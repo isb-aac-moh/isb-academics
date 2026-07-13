@@ -5,6 +5,7 @@ import type { StudentAcademicProfile } from "../types";
 const EMPTY: Omit<StudentAcademicProfile, "user_id"> = {
   undergrad_field: "",
   work_ex_domain: "",
+  work_ex_role: "",
   work_ex_years: 0,
   failed_gating_courses: [],
   target_concentrations: [],

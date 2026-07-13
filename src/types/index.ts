@@ -34,6 +34,7 @@ export interface Course {
   industry_specializations: IndustrySpecialization[];
   is_strategy_ob_course?: boolean; // for the STLD 2+2+2 split rule
   prerequisite_course_ids?: string[];
+  is_active: boolean; // soft-disable instead of delete — false means dropped/hidden from students
 }
 
 // The five core courses whose F grade blocks a specific concentration.
@@ -48,6 +49,7 @@ export interface StudentAcademicProfile {
   user_id: string;
   undergrad_field: string;
   work_ex_domain: string;
+  work_ex_role: string;
   work_ex_years: number;
   failed_gating_courses: string[]; // ids of GatingCoreCourse the student failed, if any
   target_concentrations: ConcentrationArea[]; // 0-2 per ISB's "at most two" rule; empty = not pursuing one

@@ -56,8 +56,9 @@ const EMPTY_COURSE = {
 };
 
 function CoursesAdmin() {
-  const { courses, reload } = useCourses();
+  const { courses, reload } = useCourses(true); // admin sees disabled courses too
   const [form, setForm] = useState({ ...EMPTY_COURSE });
+  const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   function toggleArea(area: ConcentrationArea) {
@@ -78,37 +79,67 @@ function CoursesAdmin() {
     }));
   }
 
-  async function handleAdd() {
+  function startEdit(id: string) {
+    const c = courses.find((c) => c.id === id);
+    if (!c) return;
+    setEditId(id);
+    setForm({
+      code: c.code, name: c.name, professor: c.professor, term: c.term, credits: c.credits,
+      concentration_areas: c.concentration_areas, industry_specializations: c.industry_specializations,
+    });
+  }
+
+  function cancelEdit() {
+    setEditId(null);
+    setForm({ ...EMPTY_COURSE });
+  }
+
+  async function handleSave() {
     if (!form.name.trim()) return;
     setSaving(true);
-    const { error } = await supabase.from("courses").insert(form);
+    const { error } = editId
+      ? await supabase.from("courses").update(form).eq("id", editId)
+      : await supabase.from("courses").insert(form);
     setSaving(false);
     if (!error) {
       setForm({ ...EMPTY_COURSE });
+      setEditId(null);
       reload();
     } else {
-      console.error("[AdminPage] add course failed:", error);
+      console.error("[AdminPage] save course failed:", error);
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this course?")) return;
-    await supabase.from("courses").delete().eq("id", id);
+  async function toggleActive(id: string, isActive: boolean) {
+    await supabase.from("courses").update({ is_active: !isActive }).eq("id", id);
     reload();
   }
 
   return (
     <div>
       <div style={{ padding: 16, borderRadius: 10, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, marginBottom: 20 }}>
-        <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, marginBottom: 10 }}>Add a course</p>
+        <div className="flex items-center justify-between mb-2">
+          <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans }}>{editId ? "Edit course" : "Add a course"}</p>
+          {editId && <button onClick={cancelEdit} style={{ fontSize: 12, color: COLOR.ink3, background: "none", border: "none", cursor: "pointer" }}>Cancel edit</button>}
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-          <input style={inputStyle} placeholder="Code" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} />
-          <input style={inputStyle} placeholder="Course name" className="col-span-2" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
-          <input style={inputStyle} placeholder="Professor" value={form.professor} onChange={(e) => setForm((f) => ({ ...f, professor: e.target.value }))} />
-          <select style={inputStyle} value={form.term} onChange={(e) => setForm((f) => ({ ...f, term: e.target.value as TermCode }))}>
-            {TERMS.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <input style={inputStyle} type="number" min={1} placeholder="Credits" value={form.credits} onChange={(e) => setForm((f) => ({ ...f, credits: Number(e.target.value) }))} />
+          <LabeledField label="Code">
+            <input style={inputStyle} value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} />
+          </LabeledField>
+          <LabeledField label="Course name" className="col-span-2">
+            <input style={inputStyle} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+          </LabeledField>
+          <LabeledField label="Professor">
+            <input style={inputStyle} value={form.professor} onChange={(e) => setForm((f) => ({ ...f, professor: e.target.value }))} />
+          </LabeledField>
+          <LabeledField label="Term">
+            <select style={inputStyle} value={form.term} onChange={(e) => setForm((f) => ({ ...f, term: e.target.value as TermCode }))}>
+              {TERMS.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </LabeledField>
+          <LabeledField label="Credits">
+            <input style={inputStyle} type="number" min={1} value={form.credits} onChange={(e) => setForm((f) => ({ ...f, credits: Number(e.target.value) }))} />
+          </LabeledField>
         </div>
         <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, margin: "8px 0 4px" }}>Concentration area(s)</p>
         <div className="flex flex-wrap gap-1 mb-2">
@@ -122,23 +153,41 @@ function CoursesAdmin() {
             <Chip key={s} active={form.industry_specializations.includes(s)} onClick={() => toggleSpec(s)} label={s} />
           ))}
         </div>
-        <button onClick={handleAdd} disabled={saving} style={buttonStyle}>{saving ? "Adding…" : "Add course"}</button>
+        <button onClick={handleSave} disabled={saving} style={buttonStyle}>
+          {saving ? "Saving…" : editId ? "Save changes" : "Add course"}
+        </button>
       </div>
 
       <div className="space-y-2">
         {courses.map((c) => (
-          <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+          <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: 9, background: c.is_active ? COLOR.surface : COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, opacity: c.is_active ? 1 : 0.6 }}>
             <div>
-              <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>{c.name}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
+                {c.name} {!c.is_active && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>DISABLED</span>}
+              </p>
               <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans }}>
                 {c.code} · {c.professor} · {c.term} · {c.credits}cr
                 {c.concentration_areas.length > 0 && ` · ${c.concentration_areas.join(", ")}`}
               </p>
             </div>
-            <button onClick={() => handleDelete(c.id)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer" }}>Delete</button>
+            <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
+              <button onClick={() => startEdit(c.id)} style={{ fontSize: 12, color: COLOR.ink2, background: "none", border: "none", cursor: "pointer" }}>Edit</button>
+              <button onClick={() => toggleActive(c.id, c.is_active)} style={{ fontSize: 12, color: c.is_active ? COLOR.red : COLOR.green, background: "none", border: "none", cursor: "pointer" }}>
+                {c.is_active ? "Disable" : "Enable"}
+              </button>
+            </div>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function LabeledField({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={className}>
+      <p style={{ fontSize: 10, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{label}</p>
+      {children}
     </div>
   );
 }

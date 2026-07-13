@@ -1,5 +1,5 @@
 import { COLOR, FONT } from "../../lib/theme";
-import { UNDERGRAD_FIELDS, WORK_EX_DOMAINS, TERM2_FLEXI_OPTIONS, TERM3_FLEXI_OPTIONS } from "../../lib/options";
+import { UNDERGRAD_FIELDS, WORK_EX_DOMAINS, WORK_EX_ROLES, TERM2_FLEXI_OPTIONS, TERM3_FLEXI_OPTIONS } from "../../lib/options";
 import type { StudentAcademicProfile, GatingCoreCourse } from "../../types";
 
 interface Props {
@@ -31,6 +31,12 @@ export default function StepBackground({ profile, save, gatingCourses }: Props) 
             <select style={inputStyle} value={profile.work_ex_domain} onChange={(e) => save({ work_ex_domain: e.target.value })}>
               <option value="">Select…</option>
               {WORK_EX_DOMAINS.map((f) => <option key={f} value={f}>{f}</option>)}
+            </select>
+          </Field>
+          <Field label="Your role / function in that domain">
+            <select style={inputStyle} value={profile.work_ex_role} onChange={(e) => save({ work_ex_role: e.target.value })}>
+              <option value="">Select…</option>
+              {WORK_EX_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
           </Field>
           <Field label="Years of work-ex">

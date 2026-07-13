@@ -34,6 +34,23 @@ export const WORK_EX_DOMAINS = [
   "Other",
 ] as const;
 
+// The function/role within a work-ex domain — a domain alone conflates very
+// different skill sets (an engineer, a PM, and a category manager can all
+// say "IT / Technology / Software" but need different electives).
+export const WORK_EX_ROLES = [
+  "Engineering / Technical",
+  "Product Management",
+  "Marketing / Brand",
+  "Sales / Business Development",
+  "Consulting / Strategy",
+  "Operations / Supply Chain",
+  "Finance / Accounting",
+  "General Management / Leadership",
+  "HR / People",
+  "Design / UX",
+  "Other",
+] as const;
+
 // Term 2 Flexi Core — pick min 2, max 3 (course codes match the `courses` table).
 export const TERM2_FLEXI_OPTIONS = [
   { code: "BSNS2", label: "Business, Society & Non-Market Strategies" },

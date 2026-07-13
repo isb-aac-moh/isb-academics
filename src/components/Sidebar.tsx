@@ -15,7 +15,7 @@ export default function Sidebar({ user, active, onNavigate, onSignOut }: Props) 
   return (
     <aside
       className="hidden md:flex flex-col justify-between"
-      style={{ width: 220, minHeight: "100vh", background: COLOR.navyHero, flexShrink: 0, padding: "24px 16px" }}
+      style={{ width: 220, height: "100vh", position: "sticky", top: 0, background: COLOR.navyHero, flexShrink: 0, padding: "24px 16px", overflowY: "auto" }}
     >
       <div>
         <p style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 14, color: "#fff" }}>ISB</p>
