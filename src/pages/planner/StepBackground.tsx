@@ -8,10 +8,25 @@ interface Props {
   gatingCourses: GatingCoreCourse[];
 }
 
+const CONVERTED_FIELD: Record<"completed_term2_flexi" | "completed_term3_flexi", "term2_converted_elective" | "term3_converted_elective"> = {
+  completed_term2_flexi: "term2_converted_elective",
+  completed_term3_flexi: "term3_converted_elective",
+};
+
 export default function StepBackground({ profile, save, gatingCourses }: Props) {
   function toggle(list: string[], code: string, field: "completed_term2_flexi" | "completed_term3_flexi") {
-    const next = list.includes(code) ? list.filter((c) => c !== code) : [...list, code];
-    save({ [field]: next } as Partial<StudentAcademicProfile>);
+    const convertedField = CONVERTED_FIELD[field];
+    if (list.includes(code)) {
+      const next = list.filter((c) => c !== code);
+      const updates: Partial<StudentAcademicProfile> = { [field]: next };
+      // Dropping below 3 picks means the mandatory-conversion rule no longer applies —
+      // clear the mark whether or not the removed course was the one converted.
+      if (next.length < 3) updates[convertedField] = null;
+      save(updates);
+      return;
+    }
+    if (list.length >= 3) return; // ISB caps Flexi Core picks at 3 per term (min 2, max 3)
+    save({ [field]: [...list, code] } as Partial<StudentAcademicProfile>);
   }
 
   return (
@@ -53,12 +68,26 @@ export default function StepBackground({ profile, save, gatingCourses }: Props) 
         <p style={{ fontSize: 13, fontWeight: 700, color: COLOR.ink, fontFamily: FONT.sans, marginBottom: 4 }}>
           Term 2 Flexi Core — which did you take?
         </p>
-        <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 10 }}>Pick 2-3 — these already count toward your concentration credits if they match.</p>
+        <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 10 }}>
+          Pick 2 (required, no credit) or 3 — the 3rd is mandatorily converted to an elective and is the only one that counts toward your 18 elective credits / concentration.
+        </p>
         <div className="flex flex-wrap gap-2">
           {TERM2_FLEXI_OPTIONS.map((o) => (
-            <Chip key={o.code} active={profile.completed_term2_flexi.includes(o.code)} onClick={() => toggle(profile.completed_term2_flexi, o.code, "completed_term2_flexi")} label={o.label} />
+            <Chip
+              key={o.code}
+              active={profile.completed_term2_flexi.includes(o.code)}
+              disabled={profile.completed_term2_flexi.length >= 3 && !profile.completed_term2_flexi.includes(o.code)}
+              onClick={() => toggle(profile.completed_term2_flexi, o.code, "completed_term2_flexi")}
+              label={o.label}
+            />
           ))}
         </div>
+        <ConvertedElectivePicker
+          codes={profile.completed_term2_flexi}
+          options={TERM2_FLEXI_OPTIONS}
+          value={profile.term2_converted_elective}
+          onChange={(code) => save({ term2_converted_elective: code })}
+        />
       </div>
 
       <div>
@@ -66,13 +95,26 @@ export default function StepBackground({ profile, save, gatingCourses }: Props) 
           Term 3 Flexi Core — which did you take?
         </p>
         <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 10 }}>
-          Pick 2-3. Only one Business Analytics variant is realistic — ISB only lets you take one of the two.
+          Pick 2 (required, no credit) or 3 — the 3rd is mandatorily converted to an elective and is the only one that counts toward your 18 elective credits / concentration.
+          Only one Business Analytics variant is realistic — ISB only lets you take one of the two.
         </p>
         <div className="flex flex-wrap gap-2">
           {TERM3_FLEXI_OPTIONS.map((o) => (
-            <Chip key={o.code} active={profile.completed_term3_flexi.includes(o.code)} onClick={() => toggle(profile.completed_term3_flexi, o.code, "completed_term3_flexi")} label={o.label} />
+            <Chip
+              key={o.code}
+              active={profile.completed_term3_flexi.includes(o.code)}
+              disabled={profile.completed_term3_flexi.length >= 3 && !profile.completed_term3_flexi.includes(o.code)}
+              onClick={() => toggle(profile.completed_term3_flexi, o.code, "completed_term3_flexi")}
+              label={o.label}
+            />
           ))}
         </div>
+        <ConvertedElectivePicker
+          codes={profile.completed_term3_flexi}
+          options={TERM3_FLEXI_OPTIONS}
+          value={profile.term3_converted_elective}
+          onChange={(code) => save({ term3_converted_elective: code })}
+        />
       </div>
 
       <div>
@@ -118,18 +160,42 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Chip({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function Chip({ active, disabled, onClick, label }: { active: boolean; disabled?: boolean; onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       style={{
-        padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer",
+        padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 600, fontFamily: FONT.sans, cursor: disabled ? "default" : "pointer",
         border: `1px solid ${active ? COLOR.navyHero : COLOR.border}`, background: active ? COLOR.navyHero : COLOR.surface, color: active ? "#fff" : COLOR.ink2,
         maxWidth: "100%", whiteSpace: "normal", textAlign: "left", wordBreak: "break-word",
+        opacity: disabled ? 0.4 : 1,
       }}
     >
       {label}
     </button>
+  );
+}
+
+/** Shown once a student has picked 3 Flexi courses in a term — they must say which one is the mandatory conversion to elective. */
+function ConvertedElectivePicker({
+  codes, options, value, onChange,
+}: {
+  codes: string[]; options: readonly { code: string; label: string }[]; value: string | null; onChange: (code: string) => void;
+}) {
+  if (codes.length < 3) return null;
+  const picked = options.filter((o) => codes.includes(o.code));
+  return (
+    <div style={{ marginTop: 10, padding: "10px 12px", borderRadius: 9, background: COLOR.amberTint }}>
+      <p style={{ fontSize: 12, fontWeight: 700, color: "#8B5E00", fontFamily: FONT.sans, marginBottom: 8 }}>
+        You picked 3 — which one converts to an elective?
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {picked.map((o) => (
+          <Chip key={o.code} active={value === o.code} onClick={() => onChange(o.code)} label={o.label} />
+        ))}
+      </div>
+    </div>
   );
 }
 

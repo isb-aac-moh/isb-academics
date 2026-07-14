@@ -1,20 +1,22 @@
 import { useMemo, useState } from "react";
 import { COLOR, FONT } from "../../lib/theme";
-import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, coursesCountingToward, allCoursesForArea, isLiveNow } from "../../lib/creditProgress";
+import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, coursesCountingToward, allCoursesForArea, isLiveNow, isBiddableTerm, chosenConcentrationFor } from "../../lib/creditProgress";
 import { relevanceTags } from "../../lib/relevance";
-import type { StudentAcademicProfile, Course, GatingCoreCourse } from "../../types";
+import type { StudentAcademicProfile, Course, GatingCoreCourse, Resource } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
 import { MIN_BID_PER_COURSE } from "../../hooks/useBidPlan";
 
 interface Props {
   profile: StudentAcademicProfile;
+  save: (updates: Partial<StudentAcademicProfile>) => void;
   courses: Course[];
   gatingCourses: GatingCoreCourse[];
+  resources: Resource[];
   bidEntries: BidPlanEntry[];
   onAdd: (courseId: string, term: string, points: number) => void;
 }
 
-export default function StepPlan({ profile, courses, gatingCourses, bidEntries, onAdd }: Props) {
+export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, onAdd }: Props) {
   const blockedConcentrations = useMemo(() => {
     const failed = new Set(profile.failed_gating_courses);
     return new Set(gatingCourses.filter((g) => failed.has(g.id)).map((g) => g.blocks_concentration));
@@ -27,18 +29,20 @@ export default function StepPlan({ profile, courses, gatingCourses, bidEntries, 
       : []),
   ];
 
-  if (areas.length === 0) {
-    return (
-      <div style={{ padding: "24px 0", fontFamily: FONT.sans, color: COLOR.ink3, fontSize: 14 }}>
-        You haven't picked a concentration or specialization yet — go back a step to set a goal, or skip ahead to the bid budget if you're keeping options open for now.
-      </div>
-    );
-  }
+  // Courses outside every chosen area — the only way to browse/bid when a student
+  // has no concentration or specialization, and still available as electives
+  // alongside a chosen area for students who do.
+  const chosenAreaNames = new Set(areas.map((a) => a.name));
+  const generalCourses = courses
+    .filter((c) => isBiddableTerm(c.term))
+    .filter((c) => !c.concentration_areas.some((a) => chosenAreaNames.has(a)) && !c.industry_specializations.some((s) => chosenAreaNames.has(s)));
 
   return (
     <div className="space-y-10">
       <p style={{ fontFamily: FONT.serif, fontSize: 15, color: COLOR.ink2, lineHeight: 1.6 }}>
-        Here's where you stand, and what's worth looking at right now.
+        {areas.length > 0
+          ? "Here's where you stand, and what's worth looking at right now."
+          : "You haven't picked a concentration or specialization — browse general electives below, or go back a step to set a goal."}
       </p>
       {areas.map((area) => (
         <AreaCard
@@ -47,26 +51,91 @@ export default function StepPlan({ profile, courses, gatingCourses, bidEntries, 
           kind={area.kind}
           blocked={area.kind === "concentration" && blockedConcentrations.has(area.name as never)}
           profile={profile}
+          save={save}
           courses={courses}
+          resources={resources}
           bidEntries={bidEntries}
           onAdd={onAdd}
         />
       ))}
+      <GeneralElectivesCard
+        courses={generalCourses}
+        profile={profile}
+        save={save}
+        resources={resources}
+        bidEntries={bidEntries}
+        onAdd={onAdd}
+      />
+    </div>
+  );
+}
+
+function GeneralElectivesCard({
+  courses, profile, save, resources, bidEntries, onAdd,
+}: {
+  courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
+  resources: Resource[]; bidEntries: BidPlanEntry[]; onAdd: (courseId: string, term: string, points: number) => void;
+}) {
+  const alreadyIds = new Set(bidEntries.map((e) => e.course_id));
+  const liveNow = courses.filter((c) => isLiveNow(c.term));
+  const later = courses.filter((c) => !isLiveNow(c.term));
+
+  return (
+    <div style={{ border: `1px solid ${COLOR.borderLight}`, borderRadius: 12, padding: "18px 20px", background: COLOR.surface }}>
+      <div className="mb-4">
+        <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink }}>General Electives</p>
+        <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>
+          Courses outside your concentration/specialization picks — still count toward your overall 18-credit requirement.
+        </p>
+      </div>
+
+      {liveNow.length > 0 && (
+        <div className="mb-4">
+          <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.green, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+            Live now — Block Week 1 &amp; 2 bidding
+          </p>
+          <div className="space-y-2">
+            {liveNow.map((c) => (
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {later.length > 0 && (
+        <details>
+          <summary style={{ fontSize: 12, fontWeight: 600, color: COLOR.ink3, fontFamily: FONT.sans, cursor: "pointer" }}>
+            {later.length} more course{later.length > 1 ? "s" : ""} in later terms
+          </summary>
+          <div className="space-y-2 mt-2">
+            {later.map((c) => (
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+            ))}
+          </div>
+        </details>
+      )}
+
+      {courses.length === 0 && (
+        <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>No general electives found in the catalog.</p>
+      )}
     </div>
   );
 }
 
 function AreaCard({
-  area, kind, blocked, profile, courses, bidEntries, onAdd,
+  area, kind, blocked, profile, save, courses, resources, bidEntries, onAdd,
 }: {
   area: string; kind: "concentration" | "specialization"; blocked: boolean;
-  profile: StudentAcademicProfile; courses: Course[]; bidEntries: BidPlanEntry[];
+  profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
+  courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[];
   onAdd: (courseId: string, term: string, points: number) => void;
 }) {
   const credits = creditsCountingToward(area as never, kind, profile, courses, bidEntries);
   const pct = Math.min(100, (credits / REQUIRED_CREDITS_PER_AREA) * 100);
   const alreadyIds = new Set(coursesCountingToward(area as never, kind, profile, courses, bidEntries).map((c) => c.id));
-  const all = allCoursesForArea(area as never, kind, courses);
+  // Bidding only exists from Term 4 onward — Flexi Core (Term 2/3) is never bid on
+  // (tracked separately in "Your Background") and core courses aren't electives.
+  const all = allCoursesForArea(area as never, kind, courses).filter((c) => isBiddableTerm(c.term));
   const liveNow = all.filter((c) => isLiveNow(c.term));
   const later = all.filter((c) => !isLiveNow(c.term));
 
@@ -92,7 +161,7 @@ function AreaCard({
           </p>
           <div className="space-y-2">
             {liveNow.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} allCourses={courses} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
             ))}
           </div>
         </div>
@@ -105,7 +174,7 @@ function AreaCard({
           </summary>
           <div className="space-y-2 mt-2">
             {later.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} allCourses={courses} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
             ))}
           </div>
         </details>
@@ -119,18 +188,38 @@ function AreaCard({
 }
 
 function CourseRow({
-  course, profile, allCourses, alreadyAdded, onAdd,
-}: { course: Course; profile: StudentAcademicProfile; allCourses: Course[]; alreadyAdded: boolean; onAdd: (points: number) => void }) {
+  course, profile, save, allCourses, resources, alreadyAdded, onAdd,
+}: {
+  course: Course; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
+  allCourses: Course[]; resources: Resource[]; alreadyAdded: boolean; onAdd: (points: number) => void;
+}) {
   const [points, setPoints] = useState(MIN_BID_PER_COURSE);
-  const areaTags = [...course.concentration_areas, ...course.industry_specializations];
+  // Cross-listed across both target concentrations — FAQ Q45: only one counts, student's choice.
+  // Only matters once the course is actually in the plan; browsing shows both areas plainly.
+  const overlappingConcentrations = profile.target_concentrations.filter((a) => course.concentration_areas.includes(a));
+  const showCrossListedPicker = alreadyAdded && overlappingConcentrations.length > 1;
+  const areaTags = showCrossListedPicker
+    ? course.industry_specializations
+    : [...course.concentration_areas, ...course.industry_specializations];
   const softTags = relevanceTags(course, profile, allCourses);
+  const outline = resources.find((r) => r.course_id === course.id && r.resource_type === "Course Outline");
 
   return (
     <div style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.bgSoft }}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink }}>{course.name}</p>
-          <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans }}>{course.professor} · {course.term} · {course.credits}cr</p>
+          <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans }}>
+            {course.professor} · {course.term} · {course.credits}cr
+            {outline && (
+              <>
+                {" · "}
+                <a href={outline.url} target="_blank" rel="noopener noreferrer" style={{ color: COLOR.navyHero, fontWeight: 700, textDecoration: "underline" }}>
+                  Course outline ↗
+                </a>
+              </>
+            )}
+          </p>
         </div>
         {alreadyAdded ? (
           <span style={{ fontSize: 12, color: COLOR.green, fontWeight: 700, fontFamily: FONT.sans, whiteSpace: "nowrap" }}>✓ In your plan</span>
@@ -161,6 +250,31 @@ function CourseRow({
               {t}
             </span>
           ))}
+        </div>
+      )}
+      {showCrossListedPicker && (
+        <div className="mt-2" style={{ padding: "8px 10px", borderRadius: 8, background: COLOR.amberTint }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#8B5E00", fontFamily: FONT.sans, marginBottom: 6 }}>
+            Cross-listed — ISB only lets this count toward one concentration. Which?
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {overlappingConcentrations.map((a) => {
+              const active = chosenConcentrationFor(course, profile) === a;
+              return (
+                <button
+                  key={a}
+                  onClick={() => save({ cross_listed_concentration_choices: { ...profile.cross_listed_concentration_choices, [course.code]: a } })}
+                  style={{
+                    padding: "4px 10px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer",
+                    border: `1px solid ${active ? COLOR.navyHero : COLOR.border}`, background: active ? COLOR.navyHero : COLOR.surface,
+                    color: active ? "#fff" : COLOR.ink2,
+                  }}
+                >
+                  {a}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

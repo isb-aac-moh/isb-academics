@@ -57,6 +57,20 @@ export interface StudentAcademicProfile {
   target_specialization?: IndustrySpecialization | "none" | "undecided";
   completed_term2_flexi: string[]; // course codes from TERM2_FLEXI_OPTIONS
   completed_term3_flexi: string[]; // course codes from TERM3_FLEXI_OPTIONS
+  // Flexi Core doesn't count toward credit on its own — only if a student picks a
+  // 3rd course beyond the required 2 does ISB mandatorily convert that extra one
+  // into an elective. These track which completed_term*_flexi code (if any) is
+  // that conversion; that's the only one credit math should count.
+  term2_converted_elective: string | null;
+  term3_converted_elective: string | null;
+  // Self-reported — Exchange bidding draws from the same 4,500-point pool as
+  // regular elective bidding but isn't modeled as a full flow yet (ROADMAP).
+  international_exchange_points_used: number | null;
+  inter_campus_exchange_points_used: number | null;
+  // A cross-listed course only counts toward ONE concentration (Elective Bidding
+  // FAQ Q45), student's choice. Keyed by course code; only meaningful when a
+  // course maps to 2+ of this student's target_concentrations.
+  cross_listed_concentration_choices: Record<string, ConcentrationArea>;
 }
 
 // Grouped into 4 tabs per course in the UI — see RESOURCE_TABS in lib/options.ts.

@@ -6,8 +6,10 @@
 import { useParams, useNavigate, Navigate, useOutletContext } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
+import { useResources } from "../hooks/useResources";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
-import { useBidPlan } from "../hooks/useBidPlan";
+import { useBidPlan, TOTAL_ELECTIVE_CREDITS_REQUIRED } from "../hooks/useBidPlan";
+import { computeBidBudget, totalElectiveCreditsSecured } from "../lib/creditProgress";
 import type { User } from "../types";
 import StepBackground from "./planner/StepBackground";
 import StepGoals from "./planner/StepGoals";
@@ -27,8 +29,9 @@ export default function BiddingPlanner() {
   const navigate = useNavigate();
 
   const { courses, gatingCourses, loading: coursesLoading } = useCourses();
+  const { resources } = useResources();
   const { profile, save } = useAcademicProfile(user.id);
-  const { entries, addEntry, removeEntry, pointsPlanned, reserved, remainingPoints } = useBidPlan(user.id);
+  const { entries, addEntry, removeEntry, pointsPlanned } = useBidPlan(user.id);
 
   const step = STEPS.findIndex((s) => s.key === stepKey);
   if (step === -1) return <Navigate to="/planner/background" replace />;
@@ -36,6 +39,9 @@ export default function BiddingPlanner() {
   if (coursesLoading || !profile) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
   }
+
+  const creditsSecured = totalElectiveCreditsSecured(profile, courses, entries);
+  const { reserved, exchangePointsUsed, remainingPoints } = computeBidBudget(profile, courses, entries, pointsPlanned);
 
   function goToStep(i: number) {
     navigate(`/planner/${STEPS[i].key}`);
@@ -72,6 +78,12 @@ export default function BiddingPlanner() {
             </button>
           ))}
         </div>
+
+        {/* Lean journey summary — elective credits + bid points, always visible */}
+        <div className="flex flex-wrap gap-3 mt-6">
+          <SummaryTile label="Elective credits" value={`${creditsSecured}/${TOTAL_ELECTIVE_CREDITS_REQUIRED}`} />
+          <SummaryTile label="Bid points remaining" value={String(remainingPoints)} warn={remainingPoints < 0} />
+        </div>
       </header>
 
       <main className="px-6 md:px-12" style={{ maxWidth: 820 }}>
@@ -80,18 +92,23 @@ export default function BiddingPlanner() {
         {step === 2 && (
           <StepPlan
             profile={profile}
+            save={save}
             courses={courses}
             gatingCourses={gatingCourses}
+            resources={resources}
             bidEntries={entries}
             onAdd={(courseId, term, points) => addEntry({ course_id: courseId, term, planned_points: points })}
           />
         )}
         {step === 3 && (
           <StepBudget
+            profile={profile}
+            save={save}
             entries={entries}
             courses={courses}
             pointsPlanned={pointsPlanned}
             reserved={reserved}
+            exchangePointsUsed={exchangePointsUsed}
             remainingPoints={remainingPoints}
             onRemove={removeEntry}
           />
@@ -120,6 +137,18 @@ export default function BiddingPlanner() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function SummaryTile({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
+  return (
+    <div style={{
+      padding: "8px 14px", borderRadius: 9, background: warn ? COLOR.redTint : COLOR.navyTint,
+      display: "flex", alignItems: "baseline", gap: 6,
+    }}>
+      <span style={{ fontSize: 15, fontWeight: 700, fontFamily: FONT.sans, color: warn ? COLOR.red : COLOR.navyHero }}>{value}</span>
+      <span style={{ fontSize: 11.5, fontFamily: FONT.sans, color: warn ? COLOR.red : COLOR.navyHero, opacity: 0.8 }}>{label}</span>
     </div>
   );
 }

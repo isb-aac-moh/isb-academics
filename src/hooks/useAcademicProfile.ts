@@ -12,6 +12,11 @@ const EMPTY: Omit<StudentAcademicProfile, "user_id"> = {
   target_specialization: "undecided",
   completed_term2_flexi: [],
   completed_term3_flexi: [],
+  term2_converted_elective: null,
+  term3_converted_elective: null,
+  international_exchange_points_used: null,
+  inter_campus_exchange_points_used: null,
+  cross_listed_concentration_choices: {},
 };
 
 export function useAcademicProfile(userId: string | undefined) {

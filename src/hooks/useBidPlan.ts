@@ -52,9 +52,6 @@ export function useBidPlan(userId: string | undefined) {
   }
 
   const pointsPlanned = entries.reduce((sum, e) => sum + e.planned_points, 0);
-  const creditsPlanned = entries.length; // 1 credit per entry in this simple model
-  const reserved = Math.max(0, TOTAL_ELECTIVE_CREDITS_REQUIRED - creditsPlanned) * RESERVE_PER_REMAINING_CREDIT;
-  const remainingPoints = TOTAL_BID_POINTS - pointsPlanned - reserved;
 
-  return { entries, loading, addEntry, removeEntry, pointsPlanned, reserved, remainingPoints };
+  return { entries, loading, addEntry, removeEntry, pointsPlanned };
 }

@@ -63,8 +63,13 @@ One row per student, keyed on `user_id`. This is the Bidding Planner's core inpu
 | `failed_gating_courses` | text[] | IDs from `gating_core_courses`. |
 | `target_concentrations` | text[], **max 2 enforced client-side** | ISB allows "at most two" concentrations. Nothing in the DB enforces the 2-item cap — it's a `MAX_CONCENTRATIONS` constant checked in `StepGoals.tsx`. |
 | `target_specialization` | text, nullable | Single value (ISB only allows one specialization on the transcript) or `"none"`/`"undecided"`. |
-| `completed_term2_flexi` | text[] | Course codes from `TERM2_FLEXI_OPTIONS`. |
-| `completed_term3_flexi` | text[] | Course codes from `TERM3_FLEXI_OPTIONS`. |
+| `completed_term2_flexi` | text[] | Course codes from `TERM2_FLEXI_OPTIONS`. Min 2 (required, no credit), max 3. |
+| `completed_term3_flexi` | text[] | Course codes from `TERM3_FLEXI_OPTIONS`. Min 2 (required, no credit), max 3. |
+| `term2_converted_elective` | text, nullable | Which `completed_term2_flexi` code (if any) is the mandatory 3rd-course conversion to elective — per ISB's "Flexi Core Courses" doc, the first 2 picks never count toward credit; only this one does. Null unless exactly 3 were picked. |
+| `term3_converted_elective` | text, nullable | Same, for Term 3. |
+| `international_exchange_points_used` | integer, nullable | Self-reported — International Exchange draws from the same 4,500-point pool as regular bidding but isn't modeled as a full flow yet (see ROADMAP). |
+| `inter_campus_exchange_points_used` | integer, nullable | Self-reported, same reasoning. |
+| `cross_listed_concentration_choices` | jsonb, default `{}` | Course code → concentration area. Which single concentration a cross-listed course counts toward (FAQ Q45), student's choice — only meaningful when a course maps to 2+ of the student's `target_concentrations`. |
 
 **RLS:** `auth.uid() = user_id` for all operations — students can only ever see/edit their own row.
 
@@ -81,7 +86,7 @@ The student's own bid-points ledger — never submitted anywhere, purely a perso
 | `planned_points` | integer | |
 | `actual_points` | integer, nullable | Field exists for a future "log what actually happened" feature; **not currently written anywhere in the app**. |
 
-Credit-toward-a-concentration math (`lib/creditProgress.ts`) treats "1 entry = 1 credit" as a simplification — it does not currently sum `courses.credits` for planned entries, only for *already-completed* Flexi Core courses. This is a known simplification, not a bug; see ROADMAP.
+Credit math (`lib/creditProgress.ts`) sums real `courses.credits` for both planned bid entries and the mandatorily-converted Flexi elective (`totalElectiveCreditsSecured`) — the earlier "1 entry = 1 credit" approximation was corrected once it became clear it fed directly into the bid-points reserve rule (`computeBidBudget`).
 
 **RLS:** `auth.uid() = user_id`, same pattern as the profile table.
 
@@ -138,5 +143,7 @@ The Notice Board feed.
 8. `drop_resources_category` — removed a superseded free-text `category` column (tables were empty, safe to drop outright).
 9. `core_courses` — the 11 mandatory courses, plus widening `credits` to numeric.
 10. `resource_description` — the description field.
+11. `flexi_conversion_and_exchange_points` — `term2/3_converted_elective` (which Flexi pick, if any, is the mandatory conversion to elective — corrected an earlier assumption that all completed Flexi Core counted toward credit) and `international/inter_campus_exchange_points_used` (self-reported, since Exchange bidding shares the same 4,500-point pool but isn't a modeled flow yet).
+12. `cross_listed_concentration_choice` — `cross_listed_concentration_choices` jsonb, so a cross-listed course only counts toward the one concentration the student picked (FAQ Q45) instead of both.
 
 If you're debugging something that references an older shape (e.g. `resources.category`), check this list — it was real, then removed.
