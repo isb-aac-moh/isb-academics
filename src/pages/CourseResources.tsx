@@ -7,7 +7,7 @@
  */
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, ExternalLink, FileText } from "lucide-react";
+import { Search, X, ExternalLink, FileText, Maximize2, Minimize2 } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useResources } from "../hooks/useResources";
 import { useCourses } from "../hooks/useCourses";
@@ -27,6 +27,7 @@ export default function CourseResources() {
   const kindFilter = params.get("kind") ?? "all"; // all | core | elective
   const activeCourseCode = params.get("course");
   const activeCourse = activeCourseCode ? courses.find((c) => c.code === activeCourseCode) : undefined;
+  const isFullScreen = params.get("view") === "full";
 
   function setParam(key: string, value: string | null, opts?: { replace?: boolean }) {
     const next = new URLSearchParams(params);
@@ -171,7 +172,18 @@ export default function CourseResources() {
       </main>
 
       {activeCourse && (
-        <CourseDetailModal course={activeCourse} resources={resourcesByCourse.get(activeCourse.id) ?? []} onClose={() => setParam("course", null)} />
+        <CourseDetailModal
+          course={activeCourse}
+          resources={resourcesByCourse.get(activeCourse.id) ?? []}
+          fullScreen={isFullScreen}
+          onToggleFullScreen={() => setParam("view", isFullScreen ? null : "full")}
+          onClose={() => {
+            const next = new URLSearchParams(params);
+            next.delete("course");
+            next.delete("view");
+            setParams(next);
+          }}
+        />
       )}
     </div>
   );
@@ -200,7 +212,9 @@ function CourseCard({ course, resourceCount, tint, onClick }: { course: Course; 
   );
 }
 
-function CourseDetailModal({ course, resources, onClose }: { course: Course; resources: Resource[]; onClose: () => void }) {
+function CourseDetailModal({
+  course, resources, fullScreen, onToggleFullScreen, onClose,
+}: { course: Course; resources: Resource[]; fullScreen: boolean; onToggleFullScreen: () => void; onClose: () => void }) {
   // Only show a tab if this course actually has a resource in it — never an empty tab.
   const populatedTabs = RESOURCE_TABS
     .map((tab) => ({ ...tab, items: resources.filter((r) => (tab.types as readonly string[]).includes(r.resource_type)) }))
@@ -211,22 +225,30 @@ function CourseDetailModal({ course, resources, onClose }: { course: Course; res
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 60 }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+      {!fullScreen && <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />}
       <div
         className="flex flex-col"
-        style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "min(480px, 100%)", background: COLOR.bg, boxShadow: "-8px 0 32px rgba(0,0,0,0.12)" }}
+        style={fullScreen
+          ? { position: "absolute", inset: 0, background: COLOR.bg }
+          : { position: "absolute", top: 0, right: 0, bottom: 0, width: "min(480px, 100%)", background: COLOR.bg, boxShadow: "-8px 0 32px rgba(0,0,0,0.12)" }
+        }
       >
         <div className="flex items-start justify-between" style={{ padding: "20px 22px", borderBottom: `1px solid ${COLOR.borderLight}`, flexShrink: 0 }}>
-          <div>
+          <div style={{ maxWidth: fullScreen ? 700 : undefined, margin: fullScreen ? "0 auto" : undefined, width: fullScreen ? "100%" : undefined }}>
             {course.is_core && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: COLOR.navyHero, color: "#fff", fontFamily: FONT.sans, textTransform: "uppercase" }}>Core</span>}
-            <h2 style={{ fontFamily: FONT.serif, fontSize: 19, fontWeight: 600, color: COLOR.ink, marginTop: 6 }}>{course.name}</h2>
+            <h2 style={{ fontFamily: FONT.serif, fontSize: fullScreen ? 26 : 19, fontWeight: 600, color: COLOR.ink, marginTop: 6 }}>{course.name}</h2>
             <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>{course.code} · {course.professor} · {course.term}</p>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><X size={20} color={COLOR.ink2} /></button>
+          <div className="flex items-center gap-3" style={{ flexShrink: 0 }}>
+            <button onClick={onToggleFullScreen} aria-label={fullScreen ? "Exit full screen" : "Open full screen"} style={{ background: "none", border: "none", cursor: "pointer" }}>
+              {fullScreen ? <Minimize2 size={18} color={COLOR.ink2} /> : <Maximize2 size={18} color={COLOR.ink2} />}
+            </button>
+            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} color={COLOR.ink2} /></button>
+          </div>
         </div>
 
         {populatedTabs.length > 0 && (
-          <div className="flex gap-1 flex-wrap" style={{ padding: "12px 22px 0", flexShrink: 0 }}>
+          <div className="flex gap-1 flex-wrap" style={{ padding: "12px 22px 0", flexShrink: 0, maxWidth: fullScreen ? 700 : undefined, margin: fullScreen ? "0 auto" : undefined, width: fullScreen ? "100%" : undefined }}>
             {populatedTabs.map((tab) => (
               <button
                 key={tab.key}
@@ -243,15 +265,17 @@ function CourseDetailModal({ course, resources, onClose }: { course: Course; res
         )}
 
         <div className="flex-1" style={{ overflowY: "auto", padding: "20px 22px" }}>
-          {resources.length === 0 ? (
-            <div style={{ padding: "24px 16px", textAlign: "center", background: COLOR.surface, borderRadius: 10, border: `1px dashed ${COLOR.border}` }}>
-              <FileText size={22} color={COLOR.ink3} style={{ margin: "0 auto 8px" }} />
-              <p style={{ fontSize: 13, fontWeight: 600, color: COLOR.ink2, fontFamily: FONT.sans }}>No resources yet for this course</p>
-              <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Check back later, or add one from the Admin panel.</p>
-            </div>
-          ) : (
-            <div className="space-y-2">{activeTab?.items.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
-          )}
+          <div style={{ maxWidth: fullScreen ? 700 : undefined, margin: fullScreen ? "0 auto" : undefined }}>
+            {resources.length === 0 ? (
+              <div style={{ padding: "24px 16px", textAlign: "center", background: COLOR.surface, borderRadius: 10, border: `1px dashed ${COLOR.border}` }}>
+                <FileText size={22} color={COLOR.ink3} style={{ margin: "0 auto 8px" }} />
+                <p style={{ fontSize: 13, fontWeight: 600, color: COLOR.ink2, fontFamily: FONT.sans }}>No resources yet for this course</p>
+                <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Check back later, or add one from the Admin panel.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">{activeTab?.items.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -275,11 +299,16 @@ function ResourceRow({ resource }: { resource: Resource }) {
       href={resource.url}
       target="_blank"
       rel="noreferrer"
-      className="flex items-center justify-between"
-      style={{ padding: "11px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none" }}
+      className="flex items-start justify-between"
+      style={{ padding: "11px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none", gap: 8 }}
     >
-      <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink, minWidth: 0 }}>{resource.title}</span>
-      <ExternalLink size={14} color={COLOR.ink3} style={{ flexShrink: 0, marginLeft: 8 }} />
+      <div style={{ minWidth: 0 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink, display: "block" }}>{resource.title}</span>
+        {resource.description && (
+          <span style={{ fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink3, display: "block", marginTop: 2, lineHeight: 1.4 }}>{resource.description}</span>
+        )}
+      </div>
+      <ExternalLink size={14} color={COLOR.ink3} style={{ flexShrink: 0, marginTop: 2 }} />
     </a>
   );
 }
@@ -290,11 +319,16 @@ function LinkCard({ resource }: { resource: Resource }) {
       href={resource.url}
       target="_blank"
       rel="noreferrer"
-      className="flex items-center justify-between"
-      style={{ padding: "13px 16px", borderRadius: 10, background: COLOR.navyTint, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none" }}
+      className="flex items-start justify-between"
+      style={{ padding: "13px 16px", borderRadius: 10, background: COLOR.navyTint, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none", gap: 8 }}
     >
-      <span style={{ fontSize: 13.5, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.navyHero }}>{resource.title}</span>
-      <ExternalLink size={14} color={COLOR.navyHero} />
+      <div style={{ minWidth: 0 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.navyHero, display: "block" }}>{resource.title}</span>
+        {resource.description && (
+          <span style={{ fontSize: 12, fontFamily: FONT.sans, color: COLOR.navyHero, opacity: 0.75, display: "block", marginTop: 2, lineHeight: 1.4 }}>{resource.description}</span>
+        )}
+      </div>
+      <ExternalLink size={14} color={COLOR.navyHero} style={{ flexShrink: 0, marginTop: 2 }} />
     </a>
   );
 }

@@ -84,6 +84,7 @@ export interface Resource {
   id: string;
   title: string;
   url: string;
+  description: string | null;
   resource_type: ResourceType;
   term: string | null;
   course_id: string | null;

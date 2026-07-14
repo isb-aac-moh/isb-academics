@@ -277,7 +277,7 @@ function LabeledField({ label, children, className }: { label: string; children:
   );
 }
 
-const EMPTY_RESOURCE = { title: "", url: "", resource_type: "General" as ResourceType, term: "", course_id: "" };
+const EMPTY_RESOURCE = { title: "", url: "", description: "", resource_type: "General" as ResourceType, term: "", course_id: "" };
 
 function ResourcesAdmin() {
   const { resources, reload } = useResources();
@@ -294,7 +294,7 @@ function ResourcesAdmin() {
     if (!r) return;
     const course = r.course_id ? courses.find((c) => c.id === r.course_id) : null;
     setEditId(id);
-    setForm({ title: r.title, url: r.url, resource_type: r.resource_type, term: r.term ?? course?.term ?? "", course_id: r.course_id ?? "" });
+    setForm({ title: r.title, url: r.url, description: r.description ?? "", resource_type: r.resource_type, term: r.term ?? course?.term ?? "", course_id: r.course_id ?? "" });
   }
 
   function cancelEdit() {
@@ -308,6 +308,7 @@ function ResourcesAdmin() {
     const payload = {
       title: form.title.trim(),
       url: form.url.trim(),
+      description: form.description.trim() || null,
       resource_type: form.resource_type,
       term: isCourseScoped && form.term ? form.term : null,
       course_id: isCourseScoped && form.course_id ? form.course_id : null,
@@ -366,6 +367,13 @@ function ResourcesAdmin() {
             <input style={inputStyle} value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} placeholder="https://…" />
           </LabeledField>
         </div>
+        <LabeledField label="Description (shown to students so they know what's inside before clicking)" className="mb-2">
+          <textarea
+            style={{ ...inputStyle, resize: "none" }} rows={2}
+            value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="e.g. Covers TVM, WACC, and capital budgeting — 12 slides from Session 3"
+          />
+        </LabeledField>
 
         {isCourseScoped && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
