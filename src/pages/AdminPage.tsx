@@ -18,7 +18,6 @@ const CONCENTRATIONS: ConcentrationArea[] = [
   "Information Technology Management", "Strategy and Leadership",
 ];
 const SPECIALIZATIONS: IndustrySpecialization[] = ["Healthcare", "Manufacturing", "Public Policy", "Infrastructure"];
-const TERMS: TermCode[] = ["Term 4", "Term 5", "Term 6", "Term 7", "Block Week 1", "Block Week 2", "Block Week 3", "Block Week 4"];
 
 type Tab = "overview" | "courses" | "resources" | "notifications";
 const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
@@ -208,7 +207,7 @@ function CoursesAdmin() {
           </LabeledField>
           <LabeledField label="Term">
             <select style={inputStyle} value={form.term} onChange={(e) => setForm((f) => ({ ...f, term: e.target.value as TermCode }))}>
-              {TERMS.map((t) => <option key={t} value={t}>{t}</option>)}
+              {ALL_TERMS.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </LabeledField>
           <LabeledField label="Credits">
