@@ -125,6 +125,7 @@ function Chip({ active, onClick, label }: { active: boolean; onClick: () => void
       style={{
         padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer",
         border: `1px solid ${active ? COLOR.navyHero : COLOR.border}`, background: active ? COLOR.navyHero : COLOR.surface, color: active ? "#fff" : COLOR.ink2,
+        maxWidth: "100%", whiteSpace: "normal", textAlign: "left", wordBreak: "break-word",
       }}
     >
       {label}

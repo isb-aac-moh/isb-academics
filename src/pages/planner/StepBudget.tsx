@@ -18,7 +18,7 @@ export default function StepBudget({ entries, courses, pointsPlanned, reserved, 
       <p style={{ fontFamily: FONT.serif, fontSize: 15, color: COLOR.ink2, marginBottom: 20, lineHeight: 1.6 }}>
         This is your own ledger — a running check against the 4,500-point budget as you decide what to bid. Nothing here is submitted to Registro.
       </p>
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <Stat label="Total points" value={TOTAL_BID_POINTS} />
         <Stat label="Planned so far" value={pointsPlanned} />
         <Stat label="Reserved for remaining credits" value={reserved} />
@@ -38,11 +38,11 @@ export default function StepBudget({ entries, courses, pointsPlanned, reserved, 
           {entries.map((e) => {
             const course = courses.find((c) => c.id === e.course_id);
             return (
-              <div key={e.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
-                <span style={{ fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink }}>
+              <div key={e.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+                <span style={{ fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink, minWidth: 0 }}>
                   {course?.name ?? "Unknown course"} <span style={{ color: COLOR.ink3 }}>· {e.term} · {e.planned_points} pts</span>
                 </span>
-                <button onClick={() => onRemove(e.id)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer" }}>Remove</button>
+                <button onClick={() => onRemove(e.id)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", flexShrink: 0, textAlign: "left" }}>Remove</button>
               </div>
             );
           })}

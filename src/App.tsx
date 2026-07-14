@@ -19,7 +19,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row">
       <Sidebar user={user} active={section} onNavigate={setSection} onSignOut={signOut} />
       <div style={{ flex: 1, minWidth: 0 }}>
         {section === "admin" && user.is_admin ? <AdminPage /> : <BiddingPlanner user={user} />}

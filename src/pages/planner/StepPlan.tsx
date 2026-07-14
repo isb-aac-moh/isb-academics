@@ -127,8 +127,8 @@ function CourseRow({
 
   return (
     <div style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.bgSoft }}>
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink }}>{course.name}</p>
           <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans }}>{course.professor} · {course.term} · {course.credits}cr</p>
         </div>

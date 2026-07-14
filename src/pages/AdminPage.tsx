@@ -160,8 +160,8 @@ function CoursesAdmin() {
 
       <div className="space-y-2">
         {courses.map((c) => (
-          <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: 9, background: c.is_active ? COLOR.surface : COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, opacity: c.is_active ? 1 : 0.6 }}>
-            <div>
+          <div key={c.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: c.is_active ? COLOR.surface : COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, opacity: c.is_active ? 1 : 0.6 }}>
+            <div style={{ minWidth: 0 }}>
               <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
                 {c.name} {!c.is_active && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>DISABLED</span>}
               </p>
@@ -231,12 +231,12 @@ function ResourcesAdmin() {
       </div>
       <div className="space-y-2">
         {items.map((r) => (
-          <div key={r.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
-            <div>
+          <div key={r.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+            <div style={{ minWidth: 0 }}>
               <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>{r.title}</p>
-              <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans }}>{r.category} · {r.url}</p>
+              <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, wordBreak: "break-all" }}>{r.category} · {r.url}</p>
             </div>
-            <button onClick={() => handleDelete(r.id)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer" }}>Delete</button>
+            <button onClick={() => handleDelete(r.id)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", flexShrink: 0, textAlign: "left" }}>Delete</button>
           </div>
         ))}
       </div>
@@ -300,6 +300,7 @@ function Chip({ active, onClick, label }: { active: boolean; onClick: () => void
       style={{
         padding: "4px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer",
         border: "none", background: active ? COLOR.navy : COLOR.bgSoft, color: active ? "#fff" : COLOR.ink2,
+        maxWidth: "100%", whiteSpace: "normal", textAlign: "left", wordBreak: "break-word",
       }}
     >
       {label}

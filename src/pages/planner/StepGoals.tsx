@@ -83,5 +83,6 @@ function pillStyle(active: boolean): React.CSSProperties {
   return {
     padding: "9px 16px", borderRadius: 9, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer",
     border: `1px solid ${active ? COLOR.navyHero : COLOR.border}`, background: active ? COLOR.navyHero : COLOR.surface, color: active ? "#fff" : COLOR.ink2,
+    maxWidth: "100%", whiteSpace: "normal", textAlign: "left", wordBreak: "break-word",
   };
 }
