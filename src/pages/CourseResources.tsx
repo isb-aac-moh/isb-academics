@@ -5,13 +5,13 @@
  * Search is simple text matching for now — title, course name/code, professor.
  * (An NLP/AI-assisted version is a planned follow-up, not built yet.)
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, X, ExternalLink, FileText } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useResources } from "../hooks/useResources";
 import { useCourses } from "../hooks/useCourses";
-import { ALL_TERMS, RESOURCE_TYPES } from "../lib/options";
+import { ALL_TERMS, RESOURCE_TABS } from "../lib/options";
 import type { Resource, Course } from "../types";
 
 const CARD_TINTS = [COLOR.navyTint, COLOR.amberTint, COLOR.greenTint, COLOR.bgSoft];
@@ -55,7 +55,11 @@ export default function CourseResources() {
       if (kindFilter === "core" && !c.is_core) return false;
       if (kindFilter === "elective" && c.is_core) return false;
       const courseResources = resourcesByCourse.get(c.id) ?? [];
-      if (typeFilter !== "all" && !courseResources.some((r) => r.resource_type === typeFilter)) return false;
+      if (typeFilter !== "all") {
+        const tab = RESOURCE_TABS.find((t) => t.key === typeFilter);
+        const typesInTab: readonly string[] = tab?.types ?? [];
+        if (!courseResources.some((r) => typesInTab.includes(r.resource_type))) return false;
+      }
       if (query) {
         const hay = `${c.name} ${c.code} ${c.professor}`.toLowerCase();
         const resMatch = courseResources.some((r) => r.title.toLowerCase().includes(query));
@@ -121,7 +125,7 @@ export default function CourseResources() {
             style={{ marginLeft: 6, padding: "6px 10px", borderRadius: 7, border: `1px solid ${COLOR.border}`, fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink2, background: COLOR.surface }}
           >
             <option value="all">All resource types</option>
-            {RESOURCE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+            {RESOURCE_TABS.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
           </select>
         </div>
       </header>
@@ -197,12 +201,13 @@ function CourseCard({ course, resourceCount, tint, onClick }: { course: Course; 
 }
 
 function CourseDetailModal({ course, resources, onClose }: { course: Course; resources: Resource[]; onClose: () => void }) {
-  const byType = new Map<string, Resource[]>();
-  resources.forEach((r) => {
-    const list = byType.get(r.resource_type) ?? [];
-    list.push(r);
-    byType.set(r.resource_type, list);
-  });
+  // Only show a tab if this course actually has a resource in it — never an empty tab.
+  const populatedTabs = RESOURCE_TABS
+    .map((tab) => ({ ...tab, items: resources.filter((r) => (tab.types as readonly string[]).includes(r.resource_type)) }))
+    .filter((tab) => tab.items.length > 0);
+
+  const [activeTabKey, setActiveTabKey] = useState(populatedTabs[0]?.key);
+  const activeTab = populatedTabs.find((t) => t.key === activeTabKey) ?? populatedTabs[0];
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 60 }}>
@@ -220,6 +225,23 @@ function CourseDetailModal({ course, resources, onClose }: { course: Course; res
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><X size={20} color={COLOR.ink2} /></button>
         </div>
 
+        {populatedTabs.length > 0 && (
+          <div className="flex gap-1 flex-wrap" style={{ padding: "12px 22px 0", flexShrink: 0 }}>
+            {populatedTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTabKey(tab.key)}
+                style={{
+                  padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer", border: "none",
+                  background: activeTab?.key === tab.key ? COLOR.navyHero : COLOR.bgSoft, color: activeTab?.key === tab.key ? "#fff" : COLOR.ink2,
+                }}
+              >
+                {tab.label} <span style={{ opacity: 0.7 }}>({tab.items.length})</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex-1" style={{ overflowY: "auto", padding: "20px 22px" }}>
           {resources.length === 0 ? (
             <div style={{ padding: "24px 16px", textAlign: "center", background: COLOR.surface, borderRadius: 10, border: `1px dashed ${COLOR.border}` }}>
@@ -228,14 +250,7 @@ function CourseDetailModal({ course, resources, onClose }: { course: Course; res
               <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Check back later, or add one from the Admin panel.</p>
             </div>
           ) : (
-            <div className="space-y-5">
-              {Array.from(byType.entries()).map(([type, items]) => (
-                <div key={type}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>{type}</p>
-                  <div className="space-y-2">{items.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
-                </div>
-              ))}
-            </div>
+            <div className="space-y-2">{activeTab?.items.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
           )}
         </div>
       </div>

@@ -59,19 +59,25 @@ export interface StudentAcademicProfile {
   completed_term3_flexi: string[]; // course codes from TERM3_FLEXI_OPTIONS
 }
 
+// Grouped into 4 tabs per course in the UI — see RESOURCE_TABS in lib/options.ts.
 export type ResourceType =
   | "Course Outline"
   | "Professor Profile"
-  | "Reading List"
-  | "PYQP"
-  | "Student Notes"
+  | "Slides"
   | "Session Transcript"
+  | "Summary"
+  | "PYQP"
+  | "Custom GPT"
+  | "Cheatsheet"
+  | "Student Notes"
+  | "Other"
   | "Platform Directory"
   | "General";
 
 // Types that make sense tied to a term/course. Platform Directory and General are cohort-wide.
 export const COURSE_SCOPED_RESOURCE_TYPES: ResourceType[] = [
-  "Course Outline", "Professor Profile", "Reading List", "PYQP", "Student Notes", "Session Transcript",
+  "Course Outline", "Professor Profile", "Slides", "Session Transcript", "Summary",
+  "PYQP", "Custom GPT", "Cheatsheet", "Student Notes", "Other",
 ];
 
 export interface Resource {

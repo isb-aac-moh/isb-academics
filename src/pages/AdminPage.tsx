@@ -10,7 +10,7 @@ import { useCourses } from "../hooks/useCourses";
 import { useResources } from "../hooks/useResources";
 import { useNotifications } from "../hooks/useNotifications";
 import { supabase } from "../lib/supabase";
-import { RESOURCE_TYPES, NOTIFICATION_TAGS, ALL_TERMS } from "../lib/options";
+import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS } from "../lib/options";
 import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
 
@@ -86,14 +86,14 @@ function Overview({ onNavigate }: { onNavigate: (t: Tab) => void }) {
         <StatCard label="Missing faculty" value={courses.filter((c) => !c.professor || c.professor === "TBD").length} sub="courses with TBD professor" onClick={() => onNavigate("courses")} />
       </div>
 
-      <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 10 }}>Resources by type</p>
+      <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 10 }}>Resources by category</p>
       <div className="space-y-1.5 mb-8" style={{ maxWidth: 420 }}>
-        {RESOURCE_TYPES.map((t) => {
-          const count = resources.filter((r) => r.resource_type === t).length;
+        {[...RESOURCE_TABS.map((t) => ({ key: t.key, label: t.label, types: t.types as readonly string[] })), { key: "platform", label: "Platform Directory", types: ["Platform Directory"] }, { key: "general", label: "General", types: ["General"] }].map((t) => {
+          const count = resources.filter((r) => t.types.includes(r.resource_type)).length;
           const pct = resources.length ? (count / resources.length) * 100 : 0;
           return (
-            <div key={t} className="flex items-center gap-3">
-              <span style={{ width: 130, fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink2, flexShrink: 0 }}>{t}</span>
+            <div key={t.key} className="flex items-center gap-3">
+              <span style={{ width: 130, fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink2, flexShrink: 0 }}>{t.label}</span>
               <div style={{ flex: 1, height: 6, borderRadius: 3, background: COLOR.borderLight, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${pct}%`, background: COLOR.navyHero, borderRadius: 3 }} />
               </div>
@@ -339,10 +339,23 @@ function ResourcesAdmin() {
         </div>
 
         <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, margin: "4px 0" }}>Type</p>
-        <div className="flex flex-wrap gap-1 mb-3">
-          {RESOURCE_TYPES.map((t) => (
-            <Chip key={t} active={form.resource_type === t} onClick={() => setForm((f) => ({ ...f, resource_type: t, term: "", course_id: "" }))} label={t} />
-          ))}
+        {RESOURCE_TABS.map((group) => (
+          <div key={group.key} className="mb-2">
+            <p style={{ fontSize: 10, color: COLOR.ink3, fontFamily: FONT.sans, margin: "2px 0" }}>{group.label}</p>
+            <div className="flex flex-wrap gap-1">
+              {group.types.map((t) => (
+                <Chip key={t} active={form.resource_type === t} onClick={() => setForm((f) => ({ ...f, resource_type: t, term: "", course_id: "" }))} label={t} />
+              ))}
+            </div>
+          </div>
+        ))}
+        <div className="mb-3">
+          <p style={{ fontSize: 10, color: COLOR.ink3, fontFamily: FONT.sans, margin: "2px 0" }}>Not tied to a course</p>
+          <div className="flex flex-wrap gap-1">
+            {(["Platform Directory", "General"] as const).map((t) => (
+              <Chip key={t} active={form.resource_type === t} onClick={() => setForm((f) => ({ ...f, resource_type: t, term: "", course_id: "" }))} label={t} />
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">

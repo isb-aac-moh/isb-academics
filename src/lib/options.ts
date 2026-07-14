@@ -75,9 +75,21 @@ export const ALL_TERMS = [
   "Block Week 1", "Block Week 2", "Block Week 3", "Block Week 4",
 ] as const;
 
-export const RESOURCE_TYPES = [
-  "Course Outline", "Professor Profile", "Reading List", "PYQP",
-  "Student Notes", "Session Transcript", "Platform Directory", "General",
+// Course-scoped resource types, grouped into at most 4 tabs per course (per
+// Eshan: don't let this sprawl past 4). Platform Directory and General sit
+// outside this — they're not tied to a specific course.
+export const RESOURCE_TABS = [
+  { key: "course_details", label: "Course Details", types: ["Course Outline", "Professor Profile"] },
+  { key: "session_resources", label: "Session Resources", types: ["Slides", "Session Transcript", "Summary"] },
+  { key: "exam_resources", label: "Exam Resources", types: ["PYQP", "Custom GPT", "Cheatsheet", "Student Notes"] },
+  { key: "others", label: "Others", types: ["Other"] },
 ] as const;
+
+export const COURSE_RESOURCE_TYPES = RESOURCE_TABS.flatMap((t) => t.types);
+export const RESOURCE_TYPES = [...COURSE_RESOURCE_TYPES, "Platform Directory", "General"] as const;
+
+export function tabForResourceType(type: string) {
+  return RESOURCE_TABS.find((t) => (t.types as readonly string[]).includes(type));
+}
 
 export const NOTIFICATION_TAGS = ["Urgent", "Important", "Info", "General"] as const;
