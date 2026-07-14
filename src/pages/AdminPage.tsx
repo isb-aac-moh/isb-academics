@@ -3,6 +3,7 @@
  * and notifications without needing a code change. Gated on user.is_admin (App.tsx).
  */
 import { useState } from "react";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { LayoutGrid, GraduationCap, BookOpen, Megaphone, Pin } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
@@ -28,7 +29,12 @@ const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<Tab>("overview");
+  const { tab } = useParams<{ tab: string }>();
+  const navigate = useNavigate();
+
+  if (!tab || !TABS.some((t) => t.key === tab)) return <Navigate to="/admin/overview" replace />;
+  const activeTab = tab as Tab;
+  const goToTab = (t: Tab) => navigate(`/admin/${t}`);
 
   return (
     <div className="min-h-screen pb-24" style={{ background: COLOR.bg }}>
@@ -38,12 +44,12 @@ export default function AdminPage() {
           {TABS.map((t) => (
             <button
               key={t.key}
-              onClick={() => setTab(t.key)}
+              onClick={() => goToTab(t.key)}
               className="flex items-center gap-1.5"
               style={{
                 padding: "7px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans,
                 cursor: "pointer", border: "none",
-                background: tab === t.key ? COLOR.ink : COLOR.bgSoft, color: tab === t.key ? "#fff" : COLOR.ink2,
+                background: activeTab === t.key ? COLOR.ink : COLOR.bgSoft, color: activeTab === t.key ? "#fff" : COLOR.ink2,
               }}
             >
               {t.icon} {t.label}
@@ -53,10 +59,10 @@ export default function AdminPage() {
       </header>
 
       <main className="px-5 md:px-8 pt-6" style={{ maxWidth: 900 }}>
-        {tab === "overview" && <Overview onNavigate={setTab} />}
-        {tab === "courses" && <CoursesAdmin />}
-        {tab === "resources" && <ResourcesAdmin />}
-        {tab === "notifications" && <NotificationsAdmin />}
+        {activeTab === "overview" && <Overview onNavigate={goToTab} />}
+        {activeTab === "courses" && <CoursesAdmin />}
+        {activeTab === "resources" && <ResourcesAdmin />}
+        {activeTab === "notifications" && <NotificationsAdmin />}
       </main>
     </div>
   );

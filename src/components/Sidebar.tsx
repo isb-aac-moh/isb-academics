@@ -1,33 +1,34 @@
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import type { User } from "../types";
 
-export type AppSection = "planner" | "resources" | "noticeboard" | "admin";
-
 interface Props {
   user: User;
-  active: AppSection;
-  onNavigate: (section: AppSection) => void;
   onSignOut: () => void;
 }
 
-export default function Sidebar({ user, active, onNavigate, onSignOut }: Props) {
+export default function Sidebar({ user, onSignOut }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  function navigate(section: AppSection) {
-    onNavigate(section);
+  function go(path: string) {
+    navigate(path);
     setMobileOpen(false);
   }
 
+  const isActive = (prefix: string) => location.pathname.startsWith(prefix);
+
   const primaryNav = (
     <nav className="space-y-1">
-      <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={active === "planner"} onClick={() => navigate("planner")} />
+      <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} />
       <NavItem
         icon={<BookOpen size={16} />}
         label="Course Resources"
-        active={active === "resources"}
-        onClick={() => navigate("resources")}
+        active={isActive("/resources")}
+        onClick={() => go("/resources")}
         disabled={!user.is_admin}
         soon={!user.is_admin}
         preview={user.is_admin}
@@ -35,8 +36,8 @@ export default function Sidebar({ user, active, onNavigate, onSignOut }: Props) 
       <NavItem
         icon={<Megaphone size={16} />}
         label="Notice Board"
-        active={active === "noticeboard"}
-        onClick={() => navigate("noticeboard")}
+        active={isActive("/notices")}
+        onClick={() => go("/notices")}
         disabled={!user.is_admin}
         soon={!user.is_admin}
         preview={user.is_admin}
@@ -47,7 +48,7 @@ export default function Sidebar({ user, active, onNavigate, onSignOut }: Props) 
   const bottomNav = (
     <div>
       {user.is_admin && (
-        <NavItem icon={<ShieldCheck size={16} />} label="Admin" active={active === "admin"} onClick={() => navigate("admin")} />
+        <NavItem icon={<ShieldCheck size={16} />} label="Admin" active={isActive("/admin")} onClick={() => go("/admin/overview")} />
       )}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", marginTop: 12, paddingTop: 12 }}>
         <p style={{ fontFamily: FONT.sans, fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

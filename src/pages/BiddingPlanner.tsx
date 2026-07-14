@@ -3,7 +3,7 @@
  * Never recommends what to bid; it shows credit progress against a student's
  * own stated goals and what's currently live to bid on, so the decision stays theirs.
  */
-import { useState } from "react";
+import { useParams, useNavigate, Navigate, useOutletContext } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
@@ -21,16 +21,24 @@ const STEPS = [
   { key: "budget", label: "Bid Budget" },
 ] as const;
 
-interface Props { user: User; }
+export default function BiddingPlanner() {
+  const { user } = useOutletContext<{ user: User }>();
+  const { step: stepKey } = useParams<{ step: string }>();
+  const navigate = useNavigate();
 
-export default function BiddingPlanner({ user }: Props) {
   const { courses, gatingCourses, loading: coursesLoading } = useCourses();
   const { profile, save } = useAcademicProfile(user.id);
   const { entries, addEntry, removeEntry, pointsPlanned, reserved, remainingPoints } = useBidPlan(user.id);
-  const [step, setStep] = useState(0);
+
+  const step = STEPS.findIndex((s) => s.key === stepKey);
+  if (step === -1) return <Navigate to="/planner/background" replace />;
 
   if (coursesLoading || !profile) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
+  }
+
+  function goToStep(i: number) {
+    navigate(`/planner/${STEPS[i].key}`);
   }
 
   return (
@@ -45,7 +53,7 @@ export default function BiddingPlanner({ user }: Props) {
           {STEPS.map((s, i) => (
             <button
               key={s.key}
-              onClick={() => setStep(i)}
+              onClick={() => goToStep(i)}
               style={{
                 display: "flex", alignItems: "center", gap: 8, padding: "7px 14px", borderRadius: 20,
                 border: "none", cursor: "pointer", fontFamily: FONT.sans, fontSize: 12.5, fontWeight: 700,
@@ -92,7 +100,7 @@ export default function BiddingPlanner({ user }: Props) {
         {/* Nav buttons */}
         <div className="flex justify-between mt-12 pb-8">
           <button
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            onClick={() => goToStep(Math.max(0, step - 1))}
             disabled={step === 0}
             style={{
               padding: "10px 20px", borderRadius: 9, border: `1px solid ${COLOR.border}`, background: COLOR.surface,
@@ -104,7 +112,7 @@ export default function BiddingPlanner({ user }: Props) {
           </button>
           {step < STEPS.length - 1 && (
             <button
-              onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
+              onClick={() => goToStep(Math.min(STEPS.length - 1, step + 1))}
               style={{ padding: "10px 22px", borderRadius: 9, border: "none", background: COLOR.navyHero, color: "#fff", fontFamily: FONT.sans, fontSize: 13, fontWeight: 700, cursor: "pointer" }}
             >
               Continue

@@ -3,19 +3,23 @@
  * Directory up top, then resources browsable by Term > Course. Admin-only
  * preview until Eshan opens it up to students (see Sidebar gating).
  */
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { ChevronRight, ExternalLink, FileText } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useResources } from "../hooks/useResources";
 import { useCourses } from "../hooks/useCourses";
-import type { Resource } from "../types";
-
-type View = { level: "terms" } | { level: "courses"; term: string } | { level: "course"; term: string; courseId: string };
+import { termToSlug, slugToTerm } from "../lib/slug";
+import type { Resource, Course } from "../types";
 
 export default function CourseResources() {
   const { resources, loading: resourcesLoading } = useResources();
   const { courses, loading: coursesLoading } = useCourses();
-  const [view, setView] = useState<View>({ level: "terms" });
+  const { termSlug, courseCode } = useParams<{ termSlug?: string; courseCode?: string }>();
+  const navigate = useNavigate();
+
+  const term = termSlug ? slugToTerm(termSlug) : undefined;
+  const course = courseCode ? courses.find((c) => c.code === courseCode) : undefined;
 
   const platformDirectory = resources.filter((r) => r.resource_type === "Platform Directory");
   const general = resources.filter((r) => r.resource_type === "General");
@@ -37,6 +41,10 @@ export default function CourseResources() {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
   }
 
+  // Invalid term/course in the URL — fall back to the top level rather than a dead page.
+  if (termSlug && !term) return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Unknown term.</div>;
+  if (courseCode && !course) return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Unknown course.</div>;
+
   return (
     <div className="min-h-screen pb-24" style={{ background: COLOR.bg }}>
       <header className="px-6 md:px-12 pt-10 pb-6">
@@ -49,7 +57,7 @@ export default function CourseResources() {
       </header>
 
       <main className="px-6 md:px-12 space-y-10" style={{ maxWidth: 900 }}>
-        {platformDirectory.length > 0 && (
+        {!term && platformDirectory.length > 0 && (
           <Section title="Platform Directory">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {platformDirectory.map((r) => <LinkCard key={r.id} resource={r} />)}
@@ -57,7 +65,7 @@ export default function CourseResources() {
           </Section>
         )}
 
-        {general.length > 0 && (
+        {!term && general.length > 0 && (
           <Section title="General">
             <div className="space-y-2">
               {general.map((r) => <ResourceRow key={r.id} resource={r} />)}
@@ -66,27 +74,27 @@ export default function CourseResources() {
         )}
 
         <Section title="Browse by term">
-          {view.level !== "terms" && <Breadcrumbs view={view} onNavigate={setView} courses={courses} />}
+          {term && <Breadcrumbs term={term} course={course} onNavigate={navigate} />}
 
-          {view.level === "terms" && (
+          {!term && (
             <div className="flex flex-wrap gap-2">
               {termsWithCourses.length === 0 && (
                 <p style={{ fontSize: 13, color: COLOR.ink3, fontFamily: FONT.sans }}>No courses loaded yet.</p>
               )}
               {termsWithCourses.map((t) => (
-                <button key={t} onClick={() => setView({ level: "courses", term: t })} style={termPillStyle}>
+                <button key={t} onClick={() => navigate(`/resources/${termToSlug(t)}`)} style={termPillStyle}>
                   {t}
                 </button>
               ))}
             </div>
           )}
 
-          {view.level === "courses" && (
+          {term && !course && (
             <div className="space-y-2">
-              {courses.filter((c) => c.term === view.term).map((c) => (
+              {courses.filter((c) => c.term === term).map((c) => (
                 <button
                   key={c.id}
-                  onClick={() => setView({ level: "course", term: view.term, courseId: c.id })}
+                  onClick={() => navigate(`/resources/${termToSlug(term)}/${c.code}`)}
                   className="flex items-center justify-between w-full"
                   style={{ padding: "12px 16px", borderRadius: 10, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, textAlign: "left", cursor: "pointer" }}
                 >
@@ -105,35 +113,32 @@ export default function CourseResources() {
             </div>
           )}
 
-          {view.level === "course" && (
-            <CourseDetail courseId={view.courseId} resources={resources.filter((r) => r.course_id === view.courseId)} courses={courses} />
-          )}
+          {course && <CourseDetail resources={resources.filter((r) => r.course_id === course.id)} />}
         </Section>
       </main>
     </div>
   );
 }
 
-function Breadcrumbs({ view, onNavigate, courses }: { view: Exclude<View, { level: "terms" }>; onNavigate: (v: View) => void; courses: import("../types").Course[] }) {
-  const course = view.level === "course" ? courses.find((c) => c.id === view.courseId) : null;
+function Breadcrumbs({ term, course, onNavigate }: { term: string; course?: Course; onNavigate: (path: string) => void }) {
   return (
     <div className="flex items-center flex-wrap gap-1 mb-4" style={{ fontFamily: FONT.sans, fontSize: 12.5 }}>
-      <button onClick={() => onNavigate({ level: "terms" })} style={crumbStyle}>Course Resources</button>
+      <button onClick={() => onNavigate("/resources")} style={crumbStyle}>Course Resources</button>
       <ChevronRight size={13} color={COLOR.ink3} />
-      <button onClick={() => onNavigate({ level: "courses", term: view.term })} style={view.level === "courses" ? { ...crumbStyle, color: COLOR.ink, fontWeight: 700 } : crumbStyle}>
-        {view.term}
+      <button onClick={() => onNavigate(`/resources/${termToSlug(term)}`)} style={!course ? { ...crumbStyle, color: COLOR.ink, fontWeight: 700 } : crumbStyle}>
+        {term}
       </button>
-      {view.level === "course" && (
+      {course && (
         <>
           <ChevronRight size={13} color={COLOR.ink3} />
-          <span style={{ color: COLOR.ink, fontWeight: 700 }}>{course?.name ?? "Course"}</span>
+          <span style={{ color: COLOR.ink, fontWeight: 700 }}>{course.name}</span>
         </>
       )}
     </div>
   );
 }
 
-function CourseDetail({ resources }: { courseId: string; resources: Resource[]; courses: import("../types").Course[] }) {
+function CourseDetail({ resources }: { resources: Resource[] }) {
   if (resources.length === 0) {
     return (
       <div style={{ padding: "24px 16px", textAlign: "center", background: COLOR.surface, borderRadius: 10, border: `1px dashed ${COLOR.border}` }}>
