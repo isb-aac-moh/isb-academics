@@ -29,8 +29,6 @@ export default function App() {
 
         <Route element={<RequireAdmin user={user} />}>
           <Route path="/resources" element={<CourseResources />} />
-          <Route path="/resources/:termSlug" element={<CourseResources />} />
-          <Route path="/resources/:termSlug/:courseCode" element={<CourseResources />} />
           <Route path="/notices" element={<NoticeBoard />} />
           <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
           <Route path="/admin/:tab" element={<AdminPage />} />

@@ -130,7 +130,7 @@ function StatCard({ label, value, sub, onClick }: { label: string; value: number
 }
 
 const EMPTY_COURSE = {
-  code: "", name: "", professor: "", term: "Term 4" as TermCode, credits: 1,
+  code: "", name: "", professor: "", term: "Term 4" as TermCode, credits: 1, is_core: false,
   concentration_areas: [] as ConcentrationArea[], industry_specializations: [] as IndustrySpecialization[],
 };
 
@@ -163,7 +163,7 @@ function CoursesAdmin() {
     if (!c) return;
     setEditId(id);
     setForm({
-      code: c.code, name: c.name, professor: c.professor, term: c.term, credits: c.credits,
+      code: c.code, name: c.name, professor: c.professor, term: c.term, credits: c.credits, is_core: c.is_core,
       concentration_areas: c.concentration_areas, industry_specializations: c.industry_specializations,
     });
   }
@@ -217,9 +217,13 @@ function CoursesAdmin() {
             </select>
           </LabeledField>
           <LabeledField label="Credits">
-            <input style={inputStyle} type="number" min={1} value={form.credits} onChange={(e) => setForm((f) => ({ ...f, credits: Number(e.target.value) }))} />
+            <input style={inputStyle} type="number" min={0.4} step={0.1} value={form.credits} onChange={(e) => setForm((f) => ({ ...f, credits: Number(e.target.value) }))} />
           </LabeledField>
         </div>
+        <label className="flex items-center gap-2 mb-3" style={{ cursor: "pointer" }}>
+          <input type="checkbox" checked={form.is_core} onChange={(e) => setForm((f) => ({ ...f, is_core: e.target.checked }))} />
+          <span style={{ fontSize: 12.5, fontFamily: FONT.sans, color: COLOR.ink2 }}>Core course (mandatory — not bid on, no concentration credit)</span>
+        </label>
         <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, margin: "8px 0 4px" }}>Concentration area(s)</p>
         <div className="flex flex-wrap gap-1 mb-2">
           {CONCENTRATIONS.map((c) => (
@@ -242,7 +246,9 @@ function CoursesAdmin() {
           <div key={c.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: c.is_active ? COLOR.surface : COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, opacity: c.is_active ? 1 : 0.6 }}>
             <div style={{ minWidth: 0 }}>
               <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
-                {c.name} {!c.is_active && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>DISABLED</span>}
+                {c.name}
+                {c.is_core && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.navyHero, marginLeft: 6 }}>CORE</span>}
+                {!c.is_active && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>DISABLED</span>}
               </p>
               <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans }}>
                 {c.code} · {c.professor} · {c.term} · {c.credits}cr

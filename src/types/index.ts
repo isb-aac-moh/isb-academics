@@ -35,6 +35,7 @@ export interface Course {
   is_strategy_ob_course?: boolean; // for the STLD 2+2+2 split rule
   prerequisite_course_ids?: string[];
   is_active: boolean; // soft-disable instead of delete — false means dropped/hidden from students
+  is_core: boolean; // mandatory core course — not bid on, doesn't count toward elective/concentration credits
 }
 
 // The five core courses whose F grade blocks a specific concentration.

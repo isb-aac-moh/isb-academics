@@ -29,7 +29,8 @@ export function creditsCountingToward(
   courses: Course[],
   bidEntries: BidPlanEntry[]
 ): number {
-  return coursesCountingToward(area, kind, profile, courses, bidEntries).reduce((sum, c) => sum + c.credits, 0);
+  // credits is numeric in Postgres — PostgREST may serialize it as a string, so coerce explicitly.
+  return coursesCountingToward(area, kind, profile, courses, bidEntries).reduce((sum, c) => sum + Number(c.credits), 0);
 }
 
 /** Every course matching an area — added-to-plan ones included, never hidden once picked. */
