@@ -69,3 +69,15 @@ export const TERM3_FLEXI_OPTIONS = [
 ] as const;
 
 export const MAX_CONCENTRATIONS = 2;
+
+export const ALL_TERMS = [
+  "Term 1", "Term 2", "Term 3", "Term 4", "Term 5", "Term 6", "Term 7",
+  "Block Week 1", "Block Week 2", "Block Week 3", "Block Week 4",
+] as const;
+
+export const RESOURCE_TYPES = [
+  "Course Outline", "Professor Profile", "Reading List", "PYQP",
+  "Student Notes", "Session Transcript", "Platform Directory", "General",
+] as const;
+
+export const NOTIFICATION_TAGS = ["Urgent", "Important", "Info", "General"] as const;

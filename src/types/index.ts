@@ -21,7 +21,7 @@ export type IndustrySpecialization =
   | "Public Policy"
   | "Infrastructure";
 
-export type TermCode = "Term 4" | "Term 5" | "Term 6" | "Term 7" | "Block Week 1" | "Block Week 2" | "Block Week 3" | "Block Week 4";
+export type TermCode = "Term 1" | "Term 2" | "Term 3" | "Term 4" | "Term 5" | "Term 6" | "Term 7" | "Block Week 1" | "Block Week 2" | "Block Week 3" | "Block Week 4";
 
 export interface Course {
   id: string;
@@ -58,17 +58,38 @@ export interface StudentAcademicProfile {
   completed_term3_flexi: string[]; // course codes from TERM3_FLEXI_OPTIONS
 }
 
+export type ResourceType =
+  | "Course Outline"
+  | "Professor Profile"
+  | "Reading List"
+  | "PYQP"
+  | "Student Notes"
+  | "Session Transcript"
+  | "Platform Directory"
+  | "General";
+
+// Types that make sense tied to a term/course. Platform Directory and General are cohort-wide.
+export const COURSE_SCOPED_RESOURCE_TYPES: ResourceType[] = [
+  "Course Outline", "Professor Profile", "Reading List", "PYQP", "Student Notes", "Session Transcript",
+];
+
 export interface Resource {
   id: string;
   title: string;
   url: string;
-  category: string;
+  resource_type: ResourceType;
+  term: string | null;
+  course_id: string | null;
   created_at: string;
 }
+
+export type NotificationTag = "Urgent" | "Important" | "Info" | "General";
 
 export interface Notification {
   id: string;
   title: string;
   body: string;
+  tag: NotificationTag;
+  pinned: boolean;
   created_at: string;
 }

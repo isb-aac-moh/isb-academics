@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ListChecks, ShieldCheck, LogOut, Menu, X } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import type { User } from "../types";
 
-export type AppSection = "planner" | "admin";
+export type AppSection = "planner" | "resources" | "noticeboard" | "admin";
 
 interface Props {
   user: User;
@@ -19,6 +19,49 @@ export default function Sidebar({ user, active, onNavigate, onSignOut }: Props) 
     onNavigate(section);
     setMobileOpen(false);
   }
+
+  const primaryNav = (
+    <nav className="space-y-1">
+      <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={active === "planner"} onClick={() => navigate("planner")} />
+      <NavItem
+        icon={<BookOpen size={16} />}
+        label="Course Resources"
+        active={active === "resources"}
+        onClick={() => navigate("resources")}
+        disabled={!user.is_admin}
+        soon={!user.is_admin}
+        preview={user.is_admin}
+      />
+      <NavItem
+        icon={<Megaphone size={16} />}
+        label="Notice Board"
+        active={active === "noticeboard"}
+        onClick={() => navigate("noticeboard")}
+        disabled={!user.is_admin}
+        soon={!user.is_admin}
+        preview={user.is_admin}
+      />
+    </nav>
+  );
+
+  const bottomNav = (
+    <div>
+      {user.is_admin && (
+        <NavItem icon={<ShieldCheck size={16} />} label="Admin" active={active === "admin"} onClick={() => navigate("admin")} />
+      )}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", marginTop: 12, paddingTop: 12 }}>
+        <p style={{ fontFamily: FONT.sans, fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {user.name || user.email}
+        </p>
+        <button
+          onClick={onSignOut}
+          style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, background: "none", border: "none", color: "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0 }}
+        >
+          <LogOut size={13} /> Sign out
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -58,28 +101,9 @@ export default function Sidebar({ user, active, onNavigate, onSignOut }: Props) 
                   <X size={20} />
                 </button>
               </div>
-              <nav className="space-y-1">
-                <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={active === "planner"} onClick={() => navigate("planner")} />
-                <NavItem icon={<ListChecks size={16} />} label="Course Resources" active={false} onClick={() => {}} disabled soon />
-                <NavItem icon={<ListChecks size={16} />} label="Notice Board" active={false} onClick={() => {}} disabled soon />
-              </nav>
+              {primaryNav}
             </div>
-            <div>
-              {user.is_admin && (
-                <NavItem icon={<ShieldCheck size={16} />} label="Admin" active={active === "admin"} onClick={() => navigate("admin")} />
-              )}
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", marginTop: 12, paddingTop: 12 }}>
-                <p style={{ fontFamily: FONT.sans, fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {user.name || user.email}
-                </p>
-                <button
-                  onClick={onSignOut}
-                  style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, background: "none", border: "none", color: "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0 }}
-                >
-                  <LogOut size={13} /> Sign out
-                </button>
-              </div>
-            </div>
+            {bottomNav}
           </div>
         </div>
       )}
@@ -92,48 +116,17 @@ export default function Sidebar({ user, active, onNavigate, onSignOut }: Props) 
         <div>
           <p style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 14, color: "#fff" }}>ISB</p>
           <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>Academics</p>
-
-          <nav className="mt-8 space-y-1">
-            <NavItem
-              icon={<ListChecks size={16} />}
-              label="Bidding Planner"
-              active={active === "planner"}
-              onClick={() => onNavigate("planner")}
-            />
-            <NavItem icon={<ListChecks size={16} />} label="Course Resources" active={false} onClick={() => {}} disabled soon />
-            <NavItem icon={<ListChecks size={16} />} label="Notice Board" active={false} onClick={() => {}} disabled soon />
-          </nav>
+          <div className="mt-8">{primaryNav}</div>
         </div>
-
-        <div>
-          {user.is_admin && (
-            <NavItem
-              icon={<ShieldCheck size={16} />}
-              label="Admin"
-              active={active === "admin"}
-              onClick={() => onNavigate("admin")}
-            />
-          )}
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", marginTop: 12, paddingTop: 12 }}>
-            <p style={{ fontFamily: FONT.sans, fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {user.name || user.email}
-            </p>
-            <button
-              onClick={onSignOut}
-              style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, background: "none", border: "none", color: "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0 }}
-            >
-              <LogOut size={13} /> Sign out
-            </button>
-          </div>
-        </div>
+        {bottomNav}
       </aside>
     </>
   );
 }
 
 function NavItem({
-  icon, label, active, onClick, disabled, soon,
-}: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void; disabled?: boolean; soon?: boolean }) {
+  icon, label, active, onClick, disabled, soon, preview,
+}: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void; disabled?: boolean; soon?: boolean; preview?: boolean }) {
   return (
     <button
       onClick={onClick}
@@ -147,6 +140,7 @@ function NavItem({
       {icon}
       <span style={{ flex: 1 }}>{label}</span>
       {soon && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em" }}>SOON</span>}
+      {preview && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em", border: `1px solid ${COLOR.mint}`, borderRadius: 4, padding: "1px 5px" }}>PREVIEW</span>}
     </button>
   );
 }
