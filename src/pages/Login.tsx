@@ -38,8 +38,8 @@ export default function Login() {
 
           <p style={{ fontFamily: FONT.sans, fontSize: 15, color: "rgba(255,255,255,0.75)", marginTop: 24, maxWidth: 420, lineHeight: 1.6 }}>
             Your background, your goals, and where you stand on concentration and
-            specialization credits — one place to plan electives and bidding strategy,
-            starting with Term 4.
+            specialization credits — your one home for ISB academics: bidding,
+            resources, and everything else that needs a place to live.
           </p>
         </div>
 
