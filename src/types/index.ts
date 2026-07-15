@@ -117,3 +117,18 @@ export interface Notification {
   pinned: boolean;
   created_at: string;
 }
+
+export type NavLinkType = "internal" | "external";
+export type NavLinkVisibility = "everyone" | "admin";
+
+// Admin-managed extra sidebar links, rendered below the locked core pages.
+export interface NavLink {
+  id: string;
+  label: string;
+  icon: string; // key into NAV_LINK_ICONS (src/lib/navLinkIcons.ts)
+  link_type: NavLinkType;
+  href: string;
+  visibility: NavLinkVisibility;
+  sort_order: number;
+  created_at: string;
+}

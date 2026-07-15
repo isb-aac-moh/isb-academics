@@ -40,6 +40,15 @@ Every resource needs a **Type** first — pick from the grouped list (Course Det
 - **Tag** every notice — Urgent, Important, Info, or General. Tags are always shown as a labeled badge, never color alone.
 - **Pin** anything that should stay at the top regardless of when it was posted (deadlines, major announcements). Pinned items always sort before unpinned ones, newest-first within each group.
 
+## Managing sidebar links (Nav Links tab)
+
+The core pages in the left sidebar — Bidding Planner, Course Resources, Notice Board — are fixed and can't be edited from here. The **Nav Links** tab manages an extra section of links rendered below them, for anything worth spotlighting without a code change (e.g. the Custom GPT elective-bidding assistant).
+
+- **Label, icon, type**: pick a name, an icon from the dropdown, and whether it's an **External URL** (opens in a new tab) or an **Internal page** (a path within this app, e.g. `/resources` — opens in the same tab and highlights when active).
+- **Visible to**: **Everyone** or **Admins only**. Use admins-only to try a link out before rolling it out to the whole cohort.
+- **Reorder**: the up/down arrows on each row move it within the extra-links section.
+- **Editing and deleting** both exist here — same as resources, there's no soft-disable; a wrong link is just wrong, delete it and re-add.
+
 ## Course Resources and Notice Board are still in preview
 
 Both pages are fully built but gated to admins only — students see them grayed out in the sidebar with a "SOON" badge. This is intentional (Eshan's call: "I do not want to open it up for everyone before I tell you to"), not a bug.

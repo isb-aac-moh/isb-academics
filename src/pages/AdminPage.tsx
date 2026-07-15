@@ -4,14 +4,16 @@
  */
 import { useState } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
-import { LayoutGrid, GraduationCap, BookOpen, Megaphone, Pin } from "lucide-react";
+import { LayoutGrid, GraduationCap, BookOpen, Megaphone, Pin, Link2, ArrowUp, ArrowDown } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useResources } from "../hooks/useResources";
 import { useNotifications } from "../hooks/useNotifications";
+import { useNavLinks } from "../hooks/useNavLinks";
 import { supabase } from "../lib/supabase";
 import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS } from "../lib/options";
-import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course } from "../types";
+import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
+import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
 
 const CONCENTRATIONS: ConcentrationArea[] = [
@@ -20,12 +22,13 @@ const CONCENTRATIONS: ConcentrationArea[] = [
 ];
 const SPECIALIZATIONS: IndustrySpecialization[] = ["Healthcare", "Manufacturing", "Public Policy", "Infrastructure"];
 
-type Tab = "overview" | "courses" | "resources" | "notifications";
+type Tab = "overview" | "courses" | "resources" | "notifications" | "nav-links";
 const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: "overview", label: "Overview", icon: <LayoutGrid size={14} /> },
   { key: "courses", label: "Courses", icon: <GraduationCap size={14} /> },
   { key: "resources", label: "Resources", icon: <BookOpen size={14} /> },
   { key: "notifications", label: "Notice Board", icon: <Megaphone size={14} /> },
+  { key: "nav-links", label: "Nav Links", icon: <Link2 size={14} /> },
 ];
 
 export default function AdminPage() {
@@ -63,6 +66,7 @@ export default function AdminPage() {
         {activeTab === "courses" && <CoursesAdmin />}
         {activeTab === "resources" && <ResourcesAdmin />}
         {activeTab === "notifications" && <NotificationsAdmin />}
+        {activeTab === "nav-links" && <NavLinksAdmin />}
       </main>
     </div>
   );
@@ -521,6 +525,145 @@ function NotificationsAdmin() {
             <p style={{ fontSize: 12, color: COLOR.ink2, fontFamily: FONT.sans, marginTop: 4 }}>{n.body}</p>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+const EMPTY_NAV_LINK = {
+  label: "", icon: "Link2" as NavLinkIconKey, link_type: "external" as NavLinkType,
+  href: "", visibility: "everyone" as NavLinkVisibility,
+};
+
+function NavLinksAdmin() {
+  const { navLinks, reload } = useNavLinks();
+  const [form, setForm] = useState({ ...EMPTY_NAV_LINK });
+  const [editId, setEditId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  function startEdit(id: string) {
+    const l = navLinks.find((l) => l.id === id);
+    if (!l) return;
+    setEditId(id);
+    setForm({ label: l.label, icon: l.icon as NavLinkIconKey, link_type: l.link_type, href: l.href, visibility: l.visibility });
+  }
+
+  function cancelEdit() {
+    setEditId(null);
+    setForm({ ...EMPTY_NAV_LINK });
+  }
+
+  async function handleSave() {
+    if (!form.label.trim() || !form.href.trim()) return;
+    setSaving(true);
+    const payload = {
+      label: form.label.trim(),
+      icon: form.icon,
+      link_type: form.link_type,
+      href: form.href.trim(),
+      visibility: form.visibility,
+    };
+    const { error } = editId
+      ? await supabase.from("nav_links").update(payload).eq("id", editId)
+      : await supabase.from("nav_links").insert({ ...payload, sort_order: navLinks.length });
+    setSaving(false);
+    if (!error) {
+      setForm({ ...EMPTY_NAV_LINK });
+      setEditId(null);
+      reload();
+    } else {
+      console.error("[AdminPage] save nav link failed:", error);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    await supabase.from("nav_links").delete().eq("id", id);
+    reload();
+  }
+
+  async function move(id: string, direction: -1 | 1) {
+    const idx = navLinks.findIndex((l) => l.id === id);
+    const target = navLinks[idx + direction];
+    if (!target) return;
+    const current = navLinks[idx];
+    await supabase.from("nav_links").update({ sort_order: target.sort_order }).eq("id", current.id);
+    await supabase.from("nav_links").update({ sort_order: current.sort_order }).eq("id", target.id);
+    reload();
+  }
+
+  return (
+    <div>
+      <div style={{ padding: 16, borderRadius: 10, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, marginBottom: 20 }}>
+        <div className="flex items-center justify-between mb-2">
+          <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans }}>{editId ? "Edit link" : "Add a link"}</p>
+          {editId && <button onClick={cancelEdit} style={{ fontSize: 12, color: COLOR.ink3, background: "none", border: "none", cursor: "pointer" }}>Cancel edit</button>}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+          <LabeledField label="Label">
+            <input style={inputStyle} value={form.label} onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))} />
+          </LabeledField>
+          <LabeledField label="Icon">
+            <select style={inputStyle} value={form.icon} onChange={(e) => setForm((f) => ({ ...f, icon: e.target.value as NavLinkIconKey }))}>
+              {(Object.keys(NAV_LINK_ICONS) as NavLinkIconKey[]).map((key) => <option key={key} value={key}>{key}</option>)}
+            </select>
+          </LabeledField>
+        </div>
+
+        <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, margin: "4px 0" }}>Type</p>
+        <div className="flex flex-wrap gap-1 mb-2">
+          {(["external", "internal"] as NavLinkType[]).map((t) => (
+            <Chip key={t} active={form.link_type === t} onClick={() => setForm((f) => ({ ...f, link_type: t }))} label={t === "external" ? "External URL" : "Internal page"} />
+          ))}
+        </div>
+
+        <LabeledField label={form.link_type === "external" ? "URL" : "App path (e.g. /resources)"} className="mb-2">
+          <input style={inputStyle} value={form.href} onChange={(e) => setForm((f) => ({ ...f, href: e.target.value }))} placeholder={form.link_type === "external" ? "https://…" : "/resources"} />
+        </LabeledField>
+
+        <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, margin: "4px 0" }}>Visible to</p>
+        <div className="flex flex-wrap gap-1 mb-3">
+          {(["everyone", "admin"] as NavLinkVisibility[]).map((v) => (
+            <Chip key={v} active={form.visibility === v} onClick={() => setForm((f) => ({ ...f, visibility: v }))} label={v === "everyone" ? "Everyone" : "Admins only"} />
+          ))}
+        </div>
+
+        <button onClick={handleSave} disabled={saving} style={buttonStyle}>
+          {saving ? "Saving…" : editId ? "Save changes" : "Add link"}
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {navLinks.map((l, idx) => {
+          const Icon = NAV_LINK_ICONS[l.icon as NavLinkIconKey];
+          return (
+            <div key={l.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+              <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+                <Icon size={15} color={COLOR.ink2} />
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
+                    {l.label}
+                    {l.visibility === "admin" && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>ADMINS ONLY</span>}
+                  </p>
+                  <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, wordBreak: "break-all" }}>
+                    {l.link_type === "external" ? "External" : "Internal"} · {l.href}
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 10, flexShrink: 0, alignItems: "center" }}>
+                <button onClick={() => move(l.id, -1)} disabled={idx === 0} style={{ background: "none", border: "none", cursor: idx === 0 ? "default" : "pointer", opacity: idx === 0 ? 0.3 : 1 }} aria-label="Move up">
+                  <ArrowUp size={14} color={COLOR.ink2} />
+                </button>
+                <button onClick={() => move(l.id, 1)} disabled={idx === navLinks.length - 1} style={{ background: "none", border: "none", cursor: idx === navLinks.length - 1 ? "default" : "pointer", opacity: idx === navLinks.length - 1 ? 0.3 : 1 }} aria-label="Move down">
+                  <ArrowDown size={14} color={COLOR.ink2} />
+                </button>
+                <button onClick={() => startEdit(l.id)} style={{ fontSize: 12, color: COLOR.ink2, background: "none", border: "none", cursor: "pointer" }}>Edit</button>
+                <button onClick={() => handleDelete(l.id)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer" }}>Delete</button>
+              </div>
+            </div>
+          );
+        })}
+        {navLinks.length === 0 && <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>No extra links yet.</p>}
       </div>
     </div>
   );

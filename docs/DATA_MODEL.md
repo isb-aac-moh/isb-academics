@@ -131,6 +131,23 @@ The Notice Board feed.
 
 **RLS:** same world-readable / admin-write pattern as `resources`.
 
+## `nav_links`
+
+Admin-managed extra links, rendered in the sidebar below the locked core pages (Bidding Planner / Course Resources / Notice Board — those stay hardcoded in `Sidebar.tsx`, not in this table).
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `label` | text | |
+| `icon` | text | Key into `NAV_LINK_ICONS` (`src/lib/navLinkIcons.ts`) — a curated ~18-icon subset of lucide-react, picked from a dropdown in the admin form. |
+| `link_type` | text | `internal` (in-app route, opens in same tab, gets active-state highlighting) or `external` (full URL, opens in a new tab). |
+| `href` | text | Relative path for `internal`, full URL for `external`. |
+| `visibility` | text, default `'everyone'` | `everyone` or `admin` — mirrors the `RequireAdmin` gate; non-admins never see `admin`-only links. |
+| `sort_order` | integer, default `0` | Reordered via up/down buttons in the admin form (two rows swap `sort_order`). |
+| `created_at` | timestamptz | |
+
+**RLS:** same world-readable / admin-write pattern as `resources`.
+
 ## Migration history (chronological, for context on *why*)
 
 1. `academics_schema` — initial tables.
@@ -145,5 +162,7 @@ The Notice Board feed.
 10. `resource_description` — the description field.
 11. `flexi_conversion_and_exchange_points` — `term2/3_converted_elective` (which Flexi pick, if any, is the mandatory conversion to elective — corrected an earlier assumption that all completed Flexi Core counted toward credit) and `international/inter_campus_exchange_points_used` (self-reported, since Exchange bidding shares the same 4,500-point pool but isn't a modeled flow yet).
 12. `cross_listed_concentration_choice` — `cross_listed_concentration_choices` jsonb, so a cross-listed course only counts toward the one concentration the student picked (FAQ Q45) instead of both.
+13. `resource_pinning` — `pinned` / `pinned_global` on `resources`.
+14. `nav_links` — new table for admin-managed extra sidebar links; seeded with the Custom GPT link that used to be hardcoded in `Sidebar.tsx`.
 
 If you're debugging something that references an older shape (e.g. `resources.category`), check this list — it was real, then removed.

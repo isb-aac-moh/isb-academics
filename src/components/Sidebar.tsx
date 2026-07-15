@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, Bot, ExternalLink } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { useNavLinks } from "../hooks/useNavLinks";
+import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
 import type { User } from "../types";
-
-// TEMPORARY — stand-in link while Course Resources is still admin-only preview.
-// Remove this NavItem (and the import above) once Course Resources goes live
-// for everyone; the Custom GPT itself will live there as a normal resource.
-const CUSTOM_GPT_URL = "https://chatgpt.com/g/g-6a569adeb170819197aa7ee8c12b2c71-isb-elective-bidding-assistant";
 
 interface Props {
   user: User;
@@ -18,6 +15,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { navLinks } = useNavLinks();
 
   function go(path: string) {
     navigate(path);
@@ -29,7 +27,6 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const primaryNav = (
     <nav className="space-y-1">
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} />
-      <ExternalNavItem icon={<Bot size={16} />} label="Custom GPT- Elective Bidding Assistant" href={CUSTOM_GPT_URL} />
       <NavItem
         icon={<BookOpen size={16} />}
         label="Course Resources"
@@ -50,6 +47,20 @@ export default function Sidebar({ user, onSignOut }: Props) {
       />
     </nav>
   );
+
+  const visibleLinks = navLinks.filter((link) => link.visibility === "everyone" || user.is_admin);
+  const extraNav = visibleLinks.length > 0 ? (
+    <nav className="space-y-1" style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+      {visibleLinks.map((link) => {
+        const Icon = NAV_LINK_ICONS[link.icon as NavLinkIconKey];
+        return link.link_type === "external" ? (
+          <ExternalNavItem key={link.id} icon={<Icon size={16} />} label={link.label} href={link.href} />
+        ) : (
+          <NavItem key={link.id} icon={<Icon size={16} />} label={link.label} active={isActive(link.href)} onClick={() => go(link.href)} />
+        );
+      })}
+    </nav>
+  ) : null;
 
   const bottomNav = (
     <div>
@@ -109,6 +120,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
                 </button>
               </div>
               {primaryNav}
+              {extraNav}
             </div>
             {bottomNav}
           </div>
@@ -124,6 +136,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
           <p style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 14, color: "#fff" }}>ISB</p>
           <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>Academics</p>
           <div className="mt-8">{primaryNav}</div>
+          {extraNav}
         </div>
         {bottomNav}
       </aside>
