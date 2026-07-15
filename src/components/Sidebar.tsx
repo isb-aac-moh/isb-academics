@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, Bot, ExternalLink } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import type { User } from "../types";
+
+// TEMPORARY — stand-in link while Course Resources is still admin-only preview.
+// Remove this NavItem (and the import above) once Course Resources goes live
+// for everyone; the Custom GPT itself will live there as a normal resource.
+const CUSTOM_GPT_URL = "https://chatgpt.com/g/g-6a569adeb170819197aa7ee8c12b2c71-isb-elective-bidding-assistant";
 
 interface Props {
   user: User;
@@ -24,6 +29,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const primaryNav = (
     <nav className="space-y-1">
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} />
+      <ExternalNavItem icon={<Bot size={16} />} label="Custom GPT- Elective Bidding Assistant" href={CUSTOM_GPT_URL} />
       <NavItem
         icon={<BookOpen size={16} />}
         label="Course Resources"
@@ -143,5 +149,24 @@ function NavItem({
       {soon && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em" }}>SOON</span>}
       {preview && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em", border: `1px solid ${COLOR.mint}`, borderRadius: 4, padding: "1px 5px" }}>PREVIEW</span>}
     </button>
+  );
+}
+
+/** Same look as NavItem, but an actual link that opens the tool in a new tab instead of routing internally. */
+function ExternalNavItem({ icon, label, href }: { icon: React.ReactNode; label: string; href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8,
+        background: "transparent", color: "#fff", fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, textAlign: "left", textDecoration: "none",
+      }}
+    >
+      {icon}
+      <span style={{ flex: 1 }}>{label}</span>
+      <ExternalLink size={12} color="rgba(255,255,255,0.5)" />
+    </a>
   );
 }
