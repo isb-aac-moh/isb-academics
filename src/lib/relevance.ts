@@ -32,6 +32,22 @@ export const WORK_EX_ROLE_AREA_HINTS: Record<string, string[]> = {
   "Design / UX": ["Marketing", "Information Technology Management"],
 };
 
+// A separate signal from work-ex — catches students whose undergrad and
+// work-ex point different directions (e.g. Mechanical Engineering -> Consulting).
+export const UNDERGRAD_FIELD_AREA_HINTS: Record<string, string[]> = {
+  "Engineering — Computer Science / IT": ["Information Technology Management"],
+  "Engineering — Mechanical": ["Operations Management", "Manufacturing"],
+  "Engineering — Electrical / Electronics": ["Information Technology Management", "Operations Management"],
+  "Engineering — Civil": ["Operations Management", "Infrastructure"],
+  "Engineering — Chemical": ["Operations Management", "Manufacturing"],
+  "Commerce / B.Com / BBA": ["Finance", "Marketing"],
+  "Economics": ["Finance", "Strategy and Leadership"],
+  "Arts / Humanities / Social Sciences": ["Marketing", "Public Policy"],
+  "Law": ["Strategy and Leadership", "Public Policy"],
+  "Medicine / Pharmacy / Life Sciences": ["Healthcare"],
+  "Architecture / Design": ["Marketing"],
+};
+
 export function relevanceTags(course: Course, profile: StudentAcademicProfile, allCourses: Course[]): string[] {
   const tags: string[] = [];
   const courseAreas = [...course.concentration_areas, ...course.industry_specializations];
@@ -43,6 +59,11 @@ export function relevanceTags(course: Course, profile: StudentAcademicProfile, a
     tags.push(`Matches your role (${profile.work_ex_role})`);
   } else if (domainAreas.some((a) => courseAreas.includes(a as never))) {
     tags.push(`Matches your work-ex (${profile.work_ex_domain})`);
+  }
+
+  const undergradAreas = UNDERGRAD_FIELD_AREA_HINTS[profile.undergrad_field] ?? [];
+  if (undergradAreas.some((a) => courseAreas.includes(a as never))) {
+    tags.push(`Connects to your undergrad (${profile.undergrad_field})`);
   }
 
   const completedCodes = [...profile.completed_term2_flexi, ...profile.completed_term3_flexi];

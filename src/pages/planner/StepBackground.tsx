@@ -54,13 +54,6 @@ export default function StepBackground({ profile, save, gatingCourses }: Props) 
               {WORK_EX_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
           </Field>
-          <Field label="Years of work-ex">
-            <input
-              type="number" min={0} step={0.5} style={inputStyle}
-              value={profile.work_ex_years || ""}
-              onChange={(e) => save({ work_ex_years: Number(e.target.value) })}
-            />
-          </Field>
         </div>
       </div>
 
