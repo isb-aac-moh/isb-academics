@@ -12,14 +12,13 @@ interface Props {
   pointsPlanned: number;
   reserved: number;
   exchangePointsUsed: number;
-  remainingPoints: number;
   onRemove: (id: string) => void;
 }
 
 // Term order for the per-term boxes — matches ISB's bidding sequence.
 const TERM_ORDER = Object.keys(TERM_CREDIT_LIMITS);
 
-export default function StepBudget({ profile, save, entries, courses, pointsPlanned, reserved, exchangePointsUsed, remainingPoints, onRemove }: Props) {
+export default function StepBudget({ profile, save, entries, courses, pointsPlanned, reserved, exchangePointsUsed, onRemove }: Props) {
   return (
     <div>
       <p style={{ fontFamily: FONT.serif, fontSize: 15, color: COLOR.ink2, marginBottom: 20, lineHeight: 1.6 }}>
@@ -29,15 +28,6 @@ export default function StepBudget({ profile, save, entries, courses, pointsPlan
         <Stat label="Total points" value={TOTAL_BID_POINTS} />
         <Stat label="Planned so far" value={pointsPlanned} />
         <Stat label="Reserved for remaining credits" value={reserved} />
-      </div>
-      <div style={{
-        padding: "12px 16px", borderRadius: 10, fontFamily: FONT.sans, fontSize: 14, fontWeight: 700,
-        background: remainingPoints < 0 ? COLOR.redTint : COLOR.greenTint,
-        color: remainingPoints < 0 ? COLOR.red : COLOR.green,
-      }}>
-        {remainingPoints < 0
-          ? `Over budget by ${Math.abs(remainingPoints)} points — this plan won't clear the automatic reserve.`
-          : `${remainingPoints} points free to allocate beyond what's planned + reserved.`}
       </div>
 
       <div className="mt-6">

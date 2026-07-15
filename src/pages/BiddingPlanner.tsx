@@ -41,7 +41,9 @@ export default function BiddingPlanner() {
   }
 
   const creditsSecured = totalElectiveCreditsSecured(profile, courses, entries);
-  const { reserved, exchangePointsUsed, remainingPoints } = computeBidBudget(profile, courses, entries, pointsPlanned);
+  const { reserved, exchangePointsUsed, pointsAvailable, remainingPoints } = computeBidBudget(profile, courses, entries, pointsPlanned);
+  const overFullBudget = pointsAvailable < 0;
+  const dippingIntoReserve = !overFullBudget && remainingPoints < 0;
 
   function goToStep(i: number) {
     navigate(`/planner/${STEPS[i].key}`);
@@ -82,8 +84,19 @@ export default function BiddingPlanner() {
         {/* Lean journey summary — elective credits + bid points, always visible */}
         <div className="flex flex-wrap gap-3 mt-6">
           <SummaryTile label="Elective credits" value={`${creditsSecured}/${TOTAL_ELECTIVE_CREDITS_REQUIRED}`} />
-          <SummaryTile label="Bid points remaining" value={String(remainingPoints)} warn={remainingPoints < 0} />
+          <SummaryTile label="Bid points remaining" value={String(pointsAvailable)} warn={overFullBudget} />
         </div>
+        <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 8, maxWidth: 520, lineHeight: 1.5 }}>
+          Out of your full 4,500-point budget. ISB also asks you to hold back 100 points per elective credit you still need ({reserved} pts right now) so you don't run out before hitting your 18-credit requirement — you can bid past that, you'll just be warned.
+        </p>
+        {dippingIntoReserve && (
+          <div style={{
+            marginTop: 8, padding: "10px 14px", borderRadius: 9, background: COLOR.redTint,
+            color: COLOR.red, fontFamily: FONT.sans, fontSize: 12.5, fontWeight: 600, maxWidth: 520,
+          }}>
+            You're {Math.abs(remainingPoints)} points into the reserve ISB holds back for your remaining required credits. Still allowed — but you may fall short of your 18-credit requirement later.
+          </div>
+        )}
       </header>
 
       <main className="px-6 md:px-12" style={{ maxWidth: 820 }}>
@@ -97,6 +110,7 @@ export default function BiddingPlanner() {
             gatingCourses={gatingCourses}
             resources={resources}
             bidEntries={entries}
+            pointsAvailable={pointsAvailable}
             onAdd={(courseId, term, points) => addEntry({ course_id: courseId, term, planned_points: points })}
           />
         )}
@@ -109,7 +123,6 @@ export default function BiddingPlanner() {
             pointsPlanned={pointsPlanned}
             reserved={reserved}
             exchangePointsUsed={exchangePointsUsed}
-            remainingPoints={remainingPoints}
             onRemove={removeEntry}
           />
         )}

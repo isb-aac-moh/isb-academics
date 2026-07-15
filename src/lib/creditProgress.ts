@@ -81,13 +81,20 @@ export function totalElectiveCreditsSecured(profile: StudentAcademicProfile, cou
  * rather than a 1-entry-=-1-credit approximation, plus Exchange points already
  * spent — International/Inter-Campus Exchange draw from the same 4,500-point
  * pool as regular elective bidding (FAQ Q4, Exchange PPT "Bid Points").
+ *
+ * `pointsAvailable` tracks the full 4,500 pool directly (total minus what's
+ * actually spent) so it moves with every planned course. `remainingPoints`
+ * nets the reserve out too — it goes negative once a plan dips into the
+ * points ISB wants held back for still-unsecured credits, which is a soft
+ * warning, not a hard cap (a student can still submit that plan).
  */
 export function computeBidBudget(profile: StudentAcademicProfile, courses: Course[], bidEntries: BidPlanEntry[], pointsPlanned: number) {
   const creditsSecured = totalElectiveCreditsSecured(profile, courses, bidEntries);
   const reserved = Math.max(0, TOTAL_ELECTIVE_CREDITS_REQUIRED - creditsSecured) * RESERVE_PER_REMAINING_CREDIT;
   const exchangePointsUsed = (profile.international_exchange_points_used ?? 0) + (profile.inter_campus_exchange_points_used ?? 0);
-  const remainingPoints = TOTAL_BID_POINTS - pointsPlanned - reserved - exchangePointsUsed;
-  return { creditsSecured, reserved, exchangePointsUsed, remainingPoints };
+  const pointsAvailable = TOTAL_BID_POINTS - pointsPlanned - exchangePointsUsed;
+  const remainingPoints = pointsAvailable - reserved;
+  return { creditsSecured, reserved, exchangePointsUsed, pointsAvailable, remainingPoints };
 }
 
 export function creditsCountingToward(

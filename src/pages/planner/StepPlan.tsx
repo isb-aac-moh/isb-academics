@@ -13,10 +13,11 @@ interface Props {
   gatingCourses: GatingCoreCourse[];
   resources: Resource[];
   bidEntries: BidPlanEntry[];
+  pointsAvailable: number;
   onAdd: (courseId: string, term: string, points: number) => void;
 }
 
-export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, onAdd }: Props) {
+export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, pointsAvailable, onAdd }: Props) {
   const blockedConcentrations = useMemo(() => {
     const failed = new Set(profile.failed_gating_courses);
     return new Set(gatingCourses.filter((g) => failed.has(g.id)).map((g) => g.blocks_concentration));
@@ -55,6 +56,7 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
           courses={courses}
           resources={resources}
           bidEntries={bidEntries}
+          pointsAvailable={pointsAvailable}
           onAdd={onAdd}
         />
       ))}
@@ -64,6 +66,7 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
         save={save}
         resources={resources}
         bidEntries={bidEntries}
+        pointsAvailable={pointsAvailable}
         onAdd={onAdd}
       />
     </div>
@@ -71,10 +74,10 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
 }
 
 function GeneralElectivesCard({
-  courses, profile, save, resources, bidEntries, onAdd,
+  courses, profile, save, resources, bidEntries, pointsAvailable, onAdd,
 }: {
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  resources: Resource[]; bidEntries: BidPlanEntry[]; onAdd: (courseId: string, term: string, points: number) => void;
+  resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; onAdd: (courseId: string, term: string, points: number) => void;
 }) {
   const alreadyIds = new Set(bidEntries.map((e) => e.course_id));
   const liveNow = courses.filter((c) => isLiveNow(c.term));
@@ -96,7 +99,7 @@ function GeneralElectivesCard({
           </p>
           <div className="space-y-2">
             {liveNow.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
             ))}
           </div>
         </div>
@@ -109,7 +112,7 @@ function GeneralElectivesCard({
           </summary>
           <div className="space-y-2 mt-2">
             {later.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
             ))}
           </div>
         </details>
@@ -123,11 +126,11 @@ function GeneralElectivesCard({
 }
 
 function AreaCard({
-  area, kind, blocked, profile, save, courses, resources, bidEntries, onAdd,
+  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, onAdd,
 }: {
   area: string; kind: "concentration" | "specialization"; blocked: boolean;
   profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[];
+  courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number;
   onAdd: (courseId: string, term: string, points: number) => void;
 }) {
   const credits = creditsCountingToward(area as never, kind, profile, courses, bidEntries);
@@ -161,7 +164,7 @@ function AreaCard({
           </p>
           <div className="space-y-2">
             {liveNow.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
             ))}
           </div>
         </div>
@@ -174,7 +177,7 @@ function AreaCard({
           </summary>
           <div className="space-y-2 mt-2">
             {later.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
+              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
             ))}
           </div>
         </details>
@@ -188,12 +191,13 @@ function AreaCard({
 }
 
 function CourseRow({
-  course, profile, save, allCourses, resources, alreadyAdded, onAdd,
+  course, profile, save, allCourses, resources, alreadyAdded, pointsAvailable, onAdd,
 }: {
   course: Course; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  allCourses: Course[]; resources: Resource[]; alreadyAdded: boolean; onAdd: (points: number) => void;
+  allCourses: Course[]; resources: Resource[]; alreadyAdded: boolean; pointsAvailable: number; onAdd: (points: number) => void;
 }) {
   const [points, setPoints] = useState(MIN_BID_PER_COURSE);
+  const exceedsBudget = points > pointsAvailable;
   // Cross-listed across both target concentrations — FAQ Q45: only one counts, student's choice.
   // Only matters once the course is actually in the plan; browsing shows both areas plainly.
   const overlappingConcentrations = profile.target_concentrations.filter((a) => course.concentration_areas.includes(a));
@@ -224,17 +228,29 @@ function CourseRow({
         {alreadyAdded ? (
           <span style={{ fontSize: 12, color: COLOR.green, fontWeight: 700, fontFamily: FONT.sans, whiteSpace: "nowrap" }}>✓ In your plan</span>
         ) : (
-          <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
-            <input
-              type="number" min={MIN_BID_PER_COURSE} value={points} onChange={(e) => setPoints(Number(e.target.value))}
-              style={{ width: 64, padding: "5px 7px", borderRadius: 6, border: `1px solid ${COLOR.border}`, fontSize: 12, fontFamily: FONT.sans }}
-            />
-            <button
-              onClick={() => onAdd(points)}
-              style={{ padding: "6px 11px", borderRadius: 7, background: COLOR.navyHero, color: "#fff", border: "none", fontSize: 12, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer" }}
-            >
-              Add
-            </button>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="number" min={MIN_BID_PER_COURSE} value={points} onChange={(e) => setPoints(Number(e.target.value))}
+                style={{ width: 64, padding: "5px 7px", borderRadius: 6, border: `1px solid ${COLOR.border}`, fontSize: 12, fontFamily: FONT.sans }}
+              />
+              <button
+                onClick={() => onAdd(points)}
+                disabled={exceedsBudget}
+                style={{
+                  padding: "6px 11px", borderRadius: 7, border: "none", fontSize: 12, fontWeight: 700, fontFamily: FONT.sans,
+                  background: exceedsBudget ? COLOR.border : COLOR.navyHero, color: exceedsBudget ? COLOR.ink3 : "#fff",
+                  cursor: exceedsBudget ? "not-allowed" : "pointer",
+                }}
+              >
+                Add
+              </button>
+            </div>
+            {exceedsBudget && (
+              <p style={{ fontSize: 10.5, color: COLOR.red, fontFamily: FONT.sans, textAlign: "right", maxWidth: 160 }}>
+                Only {pointsAvailable} pts left of your 4,500 budget — lower your bid to add this.
+              </p>
+            )}
           </div>
         )}
       </div>
