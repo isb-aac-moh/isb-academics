@@ -277,7 +277,7 @@ function LabeledField({ label, children, className }: { label: string; children:
   );
 }
 
-const EMPTY_RESOURCE = { title: "", url: "", description: "", resource_type: "General" as ResourceType, term: "", course_id: "" };
+const EMPTY_RESOURCE = { title: "", url: "", description: "", resource_type: "General" as ResourceType, term: "", course_id: "", pinned: false, pinned_global: false };
 
 function ResourcesAdmin() {
   const { resources, reload } = useResources();
@@ -294,7 +294,10 @@ function ResourcesAdmin() {
     if (!r) return;
     const course = r.course_id ? courses.find((c) => c.id === r.course_id) : null;
     setEditId(id);
-    setForm({ title: r.title, url: r.url, description: r.description ?? "", resource_type: r.resource_type, term: r.term ?? course?.term ?? "", course_id: r.course_id ?? "" });
+    setForm({
+      title: r.title, url: r.url, description: r.description ?? "", resource_type: r.resource_type,
+      term: r.term ?? course?.term ?? "", course_id: r.course_id ?? "", pinned: r.pinned, pinned_global: r.pinned_global,
+    });
   }
 
   function cancelEdit() {
@@ -312,6 +315,8 @@ function ResourcesAdmin() {
       resource_type: form.resource_type,
       term: isCourseScoped && form.term ? form.term : null,
       course_id: isCourseScoped && form.course_id ? form.course_id : null,
+      pinned: form.pinned,
+      pinned_global: form.pinned_global,
     };
     const { error } = editId
       ? await supabase.from("resources").update(payload).eq("id", editId)
@@ -392,6 +397,15 @@ function ResourcesAdmin() {
           </div>
         )}
 
+        <label className="flex items-center gap-2 mb-2" style={{ cursor: "pointer" }}>
+          <input type="checkbox" checked={form.pinned} onChange={(e) => setForm((f) => ({ ...f, pinned: e.target.checked }))} />
+          <span style={{ fontSize: 12.5, fontFamily: FONT.sans, color: COLOR.ink2 }}>Pin to top of its section (e.g. top of the Other tab, or top of General Resources)</span>
+        </label>
+        <label className="flex items-center gap-2 mb-3" style={{ cursor: "pointer" }}>
+          <input type="checkbox" checked={form.pinned_global} onChange={(e) => setForm((f) => ({ ...f, pinned_global: e.target.checked }))} />
+          <span style={{ fontSize: 12.5, fontFamily: FONT.sans, color: COLOR.ink2 }}>Pin globally — sticky banner at the top of Course Resources, regardless of filters</span>
+        </label>
+
         <button onClick={handleSave} disabled={saving} style={buttonStyle}>
           {saving ? "Saving…" : editId ? "Save changes" : "Add resource"}
         </button>
@@ -403,7 +417,11 @@ function ResourcesAdmin() {
           return (
             <div key={r.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>{r.title}</p>
+                <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
+                  {r.title}
+                  {r.pinned && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.navyHero, marginLeft: 6 }}>PINNED</span>}
+                  {r.pinned_global && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>GLOBAL</span>}
+                </p>
                 <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, wordBreak: "break-all" }}>
                   {r.resource_type}{r.term && ` · ${r.term}`}{course && ` · ${course.name}`} · {r.url}
                 </p>

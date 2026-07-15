@@ -103,6 +103,8 @@ export interface Resource {
   term: string | null;
   course_id: string | null;
   created_at: string;
+  pinned: boolean; // sorts first within its own section/tab (e.g. top of a course's "Other" tab)
+  pinned_global: boolean; // shows in a sticky banner at the top of Course Resources regardless of filters
 }
 
 export type NotificationTag = "Urgent" | "Important" | "Info" | "General";

@@ -5,16 +5,33 @@
  * Search is simple text matching for now — title, course name/code, professor.
  * (An NLP/AI-assisted version is a planned follow-up, not built yet.)
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, ExternalLink, FileText, Maximize2, Minimize2 } from "lucide-react";
+import { Search, X, ExternalLink, FileText, Maximize2, Minimize2, Pin, ChevronRight } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useResources } from "../hooks/useResources";
 import { useCourses } from "../hooks/useCourses";
 import { ALL_TERMS, RESOURCE_TABS } from "../lib/options";
+import { getCurrentTermCode } from "../lib/termCalendar";
 import type { Resource, Course } from "../types";
 
 const CARD_TINTS = [COLOR.navyTint, COLOR.amberTint, COLOR.greenTint, COLOR.bgSoft];
+
+// Pinned resources sort first within whichever list they appear in — sort is
+// stable, so relative (created_at-desc) order within each pin group holds.
+function sortPinned(list: Resource[]): Resource[] {
+  return [...list].sort((a, b) => Number(b.pinned) - Number(a.pinned));
+}
+
+// Shared by the course detail panel and the General Resources panel: groups
+// resources into the same 4 course tabs + a General tab, only keeping tabs
+// that actually have something in them.
+function buildPopulatedTabs(resources: Resource[]) {
+  const tabs = [...RESOURCE_TABS, { key: "general", label: "General", types: ["General"] as const }];
+  return tabs
+    .map((tab) => ({ ...tab, items: sortPinned(resources.filter((r) => (tab.types as readonly string[]).includes(r.resource_type))) }))
+    .filter((tab) => tab.items.length > 0);
+}
 
 export default function CourseResources() {
   const { resources, loading: resourcesLoading } = useResources();
@@ -28,6 +45,7 @@ export default function CourseResources() {
   const activeCourseCode = params.get("course");
   const activeCourse = activeCourseCode ? courses.find((c) => c.code === activeCourseCode) : undefined;
   const isFullScreen = params.get("view") === "full";
+  const generalView = params.get("view") === "general";
 
   function setParam(key: string, value: string | null, opts?: { replace?: boolean }) {
     const next = new URLSearchParams(params);
@@ -35,6 +53,18 @@ export default function CourseResources() {
     else next.set(key, value);
     setParams(next, opts);
   }
+
+  // First-time UX: default the term filter to whatever term is running right
+  // now (per the official academic calendar), so a student doesn't land on an
+  // unfiltered wall of every course ISB offers. Only applies on a fresh load —
+  // explicitly clearing to "All terms" removes the param and stays cleared
+  // until the next fresh visit.
+  useEffect(() => {
+    if (params.has("term")) return;
+    const current = getCurrentTermCode();
+    if (current) setParam("term", current, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasFilters = q.trim() !== "" || termFilter !== "all" || typeFilter !== "all" || kindFilter !== "all";
 
@@ -70,14 +100,32 @@ export default function CourseResources() {
     });
   }, [courses, termFilter, kindFilter, typeFilter, q, resourcesByCourse]);
 
-  const platformDirectory = resources.filter((r) => r.resource_type === "Platform Directory");
-  const general = resources.filter((r) => r.resource_type === "General");
-
-  const matchingLooseResources = useMemo(() => {
-    if (!q.trim()) return [];
+  // Always cohort-wide, never course-scoped — only search narrows it down.
+  const platformDirectory = useMemo(() => {
     const query = q.trim().toLowerCase();
-    return resources.filter((r) => !r.course_id && r.title.toLowerCase().includes(query));
+    return sortPinned(resources.filter((r) => r.resource_type === "Platform Directory" && (!query || r.title.toLowerCase().includes(query))));
   }, [resources, q]);
+
+  // Everything with no course attached that isn't a Platform Directory link —
+  // General-type resources, plus any course-scoped type (Custom GPT, PYQP…)
+  // an admin saved without picking a specific course ("term-wide"). Respects
+  // the same term/type/search filters as the course grid below it.
+  const generalResources = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    return sortPinned(resources.filter((r) => {
+      if (r.course_id || r.resource_type === "Platform Directory") return false;
+      if (termFilter !== "all" && r.term !== null && r.term !== termFilter) return false;
+      if (typeFilter !== "all") {
+        const tab = RESOURCE_TABS.find((t) => t.key === typeFilter);
+        const typesInTab: readonly string[] = tab?.types ?? [];
+        if (!typesInTab.includes(r.resource_type)) return false;
+      }
+      if (query && !r.title.toLowerCase().includes(query)) return false;
+      return true;
+    }));
+  }, [resources, termFilter, typeFilter, q]);
+
+  const pinnedGlobal = useMemo(() => resources.filter((r) => r.pinned_global), [resources]);
 
   const termsPresent = useMemo(() => ALL_TERMS.filter((t) => courses.some((c) => c.term === t)), [courses]);
 
@@ -94,6 +142,23 @@ export default function CourseResources() {
         <p style={{ fontFamily: FONT.sans, fontSize: 13, color: COLOR.ink2, marginTop: 4 }}>
           Everything for every course, all year — search or filter to find it.
         </p>
+
+        {pinnedGlobal.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {pinnedGlobal.map((r) => (
+              <a
+                key={r.id}
+                href={r.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5"
+                style={{ padding: "6px 12px", borderRadius: 20, background: COLOR.navyHero, color: "#fff", textDecoration: "none", fontFamily: FONT.sans, fontSize: 12, fontWeight: 700 }}
+              >
+                <Pin size={11} fill="#fff" /> {r.title}
+              </a>
+            ))}
+          </div>
+        )}
 
         <div className="relative mt-6" style={{ maxWidth: 540 }}>
           <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} color={COLOR.ink3} />
@@ -132,7 +197,7 @@ export default function CourseResources() {
       </header>
 
       <main className="px-6 md:px-12 space-y-10" style={{ maxWidth: 1100 }}>
-        {!hasFilters && platformDirectory.length > 0 && (
+        {platformDirectory.length > 0 && (
           <Section title="Platform Directory">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {platformDirectory.map((r) => <LinkCard key={r.id} resource={r} />)}
@@ -140,15 +205,20 @@ export default function CourseResources() {
           </Section>
         )}
 
-        {!hasFilters && general.length > 0 && (
-          <Section title="General">
-            <div className="space-y-2">{general.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
-          </Section>
-        )}
-
-        {matchingLooseResources.length > 0 && (
-          <Section title="Matching resources">
-            <div className="space-y-2">{matchingLooseResources.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
+        {generalResources.length > 0 && (
+          <Section title="General Resources">
+            <div className="space-y-2">
+              {generalResources.slice(0, 4).map((r) => <ResourceRow key={r.id} resource={r} />)}
+            </div>
+            {generalResources.length > 4 && (
+              <button
+                onClick={() => setParam("view", "general")}
+                className="flex items-center gap-1"
+                style={{ marginTop: 10, background: "none", border: "none", cursor: "pointer", fontFamily: FONT.sans, fontSize: 12.5, fontWeight: 700, color: COLOR.navyHero, padding: 0 }}
+              >
+                See all {generalResources.length} <ChevronRight size={14} />
+              </button>
+            )}
           </Section>
         )}
 
@@ -185,6 +255,10 @@ export default function CourseResources() {
           }}
         />
       )}
+
+      {generalView && !activeCourse && (
+        <GeneralResourcesModal resources={generalResources} onClose={() => setParam("view", null)} />
+      )}
     </div>
   );
 }
@@ -216,9 +290,7 @@ function CourseDetailModal({
   course, resources, fullScreen, onToggleFullScreen, onClose,
 }: { course: Course; resources: Resource[]; fullScreen: boolean; onToggleFullScreen: () => void; onClose: () => void }) {
   // Only show a tab if this course actually has a resource in it — never an empty tab.
-  const populatedTabs = RESOURCE_TABS
-    .map((tab) => ({ ...tab, items: resources.filter((r) => (tab.types as readonly string[]).includes(r.resource_type)) }))
-    .filter((tab) => tab.items.length > 0);
+  const populatedTabs = buildPopulatedTabs(resources);
 
   const [activeTabKey, setActiveTabKey] = useState(populatedTabs[0]?.key);
   const activeTab = populatedTabs.find((t) => t.key === activeTabKey) ?? populatedTabs[0];
@@ -282,6 +354,57 @@ function CourseDetailModal({
   );
 }
 
+/** Full-screen view for "See all" on General Resources — same tabbed layout as a course's detail panel, just not scoped to one course. */
+function GeneralResourcesModal({ resources, onClose }: { resources: Resource[]; onClose: () => void }) {
+  const populatedTabs = buildPopulatedTabs(resources);
+  const [activeTabKey, setActiveTabKey] = useState(populatedTabs[0]?.key);
+  const activeTab = populatedTabs.find((t) => t.key === activeTabKey) ?? populatedTabs[0];
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 60, background: COLOR.bg }}>
+      <div className="flex flex-col" style={{ height: "100%" }}>
+        <div className="flex items-start justify-between" style={{ padding: "20px 22px", borderBottom: `1px solid ${COLOR.borderLight}`, flexShrink: 0 }}>
+          <div style={{ maxWidth: 700, margin: "0 auto", width: "100%" }}>
+            <h2 style={{ fontFamily: FONT.serif, fontSize: 26, fontWeight: 600, color: COLOR.ink }}>General Resources</h2>
+            <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Not tied to a specific course.</p>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><X size={20} color={COLOR.ink2} /></button>
+        </div>
+
+        {populatedTabs.length > 0 && (
+          <div className="flex gap-1 flex-wrap" style={{ padding: "12px 22px 0", flexShrink: 0, maxWidth: 700, margin: "0 auto", width: "100%" }}>
+            {populatedTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTabKey(tab.key)}
+                style={{
+                  padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer", border: "none",
+                  background: activeTab?.key === tab.key ? COLOR.navyHero : COLOR.bgSoft, color: activeTab?.key === tab.key ? "#fff" : COLOR.ink2,
+                }}
+              >
+                {tab.label} <span style={{ opacity: 0.7 }}>({tab.items.length})</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex-1" style={{ overflowY: "auto", padding: "20px 22px" }}>
+          <div style={{ maxWidth: 700, margin: "0 auto" }}>
+            {resources.length === 0 ? (
+              <div style={{ padding: "24px 16px", textAlign: "center", background: COLOR.surface, borderRadius: 10, border: `1px dashed ${COLOR.border}` }}>
+                <FileText size={22} color={COLOR.ink3} style={{ margin: "0 auto 8px" }} />
+                <p style={{ fontSize: 13, fontWeight: 600, color: COLOR.ink2, fontFamily: FONT.sans }}>No general resources yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">{activeTab?.items.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
     <div style={{ padding: "32px 16px", textAlign: "center", background: COLOR.surface, borderRadius: 10, border: `1px dashed ${COLOR.border}` }}>
@@ -303,7 +426,9 @@ function ResourceRow({ resource }: { resource: Resource }) {
       style={{ padding: "11px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none", gap: 8 }}
     >
       <div style={{ minWidth: 0 }}>
-        <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink, display: "block" }}>{resource.title}</span>
+        <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink, display: "flex", alignItems: "center", gap: 5 }}>
+          {resource.pinned && <Pin size={11} color={COLOR.navyHero} fill={COLOR.navyHero} />} {resource.title}
+        </span>
         {resource.description && (
           <span style={{ fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink3, display: "block", marginTop: 2, lineHeight: 1.4 }}>{resource.description}</span>
         )}
@@ -323,7 +448,9 @@ function LinkCard({ resource }: { resource: Resource }) {
       style={{ padding: "13px 16px", borderRadius: 10, background: COLOR.navyTint, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none", gap: 8 }}
     >
       <div style={{ minWidth: 0 }}>
-        <span style={{ fontSize: 13.5, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.navyHero, display: "block" }}>{resource.title}</span>
+        <span style={{ fontSize: 13.5, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.navyHero, display: "flex", alignItems: "center", gap: 5 }}>
+          {resource.pinned && <Pin size={11} color={COLOR.navyHero} fill={COLOR.navyHero} />} {resource.title}
+        </span>
         {resource.description && (
           <span style={{ fontSize: 12, fontFamily: FONT.sans, color: COLOR.navyHero, opacity: 0.75, display: "block", marginTop: 2, lineHeight: 1.4 }}>{resource.description}</span>
         )}
