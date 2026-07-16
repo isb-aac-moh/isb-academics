@@ -13,6 +13,10 @@ const CONVERTED_FIELD: Record<"completed_term2_flexi" | "completed_term3_flexi",
   completed_term3_flexi: "term3_converted_elective",
 };
 
+// ISB only lets a student take one Business Analytics variant — picking both would
+// be an invalid Term 3 Flexi Core plan even though the total-picks cap allows it.
+const BUSINESS_ANALYTICS_CODES = new Set(["BACF2", "BANM2"]);
+
 export default function StepBackground({ profile, save, gatingCourses }: Props) {
   function toggle(list: string[], code: string, field: "completed_term2_flexi" | "completed_term3_flexi") {
     const convertedField = CONVERTED_FIELD[field];
@@ -26,6 +30,7 @@ export default function StepBackground({ profile, save, gatingCourses }: Props) 
       return;
     }
     if (list.length >= 3) return; // ISB caps Flexi Core picks at 3 per term (min 2, max 3)
+    if (BUSINESS_ANALYTICS_CODES.has(code) && list.some((c) => BUSINESS_ANALYTICS_CODES.has(c))) return;
     save({ [field]: [...list, code] } as Partial<StudentAcademicProfile>);
   }
 
@@ -96,7 +101,11 @@ export default function StepBackground({ profile, save, gatingCourses }: Props) 
             <Chip
               key={o.code}
               active={profile.completed_term3_flexi.includes(o.code)}
-              disabled={profile.completed_term3_flexi.length >= 3 && !profile.completed_term3_flexi.includes(o.code)}
+              disabled={
+                !profile.completed_term3_flexi.includes(o.code) &&
+                (profile.completed_term3_flexi.length >= 3 ||
+                  (BUSINESS_ANALYTICS_CODES.has(o.code) && profile.completed_term3_flexi.some((c) => BUSINESS_ANALYTICS_CODES.has(c))))
+              }
               onClick={() => toggle(profile.completed_term3_flexi, o.code, "completed_term3_flexi")}
               label={o.label}
             />
