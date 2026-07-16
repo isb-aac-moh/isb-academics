@@ -3,7 +3,12 @@ import { useState } from "react";
 import { COLOR, FONT } from "../lib/theme";
 import { useAuth } from "../hooks/useAuth";
 
-export default function Login() {
+interface Props {
+  notProvisioned?: boolean;
+  onSignOut?: () => void;
+}
+
+export default function Login({ notProvisioned, onSignOut }: Props) {
   const { signInWithAzure, sendMagicLink } = useAuth();
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
@@ -56,45 +61,70 @@ export default function Login() {
       {/* Right — sign-in panel */}
       <div className="flex-1 flex items-center justify-center px-8 py-14" style={{ background: COLOR.bg }}>
         <div className="w-full" style={{ maxWidth: 360 }}>
-          <p style={{ fontFamily: FONT.sans, fontSize: 12, fontWeight: 700, color: COLOR.ink3, letterSpacing: "0.12em", textTransform: "uppercase", textAlign: "center" }}>
-            Sign in
-          </p>
-          <h2 style={{ fontFamily: FONT.serif, fontSize: 28, fontWeight: 600, color: COLOR.ink, textAlign: "center", marginTop: 6 }}>
-            Microsoft SSO
-          </h2>
-          <p style={{ fontFamily: FONT.sans, fontSize: 13, color: COLOR.ink2, textAlign: "center", marginTop: 8, marginBottom: 28 }}>
-            Sign in with your institutional @isb.edu account.
-          </p>
+          {notProvisioned ? (
+            <>
+              <p style={{ fontFamily: FONT.sans, fontSize: 12, fontWeight: 700, color: COLOR.red, letterSpacing: "0.12em", textTransform: "uppercase", textAlign: "center" }}>
+                Account not set up yet
+              </p>
+              <h2 style={{ fontFamily: FONT.serif, fontSize: 24, fontWeight: 600, color: COLOR.ink, textAlign: "center", marginTop: 6 }}>
+                We signed you in, but there's no ISB Academics profile for this account yet
+              </h2>
+              <p style={{ fontFamily: FONT.sans, fontSize: 13, color: COLOR.ink2, textAlign: "center", marginTop: 12, marginBottom: 24, lineHeight: 1.6 }}>
+                This platform shares its account list with isb-explorer. If you've never signed into isb-explorer before, visit it first to get set up, then come back here. If you have used it before, this may be a setup issue — contact AAC.
+              </p>
+              <button
+                onClick={onSignOut}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: 10, background: COLOR.navyHero, color: "#fff",
+                  border: "none", fontSize: 14, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer",
+                }}
+              >
+                Sign out and try a different account
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{ fontFamily: FONT.sans, fontSize: 12, fontWeight: 700, color: COLOR.ink3, letterSpacing: "0.12em", textTransform: "uppercase", textAlign: "center" }}>
+                Sign in
+              </p>
+              <h2 style={{ fontFamily: FONT.serif, fontSize: 28, fontWeight: 600, color: COLOR.ink, textAlign: "center", marginTop: 6 }}>
+                Microsoft SSO
+              </h2>
+              <p style={{ fontFamily: FONT.sans, fontSize: 13, color: COLOR.ink2, textAlign: "center", marginTop: 8, marginBottom: 28 }}>
+                Sign in with your institutional @isb.edu account.
+              </p>
 
-          <button
-            onClick={handleAzure}
-            style={{
-              width: "100%", padding: "13px", borderRadius: 10, background: COLOR.navyHero, color: "#fff",
-              border: "none", fontSize: 14, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer", marginBottom: 16,
-            }}
-          >
-            Sign in with Microsoft SSO
-          </button>
+              <button
+                onClick={handleAzure}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: 10, background: COLOR.navyHero, color: "#fff",
+                  border: "none", fontSize: 14, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer", marginBottom: 16,
+                }}
+              >
+                Sign in with Microsoft SSO
+              </button>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "18px 0", color: COLOR.ink3, fontFamily: FONT.sans, fontSize: 12 }}>
-            <div style={{ flex: 1, height: 1, background: COLOR.border }} /> or <div style={{ flex: 1, height: 1, background: COLOR.border }} />
-          </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "18px 0", color: COLOR.ink3, fontFamily: FONT.sans, fontSize: 12 }}>
+                <div style={{ flex: 1, height: 1, background: COLOR.border }} /> or <div style={{ flex: 1, height: 1, background: COLOR.border }} />
+              </div>
 
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@isb.edu"
-            style={{ width: "100%", padding: "11px 12px", borderRadius: 9, border: `1px solid ${COLOR.border}`, fontSize: 13, fontFamily: FONT.sans, marginBottom: 10 }}
-          />
-          <button
-            onClick={handleMagicLink}
-            disabled={sending}
-            style={{ width: "100%", padding: "11px", borderRadius: 9, background: COLOR.surface, color: COLOR.ink, border: `1px solid ${COLOR.border}`, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer" }}
-          >
-            {sending ? "Sending…" : "Email me a magic link"}
-          </button>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@isb.edu"
+                style={{ width: "100%", padding: "11px 12px", borderRadius: 9, border: `1px solid ${COLOR.border}`, fontSize: 13, fontFamily: FONT.sans, marginBottom: 10 }}
+              />
+              <button
+                onClick={handleMagicLink}
+                disabled={sending}
+                style={{ width: "100%", padding: "11px", borderRadius: 9, background: COLOR.surface, color: COLOR.ink, border: `1px solid ${COLOR.border}`, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer" }}
+              >
+                {sending ? "Sending…" : "Email me a magic link"}
+              </button>
 
-          {msg && <p style={{ marginTop: 14, fontSize: 12, color: COLOR.ink2, fontFamily: FONT.sans, textAlign: "center" }}>{msg}</p>}
+              {msg && <p style={{ marginTop: 14, fontSize: 12, color: COLOR.ink2, fontFamily: FONT.sans, textAlign: "center" }}>{msg}</p>}
+            </>
+          )}
 
           <p style={{ marginTop: 28, fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, textAlign: "center", lineHeight: 1.6 }}>
             Authorized access only. By continuing, you agree to ISB's Acceptable Use Policies.

@@ -10,14 +10,14 @@ import Layout from "./components/Layout";
 import RequireAdmin from "./components/RequireAdmin";
 
 export default function App() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, notProvisioned, signOut } = useAuth();
 
   if (loading) {
     return <div style={{ minHeight: "100vh", background: COLOR.bg }} />;
   }
 
   if (!user) {
-    return <Login />;
+    return <Login notProvisioned={notProvisioned} onSignOut={signOut} />;
   }
 
   return (

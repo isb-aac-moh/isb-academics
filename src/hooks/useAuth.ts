@@ -5,6 +5,10 @@ import type { User } from "../types";
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  // True when a valid @isb.edu SSO session exists but the `users` table (owned
+  // by isb-explorer) has no matching row yet — distinct from "not signed in",
+  // so the UI can explain it instead of silently bouncing back to the login form.
+  const [notProvisioned, setNotProvisioned] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -20,6 +24,7 @@ export function useAuth() {
         gateAndLoadProfile(session.user.email, session.user.id);
       } else {
         setUser(null);
+        setNotProvisioned(false);
         setLoading(false);
       }
     });
@@ -44,8 +49,9 @@ export function useAuth() {
       .from("users")
       .select("*")
       .eq("id", uid)
-      .single();
+      .maybeSingle();
     setUser(data ?? null);
+    setNotProvisioned(!data);
     setLoading(false);
   }
 
@@ -75,7 +81,8 @@ export function useAuth() {
   async function signOut() {
     await supabase.auth.signOut();
     setUser(null);
+    setNotProvisioned(false);
   }
 
-  return { user, loading, sendMagicLink, signInWithAzure, signOut };
+  return { user, loading, notProvisioned, sendMagicLink, signInWithAzure, signOut };
 }
