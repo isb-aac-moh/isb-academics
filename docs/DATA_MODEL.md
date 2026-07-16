@@ -4,6 +4,16 @@ All tables live in the Supabase project shared with `isb-explorer`. Every schema
 
 To apply migrations: `supabase db push` (requires the Supabase CLI linked to the project — `supabase link --project-ref <ref>`).
 
+## Source of truth for course/programme data
+
+`courses` rows (term, credits, `concentration_areas`, `industry_specializations`, core vs. elective, etc.) were seeded by hand and have no citation trail in this repo. When a tag looks wrong or you're adding/editing a course, verify against ISB's own SharePoint pages (require an ISB login):
+
+- [PGP Home page](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/Pages/Atrium-%E2%80%93-Index-.aspx)
+- [Calendar](https://isbhydmoh.sharepoint.com/sites/CourseDetails/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FCourseDetails%2FShared%20Documents%2FGeneral%2FPGP%5FMohali%2F2026%2D2027%2FAcademic%20Calendar%2FLong%20Calendar%20PGP%20Co%2727%2Epdf&parent=%2Fsites%2FCourseDetails%2FShared%20Documents%2FGeneral%2FPGP%5FMohali%2F2026%2D2027%2FAcademic%20Calendar)
+- [Course Details](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/Mohali-2026-27/Pages/default.aspx)
+- [Mandatory courses](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/StudentManual/Pages/Programme%20Administration/Core_Courses_2026-27.aspx)
+- [Flexi Core courses](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/StudentManual/Pages/Programme%20Administration/Flexi-Core-Courses.aspx)
+
 ## `users` (owned by isb-explorer, not this app)
 
 isb-academics reads and updates this table but doesn't own its schema. Relevant columns:
