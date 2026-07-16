@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import { COLOR, FONT } from "../../lib/theme";
-import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, coursesCountingToward, allCoursesForArea, isLiveNow, isBiddableTerm, chosenConcentrationFor } from "../../lib/creditProgress";
+import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, allCoursesForArea, isLiveNow, isBiddableTerm, chosenConcentrationFor, TERM_CREDIT_LIMITS } from "../../lib/creditProgress";
 import { relevanceTags } from "../../lib/relevance";
 import type { StudentAcademicProfile, Course, GatingCoreCourse, Resource } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
 import { MIN_BID_PER_COURSE } from "../../hooks/useBidPlan";
+
+const TERM_ORDER = Object.keys(TERM_CREDIT_LIMITS);
 
 interface Props {
   profile: StudentAcademicProfile;
@@ -14,10 +16,11 @@ interface Props {
   resources: Resource[];
   bidEntries: BidPlanEntry[];
   pointsAvailable: number;
-  onAdd: (courseId: string, term: string, points: number) => void;
+  onAdd: (courseId: string, term: string, points: number) => Promise<void>;
+  onRemove: (id: string) => void;
 }
 
-export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, pointsAvailable, onAdd }: Props) {
+export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, pointsAvailable, onAdd, onRemove }: Props) {
   const blockedConcentrations = useMemo(() => {
     const failed = new Set(profile.failed_gating_courses);
     return new Set(gatingCourses.filter((g) => failed.has(g.id)).map((g) => g.blocks_concentration));
@@ -58,6 +61,7 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
           bidEntries={bidEntries}
           pointsAvailable={pointsAvailable}
           onAdd={onAdd}
+          onRemove={onRemove}
         />
       ))}
       <GeneralElectivesCard
@@ -68,20 +72,20 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
         bidEntries={bidEntries}
         pointsAvailable={pointsAvailable}
         onAdd={onAdd}
+        onRemove={onRemove}
       />
     </div>
   );
 }
 
 function GeneralElectivesCard({
-  courses, profile, save, resources, bidEntries, pointsAvailable, onAdd,
+  courses, profile, save, resources, bidEntries, pointsAvailable, onAdd, onRemove,
 }: {
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; onAdd: (courseId: string, term: string, points: number) => void;
+  resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number;
+  onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
-  const alreadyIds = new Set(bidEntries.map((e) => e.course_id));
-  const liveNow = courses.filter((c) => isLiveNow(c.term));
-  const later = courses.filter((c) => !isLiveNow(c.term));
+  const entryIdByCourseId = new Map(bidEntries.filter((e) => e.course_id).map((e) => [e.course_id as string, e.id]));
 
   return (
     <div style={{ border: `1px solid ${COLOR.borderLight}`, borderRadius: 12, padding: "18px 20px", background: COLOR.surface }}>
@@ -92,31 +96,17 @@ function GeneralElectivesCard({
         </p>
       </div>
 
-      {liveNow.length > 0 && (
-        <div className="mb-4">
-          <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.green, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
-            Live now — Block Week 1 &amp; 2 bidding
-          </p>
-          <div className="space-y-2">
-            {liveNow.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {later.length > 0 && (
-        <details>
-          <summary style={{ fontSize: 12, fontWeight: 600, color: COLOR.ink3, fontFamily: FONT.sans, cursor: "pointer" }}>
-            {later.length} more course{later.length > 1 ? "s" : ""} in later terms
-          </summary>
-          <div className="space-y-2 mt-2">
-            {later.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
-            ))}
-          </div>
-        </details>
-      )}
+      <CourseListByTerm
+        courses={courses}
+        profile={profile}
+        save={save}
+        allCourses={courses}
+        resources={resources}
+        entryIdByCourseId={entryIdByCourseId}
+        pointsAvailable={pointsAvailable}
+        onAdd={onAdd}
+        onRemove={onRemove}
+      />
 
       {courses.length === 0 && (
         <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>No general electives found in the catalog.</p>
@@ -126,21 +116,22 @@ function GeneralElectivesCard({
 }
 
 function AreaCard({
-  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, onAdd,
+  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, onAdd, onRemove,
 }: {
   area: string; kind: "concentration" | "specialization"; blocked: boolean;
   profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number;
-  onAdd: (courseId: string, term: string, points: number) => void;
+  onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
   const credits = creditsCountingToward(area as never, kind, profile, courses, bidEntries);
   const pct = Math.min(100, (credits / REQUIRED_CREDITS_PER_AREA) * 100);
-  const alreadyIds = new Set(coursesCountingToward(area as never, kind, profile, courses, bidEntries).map((c) => c.id));
+  // Whether a course is already in the plan is independent of which single concentration
+  // it's currently credited toward — a cross-listed course stays "in your plan" on both
+  // area cards so the picker to reassign it is always reachable, not just from the winning side.
+  const entryIdByCourseId = new Map(bidEntries.filter((e) => e.course_id).map((e) => [e.course_id as string, e.id]));
   // Bidding only exists from Term 4 onward — Flexi Core (Term 2/3) is never bid on
   // (tracked separately in "Your Background") and core courses aren't electives.
   const all = allCoursesForArea(area as never, kind, courses).filter((c) => isBiddableTerm(c.term));
-  const liveNow = all.filter((c) => isLiveNow(c.term));
-  const later = all.filter((c) => !isLiveNow(c.term));
 
   return (
     <div style={{ border: `1px solid ${COLOR.borderLight}`, borderRadius: 12, padding: "18px 20px", background: COLOR.surface }}>
@@ -157,31 +148,17 @@ function AreaCard({
         </p>
       )}
 
-      {liveNow.length > 0 && (
-        <div className="mb-4">
-          <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.green, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
-            Live now — Block Week 1 &amp; 2 bidding
-          </p>
-          <div className="space-y-2">
-            {liveNow.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {later.length > 0 && (
-        <details>
-          <summary style={{ fontSize: 12, fontWeight: 600, color: COLOR.ink3, fontFamily: FONT.sans, cursor: "pointer" }}>
-            {later.length} more course{later.length > 1 ? "s" : ""} in later terms
-          </summary>
-          <div className="space-y-2 mt-2">
-            {later.map((c) => (
-              <CourseRow key={c.id} course={c} profile={profile} save={save} allCourses={courses} resources={resources} alreadyAdded={alreadyIds.has(c.id)} pointsAvailable={pointsAvailable} onAdd={(pts) => onAdd(c.id, c.term, pts)} />
-            ))}
-          </div>
-        </details>
-      )}
+      <CourseListByTerm
+        courses={all}
+        profile={profile}
+        save={save}
+        allCourses={courses}
+        resources={resources}
+        entryIdByCourseId={entryIdByCourseId}
+        pointsAvailable={pointsAvailable}
+        onAdd={onAdd}
+        onRemove={onRemove}
+      />
 
       {all.length === 0 && (
         <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>No courses found for this area yet in the catalog.</p>
@@ -190,14 +167,85 @@ function AreaCard({
   );
 }
 
+/**
+ * Live-now courses (the current bidding round) always show, open. Everything else
+ * is grouped into one toggle per term/block week — rather than a single flat "N more
+ * courses" list — with the very next upcoming term pre-opened so it doesn't take an
+ * extra click to see what's coming next.
+ */
+function CourseListByTerm({
+  courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, onAdd, onRemove,
+}: {
+  courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
+  allCourses: Course[]; resources: Resource[]; entryIdByCourseId: Map<string, string>; pointsAvailable: number;
+  onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
+}) {
+  const liveNow = courses.filter((c) => isLiveNow(c.term));
+  const laterTerms = TERM_ORDER.filter((term) => !isLiveNow(term) && courses.some((c) => c.term === term));
+  const nextTerm = laterTerms[0];
+
+  function rowFor(c: Course) {
+    const entryId = entryIdByCourseId.get(c.id);
+    return (
+      <CourseRow
+        key={c.id}
+        course={c}
+        profile={profile}
+        save={save}
+        allCourses={allCourses}
+        resources={resources}
+        alreadyAdded={entryId !== undefined}
+        pointsAvailable={pointsAvailable}
+        onAdd={(pts) => onAdd(c.id, c.term, pts)}
+        onRemove={entryId ? () => onRemove(entryId) : undefined}
+      />
+    );
+  }
+
+  return (
+    <>
+      {liveNow.length > 0 && (
+        <div className="mb-4">
+          <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.green, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+            Live now — Block Week 1 &amp; 2 bidding
+          </p>
+          <div className="space-y-2">{liveNow.map(rowFor)}</div>
+        </div>
+      )}
+
+      {laterTerms.map((term) => {
+        const termCourses = courses.filter((c) => c.term === term);
+        return (
+          <details key={term} open={term === nextTerm} className="mb-2">
+            <summary style={{ fontSize: 12, fontWeight: 600, color: COLOR.ink3, fontFamily: FONT.sans, cursor: "pointer" }}>
+              {term} · {termCourses.length} course{termCourses.length > 1 ? "s" : ""}
+            </summary>
+            <div className="space-y-2 mt-2">{termCourses.map(rowFor)}</div>
+          </details>
+        );
+      })}
+    </>
+  );
+}
+
 function CourseRow({
-  course, profile, save, allCourses, resources, alreadyAdded, pointsAvailable, onAdd,
+  course, profile, save, allCourses, resources, alreadyAdded, pointsAvailable, onAdd, onRemove,
 }: {
   course: Course; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  allCourses: Course[]; resources: Resource[]; alreadyAdded: boolean; pointsAvailable: number; onAdd: (points: number) => void;
+  allCourses: Course[]; resources: Resource[]; alreadyAdded: boolean; pointsAvailable: number;
+  onAdd: (points: number) => Promise<void>; onRemove?: () => void;
 }) {
   const [points, setPoints] = useState(MIN_BID_PER_COURSE);
+  const [submitting, setSubmitting] = useState(false);
   const exceedsBudget = points > pointsAvailable;
+  async function handleAdd() {
+    setSubmitting(true);
+    try {
+      await onAdd(points);
+    } finally {
+      setSubmitting(false);
+    }
+  }
   // Cross-listed across both target concentrations — FAQ Q45: only one counts, student's choice.
   // Only matters once the course is actually in the plan; browsing shows both areas plainly.
   const overlappingConcentrations = profile.target_concentrations.filter((a) => course.concentration_areas.includes(a));
@@ -226,7 +274,14 @@ function CourseRow({
           </p>
         </div>
         {alreadyAdded ? (
-          <span style={{ fontSize: 12, color: COLOR.green, fontWeight: 700, fontFamily: FONT.sans, whiteSpace: "nowrap" }}>✓ In your plan</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            <span style={{ fontSize: 12, color: COLOR.green, fontWeight: 700, fontFamily: FONT.sans, whiteSpace: "nowrap" }}>✓ In your plan</span>
+            {onRemove && (
+              <button onClick={onRemove} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                Remove
+              </button>
+            )}
+          </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -235,15 +290,15 @@ function CourseRow({
                 style={{ width: 64, padding: "5px 7px", borderRadius: 6, border: `1px solid ${COLOR.border}`, fontSize: 12, fontFamily: FONT.sans }}
               />
               <button
-                onClick={() => onAdd(points)}
-                disabled={exceedsBudget}
+                onClick={handleAdd}
+                disabled={exceedsBudget || submitting}
                 style={{
                   padding: "6px 11px", borderRadius: 7, border: "none", fontSize: 12, fontWeight: 700, fontFamily: FONT.sans,
-                  background: exceedsBudget ? COLOR.border : COLOR.navyHero, color: exceedsBudget ? COLOR.ink3 : "#fff",
-                  cursor: exceedsBudget ? "not-allowed" : "pointer",
+                  background: exceedsBudget || submitting ? COLOR.border : COLOR.navyHero, color: exceedsBudget || submitting ? COLOR.ink3 : "#fff",
+                  cursor: exceedsBudget || submitting ? "not-allowed" : "pointer",
                 }}
               >
-                Add
+                {submitting ? "Adding…" : "Add"}
               </button>
             </div>
             {exceedsBudget && (
