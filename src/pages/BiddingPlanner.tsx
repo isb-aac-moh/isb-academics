@@ -8,6 +8,7 @@ import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useResources } from "../hooks/useResources";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
+import { useAppSettings } from "../hooks/useAppSettings";
 import { useBidPlan, TOTAL_ELECTIVE_CREDITS_REQUIRED } from "../hooks/useBidPlan";
 import { computeBidBudget, totalElectiveCreditsSecured } from "../lib/creditProgress";
 import type { User } from "../types";
@@ -30,8 +31,9 @@ export default function BiddingPlanner() {
 
   const { courses, gatingCourses, loading: coursesLoading } = useCourses();
   const { resources } = useResources();
-  const { profile, save } = useAcademicProfile(user.id);
+  const { profile, saveError, save } = useAcademicProfile(user.id);
   const { entries, addEntry, removeEntry, pointsPlanned } = useBidPlan(user.id);
+  const { liveBiddingTerms } = useAppSettings();
 
   const step = STEPS.findIndex((s) => s.key === stepKey);
   if (step === -1) return <Navigate to="/planner/background" replace />;
@@ -97,6 +99,14 @@ export default function BiddingPlanner() {
             You're {Math.abs(remainingPoints)} points into the reserve ISB holds back for your remaining required credits. Still allowed — but you may fall short of your 18-credit requirement later.
           </div>
         )}
+        {saveError && (
+          <div style={{
+            marginTop: 8, padding: "10px 14px", borderRadius: 9, background: COLOR.redTint,
+            color: COLOR.red, fontFamily: FONT.sans, fontSize: 12.5, fontWeight: 600, maxWidth: 520,
+          }}>
+            {saveError}
+          </div>
+        )}
       </header>
 
       <main className="px-6 md:px-12" style={{ maxWidth: 820 }}>
@@ -111,6 +121,7 @@ export default function BiddingPlanner() {
             resources={resources}
             bidEntries={entries}
             pointsAvailable={pointsAvailable}
+            liveBiddingTerms={liveBiddingTerms}
             onAdd={(courseId, term, points) => addEntry({ course_id: courseId, term, planned_points: points })}
             onRemove={removeEntry}
           />

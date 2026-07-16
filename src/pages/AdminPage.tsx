@@ -10,8 +10,10 @@ import { useCourses } from "../hooks/useCourses";
 import { useResources } from "../hooks/useResources";
 import { useNotifications } from "../hooks/useNotifications";
 import { useNavLinks } from "../hooks/useNavLinks";
+import { useAppSettings } from "../hooks/useAppSettings";
 import { supabase } from "../lib/supabase";
 import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS } from "../lib/options";
+import { TERM_CREDIT_LIMITS } from "../lib/creditProgress";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
 import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
@@ -90,6 +92,8 @@ function Overview({ onNavigate }: { onNavigate: (t: Tab) => void }) {
         <StatCard label="Missing faculty" value={courses.filter((c) => !c.professor || c.professor === "TBD").length} sub="courses with TBD professor" onClick={() => onNavigate("courses")} />
       </div>
 
+      <LiveBiddingSettings />
+
       <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 10 }}>Resources by category</p>
       <div className="space-y-1.5 mb-8" style={{ maxWidth: 420 }}>
         {[...RESOURCE_TABS.map((t) => ({ key: t.key, label: t.label, types: t.types as readonly string[] })), { key: "platform", label: "Platform Directory", types: ["Platform Directory"] }, { key: "general", label: "General", types: ["General"] }].map((t) => {
@@ -119,6 +123,42 @@ function Overview({ onNavigate }: { onNavigate: (t: Tab) => void }) {
         ))}
         {notifications.length === 0 && <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>No notices posted yet.</p>}
       </div>
+    </div>
+  );
+}
+
+// Which term(s)/block week(s) show as "Live now" in the Bidding Planner — used to
+// be a hardcoded constant requiring a code change + redeploy every time ISB opens
+// a new bidding round. Now just an admin-editable setting.
+const BIDDABLE_TERMS = Object.keys(TERM_CREDIT_LIMITS);
+
+function LiveBiddingSettings() {
+  const { liveBiddingTerms, loading, saveLiveBiddingTerms } = useAppSettings();
+  const [saving, setSaving] = useState(false);
+
+  async function toggle(term: string) {
+    setSaving(true);
+    const next = liveBiddingTerms.includes(term)
+      ? liveBiddingTerms.filter((t) => t !== term)
+      : [...liveBiddingTerms, term];
+    await saveLiveBiddingTerms(next);
+    setSaving(false);
+  }
+
+  if (loading) return null;
+
+  return (
+    <div style={{ padding: 16, borderRadius: 10, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, marginBottom: 20 }}>
+      <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 4 }}>Live bidding round</p>
+      <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 10 }}>
+        Which term(s)/block week(s) show as "Live now" in the Bidding Planner right now.
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {BIDDABLE_TERMS.map((term) => (
+          <Chip key={term} active={liveBiddingTerms.includes(term)} onClick={() => toggle(term)} label={term} />
+        ))}
+      </div>
+      {saving && <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 8 }}>Saving…</p>}
     </div>
   );
 }
@@ -194,7 +234,12 @@ function CoursesAdmin() {
   }
 
   async function toggleActive(id: string, isActive: boolean) {
-    await supabase.from("courses").update({ is_active: !isActive }).eq("id", id);
+    const { error } = await supabase.from("courses").update({ is_active: !isActive }).eq("id", id);
+    if (error) {
+      console.error("[AdminPage] toggle course active failed:", error);
+      alert("Couldn't update that course — check your connection and try again.");
+      return;
+    }
     reload();
   }
 
@@ -336,7 +381,12 @@ function ResourcesAdmin() {
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("resources").delete().eq("id", id);
+    const { error } = await supabase.from("resources").delete().eq("id", id);
+    if (error) {
+      console.error("[AdminPage] delete resource failed:", error);
+      alert("Couldn't delete that resource — check your connection and try again.");
+      return;
+    }
     reload();
   }
 
@@ -477,7 +527,12 @@ function NotificationsAdmin() {
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("notifications").delete().eq("id", id);
+    const { error } = await supabase.from("notifications").delete().eq("id", id);
+    if (error) {
+      console.error("[AdminPage] delete notification failed:", error);
+      alert("Couldn't delete that notice — check your connection and try again.");
+      return;
+    }
     reload();
   }
 
@@ -577,7 +632,12 @@ function NavLinksAdmin() {
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("nav_links").delete().eq("id", id);
+    const { error } = await supabase.from("nav_links").delete().eq("id", id);
+    if (error) {
+      console.error("[AdminPage] delete nav link failed:", error);
+      alert("Couldn't delete that link — check your connection and try again.");
+      return;
+    }
     reload();
   }
 
@@ -586,8 +646,17 @@ function NavLinksAdmin() {
     const target = navLinks[idx + direction];
     if (!target) return;
     const current = navLinks[idx];
-    await supabase.from("nav_links").update({ sort_order: target.sort_order }).eq("id", current.id);
-    await supabase.from("nav_links").update({ sort_order: current.sort_order }).eq("id", target.id);
+    const first = await supabase.from("nav_links").update({ sort_order: target.sort_order }).eq("id", current.id);
+    if (first.error) {
+      console.error("[AdminPage] reorder nav link failed:", first.error);
+      alert("Couldn't reorder that link — check your connection and try again.");
+      return;
+    }
+    const second = await supabase.from("nav_links").update({ sort_order: current.sort_order }).eq("id", target.id);
+    if (second.error) {
+      console.error("[AdminPage] reorder nav link failed (partial):", second.error);
+      alert("Reorder only half-completed — two links may now share the same position. Reloading to show the actual state; check the order below.");
+    }
     reload();
   }
 

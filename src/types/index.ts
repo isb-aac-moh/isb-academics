@@ -132,3 +132,10 @@ export interface NavLink {
   sort_order: number;
   created_at: string;
 }
+
+// Singleton settings row — see supabase/migrations/20260728090000_app_settings.sql.
+export interface AppSettings {
+  id: true;
+  live_bidding_terms: string[];
+  updated_at: string;
+}

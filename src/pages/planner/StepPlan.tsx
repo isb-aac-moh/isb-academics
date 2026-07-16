@@ -16,11 +16,12 @@ interface Props {
   resources: Resource[];
   bidEntries: BidPlanEntry[];
   pointsAvailable: number;
+  liveBiddingTerms: string[];
   onAdd: (courseId: string, term: string, points: number) => Promise<void>;
   onRemove: (id: string) => void;
 }
 
-export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, pointsAvailable, onAdd, onRemove }: Props) {
+export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, pointsAvailable, liveBiddingTerms, onAdd, onRemove }: Props) {
   const blockedConcentrations = useMemo(() => {
     const failed = new Set(profile.failed_gating_courses);
     return new Set(gatingCourses.filter((g) => failed.has(g.id)).map((g) => g.blocks_concentration));
@@ -60,6 +61,7 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
           resources={resources}
           bidEntries={bidEntries}
           pointsAvailable={pointsAvailable}
+          liveBiddingTerms={liveBiddingTerms}
           onAdd={onAdd}
           onRemove={onRemove}
         />
@@ -71,6 +73,7 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
         resources={resources}
         bidEntries={bidEntries}
         pointsAvailable={pointsAvailable}
+        liveBiddingTerms={liveBiddingTerms}
         onAdd={onAdd}
         onRemove={onRemove}
       />
@@ -79,10 +82,10 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
 }
 
 function GeneralElectivesCard({
-  courses, profile, save, resources, bidEntries, pointsAvailable, onAdd, onRemove,
+  courses, profile, save, resources, bidEntries, pointsAvailable, liveBiddingTerms, onAdd, onRemove,
 }: {
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number;
+  resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; liveBiddingTerms: string[];
   onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
   const entryIdByCourseId = new Map(bidEntries.filter((e) => e.course_id).map((e) => [e.course_id as string, e.id]));
@@ -104,6 +107,7 @@ function GeneralElectivesCard({
         resources={resources}
         entryIdByCourseId={entryIdByCourseId}
         pointsAvailable={pointsAvailable}
+        liveBiddingTerms={liveBiddingTerms}
         onAdd={onAdd}
         onRemove={onRemove}
       />
@@ -116,11 +120,11 @@ function GeneralElectivesCard({
 }
 
 function AreaCard({
-  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, onAdd, onRemove,
+  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, liveBiddingTerms, onAdd, onRemove,
 }: {
   area: string; kind: "concentration" | "specialization"; blocked: boolean;
   profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number;
+  courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; liveBiddingTerms: string[];
   onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
   const credits = creditsCountingToward(area as never, kind, profile, courses, bidEntries);
@@ -156,6 +160,7 @@ function AreaCard({
         resources={resources}
         entryIdByCourseId={entryIdByCourseId}
         pointsAvailable={pointsAvailable}
+        liveBiddingTerms={liveBiddingTerms}
         onAdd={onAdd}
         onRemove={onRemove}
       />
@@ -174,14 +179,14 @@ function AreaCard({
  * extra click to see what's coming next.
  */
 function CourseListByTerm({
-  courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, onAdd, onRemove,
+  courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, liveBiddingTerms, onAdd, onRemove,
 }: {
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
-  allCourses: Course[]; resources: Resource[]; entryIdByCourseId: Map<string, string>; pointsAvailable: number;
+  allCourses: Course[]; resources: Resource[]; entryIdByCourseId: Map<string, string>; pointsAvailable: number; liveBiddingTerms: string[];
   onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
-  const liveNow = courses.filter((c) => isLiveNow(c.term));
-  const laterTerms = TERM_ORDER.filter((term) => !isLiveNow(term) && courses.some((c) => c.term === term));
+  const liveNow = courses.filter((c) => isLiveNow(c.term, liveBiddingTerms));
+  const laterTerms = TERM_ORDER.filter((term) => !isLiveNow(term, liveBiddingTerms) && courses.some((c) => c.term === term));
   const nextTerm = laterTerms[0];
 
   function rowFor(c: Course) {
@@ -207,7 +212,7 @@ function CourseListByTerm({
       {liveNow.length > 0 && (
         <div className="mb-4">
           <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.green, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
-            Live now — Block Week 1 &amp; 2 bidding
+            Live now — {liveBiddingTerms.join(" & ")} bidding
           </p>
           <div className="space-y-2">{liveNow.map(rowFor)}</div>
         </div>
@@ -254,7 +259,7 @@ function CourseRow({
     ? course.industry_specializations
     : [...course.concentration_areas, ...course.industry_specializations];
   const softTags = relevanceTags(course, profile, allCourses);
-  const outline = resources.find((r) => r.course_id === course.id && r.resource_type === "Course Outline");
+  const outlines = resources.filter((r) => r.course_id === course.id && r.resource_type === "Course Outline");
 
   return (
     <div style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.bgSoft }}>
@@ -263,14 +268,14 @@ function CourseRow({
           <p style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink }}>{course.name}</p>
           <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans }}>
             {course.professor} · {course.term} · {course.credits}cr
-            {outline && (
-              <>
+            {outlines.map((o, i) => (
+              <span key={o.id}>
                 {" · "}
-                <a href={outline.url} target="_blank" rel="noopener noreferrer" style={{ color: COLOR.navyHero, fontWeight: 700, textDecoration: "underline" }}>
-                  Course outline ↗
+                <a href={o.url} target="_blank" rel="noopener noreferrer" style={{ color: COLOR.navyHero, fontWeight: 700, textDecoration: "underline" }}>
+                  Course outline{outlines.length > 1 ? ` ${i + 1}` : ""} ↗
                 </a>
-              </>
-            )}
+              </span>
+            ))}
           </p>
         </div>
         {alreadyAdded ? (

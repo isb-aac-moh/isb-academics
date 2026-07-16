@@ -121,7 +121,9 @@ export function allCoursesForArea(
   return courses.filter(matches);
 }
 
-export const LIVE_NOW_TERMS = ["Block Week 1", "Block Week 2"];
-export function isLiveNow(term: string) {
-  return LIVE_NOW_TERMS.includes(term);
+// Which term(s)/block week(s) are the current bidding round — admin-editable via
+// app_settings (see useAppSettings) rather than hardcoded, since the round changes
+// on ISB's own schedule and shouldn't require a code change + redeploy to update.
+export function isLiveNow(term: string, liveBiddingTerms: string[]) {
+  return liveBiddingTerms.includes(term);
 }
