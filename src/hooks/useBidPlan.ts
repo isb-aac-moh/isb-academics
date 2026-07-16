@@ -38,6 +38,8 @@ export function useBidPlan(userId: string | undefined) {
 
   async function addEntry(entry: { course_id: string | null; term: string; planned_points: number }) {
     if (!userId) return;
+    const alreadyExists = entries.some((e) => e.course_id === entry.course_id && e.term === entry.term);
+    if (alreadyExists) return;
     const { data, error } = await supabase
       .from("bid_plan_entries")
       .insert({ ...entry, user_id: userId })
@@ -47,8 +49,8 @@ export function useBidPlan(userId: string | undefined) {
   }
 
   async function removeEntry(id: string) {
-    await supabase.from("bid_plan_entries").delete().eq("id", id);
-    setEntries((prev) => prev.filter((e) => e.id !== id));
+    const { error } = await supabase.from("bid_plan_entries").delete().eq("id", id);
+    if (!error) setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
   const pointsPlanned = entries.reduce((sum, e) => sum + e.planned_points, 0);
