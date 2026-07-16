@@ -22,6 +22,7 @@ const EMPTY: Omit<StudentAcademicProfile, "user_id"> = {
 export function useAcademicProfile(userId: string | undefined) {
   const [profile, setProfile] = useState<StudentAcademicProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
@@ -41,13 +42,20 @@ export function useAcademicProfile(userId: string | undefined) {
 
   async function save(updates: Partial<StudentAcademicProfile>) {
     if (!userId) return;
+    const previous = profile;
     const next = { ...(profile ?? { user_id: userId, ...EMPTY }), ...updates };
     setProfile(next);
     const { error } = await supabase
       .from("student_academic_profiles")
       .upsert({ ...next, user_id: userId }, { onConflict: "user_id" });
-    if (error) console.error("[useAcademicProfile] save failed:", error);
+    if (error) {
+      console.error("[useAcademicProfile] save failed:", error);
+      setProfile(previous);
+      setSaveError("Couldn't save your change — check your connection and try again.");
+    } else {
+      setSaveError(null);
+    }
   }
 
-  return { profile, loading, save };
+  return { profile, loading, saveError, save };
 }
