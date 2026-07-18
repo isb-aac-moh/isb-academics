@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
@@ -27,6 +27,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const primaryNav = (
     <nav className="space-y-1">
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} />
+      <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} />
       <NavItem
         icon={<BookOpen size={16} />}
         label="Course Resources"

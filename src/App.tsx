@@ -6,6 +6,7 @@ import BiddingPlanner from "./pages/BiddingPlanner";
 import AdminPage from "./pages/AdminPage";
 import CourseResources from "./pages/CourseResources";
 import NoticeBoard from "./pages/NoticeBoard";
+import PulseCheck from "./pages/PulseCheck";
 import Layout from "./components/Layout";
 import RequireAdmin from "./components/RequireAdmin";
 
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/planner/background" replace />} />
         <Route path="/planner" element={<Navigate to="/planner/background" replace />} />
         <Route path="/planner/:step" element={<BiddingPlanner />} />
+        <Route path="/pulse-check" element={<PulseCheck />} />
 
         <Route element={<RequireAdmin user={user} />}>
           <Route path="/resources" element={<CourseResources />} />

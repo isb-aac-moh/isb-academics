@@ -137,5 +137,30 @@ export interface NavLink {
 export interface AppSettings {
   id: true;
   live_bidding_terms: string[];
+  pulse_check_cutoff: string;
   updated_at: string;
+}
+
+// Cohort Bidding Pulse Check — see supabase/migrations/20260730090000_pulse_check.sql
+// and 20260730090200_pulse_check_allow_one_edit.sql. A student's own submission
+// can be edited exactly once (RLS-enforced via the `edited` flag, not just a
+// UI restriction) and is never readable by other students as a raw row —
+// only through the threshold-gated pulse_check_results_by_term() RPC below.
+export interface PulseCheckSubmission {
+  id: string;
+  user_id: string;
+  course_id: string;
+  term: string; // denormalized from courses.term at submit time
+  bid_points_estimate: number;
+  edited: boolean; // true after the one allowed edit — no further changes possible
+  created_at: string;
+}
+
+// Shape returned by the pulse_check_results_by_term RPC. median_points is
+// null until respondent_count clears the in-DB threshold (5) — never a
+// partial number standing in for real signal.
+export interface PulseCheckResult {
+  course_id: string;
+  respondent_count: number;
+  median_points: number | null;
 }

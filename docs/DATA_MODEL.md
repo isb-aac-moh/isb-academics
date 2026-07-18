@@ -1,6 +1,6 @@
 # Data Model
 
-All tables live in the Supabase project shared with `isb-explorer`. Every schema change is a numbered file in `supabase/migrations/` — that's the actual source of truth; this doc is a human-readable summary of it, current as of migration `20260719090000_resource_description.sql`.
+All tables live in the Supabase project shared with `isb-explorer`. Every schema change is a numbered file in `supabase/migrations/` — that's the actual source of truth; this doc is a human-readable summary of it, current as of migration `20260730090200_pulse_check_allow_one_edit.sql`.
 
 To apply migrations: `supabase db push` (requires the Supabase CLI linked to the project — `supabase link --project-ref <ref>`).
 
@@ -141,6 +141,34 @@ The Notice Board feed.
 
 **RLS:** same world-readable / admin-write pattern as `resources`.
 
+## `pulse_check_submissions`
+
+A student's voluntary, one-time-per-Block-Week submission of which course they're seriously bidding on and an estimated bid-point amount — the Cohort Bidding Pulse Check. Deliberately isolated from `bid_plan_entries`, which is real personal planning data never shared with anyone else.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `user_id` | uuid, FK → `users.id` | |
+| `course_id` | uuid, FK → `courses.id`, **not nullable**, `on delete cascade` | Unlike `bid_plan_entries`, a submission with no course doesn't mean anything, so there's no "keep the row, drop the reference" case to support. |
+| `term` | text | Denormalized from the course's term at submit time, same pattern as `bid_plan_entries.term`. |
+| `bid_points_estimate` | integer, `check (>= 100 and <= 4500)` | Mirrors the real bidding mechanics' min/max (`MIN_BID_PER_COURSE` / `TOTAL_BID_POINTS` in `hooks/useBidPlan.ts`). |
+| `edited` | boolean, default `false` | Flips to `true` on the one allowed edit (see below); a submission is fully locked once this is `true`. |
+| `created_at` | timestamptz | |
+
+**Unique constraint on (`user_id`, `term`)** — one submission per student per Block Week, regardless of which course. This is intentionally not scoped to `course_id`: the feature's premise is "one voice per Block Week," and a per-course constraint would let a student submit two different courses for the same Block Week, double-counting their vote across two courses' aggregates.
+
+**RLS is the whole safety design here**, not an afterthought:
+- **Own-row select only.** No admin-read policy, no other-student-read policy. Raw per-student estimates are never meant to be visible to anyone but the submitter.
+- **Insert, then exactly one edit, both time-bound.** Originally fully immutable (insert-only, no update policy at all); relaxed once, deliberately, to allow one edit — see below. Both the insert and update policies require `now() < app_settings.pulse_check_cutoff`.
+- **The one-edit cap is enforced by Postgres, not the UI.** The update policy's `using` clause only matches rows where `edited = false`; its `with check` clause requires the updated row to have `edited = true`. A second edit attempt finds no existing row matching `using` (since `edited` is already `true`) and is denied the same way a delete always has been — there's no client-side bypass.
+- **The only way to read the aggregate** is `pulse_check_results_by_term(p_term)`, a `security definer` function that returns `(course_id, respondent_count, median_points)` per course, with `median_points` staying `null` until `respondent_count >= 5`. A direct select policy broad enough for students to compute this aggregate client-side would also let them read every other student's exact bid-point number — worse than not building this feature at all.
+
+**Why this exists despite an earlier, similar idea being cut:** see ROADMAP.md — a "bidding-risk/points recommendation layer" was cut earlier for the same self-report bias reasoning that applies here. This feature was built anyway, as a deliberate, informed decision to accept that risk in exchange for a richer signal than a plain interest toggle. The immutability and threshold-gating above are the guardrails that decision was conditioned on, not incidental details.
+
+## `app_settings.pulse_check_cutoff`
+
+Added alongside the table above (see `supabase/migrations/20260730090000_pulse_check.sql`). A `timestamptz`, admin-editable only via direct SQL for now (no Admin UI yet — see ROADMAP), defaulting to this cycle's real Phase 1 close (`2026-07-20 08:00:00+05:30`). Both the RLS insert policy and the frontend (`PulseCheck.tsx`) check against this same value, so update it here each cycle rather than hardcoding a new date in a future migration.
+
 ## `nav_links`
 
 Admin-managed extra links, rendered in the sidebar below the locked core pages (Bidding Planner / Course Resources / Notice Board — those stay hardcoded in `Sidebar.tsx`, not in this table).
@@ -174,5 +202,8 @@ Admin-managed extra links, rendered in the sidebar below the locked core pages (
 12. `cross_listed_concentration_choice` — `cross_listed_concentration_choices` jsonb, so a cross-listed course only counts toward the one concentration the student picked (FAQ Q45) instead of both.
 13. `resource_pinning` — `pinned` / `pinned_global` on `resources`.
 14. `nav_links` — new table for admin-managed extra sidebar links; seeded with the Custom GPT link that used to be hardcoded in `Sidebar.tsx`.
+15. `pulse_check` — `pulse_check_submissions` table (one voluntary bid-point estimate per student per Block Week, immutable once submitted) plus `app_settings.pulse_check_cutoff` and the `pulse_check_results_by_term()` security-definer RPC that's the only sanctioned way to read the threshold-gated aggregate back.
+16. `pulse_check_revoke_anon_execute` — follow-up fix, same day. Live testing found that Supabase's default privileges on this project auto-grant `EXECUTE` on new `public`-schema functions to `anon` (separately from the `PUBLIC` pseudo-role the prior migration revoked from), so the pulse-check RPC was callable by anyone holding the public anon key, not just logged-in students. No raw data was ever exposed by this (the function only ever returns the same threshold-gated aggregate a real student would see), but it's fixed here — worth remembering for any future `security definer` function in this schema: revoke from `anon` explicitly, not just `public`.
+17. `pulse_check_allow_one_edit` — relaxes `pulse_check_submissions` from fully immutable to "editable exactly once," per Eshan's product call after using the feature. Adds the `edited` boolean and an update policy scoped so a second edit is denied at the RLS layer, the same way any edit was denied before this migration.
 
 If you're debugging something that references an older shape (e.g. `resources.category`), check this list — it was real, then removed.

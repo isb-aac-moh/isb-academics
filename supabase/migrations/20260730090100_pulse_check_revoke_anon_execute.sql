@@ -1,0 +1,11 @@
+-- The prior migration's `revoke all on function ... from public` only revoked
+-- the PUBLIC pseudo-role grant. Supabase's default privileges on this project
+-- separately auto-grant EXECUTE to `anon` (and `authenticated`) whenever a new
+-- function is created in `public` — confirmed by testing: an unauthenticated
+-- anon-key call to pulse_check_results_by_term succeeded (HTTP 200) when it
+-- should have been rejected, since the function is meant to require a real
+-- student login, not just be reachable by anyone holding the public anon key.
+-- No raw data was ever at risk (the function only ever returns the same
+-- threshold-gated aggregate a logged-in student would see), but requiring
+-- login is part of what this feature was designed to do — fix it explicitly.
+revoke execute on function public.pulse_check_results_by_term(text) from anon;
