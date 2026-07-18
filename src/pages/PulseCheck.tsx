@@ -54,7 +54,7 @@ export default function PulseCheck() {
         )}
       </header>
 
-      <main className="px-6 md:px-12 space-y-8" style={{ maxWidth: 900 }}>
+      <main className="px-6 md:px-12 space-y-8" style={{ maxWidth: 1600 }}>
         {liveBiddingTerms.length === 0 ? (
           <p style={{ fontSize: 13, color: COLOR.ink3, fontFamily: FONT.sans }}>No Block Week bidding is live right now.</p>
         ) : (
@@ -149,7 +149,7 @@ function TermSection({
               Bar + top number = responses. Bottom number = bid points at that point.
             </p>
             {/* Fixed catalog order — never sorted by response count or bid points, so this can't read as a popularity leaderboard. */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))" }}>
               {courses.map((c) => (
                 <CourseCard key={c.id} course={c} result={resultByCourse.get(c.id)} histogram={histogramByCourse.get(c.id) ?? []} />
               ))}
@@ -169,11 +169,29 @@ function CourseCard({ course, result, histogram }: { course: Course; result: Pul
   const count = result?.respondent_count ?? 0;
   const enough = !!result && count >= PULSE_CHECK_MIN_RESPONDENTS && result.median_points != null;
 
+  // A name can carry a " — <location/section>" suffix (e.g. Study Trek
+  // destinations) — split it out so it always gets its own line instead of
+  // being lost to the base title's truncation, however long that title is.
+  const dashIndex = course.name.lastIndexOf(" — ");
+  const baseName = dashIndex === -1 ? course.name : course.name.slice(0, dashIndex);
+  const suffix = dashIndex === -1 ? null : course.name.slice(dashIndex + 3);
+
   return (
     <div style={{ border: `1px solid ${COLOR.border}`, borderRadius: 10, padding: "12px 14px", background: COLOR.surface }}>
-      <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={course.name}>
-        {course.name}
+      <p
+        style={{
+          fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, lineHeight: 1.3,
+          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+        }}
+        title={course.name}
+      >
+        {baseName}
       </p>
+      {suffix && (
+        <p style={{ fontSize: 11, color: COLOR.ink2, fontFamily: FONT.sans, fontStyle: "italic", marginTop: 1 }}>
+          {suffix}
+        </p>
+      )}
       <p style={{ fontSize: 11, color: COLOR.navyHero, fontFamily: FONT.sans, fontWeight: 700, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {course.professor}
       </p>
@@ -299,7 +317,7 @@ function SubmitForm({
         <select
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
-          style={{ flex: 1, padding: "8px 10px", borderRadius: 7, border: `1px solid ${COLOR.border}`, fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink }}
+          style={{ flex: "1 1 240px", minWidth: 0, padding: "8px 10px", borderRadius: 7, border: `1px solid ${COLOR.border}`, fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink }}
         >
           <option value="">Which course?</option>
           {courses.map((c) => (
@@ -320,6 +338,7 @@ function SubmitForm({
           style={{
             padding: "8px 16px", borderRadius: 7, border: "none", fontSize: 13, fontWeight: 700, fontFamily: FONT.sans,
             background: valid ? COLOR.navyHero : COLOR.border, color: valid ? "#fff" : COLOR.ink3, cursor: valid ? "pointer" : "not-allowed",
+            whiteSpace: "nowrap", flexShrink: 0,
           }}
         >
           {mode === "edit" ? "Save edit" : "Submit"}
@@ -327,7 +346,7 @@ function SubmitForm({
         {onCancel && (
           <button
             onClick={onCancel}
-            style={{ padding: "8px 14px", borderRadius: 7, border: `1px solid ${COLOR.border}`, background: COLOR.surface, color: COLOR.ink2, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer" }}
+            style={{ padding: "8px 14px", borderRadius: 7, border: `1px solid ${COLOR.border}`, background: COLOR.surface, color: COLOR.ink2, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
           >
             Cancel
           </button>
