@@ -174,6 +174,9 @@ function CourseCard({ course, result, histogram }: { course: Course; result: Pul
       <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={course.name}>
         {course.name}
       </p>
+      <p style={{ fontSize: 11, color: COLOR.navyHero, fontFamily: FONT.sans, fontWeight: 700, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {course.professor}
+      </p>
       <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>
         {enough
           ? `${Math.round(result!.min_points as number)}–${Math.round(result!.max_points as number)} pts · ${count} responses`
@@ -246,7 +249,7 @@ function SubmittedState({
     <div style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.greenTint, marginBottom: 4 }}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <p style={{ fontSize: 13, fontWeight: 700, color: COLOR.green, fontFamily: FONT.sans }}>
-          ✓ {course?.name ?? "Unknown course"} — {points} pts{edited ? " (edited)" : ""}
+          ✓ {course?.name ?? "Unknown course"}{course?.professor ? ` (${course.professor})` : ""} — {points} pts{edited ? " (edited)" : ""}
         </p>
         {canEdit && (
           <button
@@ -300,7 +303,7 @@ function SubmitForm({
         >
           <option value="">Which course?</option>
           {courses.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id}>{c.name} — {c.professor}</option>
           ))}
         </select>
         <input
@@ -337,7 +340,7 @@ function SubmitForm({
       {confirming && selectedCourse && (
         <ConfirmModal
           mode={mode}
-          courseName={selectedCourse.name}
+          courseName={`${selectedCourse.name} (${selectedCourse.professor})`}
           points={points}
           submitting={submitting}
           onCancel={() => setConfirming(false)}
