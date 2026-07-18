@@ -63,7 +63,7 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="px-5 md:px-8 pt-6" style={{ maxWidth: 900 }}>
+      <main className="px-5 md:px-8 pt-6" style={{ maxWidth: 1600 }}>
         {activeTab === "overview" && <Overview onNavigate={goToTab} />}
         {activeTab === "courses" && <CoursesAdmin />}
         {activeTab === "resources" && <ResourcesAdmin />}

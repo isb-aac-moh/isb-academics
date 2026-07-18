@@ -109,7 +109,7 @@ export default function BiddingPlanner() {
         )}
       </header>
 
-      <main className="px-6 md:px-12" style={{ maxWidth: 820 }}>
+      <main className="px-6 md:px-12" style={{ maxWidth: 1600 }}>
         {step === 0 && <StepBackground profile={profile} save={save} gatingCourses={gatingCourses} />}
         {step === 1 && <StepGoals profile={profile} save={save} />}
         {step === 2 && (
