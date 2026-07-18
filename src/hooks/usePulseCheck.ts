@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabase";
-import type { PulseCheckSubmission, PulseCheckResult } from "../types";
+import type { PulseCheckSubmission, PulseCheckResult, PulseCheckHistogramBucket } from "../types";
 
 export const PULSE_CHECK_MIN_RESPONDENTS = 5;
 
 export function usePulseCheck(userId: string | undefined, liveBiddingTerms: string[]) {
   const [ownSubmissions, setOwnSubmissions] = useState<PulseCheckSubmission[]>([]);
   const [results, setResults] = useState<Record<string, PulseCheckResult[]>>({});
+  const [histograms, setHistograms] = useState<Record<string, PulseCheckHistogramBucket[]>>({});
   const [loading, setLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -19,13 +20,17 @@ export function usePulseCheck(userId: string | undefined, liveBiddingTerms: stri
     const [ownRes, ...termResults] = await Promise.all([
       supabase.from("pulse_check_submissions").select("*").eq("user_id", userId),
       ...terms.map((term) => supabase.rpc("pulse_check_results_by_term", { p_term: term })),
+      ...terms.map((term) => supabase.rpc("pulse_check_histogram_by_term", { p_term: term })),
     ]);
     setOwnSubmissions((ownRes.data as PulseCheckSubmission[]) ?? []);
     const nextResults: Record<string, PulseCheckResult[]> = {};
+    const nextHistograms: Record<string, PulseCheckHistogramBucket[]> = {};
     terms.forEach((term, i) => {
       nextResults[term] = (termResults[i]?.data as PulseCheckResult[]) ?? [];
+      nextHistograms[term] = (termResults[terms.length + i]?.data as PulseCheckHistogramBucket[]) ?? [];
     });
     setResults(nextResults);
+    setHistograms(nextHistograms);
     setLoading(false);
   }, [userId, termsKey]);
 
@@ -75,5 +80,5 @@ export function usePulseCheck(userId: string | undefined, liveBiddingTerms: stri
     await reload();
   }
 
-  return { ownSubmissions, results, loading, submitError, submit, edit };
+  return { ownSubmissions, results, histograms, loading, submitError, submit, edit };
 }

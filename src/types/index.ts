@@ -156,11 +156,27 @@ export interface PulseCheckSubmission {
   created_at: string;
 }
 
-// Shape returned by the pulse_check_results_by_term RPC. median_points is
-// null until respondent_count clears the in-DB threshold (5) — never a
-// partial number standing in for real signal.
+// Shape returned by the pulse_check_results_by_term RPC — a 5-number summary
+// (min/P25/median/P75/max), all null until respondent_count clears the
+// in-DB threshold (5) — never a partial number standing in for real signal.
 export interface PulseCheckResult {
   course_id: string;
   respondent_count: number;
+  min_points: number | null;
+  p25_points: number | null;
   median_points: number | null;
+  p75_points: number | null;
+  max_points: number | null;
+}
+
+// Shape returned by pulse_check_histogram_by_term — 5 adaptive-width buckets
+// per course (via Postgres's width_bucket()), only present for courses that
+// clear the >=5 respondent threshold. A coarser aggregate than the 5-number
+// summary above, not a new privacy exposure.
+export interface PulseCheckHistogramBucket {
+  course_id: string;
+  bucket_index: number;
+  bucket_start: number;
+  bucket_end: number;
+  bucket_count: number;
 }
