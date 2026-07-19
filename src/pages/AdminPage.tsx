@@ -18,6 +18,13 @@ import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
 import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
 
+// Admins often paste a bare domain ("example.com") into link fields — without
+// a scheme, <a href> resolves it as a relative path off the current route
+// instead of an external URL. Default missing schemes to https://.
+function withScheme(url: string): string {
+  return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
+}
+
 const CONCENTRATIONS: ConcentrationArea[] = [
   "Entrepreneurship", "Finance", "Marketing", "Operations Management",
   "Information Technology Management", "Strategy and Leadership",
@@ -359,7 +366,7 @@ function ResourcesAdmin() {
     setSaving(true);
     const payload = {
       title: form.title.trim(),
-      url: form.url.trim(),
+      url: withScheme(form.url.trim()),
       description: form.description.trim() || null,
       resource_type: form.resource_type,
       term: isCourseScoped && form.term ? form.term : null,
@@ -615,7 +622,7 @@ function NavLinksAdmin() {
       label: form.label.trim(),
       icon: form.icon,
       link_type: form.link_type,
-      href: form.href.trim(),
+      href: form.link_type === "external" ? withScheme(form.href.trim()) : form.href.trim(),
       visibility: form.visibility,
     };
     const { error } = editId
