@@ -366,8 +366,10 @@ function EarlierTermsGrades({
     <div className="space-y-2">
       {grouped.map(({ term, items }) => {
         const gradedCount = items.filter((c) => entries.find((e) => e.course_id === c.id && e.term === term)?.grade).length;
+        const termGpa = computeGPA(entries.filter((e) => e.term === term), courses);
+        const summary = `${items.length} course${items.length === 1 ? "" : "s"} · ${gradedCount} graded` + (termGpa !== null ? ` · GPA ${termGpa.toFixed(2)}` : "");
         return (
-          <TermGroup key={term} term={term} summary={`${items.length} course${items.length === 1 ? "" : "s"} · ${gradedCount} graded`}>
+          <TermGroup key={term} term={term} summary={summary}>
             {items.map((course) => {
               const entry = entries.find((e) => e.course_id === course.id && e.term === term);
               return (
@@ -472,8 +474,10 @@ function TermLedger({
         const termEntries = entries.filter((e) => e.term === term);
         if (termEntries.length === 0) return null;
         const credits = termEntries.reduce((sum, e) => sum + (courses.find((c) => c.id === e.course_id)?.credits ?? 0), 0);
+        const termGpa = computeGPA(termEntries, courses);
+        const summary = `${termEntries.length} course${termEntries.length === 1 ? "" : "s"} · ${credits}cr` + (termGpa !== null ? ` · GPA ${termGpa.toFixed(2)}` : "");
         return (
-          <TermGroup key={term} term={term} summary={`${termEntries.length} course${termEntries.length === 1 ? "" : "s"} · ${credits}cr`}>
+          <TermGroup key={term} term={term} summary={summary}>
             {termEntries.map((e) => (
               <LedgerRow key={e.id} entry={e} course={courses.find((c) => c.id === e.course_id)} onUpdate={onUpdate} onRemove={onRemove} />
             ))}
