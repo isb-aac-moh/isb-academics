@@ -19,6 +19,12 @@ const TERM_DATE_RANGES: Record<TermCode, { start: string; end: string }> = {
   "Term 7": { start: "2027-02-15", end: "2027-03-28" },
 };
 
+// Real chronological order (insertion order above follows ISB's actual calendar) —
+// used wherever terms need to display or reconcile in the order they happen,
+// rather than TERM_CREDIT_LIMITS' declaration order (which groups Term 4-7 before
+// Block Weeks regardless of when each Block Week actually falls).
+export const TERM_SEQUENCE = Object.keys(TERM_DATE_RANGES) as TermCode[];
+
 // Returns the term code whose date range contains today, or null if today
 // falls in a gap between terms (breaks, placement window, orientation).
 export function getCurrentTermCode(today: Date = new Date()): TermCode | null {
@@ -27,4 +33,13 @@ export function getCurrentTermCode(today: Date = new Date()): TermCode | null {
     if (todayStr >= range.start && todayStr <= range.end) return term as TermCode;
   }
   return null;
+}
+
+// A term's bidding round is over once its date range has ended — used to know
+// when to prompt a student to reconcile what they planned against what they
+// actually got (see creditProgress's reconciliation helpers).
+export function isTermComplete(term: string, today: Date = new Date()): boolean {
+  const range = TERM_DATE_RANGES[term as TermCode];
+  if (!range) return false;
+  return today.toISOString().slice(0, 10) > range.end;
 }

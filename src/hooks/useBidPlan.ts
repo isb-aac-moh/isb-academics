@@ -53,7 +53,20 @@ export function useBidPlan(userId: string | undefined) {
     if (!error) setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
+  // Marks a planned entry as reconciled against a real result — 0 means "didn't
+  // get it" (a real winning bid is always >= MIN_BID_PER_COURSE, so 0 is a safe
+  // sentinel), a positive number is what was actually paid.
+  async function resolveEntry(id: string, actualPoints: number) {
+    const { data, error } = await supabase
+      .from("bid_plan_entries")
+      .update({ actual_points: actualPoints })
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (!error && data) setEntries((prev) => prev.map((e) => (e.id === id ? (data as BidPlanEntry) : e)));
+  }
+
   const pointsPlanned = entries.reduce((sum, e) => sum + e.planned_points, 0);
 
-  return { entries, loading, addEntry, removeEntry, pointsPlanned };
+  return { entries, loading, addEntry, removeEntry, resolveEntry, pointsPlanned };
 }

@@ -5,3 +5,26 @@
 body {
   background: #F4F2EC;
 }
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.dropdown-panel-enter {
+  animation: dropdown-in 140ms ease-out;
+  transform-origin: top;
+}
+
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.row-enter {
+  animation: row-in 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-panel-enter, .row-enter {
+    animation: none;
+  }
+}

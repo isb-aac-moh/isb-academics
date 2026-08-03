@@ -1,8 +1,16 @@
 import type { Course, ConcentrationArea, IndustrySpecialization, StudentAcademicProfile } from "../types";
 import type { BidPlanEntry } from "../hooks/useBidPlan";
 import { TOTAL_BID_POINTS, RESERVE_PER_REMAINING_CREDIT, TOTAL_ELECTIVE_CREDITS_REQUIRED } from "../hooks/useBidPlan";
+import { isTermComplete } from "./termCalendar";
 
 export const REQUIRED_CREDITS_PER_AREA = 6;
+
+// A course a student has "secured" toward credit — satisfied by both a planned
+// bid (BidPlanEntry) and a confirmed result (ActualEnrollment), so this math
+// runs unchanged against either the Bidding Planner or the Credit Tracker.
+export interface SecuredCourseEntry {
+  course_id: string | null;
+}
 
 // ISB's own term-wise elective credit limits (Elective Bidding FAQ Q9 / Elective
 // Course Registration doc) — used to show per-term progress in the bid budget.
@@ -22,6 +30,17 @@ export const TERM_CREDIT_LIMITS: Record<string, { min: number; max: number }> = 
 // "there is no bidding involved in this process").
 export function isBiddableTerm(term: string) {
   return term in TERM_CREDIT_LIMITS;
+}
+
+/**
+ * Planned bids whose term has finished but whose outcome hasn't been logged yet
+ * (BidPlanEntry.actual_points is null) — the Credit Tracker prompts these first,
+ * before falling back to a blank "log a confirmed course" picker, since the plan
+ * is usually right and re-typing it is wasted effort. `actual_points = 0` means
+ * "resolved, didn't get it"; a real winning bid is always >= MIN_BID_PER_COURSE.
+ */
+export function pendingReconciliations(bidEntries: BidPlanEntry[], today: Date = new Date()): BidPlanEntry[] {
+  return bidEntries.filter((e) => e.course_id && isBiddableTerm(e.term) && isTermComplete(e.term, today) && e.actual_points === null);
 }
 
 /** A student's mandatorily-converted Flexi Core courses — the only Flexi picks that count toward credit. */
@@ -50,7 +69,7 @@ export function coursesCountingToward(
   kind: "concentration" | "specialization",
   profile: StudentAcademicProfile,
   courses: Course[],
-  bidEntries: BidPlanEntry[]
+  bidEntries: SecuredCourseEntry[]
 ): Course[] {
   // Specialization overlap with a concentration is explicitly allowed (up to 3
   // credits, FAQ Q47) — only concentration-vs-concentration cross-listing is exclusive.
@@ -66,7 +85,7 @@ export function coursesCountingToward(
 }
 
 /** Total elective credits secured toward the 18-credit graduation requirement: converted Flexi + planned bid entries. */
-export function totalElectiveCreditsSecured(profile: StudentAcademicProfile, courses: Course[], bidEntries: BidPlanEntry[]): number {
+export function totalElectiveCreditsSecured(profile: StudentAcademicProfile, courses: Course[], bidEntries: SecuredCourseEntry[]): number {
   const convertedCredits = convertedFlexiCourses(profile, courses).reduce((sum, c) => sum + Number(c.credits), 0);
   const plannedCredits = bidEntries.reduce((sum, e) => {
     const course = courses.find((c) => c.id === e.course_id);
@@ -88,7 +107,7 @@ export function totalElectiveCreditsSecured(profile: StudentAcademicProfile, cou
  * points ISB wants held back for still-unsecured credits, which is a soft
  * warning, not a hard cap (a student can still submit that plan).
  */
-export function computeBidBudget(profile: StudentAcademicProfile, courses: Course[], bidEntries: BidPlanEntry[], pointsPlanned: number) {
+export function computeBidBudget(profile: StudentAcademicProfile, courses: Course[], bidEntries: SecuredCourseEntry[], pointsPlanned: number) {
   const creditsSecured = totalElectiveCreditsSecured(profile, courses, bidEntries);
   const reserved = Math.max(0, TOTAL_ELECTIVE_CREDITS_REQUIRED - creditsSecured) * RESERVE_PER_REMAINING_CREDIT;
   const exchangePointsUsed = (profile.international_exchange_points_used ?? 0) + (profile.inter_campus_exchange_points_used ?? 0);
@@ -102,7 +121,7 @@ export function creditsCountingToward(
   kind: "concentration" | "specialization",
   profile: StudentAcademicProfile,
   courses: Course[],
-  bidEntries: BidPlanEntry[]
+  bidEntries: SecuredCourseEntry[]
 ): number {
   // credits is numeric in Postgres — PostgREST may serialize it as a string, so coerce explicitly.
   return coursesCountingToward(area, kind, profile, courses, bidEntries).reduce((sum, c) => sum + Number(c.credits), 0);

@@ -1,0 +1,400 @@
+/**
+ * Credit Tracker — a record of what a student actually ended up enrolled in,
+ * separate from the Bidding Planner's forward-looking plan. Bidding results
+ * (and grades) can differ from intentions, so this reads against its own
+ * actual_enrollments table rather than bid_plan_entries.
+ *
+ * Once a bidding round's term has ended, its planned entries surface here as a
+ * reconciliation queue ("did you get it, for how much?") before falling back to
+ * a blank picker — reusing what the student already told the Planner rather
+ * than asking them to re-enter it.
+ */
+import { useMemo, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { GraduationCap, Wallet, Receipt, CheckCircle2, X } from "lucide-react";
+import { COLOR, FONT } from "../lib/theme";
+import { useCourses } from "../hooks/useCourses";
+import { useAcademicProfile } from "../hooks/useAcademicProfile";
+import { useActualEnrollments, type ActualEnrollment } from "../hooks/useActualEnrollments";
+import { useBidPlan, TOTAL_BID_POINTS, TOTAL_ELECTIVE_CREDITS_REQUIRED } from "../hooks/useBidPlan";
+import type { BidPlanEntry } from "../hooks/useBidPlan";
+import { TERM_SEQUENCE } from "../lib/termCalendar";
+import {
+  REQUIRED_CREDITS_PER_AREA, isBiddableTerm, pendingReconciliations,
+  totalElectiveCreditsSecured, computeBidBudget, creditsCountingToward,
+} from "../lib/creditProgress";
+import Dropdown, { type DropdownGroup } from "../components/Dropdown";
+import type { Course, StudentAcademicProfile, User } from "../types";
+
+const TERM_ORDER = TERM_SEQUENCE.filter(isBiddableTerm);
+const GRADE_OPTIONS = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F", "Pass", "Fail"];
+const GRADE_GROUPS: DropdownGroup[] = [{ label: "Grade", options: GRADE_OPTIONS.map((g) => ({ value: g, label: g })) }];
+
+export default function CreditTracker() {
+  const { user } = useOutletContext<{ user: User }>();
+  const { courses, loading: coursesLoading } = useCourses();
+  const { profile } = useAcademicProfile(user.id);
+  const { entries: bidEntries, resolveEntry } = useBidPlan(user.id);
+  const { entries, addEntry, updateEntry, removeEntry, pointsPaid } = useActualEnrollments(user.id);
+
+  if (coursesLoading || !profile) {
+    return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
+  }
+
+  const creditsSecured = totalElectiveCreditsSecured(profile, courses, entries);
+  const { reserved, exchangePointsUsed, pointsAvailable, remainingPoints } = computeBidBudget(profile, courses, entries, pointsPaid);
+  const overFullBudget = pointsAvailable < 0;
+  const dippingIntoReserve = !overFullBudget && remainingPoints < 0;
+  const pending = pendingReconciliations(bidEntries);
+
+  const areas: { name: string; kind: "concentration" | "specialization" }[] = [
+    ...profile.target_concentrations.map((c) => ({ name: c, kind: "concentration" as const })),
+    ...(profile.target_specialization && !["none", "undecided"].includes(profile.target_specialization)
+      ? [{ name: profile.target_specialization, kind: "specialization" as const }]
+      : []),
+  ];
+
+  async function handleResolve(entry: BidPlanEntry, gotIt: boolean, points: number) {
+    if (gotIt) {
+      await resolveEntry(entry.id, points);
+      if (entry.course_id) await addEntry({ course_id: entry.course_id, term: entry.term, points_paid: points, grade: null });
+    } else {
+      await resolveEntry(entry.id, 0);
+    }
+  }
+
+  return (
+    <div className="min-h-screen pb-24" style={{ background: COLOR.bg }}>
+      <header className="px-6 md:px-12 pt-10 pb-6">
+        <h1 style={{ fontFamily: FONT.serif, fontSize: 26, fontWeight: 500, color: COLOR.ink }}>
+          Credit <em>Tracker</em>
+        </h1>
+        <p style={{ fontFamily: FONT.serif, fontSize: 15, color: COLOR.ink2, marginTop: 10, maxWidth: 620, lineHeight: 1.6 }}>
+          What you actually ended up with — bidding results don't always match a plan, so this is logged separately from your Bidding Planner.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6" style={{ maxWidth: 720 }}>
+          <StatCard
+            icon={<GraduationCap size={17} />}
+            label="Elective credits secured"
+            value={creditsSecured}
+            total={TOTAL_ELECTIVE_CREDITS_REQUIRED}
+          />
+          <StatCard
+            icon={<Wallet size={17} />}
+            label="Bid points remaining"
+            value={pointsAvailable}
+            warn={overFullBudget}
+          />
+          <StatCard
+            icon={<Receipt size={17} />}
+            label="Points paid so far"
+            value={pointsPaid}
+          />
+        </div>
+        <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 10, maxWidth: 560, lineHeight: 1.5 }}>
+          Out of your full {TOTAL_BID_POINTS.toLocaleString()}-point budget, minus {exchangePointsUsed} exchange points already
+          spent (edit that in the Bidding Planner's Bid Budget step). ISB also asks you to hold back 100 points per elective
+          credit you still need ({reserved} pts right now).
+        </p>
+        {dippingIntoReserve && (
+          <div style={{
+            marginTop: 8, padding: "10px 14px", borderRadius: 9, background: COLOR.redTint,
+            color: COLOR.red, fontFamily: FONT.sans, fontSize: 12.5, fontWeight: 600, maxWidth: 560,
+          }}>
+            You're {Math.abs(remainingPoints)} points into the reserve ISB holds back for your remaining required credits.
+          </div>
+        )}
+      </header>
+
+      <main className="px-6 md:px-12 space-y-8" style={{ maxWidth: 1000 }}>
+        {pending.length > 0 && (
+          <ReconciliationQueue pending={pending} courses={courses} onResolve={handleResolve} />
+        )}
+
+        {areas.length > 0 && (
+          <div>
+            <SectionLabel>Concentration & specialization progress</SectionLabel>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {areas.map((area) => (
+                <AreaProgress key={area.name} area={area.name} kind={area.kind} profile={profile} courses={courses} entries={entries} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div>
+          <SectionLabel>Log a confirmed course</SectionLabel>
+          <AddEntryForm courses={courses} entries={entries} onAdd={addEntry} />
+        </div>
+
+        <div>
+          <SectionLabel>Your confirmed courses</SectionLabel>
+          <TermLedger entries={entries} courses={courses} onUpdate={updateEntry} onRemove={removeEntry} />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+      {children}
+    </p>
+  );
+}
+
+function StatCard({ icon, label, value, total, warn }: { icon: React.ReactNode; label: string; value: number; total?: number; warn?: boolean }) {
+  const pct = total ? Math.min(100, (value / total) * 100) : null;
+  return (
+    <div style={{ padding: "14px 16px", borderRadius: 12, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+      <div className="flex items-center gap-2 mb-1.5" style={{ color: warn ? COLOR.red : COLOR.navyHero }}>
+        {icon}
+        <span style={{ fontSize: 11, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</span>
+      </div>
+      <p style={{ fontSize: 24, fontWeight: 700, fontFamily: FONT.sans, color: warn ? COLOR.red : COLOR.ink }}>
+        {value}{total !== undefined && <span style={{ fontSize: 14, color: COLOR.ink3, fontWeight: 600 }}>/{total}</span>}
+      </p>
+      {pct !== null && (
+        <div style={{ height: 5, borderRadius: 3, background: COLOR.borderLight, overflow: "hidden", marginTop: 8 }}>
+          <div style={{ height: "100%", width: `${pct}%`, background: COLOR.navyHero, borderRadius: 3, transition: "width 400ms ease-out" }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ReconciliationQueue({
+  pending, courses, onResolve,
+}: {
+  pending: BidPlanEntry[]; courses: Course[];
+  onResolve: (entry: BidPlanEntry, gotIt: boolean, points: number) => Promise<void>;
+}) {
+  return (
+    <div>
+      <SectionLabel>Did you get these?</SectionLabel>
+      <div className="space-y-2">
+        {pending.map((entry, i) => (
+          <ReconciliationCard key={entry.id} entry={entry} course={courses.find((c) => c.id === entry.course_id)} onResolve={onResolve} delay={i * 40} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReconciliationCard({
+  entry, course, onResolve, delay,
+}: {
+  entry: BidPlanEntry; course: Course | undefined; onResolve: (entry: BidPlanEntry, gotIt: boolean, points: number) => Promise<void>; delay: number;
+}) {
+  const [points, setPoints] = useState(entry.planned_points);
+  const [submitting, setSubmitting] = useState<"yes" | "no" | null>(null);
+
+  async function handle(gotIt: boolean) {
+    setSubmitting(gotIt ? "yes" : "no");
+    try {
+      await onResolve(entry, gotIt, points);
+    } finally {
+      setSubmitting(null);
+    }
+  }
+
+  return (
+    <div
+      className="row-enter flex flex-col sm:flex-row sm:items-center gap-3"
+      style={{ animationDelay: `${delay}ms`, padding: "14px 16px", borderRadius: 10, background: COLOR.amberTint, border: `1px solid #F0DBA8` }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 13.5, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink }}>{course?.name ?? "Unknown course"}</p>
+        <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans }}>{entry.term} · You bid {entry.planned_points} pts</p>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <input
+          type="number" min={0} value={points} onChange={(e) => setPoints(Number(e.target.value) || 0)}
+          aria-label="Points actually paid"
+          style={{ width: 84, padding: "7px 9px", borderRadius: 7, border: `1px solid ${COLOR.border}`, fontSize: 12.5, fontFamily: FONT.sans, background: COLOR.surface }}
+        />
+        <button
+          onClick={() => handle(true)}
+          disabled={submitting !== null}
+          style={{
+            display: "flex", alignItems: "center", gap: 5, padding: "7px 12px", borderRadius: 7, border: "none",
+            background: COLOR.navyHero, color: "#fff", fontSize: 12, fontWeight: 700, fontFamily: FONT.sans,
+            cursor: submitting !== null ? "default" : "pointer", opacity: submitting !== null ? 0.6 : 1, whiteSpace: "nowrap",
+          }}
+        >
+          <CheckCircle2 size={13} /> {submitting === "yes" ? "Saving…" : "Got it"}
+        </button>
+        <button
+          onClick={() => handle(false)}
+          disabled={submitting !== null}
+          style={{
+            display: "flex", alignItems: "center", gap: 5, padding: "7px 12px", borderRadius: 7, border: `1px solid ${COLOR.border}`,
+            background: COLOR.surface, color: COLOR.ink2, fontSize: 12, fontWeight: 700, fontFamily: FONT.sans,
+            cursor: submitting !== null ? "default" : "pointer", opacity: submitting !== null ? 0.6 : 1, whiteSpace: "nowrap",
+          }}
+        >
+          <X size={13} /> {submitting === "no" ? "Saving…" : "Didn't get it"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AreaProgress({
+  area, kind, profile, courses, entries,
+}: {
+  area: string; kind: "concentration" | "specialization";
+  profile: StudentAcademicProfile; courses: Course[]; entries: ActualEnrollment[];
+}) {
+  const credits = creditsCountingToward(area as never, kind, profile, courses, entries);
+  const pct = Math.min(100, (credits / REQUIRED_CREDITS_PER_AREA) * 100);
+  const complete = credits >= REQUIRED_CREDITS_PER_AREA;
+
+  return (
+    <div style={{ padding: "12px 14px", borderRadius: 10, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+      <div className="flex items-center justify-between mb-1.5">
+        <p style={{ fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{area}</p>
+        <p style={{ fontSize: 11.5, color: complete ? COLOR.green : COLOR.ink3, fontFamily: FONT.sans, fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>
+          {credits}/{REQUIRED_CREDITS_PER_AREA}
+        </p>
+      </div>
+      <div style={{ height: 6, borderRadius: 3, background: COLOR.borderLight, overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct}%`, background: complete ? COLOR.green : COLOR.navyHero, borderRadius: 3, transition: "width 400ms ease-out" }} />
+      </div>
+    </div>
+  );
+}
+
+function courseGroups(courses: Course[]): DropdownGroup[] {
+  return TERM_ORDER
+    .map((term) => ({ label: term, options: courses.filter((c) => c.term === term).map((c) => ({ value: c.id, label: c.name, sublabel: `${c.credits}cr` })) }))
+    .filter((g) => g.options.length > 0);
+}
+
+function AddEntryForm({
+  courses, entries, onAdd,
+}: {
+  courses: Course[]; entries: ActualEnrollment[];
+  onAdd: (entry: { course_id: string; term: string; points_paid: number; grade: string | null }) => Promise<void>;
+}) {
+  const [courseId, setCourseId] = useState("");
+  const [points, setPoints] = useState(0);
+  const [grade, setGrade] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const alreadyAddedIds = useMemo(() => new Set(entries.map((e) => e.course_id)), [entries]);
+  const available = useMemo(() => courses.filter((c) => isBiddableTerm(c.term) && !alreadyAddedIds.has(c.id)), [courses, alreadyAddedIds]);
+  const groups = useMemo(() => courseGroups(available), [available]);
+
+  async function handleAdd() {
+    if (!courseId) return;
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return;
+    setSubmitting(true);
+    try {
+      await onAdd({ course_id: courseId, term: course.term, points_paid: points, grade: grade || null });
+      setCourseId("");
+      setPoints(0);
+      setGrade("");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div style={{ border: `1px solid ${COLOR.borderLight}`, borderRadius: 12, padding: "16px", background: COLOR.surface }}>
+      <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_auto] gap-3 sm:items-end">
+        <Dropdown label="Course" placeholder="Select course…" value={courseId} onChange={setCourseId} groups={groups} searchable />
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5 }}>
+            Points paid
+          </p>
+          <input
+            type="number" min={0} value={points || ""} placeholder="0" onChange={(e) => setPoints(Number(e.target.value) || 0)}
+            style={inputStyle}
+          />
+        </div>
+        <Dropdown label="Grade" placeholder="Optional" value={grade} onChange={setGrade} groups={GRADE_GROUPS} />
+        <button
+          onClick={handleAdd}
+          disabled={!courseId || submitting}
+          style={{
+            padding: "9px 18px", borderRadius: 9, border: "none", fontSize: 13, fontWeight: 700, fontFamily: FONT.sans,
+            background: !courseId || submitting ? COLOR.border : COLOR.navyHero, color: !courseId || submitting ? COLOR.ink3 : "#fff",
+            cursor: !courseId || submitting ? "not-allowed" : "pointer", whiteSpace: "nowrap", height: 38,
+            transition: "background 120ms ease-out",
+          }}
+        >
+          {submitting ? "Adding…" : "Add"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TermLedger({
+  entries, courses, onUpdate, onRemove,
+}: {
+  entries: ActualEnrollment[]; courses: Course[];
+  onUpdate: (id: string, updates: Partial<Pick<ActualEnrollment, "points_paid" | "grade">>) => Promise<void>;
+  onRemove: (id: string) => Promise<void>;
+}) {
+  if (entries.length === 0) {
+    return <p style={{ fontSize: 13, color: COLOR.ink3, fontFamily: FONT.sans }}>Nothing logged yet — add a confirmed course above.</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {TERM_ORDER.map((term) => {
+        const termEntries = entries.filter((e) => e.term === term);
+        if (termEntries.length === 0) return null;
+        return (
+          <div key={term}>
+            <p style={{ fontSize: 12, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink2, marginBottom: 6 }}>{term}</p>
+            <div className="space-y-2">
+              {termEntries.map((e) => (
+                <LedgerRow key={e.id} entry={e} course={courses.find((c) => c.id === e.course_id)} onUpdate={onUpdate} onRemove={onRemove} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LedgerRow({
+  entry, course, onUpdate, onRemove,
+}: {
+  entry: ActualEnrollment; course: Course | undefined;
+  onUpdate: (id: string, updates: Partial<Pick<ActualEnrollment, "points_paid" | "grade">>) => Promise<void>;
+  onRemove: (id: string) => Promise<void>;
+}) {
+  return (
+    <div className="row-enter flex flex-col sm:flex-row sm:items-center gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+      <span style={{ fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink, flex: 1, minWidth: 0 }}>
+        {course?.name ?? "Unknown course"} <span style={{ color: COLOR.ink3 }}>· {course?.credits ?? 0}cr</span>
+      </span>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <input
+          type="number" min={0} value={entry.points_paid} aria-label="Points paid"
+          onChange={(ev) => onUpdate(entry.id, { points_paid: Number(ev.target.value) || 0 })}
+          style={{ ...inputStyle, width: 84, padding: "7px 9px" }}
+        />
+        <div style={{ width: 120 }}>
+          <Dropdown placeholder="Grade" value={entry.grade ?? ""} onChange={(g) => onUpdate(entry.id, { grade: g || null })} groups={GRADE_GROUPS} />
+        </div>
+        <button onClick={() => onRemove(entry.id)} aria-label="Remove" style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", padding: "6px 4px" }}>
+          Remove
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLOR.border}`, width: "100%",
+  fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink, background: COLOR.surface, outline: "none",
+};
