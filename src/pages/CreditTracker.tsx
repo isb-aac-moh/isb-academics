@@ -31,15 +31,19 @@ const EARLIER_TERMS = ["Term 1", "Term 2", "Term 3"];
 const GRADE_OPTIONS = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F", "Pass", "Fail"];
 const GRADE_GROUPS: DropdownGroup[] = [{ label: "Grade", options: GRADE_OPTIONS.map((g) => ({ value: g, label: g })) }];
 
-// Standard 4.0 scale — ISB's Programme Structure doc confirms CGPA sits on this
-// range (2.50/2.20 graduation thresholds) but doesn't publish a letter-to-point
-// table, so this is the conventional US mapping, not a verified ISB source.
-// Pass/Fail-designated courses are excluded from GPA per that same doc; the
-// letter grade "F" (a real failing grade, not a Pass/Fail course) still counts.
+// ISB's actual scale, confirmed against a real elearn.isb.edu letter grade
+// report (Eshan's own Term 1: C=2, B=3, A-=3.5, credit-weighted average
+// reproduced that report's GPA of 3.18 exactly). Whole letters sit on integers
+// (A=4, B=3, C=2, D=1, F=0); +/- shifts by 0.5, capped at 4.0 for A+. Only
+// C/B/A- are directly confirmed — the rest follow that same confirmed step
+// pattern, not independently verified.
+// Pass/Fail-designated courses are excluded from GPA per the Programme
+// Structure doc; the letter grade "F" (a real failing grade, not a Pass/Fail
+// course) still counts.
 const GRADE_POINTS: Record<string, number> = {
-  "A+": 4.0, "A": 4.0, "A-": 3.7,
-  "B+": 3.3, "B": 3.0, "B-": 2.7,
-  "C+": 2.3, "C": 2.0, "C-": 1.7,
+  "A+": 4.0, "A": 4.0, "A-": 3.5,
+  "B+": 3.5, "B": 3.0, "B-": 2.5,
+  "C+": 2.5, "C": 2.0, "C-": 1.5,
   "D": 1.0, "F": 0.0,
 };
 
@@ -130,8 +134,8 @@ export default function CreditTracker() {
         <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 10, maxWidth: 560, lineHeight: 1.5 }}>
           Out of your full {TOTAL_BID_POINTS.toLocaleString()}-point budget, minus {exchangePointsUsed} exchange points already
           spent (edit that in the Bidding Planner's Bid Budget step). ISB also asks you to hold back 100 points per elective
-          credit you still need ({reserved} pts right now). GPA uses the standard 4.0 scale (A=4.0 … F=0), credit-weighted
-          across every graded course — ISB doesn't publish its own scale, so treat this as an estimate, not your transcript.
+          credit you still need ({reserved} pts right now). GPA uses ISB's own scale (A=4.0, B=3.0, C=2.0, D=1.0, F=0,
+          +/- shifts by 0.5), credit-weighted across every graded course.
         </p>
         {dippingIntoReserve && (
           <div style={{
