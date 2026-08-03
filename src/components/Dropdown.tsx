@@ -4,7 +4,7 @@
  * here have 100+ options across 8 term groups, which a plain select handles badly.
  */
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 
 export interface DropdownOption {
@@ -26,9 +26,10 @@ interface Props {
   groups: DropdownGroup[];
   searchable?: boolean;
   disabled?: boolean;
+  clearable?: boolean;
 }
 
-export default function Dropdown({ label, placeholder = "Select…", value, onChange, groups, searchable = false, disabled }: Props) {
+export default function Dropdown({ label, placeholder = "Select…", value, onChange, groups, searchable = false, disabled, clearable = false }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -93,7 +94,21 @@ export default function Dropdown({ label, placeholder = "Select…", value, onCh
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {selected ? selected.label : placeholder}
         </span>
-        <ChevronDown size={15} color={COLOR.ink3} style={{ flexShrink: 0, transition: "transform 150ms ease-out", transform: open ? "rotate(180deg)" : "none" }} />
+        <span style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+          {clearable && selected && (
+            <span
+              role="button"
+              aria-label="Clear selection"
+              onClick={(e) => { e.stopPropagation(); onChange(""); }}
+              style={{ display: "flex", padding: 2, borderRadius: 4, cursor: "pointer" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = COLOR.bgSoft; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              <X size={13} color={COLOR.ink3} />
+            </span>
+          )}
+          <ChevronDown size={15} color={COLOR.ink3} style={{ transition: "transform 150ms ease-out", transform: open ? "rotate(180deg)" : "none" }} />
+        </span>
       </button>
 
       {open && (

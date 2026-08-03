@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { GraduationCap, Wallet, Receipt, CheckCircle2, X } from "lucide-react";
+import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
@@ -31,6 +31,32 @@ const EARLIER_TERMS = ["Term 1", "Term 2", "Term 3"];
 const GRADE_OPTIONS = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F", "Pass", "Fail"];
 const GRADE_GROUPS: DropdownGroup[] = [{ label: "Grade", options: GRADE_OPTIONS.map((g) => ({ value: g, label: g })) }];
 
+// Standard 4.0 scale — ISB's Programme Structure doc confirms CGPA sits on this
+// range (2.50/2.20 graduation thresholds) but doesn't publish a letter-to-point
+// table, so this is the conventional US mapping, not a verified ISB source.
+// Pass/Fail-designated courses are excluded from GPA per that same doc; the
+// letter grade "F" (a real failing grade, not a Pass/Fail course) still counts.
+const GRADE_POINTS: Record<string, number> = {
+  "A+": 4.0, "A": 4.0, "A-": 3.7,
+  "B+": 3.3, "B": 3.0, "B-": 2.7,
+  "C+": 2.3, "C": 2.0, "C-": 1.7,
+  "D": 1.0, "F": 0.0,
+};
+
+function computeGPA(entries: ActualEnrollment[], courses: Course[]): number | null {
+  let creditSum = 0;
+  let pointSum = 0;
+  for (const e of entries) {
+    const points = e.grade ? GRADE_POINTS[e.grade] : undefined;
+    if (points === undefined) continue;
+    const course = courses.find((c) => c.id === e.course_id);
+    const credits = course ? Number(course.credits) : 0;
+    creditSum += credits;
+    pointSum += credits * points;
+  }
+  return creditSum > 0 ? pointSum / creditSum : null;
+}
+
 export default function CreditTracker() {
   const { user } = useOutletContext<{ user: User }>();
   const { courses, loading: coursesLoading } = useCourses();
@@ -43,6 +69,7 @@ export default function CreditTracker() {
   }
 
   const creditsSecured = totalElectiveCreditsSecured(profile, courses, entries);
+  const gpa = computeGPA(entries, courses);
   const { reserved, exchangePointsUsed, pointsAvailable, remainingPoints } = computeBidBudget(profile, courses, entries, pointsPaid);
   const overFullBudget = pointsAvailable < 0;
   const dippingIntoReserve = !overFullBudget && remainingPoints < 0;
@@ -74,7 +101,7 @@ export default function CreditTracker() {
           What you actually ended up with — bidding results don't always match a plan, so this is logged separately from your Bidding Planner.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6" style={{ maxWidth: 720 }}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6" style={{ maxWidth: 920 }}>
           <StatCard
             icon={<GraduationCap size={17} />}
             label="Elective credits secured"
@@ -92,11 +119,19 @@ export default function CreditTracker() {
             label="Points paid so far"
             value={pointsPaid}
           />
+          <StatCard
+            icon={<Award size={17} />}
+            label="Overall GPA"
+            value={gpa}
+            total={gpa !== null ? 4.0 : undefined}
+            decimals={2}
+          />
         </div>
         <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 10, maxWidth: 560, lineHeight: 1.5 }}>
           Out of your full {TOTAL_BID_POINTS.toLocaleString()}-point budget, minus {exchangePointsUsed} exchange points already
           spent (edit that in the Bidding Planner's Bid Budget step). ISB also asks you to hold back 100 points per elective
-          credit you still need ({reserved} pts right now).
+          credit you still need ({reserved} pts right now). GPA uses the standard 4.0 scale (A=4.0 … F=0), credit-weighted
+          across every graded course — ISB doesn't publish its own scale, so treat this as an estimate, not your transcript.
         </p>
         {dippingIntoReserve && (
           <div style={{
@@ -154,8 +189,11 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StatCard({ icon, label, value, total, warn }: { icon: React.ReactNode; label: string; value: number; total?: number; warn?: boolean }) {
-  const pct = total ? Math.min(100, (value / total) * 100) : null;
+function StatCard({
+  icon, label, value, total, warn, decimals,
+}: { icon: React.ReactNode; label: string; value: number | null; total?: number; warn?: boolean; decimals?: number }) {
+  const pct = total && value !== null ? Math.min(100, (value / total) * 100) : null;
+  const fmt = (n: number) => (decimals !== undefined ? n.toFixed(decimals) : n);
   return (
     <div style={{ padding: "14px 16px", borderRadius: 12, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
       <div className="flex items-center gap-2 mb-1.5" style={{ color: warn ? COLOR.red : COLOR.navyHero }}>
@@ -163,7 +201,8 @@ function StatCard({ icon, label, value, total, warn }: { icon: React.ReactNode; 
         <span style={{ fontSize: 11, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</span>
       </div>
       <p style={{ fontSize: 24, fontWeight: 700, fontFamily: FONT.sans, color: warn ? COLOR.red : COLOR.ink }}>
-        {value}{total !== undefined && <span style={{ fontSize: 14, color: COLOR.ink3, fontWeight: 600 }}>/{total}</span>}
+        {value !== null ? fmt(value) : "—"}
+        {total !== undefined && value !== null && <span style={{ fontSize: 14, color: COLOR.ink3, fontWeight: 600 }}>/{fmt(total)}</span>}
       </p>
       {pct !== null && (
         <div style={{ height: 5, borderRadius: 3, background: COLOR.borderLight, overflow: "hidden", marginTop: 8 }}>
@@ -315,7 +354,7 @@ function EarlierTermsGrades({
                     {course.name} <span style={{ color: COLOR.ink3 }}>· {course.credits}cr</span>
                   </span>
                   <div style={{ width: 120, flexShrink: 0 }}>
-                    <Dropdown placeholder="Grade" value={entry?.grade ?? ""} onChange={(g) => onSetGrade(course.id, term, g || null)} groups={GRADE_GROUPS} />
+                    <Dropdown placeholder="Grade" value={entry?.grade ?? ""} onChange={(g) => onSetGrade(course.id, term, g || null)} groups={GRADE_GROUPS} clearable />
                   </div>
                 </div>
               );
@@ -376,7 +415,7 @@ function AddEntryForm({
             style={inputStyle}
           />
         </div>
-        <Dropdown label="Grade" placeholder="Optional" value={grade} onChange={setGrade} groups={GRADE_GROUPS} />
+        <Dropdown label="Grade" placeholder="Optional" value={grade} onChange={setGrade} groups={GRADE_GROUPS} clearable />
         <button
           onClick={handleAdd}
           disabled={!courseId || submitting}
@@ -444,7 +483,7 @@ function LedgerRow({
           style={{ ...inputStyle, width: 84, padding: "7px 9px" }}
         />
         <div style={{ width: 120 }}>
-          <Dropdown placeholder="Grade" value={entry.grade ?? ""} onChange={(g) => onUpdate(entry.id, { grade: g || null })} groups={GRADE_GROUPS} />
+          <Dropdown placeholder="Grade" value={entry.grade ?? ""} onChange={(g) => onUpdate(entry.id, { grade: g || null })} groups={GRADE_GROUPS} clearable />
         </div>
         <button onClick={() => onRemove(entry.id)} aria-label="Remove" style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", padding: "6px 4px" }}>
           Remove
