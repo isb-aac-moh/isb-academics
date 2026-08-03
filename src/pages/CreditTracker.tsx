@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X } from "lucide-react";
+import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X, ChevronDown } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
@@ -193,6 +193,24 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Collapsed by default — a term's worth of course rows is the biggest single
+ * contributor to page length, and most of the time a student only needs one
+ * term open at once. The summary line carries the useful bit either way. */
+function TermGroup({ term, summary, children }: { term: string; summary: string; children: React.ReactNode }) {
+  return (
+    <details className="term-group">
+      <summary className="flex items-center justify-between" style={{ padding: "8px 2px" }}>
+        <span style={{ fontSize: 12, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink2 }}>{term}</span>
+        <span className="flex items-center gap-1.5">
+          <span style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans }}>{summary}</span>
+          <ChevronDown className="chevron" size={14} color={COLOR.ink3} />
+        </span>
+      </summary>
+      <div className="space-y-2 mt-2">{children}</div>
+    </details>
+  );
+}
+
 function StatCard({
   icon, label, value, total, warn, decimals,
 }: { icon: React.ReactNode; label: string; value: number | null; total?: number; warn?: boolean; decimals?: number }) {
@@ -345,11 +363,11 @@ function EarlierTermsGrades({
   }
 
   return (
-    <div className="space-y-4">
-      {grouped.map(({ term, items }) => (
-        <div key={term}>
-          <p style={{ fontSize: 12, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink2, marginBottom: 6 }}>{term}</p>
-          <div className="space-y-2">
+    <div className="space-y-2">
+      {grouped.map(({ term, items }) => {
+        const gradedCount = items.filter((c) => entries.find((e) => e.course_id === c.id && e.term === term)?.grade).length;
+        return (
+          <TermGroup key={term} term={term} summary={`${items.length} course${items.length === 1 ? "" : "s"} · ${gradedCount} graded`}>
             {items.map((course) => {
               const entry = entries.find((e) => e.course_id === course.id && e.term === term);
               return (
@@ -363,9 +381,9 @@ function EarlierTermsGrades({
                 </div>
               );
             })}
-          </div>
-        </div>
-      ))}
+          </TermGroup>
+        );
+      })}
     </div>
   );
 }
@@ -449,19 +467,17 @@ function TermLedger({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {TERM_ORDER.map((term) => {
         const termEntries = entries.filter((e) => e.term === term);
         if (termEntries.length === 0) return null;
+        const credits = termEntries.reduce((sum, e) => sum + (courses.find((c) => c.id === e.course_id)?.credits ?? 0), 0);
         return (
-          <div key={term}>
-            <p style={{ fontSize: 12, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink2, marginBottom: 6 }}>{term}</p>
-            <div className="space-y-2">
-              {termEntries.map((e) => (
-                <LedgerRow key={e.id} entry={e} course={courses.find((c) => c.id === e.course_id)} onUpdate={onUpdate} onRemove={onRemove} />
-              ))}
-            </div>
-          </div>
+          <TermGroup key={term} term={term} summary={`${termEntries.length} course${termEntries.length === 1 ? "" : "s"} · ${credits}cr`}>
+            {termEntries.map((e) => (
+              <LedgerRow key={e.id} entry={e} course={courses.find((c) => c.id === e.course_id)} onUpdate={onUpdate} onRemove={onRemove} />
+            ))}
+          </TermGroup>
         );
       })}
     </div>

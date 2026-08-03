@@ -28,3 +28,20 @@ body {
     animation: none;
   }
 }
+
+details.term-group > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details.term-group > summary::-webkit-details-marker {
+  display: none;
+}
+details.term-group > summary::marker {
+  content: "";
+}
+details.term-group > summary .chevron {
+  transition: transform 150ms ease-out;
+}
+details.term-group[open] > summary .chevron {
+  transform: rotate(180deg);
+}
