@@ -3,7 +3,7 @@ import { COLOR, FONT } from "../lib/theme";
 import Sidebar from "./Sidebar";
 import type { User } from "../types";
 
-const ADMIN_PREVIEW_PREFIXES = ["/resources", "/notices"];
+const ADMIN_PREVIEW_PREFIXES = ["/notices"];
 
 export default function Layout({ user, onSignOut }: { user: User; onSignOut: () => void }) {
   const location = useLocation();
