@@ -7,6 +7,7 @@ import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { LayoutGrid, GraduationCap, BookOpen, Megaphone, Pin, Link2, ArrowUp, ArrowDown } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
+import { useCourseGradingProfiles } from "../hooks/useCourseGradingProfiles";
 import { useResources } from "../hooks/useResources";
 import { useNotifications } from "../hooks/useNotifications";
 import { useNavLinks } from "../hooks/useNavLinks";
@@ -15,7 +16,7 @@ import { supabase } from "../lib/supabase";
 import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS } from "../lib/options";
 import { TERM_CREDIT_LIMITS } from "../lib/creditProgress";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
-import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility } from "../types";
+import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility, CourseGradingProfile } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
 
 // Admins often paste a bare domain ("example.com") into link fields — without
@@ -187,9 +188,11 @@ const EMPTY_COURSE = {
 
 function CoursesAdmin() {
   const { courses, reload } = useCourses(true); // admin sees disabled courses too
+  const { profiles: gradingProfiles, reload: reloadGrading } = useCourseGradingProfiles();
   const [form, setForm] = useState({ ...EMPTY_COURSE });
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [gradingCourseId, setGradingCourseId] = useState<string | null>(null);
 
   function toggleArea(area: ConcentrationArea) {
     setForm((f) => ({
@@ -299,27 +302,131 @@ function CoursesAdmin() {
 
       <div className="space-y-2">
         {courses.map((c) => (
-          <div key={c.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: c.is_active ? COLOR.surface : COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, opacity: c.is_active ? 1 : 0.6 }}>
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
-                {c.name}
-                {c.is_core && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.navyHero, marginLeft: 6 }}>CORE</span>}
-                {!c.is_active && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>DISABLED</span>}
-              </p>
-              <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans }}>
-                {c.code} · {c.professor} · {c.term} · {c.credits}cr
-                {c.concentration_areas.length > 0 && ` · ${c.concentration_areas.join(", ")}`}
-              </p>
+          <div key={c.id}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: c.is_active ? COLOR.surface : COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, opacity: c.is_active ? 1 : 0.6 }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
+                  {c.name}
+                  {c.is_core && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.navyHero, marginLeft: 6 }}>CORE</span>}
+                  {!c.is_active && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>DISABLED</span>}
+                </p>
+                <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans }}>
+                  {c.code} · {c.professor} · {c.term} · {c.credits}cr
+                  {c.concentration_areas.length > 0 && ` · ${c.concentration_areas.join(", ")}`}
+                  {gradingProfiles.has(c.id) && <span style={{ color: COLOR.green, fontWeight: 700 }}> · has grading profile</span>}
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
+                <button onClick={() => setGradingCourseId(gradingCourseId === c.id ? null : c.id)} style={{ fontSize: 12, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer" }}>
+                  {gradingCourseId === c.id ? "Close grading" : "Grading"}
+                </button>
+                <button onClick={() => startEdit(c.id)} style={{ fontSize: 12, color: COLOR.ink2, background: "none", border: "none", cursor: "pointer" }}>Edit</button>
+                <button onClick={() => toggleActive(c.id, c.is_active)} style={{ fontSize: 12, color: c.is_active ? COLOR.red : COLOR.green, background: "none", border: "none", cursor: "pointer" }}>
+                  {c.is_active ? "Disable" : "Enable"}
+                </button>
+              </div>
             </div>
-            <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
-              <button onClick={() => startEdit(c.id)} style={{ fontSize: 12, color: COLOR.ink2, background: "none", border: "none", cursor: "pointer" }}>Edit</button>
-              <button onClick={() => toggleActive(c.id, c.is_active)} style={{ fontSize: 12, color: c.is_active ? COLOR.red : COLOR.green, background: "none", border: "none", cursor: "pointer" }}>
-                {c.is_active ? "Disable" : "Enable"}
-              </button>
-            </div>
+            {gradingCourseId === c.id && (
+              <GradingProfileEditor course={c} profile={gradingProfiles.get(c.id)} onSaved={reloadGrading} />
+            )}
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+const EMPTY_GRADING = {
+  grade_participation_pct: 0, grade_individual_pct: 0, grade_group_pct: 0, grade_exam_pct: 0,
+  exam_midterm_count: 0, exam_endterm_count: 0, exam_quiz_count: 0,
+  load_quant: 0, load_assignments: 0, load_participation: 0, load_exam_pressure: 0, load_group: 0, load_reading: 0,
+  brief: [] as { label: string; text: string }[],
+  source_url: "",
+};
+
+function GradingProfileEditor({ course, profile, onSaved }: { course: Course; profile?: CourseGradingProfile; onSaved: () => void }) {
+  const [form, setForm] = useState(() => (profile ? { ...profile, source_url: profile.source_url ?? "" } : { ...EMPTY_GRADING }));
+  const [saving, setSaving] = useState(false);
+  const gradeTotal = form.grade_participation_pct + form.grade_individual_pct + form.grade_group_pct + form.grade_exam_pct;
+
+  function num(key: keyof typeof EMPTY_GRADING) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [key]: Number(e.target.value) }));
+  }
+
+  function updateBrief(i: number, field: "label" | "text", value: string) {
+    setForm((f) => ({ ...f, brief: f.brief.map((b, bi) => (bi === i ? { ...b, [field]: value } : b)) }));
+  }
+
+  function addBrief() {
+    setForm((f) => ({ ...f, brief: [...f.brief, { label: "", text: "" }] }));
+  }
+
+  function removeBrief(i: number) {
+    setForm((f) => ({ ...f, brief: f.brief.filter((_, bi) => bi !== i) }));
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    const { error } = await supabase.from("course_grading_profiles").upsert({
+      course_id: course.id,
+      ...form,
+      source_url: form.source_url.trim() || null,
+      extracted_at: profile?.extracted_at ?? null,
+    });
+    setSaving(false);
+    if (!error) onSaved();
+    else console.error("[AdminPage] save grading profile failed:", error);
+  }
+
+  return (
+    <div style={{ padding: "14px 16px", borderRadius: 9, background: COLOR.bgSoft, marginTop: 6 }}>
+      <p style={{ fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans, marginBottom: 10 }}>
+        Grading DNA — {course.code}
+        {gradeTotal !== 100 && <span style={{ color: COLOR.red, fontWeight: 600 }}> (grade % totals {gradeTotal}, should be 100)</span>}
+      </p>
+
+      <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 4 }}>Grading composition (%)</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+        <LabeledField label="Participation"><input style={inputStyle} type="number" value={form.grade_participation_pct} onChange={num("grade_participation_pct")} /></LabeledField>
+        <LabeledField label="Individual"><input style={inputStyle} type="number" value={form.grade_individual_pct} onChange={num("grade_individual_pct")} /></LabeledField>
+        <LabeledField label="Group"><input style={inputStyle} type="number" value={form.grade_group_pct} onChange={num("grade_group_pct")} /></LabeledField>
+        <LabeledField label="Exam"><input style={inputStyle} type="number" value={form.grade_exam_pct} onChange={num("grade_exam_pct")} /></LabeledField>
+      </div>
+
+      <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 4 }}>Exam structure (count)</p>
+      <div className="grid grid-cols-3 gap-2 mb-3" style={{ maxWidth: 320 }}>
+        <LabeledField label="Mid-terms"><input style={inputStyle} type="number" min={0} value={form.exam_midterm_count} onChange={num("exam_midterm_count")} /></LabeledField>
+        <LabeledField label="End-terms"><input style={inputStyle} type="number" min={0} value={form.exam_endterm_count} onChange={num("exam_endterm_count")} /></LabeledField>
+        <LabeledField label="Quizzes"><input style={inputStyle} type="number" min={0} value={form.exam_quiz_count} onChange={num("exam_quiz_count")} /></LabeledField>
+      </div>
+
+      <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 4 }}>Workload profile (0-5)</p>
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-3">
+        <LabeledField label="Quant"><input style={inputStyle} type="number" min={0} max={5} step={0.5} value={form.load_quant} onChange={num("load_quant")} /></LabeledField>
+        <LabeledField label="Assignments"><input style={inputStyle} type="number" min={0} max={5} step={0.5} value={form.load_assignments} onChange={num("load_assignments")} /></LabeledField>
+        <LabeledField label="Participation"><input style={inputStyle} type="number" min={0} max={5} step={0.5} value={form.load_participation} onChange={num("load_participation")} /></LabeledField>
+        <LabeledField label="Exam pressure"><input style={inputStyle} type="number" min={0} max={5} step={0.5} value={form.load_exam_pressure} onChange={num("load_exam_pressure")} /></LabeledField>
+        <LabeledField label="Group"><input style={inputStyle} type="number" min={0} max={5} step={0.5} value={form.load_group} onChange={num("load_group")} /></LabeledField>
+        <LabeledField label="Reading"><input style={inputStyle} type="number" min={0} max={5} step={0.5} value={form.load_reading} onChange={num("load_reading")} /></LabeledField>
+      </div>
+
+      <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 4 }}>Brief (shown as "every detail" in the planner)</p>
+      <div className="space-y-2 mb-2">
+        {form.brief.map((b, i) => (
+          <div key={i} className="flex gap-2 items-start">
+            <input style={{ ...inputStyle, width: 110, flexShrink: 0 }} placeholder="Label" value={b.label} onChange={(e) => updateBrief(i, "label", e.target.value)} />
+            <input style={{ ...inputStyle, flex: 1 }} placeholder="Text" value={b.text} onChange={(e) => updateBrief(i, "text", e.target.value)} />
+            <button onClick={() => removeBrief(i)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", padding: "6px 4px" }}>✕</button>
+          </div>
+        ))}
+        <button onClick={addBrief} style={{ fontSize: 12, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer" }}>+ Add bullet</button>
+      </div>
+
+      <LabeledField label="Source URL (course outline)" className="mb-3">
+        <input style={inputStyle} value={form.source_url} onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))} />
+      </LabeledField>
+
+      <button onClick={handleSave} disabled={saving} style={buttonStyle}>{saving ? "Saving…" : "Save grading profile"}</button>
     </div>
   );
 }

@@ -38,6 +38,29 @@ export interface Course {
   is_core: boolean; // mandatory core course — not bid on, doesn't count toward elective/concentration credits
 }
 
+// Per-course grading DNA — extracted from official course outlines, admin-editable
+// after that. Not every course has one yet (only Term 4 as of this writing); the
+// planner should degrade gracefully when a course_id has no matching row.
+export interface CourseGradingProfile {
+  course_id: string;
+  grade_participation_pct: number;
+  grade_individual_pct: number;
+  grade_group_pct: number;
+  grade_exam_pct: number;
+  exam_midterm_count: number;
+  exam_endterm_count: number;
+  exam_quiz_count: number;
+  load_quant: number;
+  load_assignments: number;
+  load_participation: number;
+  load_exam_pressure: number;
+  load_group: number;
+  load_reading: number;
+  brief: { label: string; text: string }[];
+  source_url: string | null;
+  extracted_at: string | null;
+}
+
 // The five core courses whose F grade blocks a specific concentration.
 export interface GatingCoreCourse {
   id: string;

@@ -10,17 +10,20 @@ import { useResources } from "../hooks/useResources";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
 import { useAppSettings } from "../hooks/useAppSettings";
 import { useBidPlan, TOTAL_ELECTIVE_CREDITS_REQUIRED } from "../hooks/useBidPlan";
+import { useCourseGradingProfiles } from "../hooks/useCourseGradingProfiles";
 import { computeBidBudget, totalElectiveCreditsSecured } from "../lib/creditProgress";
 import type { User } from "../types";
 import StepBackground from "./planner/StepBackground";
 import StepGoals from "./planner/StepGoals";
 import StepPlan from "./planner/StepPlan";
+import StepGlance from "./planner/StepGlance";
 import StepBudget from "./planner/StepBudget";
 
 const STEPS = [
   { key: "background", label: "Your Background" },
   { key: "goals", label: "Your Goals" },
   { key: "plan", label: "Your Plan" },
+  { key: "glance", label: "Your Term" },
   { key: "budget", label: "Bid Budget" },
 ] as const;
 
@@ -34,6 +37,7 @@ export default function BiddingPlanner() {
   const { profile, saveError, save } = useAcademicProfile(user.id);
   const { entries, addEntry, removeEntry, pointsPlanned } = useBidPlan(user.id);
   const { liveBiddingTerms } = useAppSettings();
+  const { profiles: gradingProfiles } = useCourseGradingProfiles();
 
   const step = STEPS.findIndex((s) => s.key === stepKey);
   if (step === -1) return <Navigate to="/planner/background" replace />;
@@ -126,7 +130,8 @@ export default function BiddingPlanner() {
             onRemove={removeEntry}
           />
         )}
-        {step === 3 && (
+        {step === 3 && <StepGlance courses={courses} bidEntries={entries} gradingProfiles={gradingProfiles} />}
+        {step === 4 && (
           <StepBudget
             profile={profile}
             save={save}
