@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, GitCompare } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
@@ -30,6 +30,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} />
       <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} />
       <NavItem icon={<BookOpen size={16} />} label="Course Resources" active={isActive("/resources")} onClick={() => go("/resources")} />
+      <NavItem icon={<GitCompare size={16} />} label="Term 4 Comparison" active={isActive("/course-comparison")} onClick={() => go("/course-comparison")} />
       <NavItem
         icon={<Megaphone size={16} />}
         label="Notice Board"
