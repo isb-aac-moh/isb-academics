@@ -3,6 +3,7 @@ import { COLOR } from "./lib/theme";
 import { useAuth } from "./hooks/useAuth";
 import Login from "./pages/Login";
 import BiddingPlanner from "./pages/BiddingPlanner";
+import CreditTracker from "./pages/CreditTracker";
 import AdminPage from "./pages/AdminPage";
 import CourseResources from "./pages/CourseResources";
 import NoticeBoard from "./pages/NoticeBoard";
@@ -24,13 +25,14 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout user={user} onSignOut={signOut} />}>
-        <Route path="/" element={<Navigate to="/planner/background" replace />} />
+        <Route path="/" element={<Navigate to="/tracker" replace />} />
         <Route path="/planner" element={<Navigate to="/planner/background" replace />} />
         <Route path="/planner/:step" element={<BiddingPlanner />} />
+        <Route path="/tracker" element={<CreditTracker />} />
         <Route path="/pulse-check" element={<PulseCheck />} />
+        <Route path="/resources" element={<CourseResources />} />
 
         <Route element={<RequireAdmin user={user} />}>
-          <Route path="/resources" element={<CourseResources />} />
           <Route path="/notices" element={<NoticeBoard />} />
           <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
           <Route path="/admin/:tab" element={<AdminPage />} />

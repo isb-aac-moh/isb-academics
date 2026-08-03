@@ -618,6 +618,7 @@ function NavLinksAdmin() {
   async function handleSave() {
     if (!form.label.trim() || !form.href.trim()) return;
     setSaving(true);
+    const isNew = !editId;
     const payload = {
       label: form.label.trim(),
       icon: form.icon,
@@ -630,6 +631,15 @@ function NavLinksAdmin() {
       : await supabase.from("nav_links").insert({ ...payload, sort_order: navLinks.length });
     setSaving(false);
     if (!error) {
+      // Every new nav link also becomes a browsable resource by default, kept
+      // independent of the nav_links row (no FK) — removing the nav link later
+      // must leave the resource in place on the Resources page (Eshan's spec).
+      if (isNew) {
+        const { error: resourceError } = await supabase
+          .from("resources")
+          .insert({ title: payload.label, url: payload.href, resource_type: "Platform Directory" });
+        if (resourceError) console.error("[AdminPage] auto-create resource for nav link failed:", resourceError);
+      }
       setForm({ ...EMPTY_NAV_LINK });
       setEditId(null);
       reload();
