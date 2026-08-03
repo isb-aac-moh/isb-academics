@@ -18,7 +18,7 @@ So: one Supabase project, one `users` table, one Microsoft SSO configuration, tw
 | Live URL | isb-academics.vercel.app | pulse-isb.vercel.app |
 | Supabase project | **same one** | **same one** |
 
-Both Vercel projects are connected to their GitHub repo — push to `main`, it deploys. There is no staging/preview gate in front of production; every push to `main` goes live. Treat `main` accordingly.
+**isb-academics is *not* connected to GitHub for auto-deploy** — `vercel project inspect isb-academics` shows no git integration, and confirmed directly (2026-08-03): pushing to `main` alone never produced a new deployment; every ship required an explicit `vercel --prod`. (isb-explorer's own deploy wiring wasn't re-verified — don't assume it matches.) There is no staging/preview gate in front of production either way — once `vercel --prod` runs, it's live. Treat both `main` and that command accordingly.
 
 ## Auth flow
 
@@ -32,9 +32,10 @@ Both Vercel projects are connected to their GitHub repo — push to `main`, it d
 Every page and every meaningful sub-state has a real URL — this was a deliberate fix partway through the build (previously navigation was pure client-state, no URL change, no back/forward, refresh reset everything).
 
 ```
-/                          → redirects to /planner/background
+/                          → redirects to /tracker
+/tracker                   → Credit Tracker — the default landing page
 /planner/:step             → Bidding Planner, step ∈ {background, goals, plan, budget}
-/resources                 → Course Resources (admin-only preview)
+/resources                 → Course Resources (live to everyone, not admin-gated)
 /notices                   → Notice Board (admin-only preview)
 /admin/:tab                → Admin panel, tab ∈ {overview, courses, resources, notifications}
 *                          → redirects to /
@@ -45,7 +46,7 @@ Two different state-encoding strategies were used deliberately, not interchangea
 - **Bidding Planner and Admin use path segments** (`/planner/goals`, `/admin/courses`) — these are genuinely distinct sequential steps/screens, and a path segment is the right level of URL "weight" for that.
 - **Course Resources uses query params** (`/resources?term=Term+4&kind=core&q=finance&course=FSAN&view=full`) — this was an explicit product decision (see git log for the commit "Rebuild Course Resources as a single-page searchable gallery"). It replaced an earlier version that used path segments per term/course; that was reverted because Eshan asked for filters instead of "different pages for each term." Query params keep the single-page filtering UX while staying shareable and refresh-safe.
 
-**Route guards:** `RequireAdmin` (`src/components/RequireAdmin.tsx`) wraps `/resources`, `/notices`, and `/admin/*`. It's a real redirect-based guard (`<Navigate>` to `/planner/background` for non-admins), not just a hidden sidebar button — `App.tsx` enforces this independent of whatever the Sidebar shows, so a non-admin typing the URL directly still gets redirected.
+**Route guards:** `RequireAdmin` (`src/components/RequireAdmin.tsx`) wraps `/notices` and `/admin/*` (`/resources` moved out of this group once Course Resources went live to everyone). It's a real redirect-based guard (`<Navigate>` to `/tracker` for non-admins), not just a hidden sidebar button — `App.tsx` enforces this independent of whatever the Sidebar shows, so a non-admin typing the URL directly still gets redirected.
 
 **Unauthenticated state:** `App.tsx` renders `<Login />` for *any* path when there's no user — it never touches the URL. This means a bookmarked deep link works correctly post-login: the browser's URL bar already has the right path, and once `user` becomes truthy, the same render picks up the `<Routes>` tree against whatever URL is already there. No explicit "redirect back after login" logic was needed or built.
 

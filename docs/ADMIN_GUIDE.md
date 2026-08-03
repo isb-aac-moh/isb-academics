@@ -10,7 +10,7 @@ There's no button for this in the app — it's deliberately a manual step, done 
 2. Go to the [Supabase dashboard](https://supabase.com/dashboard) → your project → **Table Editor** → `users` table.
 3. Find their row by email.
 4. Set `is_admin` to `true`. Save.
-5. They'll see the Admin link (and Course Resources / Notice Board, marked PREVIEW) next time they load the sidebar — no redeploy needed.
+5. They'll see the Admin link (and Notice Board, marked PREVIEW) next time they load the sidebar — no redeploy needed. Course Resources is live to everyone regardless of admin status.
 
 ## The Overview tab
 
@@ -42,21 +42,22 @@ Every resource needs a **Type** first — pick from the grouped list (Course Det
 
 ## Managing sidebar links (Nav Links tab)
 
-The core pages in the left sidebar — Bidding Planner, Course Resources, Notice Board — are fixed and can't be edited from here. The **Nav Links** tab manages an extra section of links rendered below them, for anything worth spotlighting without a code change (e.g. the Custom GPT elective-bidding assistant).
+The core pages in the left sidebar — Credit Tracker, Bidding Planner, Bidding Pulse, Course Resources, Notice Board — are fixed and can't be edited from here. The **Nav Links** tab manages an extra section of links rendered below them, for anything worth spotlighting without a code change (e.g. the Custom GPT elective-bidding assistant).
 
 - **Label, icon, type**: pick a name, an icon from the dropdown, and whether it's an **External URL** (opens in a new tab) or an **Internal page** (a path within this app, e.g. `/resources` — opens in the same tab and highlights when active).
 - **Visible to**: **Everyone** or **Admins only**. Use admins-only to try a link out before rolling it out to the whole cohort.
 - **Reorder**: the up/down arrows on each row move it within the extra-links section.
 - **Editing and deleting** both exist here — same as resources, there's no soft-disable; a wrong link is just wrong, delete it and re-add.
+- **Adding a new link also files it as a resource.** Every link you *create* here (not edits to an existing one) automatically gets a matching entry on the Course Resources page (filed as Platform Directory). Deleting the nav link afterward does **not** remove that resource — the two are intentionally independent, so pulling a link from the sidebar doesn't also erase it from where students go looking for it. Remove it from Resources separately (Managing resources, above) if you actually want it gone from both places.
 
-## Course Resources and Notice Board are still in preview
+## Notice Board is still in preview
 
-Both pages are fully built but gated to admins only — students see them grayed out in the sidebar with a "SOON" badge. This is intentional (Eshan's call: "I do not want to open it up for everyone before I tell you to"), not a bug.
+The page is fully built but gated to admins only — students see it grayed out in the sidebar with a "SOON" badge. This is intentional (Eshan's call: "I do not want to open it up for everyone before I tell you to"), not a bug. Course Resources used to be gated the same way; it was opened to everyone and no longer needs this step.
 
-**Opening them to everyone is a code change, not a setting.** In `src/App.tsx`, the `/resources` and `/notices` routes currently sit inside a `<Route element={<RequireAdmin user={user} />}>` wrapper. To launch:
-1. Move those two `<Route>` lines out from under `RequireAdmin`.
-2. In `src/components/Sidebar.tsx`, remove the `disabled={!user.is_admin}` / `soon={!user.is_admin}` / `preview={user.is_admin}` props on those two `NavItem`s so they're always enabled for everyone.
-3. Deploy.
+**Opening it to everyone is a code change, not a setting.** In `src/App.tsx`, the `/notices` route currently sits inside a `<Route element={<RequireAdmin user={user} />}>` wrapper. To launch:
+1. Move that `<Route>` line out from under `RequireAdmin`.
+2. In `src/components/Sidebar.tsx`, remove the `disabled={!user.is_admin}` / `soon={!user.is_admin}` / `preview={user.is_admin}` props on that `NavItem` so it's always enabled for everyone.
+3. Deploy (`vercel --prod` — this repo isn't connected to GitHub for auto-deploy, see ARCHITECTURE.md).
 
 Whoever's doing engineering work on this repo should make this change when Eshan gives the go-ahead — it's a five-minute change, deliberately left as a clear, single decision point rather than something that could accidentally ship early.
 

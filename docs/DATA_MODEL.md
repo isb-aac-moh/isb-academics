@@ -1,6 +1,6 @@
 # Data Model
 
-All tables live in the Supabase project shared with `isb-explorer`. Every schema change is a numbered file in `supabase/migrations/` — that's the actual source of truth; this doc is a human-readable summary of it, current as of migration `20260730090500_split_seed_study_trek_sections.sql`.
+All tables live in the Supabase project shared with `isb-explorer`. Every schema change is a numbered file in `supabase/migrations/` — that's the actual source of truth; this doc is a human-readable summary of it, current as of migration `20260803090000_actual_enrollments.sql`.
 
 To apply migrations: `supabase db push` (requires the Supabase CLI linked to the project — `supabase link --project-ref <ref>`).
 
@@ -94,7 +94,7 @@ The student's own bid-points ledger — never submitted anywhere, purely a perso
 | `course_id` | uuid, FK → `courses.id`, nullable | Nullable via `on delete set null` — if a course is ever hard-deleted, existing plan entries survive with a dangling reference rather than cascading away. |
 | `term` | text | Denormalized copy of the course's term at time of adding — not re-derived live. |
 | `planned_points` | integer | |
-| `actual_points` | integer, nullable | Field exists for a future "log what actually happened" feature; **not currently written anywhere in the app**. |
+| `actual_points` | integer, nullable | `null` = unresolved. Written by the Credit Tracker's reconciliation queue (`resolveEntry` in `useBidPlan.ts`) once a term's bidding round has ended (per `termCalendar.ts` real dates): a positive number is what was actually paid, `0` is the sentinel for "resolved, didn't get it" (a real winning bid is always ≥ `MIN_BID_PER_COURSE`). See `pendingReconciliations()` in `lib/creditProgress.ts`. |
 
 Credit math (`lib/creditProgress.ts`) sums real `courses.credits` for both planned bid entries and the mandatorily-converted Flexi elective (`totalElectiveCreditsSecured`) — the earlier "1 entry = 1 credit" approximation was corrected once it became clear it fed directly into the bid-points reserve rule (`computeBidBudget`).
 
@@ -187,6 +187,32 @@ Admin-managed extra links, rendered in the sidebar below the locked core pages (
 
 **RLS:** same world-readable / admin-write pattern as `resources`.
 
+**App-level behavior, not a DB constraint:** creating a new `nav_links` row (not editing an existing one) also inserts a matching `resources` row (`resource_type: "Platform Directory"`, same `title`/`url`) — see `handleSave` in `AdminPage.tsx`'s `NavLinksAdmin`. Deliberately **no FK between the two tables** — deleting a nav link must not take its resource down with it (Eshan's explicit call), so this is a one-way, fire-and-forget insert at creation time only, not a maintained relationship.
+
+## `actual_enrollments`
+
+What a student actually ended up enrolled in — separate from `bid_plan_entries` (their bid *intentions*), since bidding results can diverge from a plan and grades don't belong on a "plan" table at all. Powers the Credit Tracker (`CreditTracker.tsx`).
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `user_id` | uuid, FK → `users.id`, `on delete cascade` | |
+| `course_id` | uuid, FK → `courses.id`, nullable, `on delete set null` | Same dangling-reference-survives pattern as `bid_plan_entries.course_id`. |
+| `term` | text | Denormalized from the course's term, same pattern as `bid_plan_entries.term`. |
+| `points_paid` | integer, default `0` | What was actually paid to win the bid. `0` for courses that were never bid on at all (Term 1-3 core and Flexi Core — see below). |
+| `grade` | text, nullable | Free-text letter grade (`A+` … `F`, or `Pass`/`Fail`). Not DB-constrained to a fixed set; the UI's `GRADE_OPTIONS` (`CreditTracker.tsx`) is the only enforcement. |
+| `created_at` | timestamptz | |
+
+**Unique constraint on (`user_id`, `course_id`, `term`)** — one row per student per course per term, same pattern as `bid_plan_entries`.
+
+**Two ways a row gets created**, both from `CreditTracker.tsx`:
+1. **Electives (Term 4+/Block Weeks)** — either logged manually via the "Log a confirmed course" form, or created by the reconciliation queue when a student confirms they got a planned course (`points_paid` copied from what they say they actually paid).
+2. **Term 1-3 core + Flexi Core** — these never go through bidding, so there's no "add" step; every mandatory core course (`courses.is_core = true`) for Term 1-3 is listed automatically, plus whichever Flexi Core codes the student recorded in their `student_academic_profiles.completed_term2_flexi`/`completed_term3_flexi`. Picking a grade for one of these calls `upsertGrade` (`useActualEnrollments.ts`), which creates the row on first use with `points_paid: 0`.
+
+**GPA** (`computeGPA` in `CreditTracker.tsx`) is a credit-weighted average of `grade` across every row here with a recognized letter grade, on ISB's real scale — confirmed against an actual `elearn.isb.edu` letter-grade report (whole letters on integers: A=4, B=3, C=2, D=1, F=0; `+`/`-` shifts by 0.5, capped at 4.0). Rows with `grade` set to `Pass`/`Fail` are excluded from the average, matching the Programme Structure doc's rule that Pass/Fail courses don't count toward GPA/CGPA. Only C, B, and A- are directly verified against a real transcript; the rest follow that same confirmed step pattern.
+
+**RLS:** `auth.uid() = user_id`, same pattern as `bid_plan_entries`.
+
 ## Migration history (chronological, for context on *why*)
 
 1. `academics_schema` — initial tables.
@@ -209,5 +235,7 @@ Admin-managed extra links, rendered in the sidebar below the locked core pages (
 18. `pulse_check_range_stats` — replaces the single `median_points` return column with a 5-number summary (`min_points`, `p25_points`, `median_points`, `p75_points`, `max_points`), per feedback that a median hides the spread a student actually needs (second-price clearing depends on where the marginal bid sits, not the average). Same `>=5` threshold, drop-and-recreate since Postgres can't `CREATE OR REPLACE` a function's return columns.
 19. `pulse_check_histogram` — adds `pulse_check_histogram_by_term()`, a real 5-bucket histogram per course via `width_bucket()`, replacing a range-meter-behind-a-dropdown UI with a card-per-course grid, each with its own small bar chart. Same `>=5` threshold and anon-execute revoke, both inline this time.
 20. `split_seed_study_trek_sections` — the "SEED" course (Sustainable Empowerment through Emerging Digitization, Study Trek, Block Week 2) was seeded as one row with three faculty jammed into a single `professor` string. `resources` already independently held three separately-numbered outline PDFs for it (SEED1/2/3_BW2.pdf) — a clean signal these are three separately-bid faculty-course combinations (per ISB's own rule), not one co-taught course. Split into three course rows (SEED1/SEED2/SEED3), one per professor, each keeping its own outline PDF. **The professor-to-PDF-number mapping is an inferred assumption** (matched by stated order — Chhatre/Ramachandran/Dutta to SEED1/2/3), not verified against the PDFs themselves; worth a spot-check. Checked the rest of the catalog for the same pattern (`professor` containing `/`): the other Block Week 1 hits (`HCEN`, `PFCA`, `TISE`) each have exactly one, non-numbered outline PDF — genuinely co-taught single courses, correctly left as-is, not split.
+21. `seed_study_trek_locations` — appends each SEED section's real trip location (Sikkim/Tamil Nadu/Madhya Pradesh, per Eshan directly) to `courses.name` so the three read as obviously distinct wherever the name is shown, not just via `professor`.
+22. `actual_enrollments` — new table for the Credit Tracker (`CreditTracker.tsx`), separate from `bid_plan_entries` since a bid plan is intent and this is result. Purely additive (new table + RLS policy, no changes to existing tables) — see the `actual_enrollments` section above for the full shape.
 
 If you're debugging something that references an older shape (e.g. `resources.category`), check this list — it was real, then removed.

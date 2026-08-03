@@ -4,7 +4,7 @@ A web app for ISB PGP students to plan electives, Areas of Concentration, and bi
 
 **Live:** https://isb-academics.vercel.app
 **Repo:** https://github.com/jain-eshan/isb-academics
-**Status:** Bidding Planner is fully built. Course Resources and Notice Board are built but in **admin-only preview** — not yet visible to students. See [docs/ROADMAP.md](docs/ROADMAP.md) for what's next.
+**Status:** Credit Tracker (default landing page), Bidding Planner, and Course Resources are all live to every student. Notice Board is still built but in **admin-only preview**. See [docs/ROADMAP.md](docs/ROADMAP.md) for what's next.
 
 ## What this is, in one paragraph
 
@@ -38,12 +38,12 @@ There is no test suite yet — verification has been manual (build passing + dir
 - **React Router v7** — real URL routing for every page (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the route map).
 - **Supabase** — Postgres + Auth + RLS. **Shared with `isb-explorer`**, not a separate project. One login covers both apps (`storageKey: "pulse-isb-auth"` in `src/lib/supabase.ts` is intentionally the same key isb-explorer uses).
 - **Microsoft SSO** via Supabase Auth's Azure provider, gated to `@isb.edu` emails, with an email magic-link fallback.
-- **Vercel** — auto-deploys on push to `main` (GitHub integration connected). `vercel.json` has a catch-all SPA rewrite — without it, every route except `/` would 404 on refresh or direct load.
+- **Vercel** — **not connected to GitHub for auto-deploy** (confirmed 2026-08-03; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)) — every ship needs an explicit `vercel --prod` after pushing. `vercel.json` has a catch-all SPA rewrite — without it, every route except `/` would 404 on refresh or direct load.
 
 ## Who can do what
 
-- **Any `@isb.edu` login** → Bidding Planner (the only section live to students right now).
-- **`users.is_admin = true`** → also gets Admin panel, Course Resources, and Notice Board (both still in preview — visible to admins only, marked with a "Admin preview" banner and a PREVIEW badge in the sidebar).
+- **Any `@isb.edu` login** → Credit Tracker (home page), Bidding Planner, Bidding Pulse, and Course Resources — everything except Notice Board and Admin.
+- **`users.is_admin = true`** → also gets the Admin panel and Notice Board (still in preview — visible to admins only, marked with a "Admin preview" banner and a PREVIEW badge in the sidebar).
 - **Granting admin access is a manual, deliberate step** — not self-service in the app. See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md#granting-admin-access). This was a conscious choice: privilege escalation shouldn't be one click away in a tool students also use.
 
 ## Where to go next
