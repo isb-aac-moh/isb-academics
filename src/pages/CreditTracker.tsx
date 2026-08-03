@@ -27,6 +27,7 @@ import Dropdown, { type DropdownGroup } from "../components/Dropdown";
 import type { Course, StudentAcademicProfile, User } from "../types";
 
 const TERM_ORDER = TERM_SEQUENCE.filter(isBiddableTerm);
+const EARLIER_TERMS = ["Term 1", "Term 2", "Term 3"];
 const GRADE_OPTIONS = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F", "Pass", "Fail"];
 const GRADE_GROUPS: DropdownGroup[] = [{ label: "Grade", options: GRADE_OPTIONS.map((g) => ({ value: g, label: g })) }];
 
@@ -35,7 +36,7 @@ export default function CreditTracker() {
   const { courses, loading: coursesLoading } = useCourses();
   const { profile } = useAcademicProfile(user.id);
   const { entries: bidEntries, resolveEntry } = useBidPlan(user.id);
-  const { entries, addEntry, updateEntry, removeEntry, pointsPaid } = useActualEnrollments(user.id);
+  const { entries, addEntry, updateEntry, removeEntry, upsertGrade, pointsPaid } = useActualEnrollments(user.id);
 
   if (coursesLoading || !profile) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
@@ -122,6 +123,14 @@ export default function CreditTracker() {
             </div>
           </div>
         )}
+
+        <div>
+          <SectionLabel>Term 1–3 grades</SectionLabel>
+          <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 10, maxWidth: 560 }}>
+            Core courses and the Flexi Core you told the Bidding Planner you completed — not bid on, but still worth logging a grade for your own GPA tracking.
+          </p>
+          <EarlierTermsGrades courses={courses} profile={profile} entries={entries} onSetGrade={upsertGrade} />
+        </div>
 
         <div>
           <SectionLabel>Log a confirmed course</SectionLabel>
@@ -263,6 +272,57 @@ function AreaProgress({
       <div style={{ height: 6, borderRadius: 3, background: COLOR.borderLight, overflow: "hidden" }}>
         <div style={{ height: "100%", width: `${pct}%`, background: complete ? COLOR.green : COLOR.navyHero, borderRadius: 3, transition: "width 400ms ease-out" }} />
       </div>
+    </div>
+  );
+}
+
+/** Term 1-3 core (mandatory, same for everyone) plus whichever Flexi Core the
+ * student told the Planner they completed — the courses that never went through
+ * bidding, so they'd otherwise have no grade-tracking home at all. */
+function earlierTermCourses(courses: Course[], profile: StudentAcademicProfile): Course[] {
+  const core = courses.filter((c) => c.is_core && EARLIER_TERMS.includes(c.term));
+  const flexiCodes = new Set([...profile.completed_term2_flexi, ...profile.completed_term3_flexi]);
+  const flexi = courses.filter((c) => flexiCodes.has(c.code));
+  return [...core, ...flexi];
+}
+
+function EarlierTermsGrades({
+  courses, profile, entries, onSetGrade,
+}: {
+  courses: Course[]; profile: StudentAcademicProfile; entries: ActualEnrollment[];
+  onSetGrade: (courseId: string, term: string, grade: string | null) => Promise<void>;
+}) {
+  const items = earlierTermCourses(courses, profile);
+  const grouped = EARLIER_TERMS
+    .map((term) => ({ term, items: items.filter((c) => c.term === term) }))
+    .filter((g) => g.items.length > 0);
+
+  if (grouped.length === 0) {
+    return <p style={{ fontSize: 13, color: COLOR.ink3, fontFamily: FONT.sans }}>Nothing here yet — Term 1's core courses will show up once the catalog has them.</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {grouped.map(({ term, items }) => (
+        <div key={term}>
+          <p style={{ fontSize: 12, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink2, marginBottom: 6 }}>{term}</p>
+          <div className="space-y-2">
+            {items.map((course) => {
+              const entry = entries.find((e) => e.course_id === course.id && e.term === term);
+              return (
+                <div key={course.id} className="flex flex-col sm:flex-row sm:items-center gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+                  <span style={{ fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink, flex: 1, minWidth: 0 }}>
+                    {course.name} <span style={{ color: COLOR.ink3 }}>· {course.credits}cr</span>
+                  </span>
+                  <div style={{ width: 120, flexShrink: 0 }}>
+                    <Dropdown placeholder="Grade" value={entry?.grade ?? ""} onChange={(g) => onSetGrade(course.id, term, g || null)} groups={GRADE_GROUPS} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

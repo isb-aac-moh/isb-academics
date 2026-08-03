@@ -58,7 +58,18 @@ export function useActualEnrollments(userId: string | undefined) {
     if (!error) setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
+  // For courses that aren't manually "added" (core/Flexi Core in Term 1-3, listed
+  // automatically) — picking a grade creates the row on first use, updates it after.
+  async function upsertGrade(course_id: string, term: string, grade: string | null) {
+    const existing = entries.find((e) => e.course_id === course_id && e.term === term);
+    if (existing) {
+      await updateEntry(existing.id, { grade });
+    } else {
+      await addEntry({ course_id, term, points_paid: 0, grade });
+    }
+  }
+
   const pointsPaid = entries.reduce((sum, e) => sum + e.points_paid, 0);
 
-  return { entries, loading, addEntry, updateEntry, removeEntry, pointsPaid };
+  return { entries, loading, addEntry, updateEntry, removeEntry, upsertGrade, pointsPaid };
 }
