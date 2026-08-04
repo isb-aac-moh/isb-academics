@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, FileStack, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
@@ -13,6 +13,7 @@ interface Props {
 
 export default function Sidebar({ user, onSignOut }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { navLinks } = useNavLinks();
@@ -26,10 +27,11 @@ export default function Sidebar({ user, onSignOut }: Props) {
 
   const primaryNav = (
     <nav className="space-y-1">
-      <NavItem icon={<GraduationCap size={16} />} label="Credit Tracker" active={isActive("/tracker")} onClick={() => go("/tracker")} />
-      <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} />
-      <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} />
-      <NavItem icon={<BookOpen size={16} />} label="Course Resources" active={isActive("/resources")} onClick={() => go("/resources")} />
+      <NavItem icon={<GraduationCap size={16} />} label="Credit Tracker" active={isActive("/tracker")} onClick={() => go("/tracker")} collapsed={collapsed} />
+      <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} collapsed={collapsed} />
+      <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} collapsed={collapsed} />
+      <NavItem icon={<BookOpen size={16} />} label="Course Resources" active={isActive("/resources")} onClick={() => go("/resources")} collapsed={collapsed} />
+      <NavItem icon={<FileStack size={16} />} label="Term 4 Dossier" active={isActive("/term4")} onClick={() => go("/term4")} collapsed={collapsed} />
       <NavItem
         icon={<Megaphone size={16} />}
         label="Notice Board"
@@ -38,6 +40,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
         disabled={!user.is_admin}
         soon={!user.is_admin}
         preview={user.is_admin}
+        collapsed={collapsed}
       />
     </nav>
   );
@@ -48,9 +51,9 @@ export default function Sidebar({ user, onSignOut }: Props) {
       {visibleLinks.map((link) => {
         const Icon = NAV_LINK_ICONS[link.icon as NavLinkIconKey];
         return link.link_type === "external" ? (
-          <ExternalNavItem key={link.id} icon={<Icon size={16} />} label={link.label} href={link.href} />
+          <ExternalNavItem key={link.id} icon={<Icon size={16} />} label={link.label} href={link.href} collapsed={collapsed} />
         ) : (
-          <NavItem key={link.id} icon={<Icon size={16} />} label={link.label} active={isActive(link.href)} onClick={() => go(link.href)} />
+          <NavItem key={link.id} icon={<Icon size={16} />} label={link.label} active={isActive(link.href)} onClick={() => go(link.href)} collapsed={collapsed} />
         );
       })}
     </nav>
@@ -59,17 +62,23 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const bottomNav = (
     <div>
       {user.is_admin && (
-        <NavItem icon={<ShieldCheck size={16} />} label="Admin" active={isActive("/admin")} onClick={() => go("/admin/overview")} />
+        <NavItem icon={<ShieldCheck size={16} />} label="Admin" active={isActive("/admin")} onClick={() => go("/admin/overview")} collapsed={collapsed} />
       )}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", marginTop: 12, paddingTop: 12 }}>
-        <p style={{ fontFamily: FONT.sans, fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {user.name || user.email}
-        </p>
+        {!collapsed && (
+          <p style={{ fontFamily: FONT.sans, fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {user.name || user.email}
+          </p>
+        )}
         <button
           onClick={onSignOut}
-          style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, background: "none", border: "none", color: "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0 }}
+          title="Sign out"
+          style={{
+            display: "flex", alignItems: "center", gap: 6, marginTop: collapsed ? 0 : 8, justifyContent: collapsed ? "center" : "flex-start",
+            width: "100%", background: "none", border: "none", color: "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0,
+          }}
         >
-          <LogOut size={13} /> Sign out
+          <LogOut size={13} /> {!collapsed && "Sign out"}
         </button>
       </div>
     </div>
@@ -124,11 +133,28 @@ export default function Sidebar({ user, onSignOut }: Props) {
       {/* Desktop sidebar — visible at md and up */}
       <aside
         className="hidden md:flex flex-col justify-between"
-        style={{ width: 220, height: "100vh", position: "sticky", top: 0, background: COLOR.navyHero, flexShrink: 0, padding: "24px 16px", overflowY: "auto" }}
+        style={{
+          width: collapsed ? 72 : 220, height: "100vh", position: "sticky", top: 0, background: COLOR.navyHero, flexShrink: 0,
+          padding: "24px 12px", overflowY: "auto", overflowX: "hidden", transition: "width 0.2s ease",
+        }}
       >
         <div>
-          <p style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 14, color: "#fff" }}>ISB</p>
-          <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>Academics</p>
+          <div className="flex items-center justify-between" style={{ paddingLeft: collapsed ? 0 : 4, justifyContent: collapsed ? "center" : "space-between" }}>
+            {!collapsed && (
+              <div>
+                <p style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 14, color: "#fff" }}>ISB</p>
+                <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>Academics</p>
+              </div>
+            )}
+            <button
+              onClick={() => setCollapsed((c) => !c)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", padding: 4, cursor: "pointer", display: "flex" }}
+            >
+              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            </button>
+          </div>
           <div className="mt-8">{primaryNav}</div>
           {extraNav}
         </div>
@@ -139,41 +165,53 @@ export default function Sidebar({ user, onSignOut }: Props) {
 }
 
 function NavItem({
-  icon, label, active, onClick, disabled, soon, preview,
-}: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void; disabled?: boolean; soon?: boolean; preview?: boolean }) {
+  icon, label, active, onClick, disabled, soon, preview, collapsed,
+}: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void; disabled?: boolean; soon?: boolean; preview?: boolean; collapsed?: boolean }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      title={collapsed ? label : undefined}
       style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8,
+        width: "100%", display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px" : "9px 10px", borderRadius: 8,
+        justifyContent: collapsed ? "center" : "flex-start",
         background: active ? "rgba(255,255,255,0.12)" : "transparent", border: "none", cursor: disabled ? "default" : "pointer",
         color: disabled ? "rgba(255,255,255,0.35)" : "#fff", fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, textAlign: "left",
       }}
     >
       {icon}
-      <span style={{ flex: 1 }}>{label}</span>
-      {soon && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em" }}>SOON</span>}
-      {preview && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em", border: `1px solid ${COLOR.mint}`, borderRadius: 4, padding: "1px 5px" }}>PREVIEW</span>}
+      {!collapsed && (
+        <>
+          <span style={{ flex: 1 }}>{label}</span>
+          {soon && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em" }}>SOON</span>}
+          {preview && <span style={{ fontSize: 9, fontWeight: 700, color: COLOR.mint, letterSpacing: "0.04em", border: `1px solid ${COLOR.mint}`, borderRadius: 4, padding: "1px 5px" }}>PREVIEW</span>}
+        </>
+      )}
     </button>
   );
 }
 
 /** Same look as NavItem, but an actual link that opens the tool in a new tab instead of routing internally. */
-function ExternalNavItem({ icon, label, href }: { icon: React.ReactNode; label: string; href: string }) {
+function ExternalNavItem({ icon, label, href, collapsed }: { icon: React.ReactNode; label: string; href: string; collapsed?: boolean }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      title={collapsed ? label : undefined}
       style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8,
+        width: "100%", display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px" : "9px 10px", borderRadius: 8,
+        justifyContent: collapsed ? "center" : "flex-start",
         background: "transparent", color: "#fff", fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, textAlign: "left", textDecoration: "none",
       }}
     >
       {icon}
-      <span style={{ flex: 1 }}>{label}</span>
-      <ExternalLink size={12} color="rgba(255,255,255,0.5)" />
+      {!collapsed && (
+        <>
+          <span style={{ flex: 1 }}>{label}</span>
+          <ExternalLink size={12} color="rgba(255,255,255,0.5)" />
+        </>
+      )}
     </a>
   );
 }
