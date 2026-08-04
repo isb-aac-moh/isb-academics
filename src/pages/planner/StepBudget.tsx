@@ -1,7 +1,7 @@
 import { COLOR, FONT } from "../../lib/theme";
 import { TOTAL_BID_POINTS } from "../../hooks/useBidPlan";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
-import { TERM_CREDIT_LIMITS } from "../../lib/creditProgress";
+import { BIDDABLE_TERM_ORDER } from "../../lib/creditProgress";
 import type { Course, StudentAcademicProfile } from "../../types";
 
 interface Props {
@@ -12,13 +12,14 @@ interface Props {
   pointsPlanned: number;
   reserved: number;
   exchangePointsUsed: number;
+  termCreditLimits: Record<string, { min: number; max: number }>;
   onRemove: (id: string) => void;
 }
 
 // Term order for the per-term boxes — matches ISB's bidding sequence.
-const TERM_ORDER = Object.keys(TERM_CREDIT_LIMITS);
+const TERM_ORDER = BIDDABLE_TERM_ORDER;
 
-export default function StepBudget({ profile, save, entries, courses, pointsPlanned, reserved, exchangePointsUsed, onRemove }: Props) {
+export default function StepBudget({ profile, save, entries, courses, pointsPlanned, reserved, exchangePointsUsed, termCreditLimits, onRemove }: Props) {
   return (
     <div>
       <p style={{ fontFamily: FONT.serif, fontSize: 15, color: COLOR.ink2, marginBottom: 20, lineHeight: 1.6 }}>
@@ -61,7 +62,7 @@ export default function StepBudget({ profile, save, entries, courses, pointsPlan
           {TERM_ORDER.map((term) => {
             const termEntries = entries.filter((e) => e.term === term);
             if (termEntries.length === 0) return null;
-            const limit = TERM_CREDIT_LIMITS[term];
+            const limit = termCreditLimits[term];
             const creditsInTerm = termEntries.reduce((sum, e) => {
               const course = courses.find((c) => c.id === e.course_id);
               return sum + (course ? Number(course.credits) : 0);

@@ -138,6 +138,7 @@ export interface AppSettings {
   id: true;
   live_bidding_terms: string[];
   pulse_check_cutoff: string;
+  term_credit_limits: Record<string, { min: number; max: number }>;
   updated_at: string;
 }
 

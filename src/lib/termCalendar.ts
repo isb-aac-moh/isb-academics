@@ -21,7 +21,7 @@ const TERM_DATE_RANGES: Record<TermCode, { start: string; end: string }> = {
 
 // Real chronological order (insertion order above follows ISB's actual calendar) —
 // used wherever terms need to display or reconcile in the order they happen,
-// rather than TERM_CREDIT_LIMITS' declaration order (which groups Term 4-7 before
+// rather than BIDDABLE_TERM_ORDER's declaration order (which groups Term 4-7 before
 // Block Weeks regardless of when each Block Week actually falls).
 export const TERM_SEQUENCE = Object.keys(TERM_DATE_RANGES) as TermCode[];
 
