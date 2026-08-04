@@ -4,14 +4,12 @@ import type { AppSettings } from "../types";
 
 export function useAppSettings() {
   const [liveBiddingTerms, setLiveBiddingTerms] = useState<string[]>([]);
-  const [pulseCheckCutoff, setPulseCheckCutoff] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const reload = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase.from("app_settings").select("*").eq("id", true).maybeSingle();
     setLiveBiddingTerms((data as AppSettings | null)?.live_bidding_terms ?? []);
-    setPulseCheckCutoff((data as AppSettings | null)?.pulse_check_cutoff ?? null);
     setLoading(false);
   }, []);
 
@@ -28,5 +26,5 @@ export function useAppSettings() {
     else console.error("[useAppSettings] save failed:", error);
   }
 
-  return { liveBiddingTerms, pulseCheckCutoff, loading, saveLiveBiddingTerms };
+  return { liveBiddingTerms, loading, saveLiveBiddingTerms };
 }
