@@ -26,14 +26,12 @@ const FAIR_USE_NOTE = "Bid what you'd actually pay — it only works if it's rea
 export default function PulseCheck() {
   const { user } = useOutletContext<{ user: User }>();
   const { courses, loading: coursesLoading } = useCourses();
-  const { liveBiddingTerms, pulseCheckCutoff, loading: settingsLoading } = useAppSettings();
+  const { liveBiddingTerms, loading: settingsLoading } = useAppSettings();
   const { ownSubmissions, results, histograms, loading: pulseLoading, submitError, submit, edit } = usePulseCheck(user.id, liveBiddingTerms);
 
   if (coursesLoading || settingsLoading || pulseLoading) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
   }
-
-  const cutoffPassed = pulseCheckCutoff ? new Date() >= new Date(pulseCheckCutoff) : false;
 
   return (
     <div className="min-h-screen pb-24" style={{ background: COLOR.bg }}>
@@ -73,7 +71,6 @@ export default function PulseCheck() {
                 ownSubmission={ownSubmissions.find((s) => s.term === term)}
                 results={displayResults}
                 histograms={displayHistograms}
-                cutoffPassed={cutoffPassed}
                 onSubmit={(courseId, points) => submit({ course_id: courseId, term, bid_points_estimate: points })}
                 onEdit={(courseId, points) => edit(term, { course_id: courseId, bid_points_estimate: points })}
               />
@@ -86,19 +83,18 @@ export default function PulseCheck() {
 }
 
 function TermSection({
-  term, courses, ownSubmission, results, histograms, cutoffPassed, onSubmit, onEdit,
+  term, courses, ownSubmission, results, histograms, onSubmit, onEdit,
 }: {
   term: string;
   courses: Course[];
   ownSubmission: PulseCheckSubmission | undefined;
   results: PulseCheckResult[];
   histograms: PulseCheckHistogramBucket[];
-  cutoffPassed: boolean;
   onSubmit: (courseId: string, points: number) => void;
   onEdit: (courseId: string, points: number) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const canEdit = !!ownSubmission && !ownSubmission.edited && !cutoffPassed;
+  const canEdit = !!ownSubmission && !ownSubmission.edited;
   const resultByCourse = new Map(results.map((r) => [r.course_id, r]));
   const histogramByCourse = new Map<string, PulseCheckHistogramBucket[]>();
   histograms.forEach((b) => {
@@ -119,8 +115,6 @@ function TermSection({
           canEdit={canEdit}
           onEditClick={() => setEditing(true)}
         />
-      ) : !ownSubmission && cutoffPassed ? (
-        <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>Submissions closed for this Block Week.</p>
       ) : (
         <SubmitForm
           courses={courses}
