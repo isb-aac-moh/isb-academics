@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, GitCompare, FileStack, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, FileStack, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
@@ -31,7 +31,6 @@ export default function Sidebar({ user, onSignOut }: Props) {
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} collapsed={collapsed} />
       <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} collapsed={collapsed} />
       <NavItem icon={<BookOpen size={16} />} label="Course Resources" active={isActive("/resources")} onClick={() => go("/resources")} collapsed={collapsed} />
-      <NavItem icon={<GitCompare size={16} />} label="Term 4 Comparison" active={isActive("/course-comparison")} onClick={() => go("/course-comparison")} collapsed={collapsed} />
       <NavItem icon={<FileStack size={16} />} label="Term 4 Dossier" active={isActive("/term4")} onClick={() => go("/term4")} collapsed={collapsed} />
       <NavItem
         icon={<Megaphone size={16} />}

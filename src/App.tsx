@@ -6,7 +6,6 @@ import BiddingPlanner from "./pages/BiddingPlanner";
 import CreditTracker from "./pages/CreditTracker";
 import AdminPage from "./pages/AdminPage";
 import CourseResources from "./pages/CourseResources";
-import CourseComparison from "./pages/CourseComparison";
 import TermFourDossier from "./pages/TermFourDossier";
 import NoticeBoard from "./pages/NoticeBoard";
 import PulseCheck from "./pages/PulseCheck";
@@ -33,7 +32,6 @@ export default function App() {
         <Route path="/tracker" element={<CreditTracker />} />
         <Route path="/pulse-check" element={<PulseCheck />} />
         <Route path="/resources" element={<CourseResources />} />
-        <Route path="/course-comparison" element={<CourseComparison />} />
         <Route path="/term4" element={<TermFourDossier />} />
 
         <Route element={<RequireAdmin user={user} />}>
