@@ -2,8 +2,9 @@
  * Cohort Bidding Pulse Check — students voluntarily submit which course
  * they're seriously bidding on for a live Block Week and an estimated
  * bid-point amount, so everyone gets an aggregated demand read instead of
- * relying on scattered WhatsApp chatter. A submission can be edited exactly
- * once (RLS-enforced, not just this UI), then it's locked for good. Each
+ * relying on scattered WhatsApp chatter. A submission can be edited up to 3
+ * times (RLS-enforced, not just this UI) or removed outright at any point.
+ * Each
  * course gets its own card with a real bucketed histogram of submitted bid
  * points — never a smoothed curve, which would oversell how much data a
  * handful of respondents actually is. Cards stay in catalog order, never
@@ -16,7 +17,7 @@ import { useOutletContext } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useAppSettings } from "../hooks/useAppSettings";
-import { usePulseCheck, PULSE_CHECK_MIN_RESPONDENTS } from "../hooks/usePulseCheck";
+import { usePulseCheck, PULSE_CHECK_MIN_RESPONDENTS, PULSE_CHECK_MAX_EDITS } from "../hooks/usePulseCheck";
 import { MIN_BID_PER_COURSE, TOTAL_BID_POINTS } from "../hooks/useBidPlan";
 import { fakePulseResults, fakePulseHistograms } from "../lib/devFixtures";
 import type { User, Course, PulseCheckSubmission, PulseCheckResult, PulseCheckHistogramBucket } from "../types";
@@ -27,7 +28,7 @@ export default function PulseCheck() {
   const { user } = useOutletContext<{ user: User }>();
   const { courses, loading: coursesLoading } = useCourses();
   const { liveBiddingTerms, loading: settingsLoading } = useAppSettings();
-  const { ownSubmissions, results, histograms, loading: pulseLoading, submitError, submit, edit } = usePulseCheck(user.id, liveBiddingTerms);
+  const { ownSubmissions, results, histograms, loading: pulseLoading, submitError, submit, edit, remove } = usePulseCheck(user.id, liveBiddingTerms);
 
   if (coursesLoading || settingsLoading || pulseLoading) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
@@ -40,7 +41,7 @@ export default function PulseCheck() {
           Cohort Bidding <em>Pulse Check</em>
         </h1>
         <p style={{ fontFamily: FONT.sans, fontSize: 13, color: COLOR.ink2, marginTop: 4, maxWidth: 600 }}>
-          Share your Block Week bid, see the cohort's range. Unofficial, editable once. {FAIR_USE_NOTE}
+          Share your bids, see the cohort's range. Unofficial, editable up to {PULSE_CHECK_MAX_EDITS} times per course. {FAIR_USE_NOTE}
         </p>
         {submitError && (
           <p style={{ fontFamily: FONT.sans, fontSize: 12.5, color: COLOR.red, marginTop: 10 }}>{submitError}</p>
@@ -68,11 +69,12 @@ export default function PulseCheck() {
                 key={term}
                 term={term}
                 courses={termCourses}
-                ownSubmission={ownSubmissions.find((s) => s.term === term)}
+                ownSubmissions={ownSubmissions.filter((s) => s.term === term)}
                 results={displayResults}
                 histograms={displayHistograms}
                 onSubmit={(courseId, points) => submit({ course_id: courseId, term, bid_points_estimate: points })}
-                onEdit={(courseId, points) => edit(term, { course_id: courseId, bid_points_estimate: points })}
+                onEdit={(original, courseId, points) => edit(original, { course_id: courseId, bid_points_estimate: points })}
+                onRemove={(submissionId) => remove(submissionId)}
               />
             );
           })
@@ -83,18 +85,20 @@ export default function PulseCheck() {
 }
 
 function TermSection({
-  term, courses, ownSubmission, results, histograms, onSubmit, onEdit,
+  term, courses, ownSubmissions, results, histograms, onSubmit, onEdit, onRemove,
 }: {
   term: string;
   courses: Course[];
-  ownSubmission: PulseCheckSubmission | undefined;
+  ownSubmissions: PulseCheckSubmission[];
   results: PulseCheckResult[];
   histograms: PulseCheckHistogramBucket[];
   onSubmit: (courseId: string, points: number) => void;
-  onEdit: (courseId: string, points: number) => void;
+  onEdit: (original: PulseCheckSubmission, courseId: string, points: number) => void;
+  onRemove: (submissionId: string) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const canEdit = !!ownSubmission && !ownSubmission.edited;
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const [addingAnother, setAddingAnother] = useState(false);
+  const [removingSub, setRemovingSub] = useState<PulseCheckSubmission | null>(null);
   const resultByCourse = new Map(results.map((r) => [r.course_id, r]));
   const histogramByCourse = new Map<string, PulseCheckHistogramBucket[]>();
   histograms.forEach((b) => {
@@ -102,39 +106,74 @@ function TermSection({
     list.push(b);
     histogramByCourse.set(b.course_id, list);
   });
+  const submittedCourseIds = new Set(ownSubmissions.map((s) => s.course_id));
+  const remainingCourses = courses.filter((c) => !submittedCourseIds.has(c.id));
 
   return (
     <section style={{ border: `1px solid ${COLOR.borderLight}`, borderRadius: 12, padding: "18px 20px", background: COLOR.surface }}>
       <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 12 }}>{term}</p>
 
-      {ownSubmission && !editing ? (
-        <SubmittedState
-          course={courses.find((c) => c.id === ownSubmission.course_id)}
-          points={ownSubmission.bid_points_estimate}
-          edited={ownSubmission.edited}
-          canEdit={canEdit}
-          onEditClick={() => setEditing(true)}
-        />
-      ) : (
-        <SubmitForm
-          courses={courses}
-          mode={ownSubmission ? "edit" : "submit"}
-          initialCourseId={ownSubmission?.course_id}
-          initialPoints={ownSubmission?.bid_points_estimate}
-          onConfirm={(courseId, points) => {
-            if (ownSubmission) {
-              onEdit(courseId, points);
-              setEditing(false);
-            } else {
-              onSubmit(courseId, points);
-            }
+      {ownSubmissions.map((sub) => (
+        editingCourseId === sub.course_id ? (
+          <SubmitForm
+            key={sub.id}
+            courses={courses.filter((c) => !submittedCourseIds.has(c.id) || c.id === sub.course_id)}
+            mode="edit"
+            initialCourseId={sub.course_id}
+            initialPoints={sub.bid_points_estimate}
+            onConfirm={(courseId, points) => {
+              onEdit(sub, courseId, points);
+              setEditingCourseId(null);
+            }}
+            onCancel={() => setEditingCourseId(null)}
+          />
+        ) : (
+          <SubmittedState
+            key={sub.id}
+            course={courses.find((c) => c.id === sub.course_id)}
+            points={sub.bid_points_estimate}
+            editCount={sub.edit_count}
+            canEdit={sub.edit_count < PULSE_CHECK_MAX_EDITS}
+            onEditClick={() => setEditingCourseId(sub.course_id)}
+            onRemoveClick={() => setRemovingSub(sub)}
+          />
+        )
+      ))}
+
+      {removingSub && (
+        <RemoveConfirmModal
+          courseName={courses.find((c) => c.id === removingSub.course_id)?.name ?? "this course"}
+          onCancel={() => setRemovingSub(null)}
+          onConfirm={() => {
+            onRemove(removingSub.id);
+            setRemovingSub(null);
           }}
-          onCancel={ownSubmission ? () => setEditing(false) : undefined}
         />
       )}
 
+      {addingAnother ? (
+        <SubmitForm
+          courses={remainingCourses}
+          mode="submit"
+          onConfirm={(courseId, points) => {
+            onSubmit(courseId, points);
+            setAddingAnother(false);
+          }}
+          onCancel={() => setAddingAnother(false)}
+        />
+      ) : ownSubmissions.length === 0 ? (
+        <SubmitForm courses={courses} mode="submit" onConfirm={onSubmit} />
+      ) : remainingCourses.length > 0 ? (
+        <button
+          onClick={() => setAddingAnother(true)}
+          style={{ fontSize: 12.5, fontWeight: 700, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+        >
+          + Add another course
+        </button>
+      ) : null}
+
       {courses.length > 0 && (
-        ownSubmission ? (
+        ownSubmissions.length > 0 ? (
           <div className="mt-5">
             <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>
               Cohort pulse
@@ -255,24 +294,32 @@ function MiniHistogram({ buckets }: { buckets: PulseCheckHistogramBucket[] }) {
 }
 
 function SubmittedState({
-  course, points, edited, canEdit, onEditClick,
-}: { course: Course | undefined; points: number; edited: boolean; canEdit: boolean; onEditClick: () => void }) {
+  course, points, editCount, canEdit, onEditClick, onRemoveClick,
+}: { course: Course | undefined; points: number; editCount: number; canEdit: boolean; onEditClick: () => void; onRemoveClick: () => void }) {
   return (
-    <div style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.greenTint, marginBottom: 4 }}>
+    <div style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.greenTint, marginBottom: 8 }}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <p style={{ fontSize: 13, fontWeight: 700, color: COLOR.green, fontFamily: FONT.sans }}>
-          ✓ {course?.name ?? "Unknown course"}{course?.professor ? ` (${course.professor})` : ""} — {points} pts{edited ? " (edited)" : ""}
+          ✓ {course?.name ?? "Unknown course"}{course?.professor ? ` (${course.professor})` : ""} — {points} pts{editCount > 0 ? ` (edited ${editCount}x)` : ""}
         </p>
-        {canEdit && (
+        <div className="flex items-center gap-3">
+          {canEdit && (
+            <button
+              onClick={onEditClick}
+              style={{ fontSize: 12, fontWeight: 700, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+            >
+              Edit ({PULSE_CHECK_MAX_EDITS - editCount} left)
+            </button>
+          )}
           <button
-            onClick={onEditClick}
-            style={{ fontSize: 12, fontWeight: 700, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+            onClick={onRemoveClick}
+            style={{ fontSize: 12, fontWeight: 700, color: COLOR.red, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}
           >
-            Edit (once)
+            Remove
           </button>
-        )}
+        </div>
       </div>
-      {edited && <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Locked — already edited once.</p>}
+      {!canEdit && <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Locked — used all {PULSE_CHECK_MAX_EDITS} allowed edits.</p>}
     </div>
   );
 }
@@ -347,7 +394,7 @@ function SubmitForm({
         )}
       </div>
       <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 6 }}>
-        One course per Block Week, min {MIN_BID_PER_COURSE} pts. Editable once.
+        One submission per course, min {MIN_BID_PER_COURSE} pts. Editable up to {PULSE_CHECK_MAX_EDITS} times, removable anytime.
       </p>
 
       {confirming && selectedCourse && (
@@ -360,6 +407,38 @@ function SubmitForm({
           onConfirm={handleConfirm}
         />
       )}
+    </div>
+  );
+}
+
+function RemoveConfirmModal({
+  courseName, onCancel, onConfirm,
+}: { courseName: string; onCancel: () => void; onConfirm: () => void }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div onClick={onCancel} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
+      <div style={{ position: "relative", background: COLOR.surface, borderRadius: 14, padding: 24, maxWidth: 380, width: "100%" }}>
+        <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 8 }}>
+          Remove this submission?
+        </p>
+        <p style={{ fontSize: 13.5, color: COLOR.ink2, fontFamily: FONT.sans, lineHeight: 1.5, marginBottom: 20 }}>
+          <strong>{courseName}</strong> will be pulled from the cohort pulse. You can submit a new bid for it (or a different course) afterward.
+        </p>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onCancel}
+            style={{ padding: "8px 14px", borderRadius: 7, border: `1px solid ${COLOR.border}`, background: COLOR.surface, color: COLOR.ink2, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer" }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{ padding: "8px 14px", borderRadius: 7, border: "none", background: COLOR.red, color: "#fff", fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer" }}
+          >
+            Remove
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -378,7 +457,7 @@ function ConfirmModal({
           <strong>{courseName}</strong> — {points} pts
         </p>
         <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, lineHeight: 1.5, marginBottom: 20 }}>
-          {mode === "edit" ? "This is your one allowed edit — locked after this." : "Editable once later, then locked."} {FAIR_USE_NOTE}
+          {mode === "edit" ? `Editable up to ${PULSE_CHECK_MAX_EDITS} times total.` : `Editable up to ${PULSE_CHECK_MAX_EDITS} times later, and removable anytime.`} {FAIR_USE_NOTE}
         </p>
         <div className="flex justify-end gap-2">
           <button

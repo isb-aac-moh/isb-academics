@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import type { PulseCheckSubmission, PulseCheckResult, PulseCheckHistogramBucket } from "../types";
 
 export const PULSE_CHECK_MIN_RESPONDENTS = 5;
+export const PULSE_CHECK_MAX_EDITS = 3;
 
 export function usePulseCheck(userId: string | undefined, liveBiddingTerms: string[]) {
   const [ownSubmissions, setOwnSubmissions] = useState<PulseCheckSubmission[]>([]);
@@ -48,7 +49,7 @@ export function usePulseCheck(userId: string | undefined, liveBiddingTerms: stri
       console.error("[usePulseCheck] submit failed:", error);
       setSubmitError(
         error.code === "23505"
-          ? "You've already submitted for this Block Week."
+          ? "You've already submitted a pulse for this course."
           : "Couldn't submit — check your connection and try again."
       );
       return;
@@ -56,17 +57,20 @@ export function usePulseCheck(userId: string | undefined, liveBiddingTerms: stri
     await reload();
   }
 
-  // Exactly one edit allowed, enforced at the RLS layer (the `edited` flag can
-  // only ever flip false -> true) — a rejected second attempt lands here as
-  // a generic "no rows updated" no-op from Supabase, not a thrown error.
-  async function edit(term: string, entry: { course_id: string; bid_points_estimate: number }) {
+  // Up to 3 edits allowed, enforced at the RLS layer (edit_count can only
+  // climb, and the update policy stops matching once it hits 3) — a rejected
+  // 4th attempt lands here as a generic "no rows updated" no-op from
+  // Supabase, not a thrown error. `original` is the submission being edited
+  // (there can be several per term); `entry.course_id` is what it's being
+  // changed to, which may be the same course or a different one.
+  async function edit(original: PulseCheckSubmission, entry: { course_id: string; bid_points_estimate: number }) {
     if (!userId) return;
     setSubmitError(null);
     const { data, error } = await supabase
       .from("pulse_check_submissions")
-      .update({ ...entry, edited: true })
+      .update({ ...entry, edit_count: original.edit_count + 1 })
+      .eq("id", original.id)
       .eq("user_id", userId)
-      .eq("term", term)
       .select("id");
     if (error) {
       console.error("[usePulseCheck] edit failed:", error);
@@ -74,11 +78,27 @@ export function usePulseCheck(userId: string | undefined, liveBiddingTerms: stri
       return;
     }
     if (!data || data.length === 0) {
-      setSubmitError("This submission has already been edited once and can't be changed again.");
+      setSubmitError("This submission has already used up its 3 allowed edits.");
       return;
     }
     await reload();
   }
 
-  return { ownSubmissions, results, histograms, loading, submitError, submit, edit };
+  async function remove(submissionId: string) {
+    if (!userId) return;
+    setSubmitError(null);
+    const { error } = await supabase
+      .from("pulse_check_submissions")
+      .delete()
+      .eq("id", submissionId)
+      .eq("user_id", userId);
+    if (error) {
+      console.error("[usePulseCheck] remove failed:", error);
+      setSubmitError("Couldn't remove that submission — check your connection and try again.");
+      return;
+    }
+    await reload();
+  }
+
+  return { ownSubmissions, results, histograms, loading, submitError, submit, edit, remove };
 }
