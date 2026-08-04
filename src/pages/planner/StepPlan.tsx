@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { COLOR, FONT } from "../../lib/theme";
-import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, allCoursesForArea, isLiveNow, isBiddableTerm, chosenConcentrationFor, TERM_CREDIT_LIMITS } from "../../lib/creditProgress";
+import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, allCoursesForArea, isLiveNow, isBiddableTerm, chosenConcentrationFor, BIDDABLE_TERM_ORDER } from "../../lib/creditProgress";
 import { relevanceTags } from "../../lib/relevance";
 import type { StudentAcademicProfile, Course, GatingCoreCourse, Resource } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
 import { MIN_BID_PER_COURSE } from "../../hooks/useBidPlan";
 
-const TERM_ORDER = Object.keys(TERM_CREDIT_LIMITS);
+const TERM_ORDER = BIDDABLE_TERM_ORDER;
 
 interface Props {
   profile: StudentAcademicProfile;

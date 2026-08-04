@@ -36,7 +36,7 @@ export default function BiddingPlanner() {
   const { resources } = useResources();
   const { profile, saveError, save } = useAcademicProfile(user.id);
   const { entries, addEntry, removeEntry, pointsPlanned } = useBidPlan(user.id);
-  const { liveBiddingTerms } = useAppSettings();
+  const { liveBiddingTerms, termCreditLimits } = useAppSettings();
   const { profiles: gradingProfiles } = useCourseGradingProfiles();
 
   const step = STEPS.findIndex((s) => s.key === stepKey);
@@ -140,6 +140,7 @@ export default function BiddingPlanner() {
             pointsPlanned={pointsPlanned}
             reserved={reserved}
             exchangePointsUsed={exchangePointsUsed}
+            termCreditLimits={termCreditLimits}
             onRemove={removeEntry}
           />
         )}

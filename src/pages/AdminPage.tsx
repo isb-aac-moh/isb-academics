@@ -2,7 +2,7 @@
  * Admin — for the AAC resource coordinator (Anuj) to manage courses, resources,
  * and notifications without needing a code change. Gated on user.is_admin (App.tsx).
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { LayoutGrid, GraduationCap, BookOpen, Megaphone, Pin, Link2, ArrowUp, ArrowDown } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
@@ -14,7 +14,7 @@ import { useNavLinks } from "../hooks/useNavLinks";
 import { useAppSettings } from "../hooks/useAppSettings";
 import { supabase } from "../lib/supabase";
 import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS } from "../lib/options";
-import { TERM_CREDIT_LIMITS } from "../lib/creditProgress";
+import { BIDDABLE_TERM_ORDER } from "../lib/creditProgress";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
 import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility, CourseGradingProfile } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
@@ -101,6 +101,7 @@ function Overview({ onNavigate }: { onNavigate: (t: Tab) => void }) {
       </div>
 
       <LiveBiddingSettings />
+      <TermCreditLimitsSettings />
 
       <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 10 }}>Resources by category</p>
       <div className="space-y-1.5 mb-8" style={{ maxWidth: 420 }}>
@@ -138,7 +139,7 @@ function Overview({ onNavigate }: { onNavigate: (t: Tab) => void }) {
 // Which term(s)/block week(s) show as "Live now" in the Bidding Planner — used to
 // be a hardcoded constant requiring a code change + redeploy every time ISB opens
 // a new bidding round. Now just an admin-editable setting.
-const BIDDABLE_TERMS = Object.keys(TERM_CREDIT_LIMITS);
+const BIDDABLE_TERMS = BIDDABLE_TERM_ORDER;
 
 function LiveBiddingSettings() {
   const { liveBiddingTerms, loading, saveLiveBiddingTerms } = useAppSettings();
@@ -167,6 +168,78 @@ function LiveBiddingSettings() {
         ))}
       </div>
       {saving && <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 8 }}>Saving…</p>}
+    </div>
+  );
+}
+
+// Per-term min/max elective credits — used to be the hardcoded TERM_CREDIT_LIMITS
+// constant in creditProgress.ts. Now admin-editable for the same reason
+// live_bidding_terms is: ISB's own limits can change term to term without needing
+// a code change + redeploy.
+function TermCreditLimitsSettings() {
+  const { termCreditLimits, loading, saveTermCreditLimits } = useAppSettings();
+  const [draft, setDraft] = useState(termCreditLimits);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!dirty) setDraft(termCreditLimits);
+  }, [termCreditLimits, dirty]);
+
+  function update(term: string, field: "min" | "max", value: number) {
+    setDraft((d) => ({ ...d, [term]: { ...d[term], [field]: value } }));
+    setDirty(true);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    await saveTermCreditLimits(draft);
+    setSaving(false);
+    setDirty(false);
+  }
+
+  if (loading) return null;
+
+  return (
+    <div style={{ padding: 16, borderRadius: 10, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, marginBottom: 20 }}>
+      <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 4 }}>Term elective credit limits</p>
+      <p style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 10 }}>
+        Min/max elective credits a student can bid in each term/Block Week — shown as a check in the Bidding Planner's budget step.
+      </p>
+      <div className="space-y-1.5" style={{ maxWidth: 420 }}>
+        {BIDDABLE_TERM_ORDER.map((term) => {
+          const limit = draft[term] ?? { min: 0, max: 0 };
+          return (
+            <div key={term} className="flex items-center gap-2">
+              <span style={{ width: 110, fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink2, flexShrink: 0 }}>{term}</span>
+              <input
+                type="number" min={0} value={limit.min}
+                onChange={(e) => update(term, "min", Number(e.target.value))}
+                style={{ width: 56, padding: "4px 6px", borderRadius: 6, border: `1px solid ${COLOR.border}`, fontSize: 12, fontFamily: FONT.sans }}
+              />
+              <span style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans }}>to</span>
+              <input
+                type="number" min={0} value={limit.max}
+                onChange={(e) => update(term, "max", Number(e.target.value))}
+                style={{ width: 56, padding: "4px 6px", borderRadius: 6, border: `1px solid ${COLOR.border}`, fontSize: 12, fontFamily: FONT.sans }}
+              />
+              <span style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans }}>credits</span>
+            </div>
+          );
+        })}
+      </div>
+      {dirty && (
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{
+            marginTop: 12, padding: "7px 14px", borderRadius: 7, border: "none", fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans,
+            background: COLOR.navyHero, color: "#fff", cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1,
+          }}
+        >
+          {saving ? "Saving…" : "Save changes"}
+        </button>
+      )}
     </div>
   );
 }

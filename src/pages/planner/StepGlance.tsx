@@ -4,12 +4,12 @@
  * load, workload profile, and the full brief per course, per planned term.
  */
 import { COLOR, FONT } from "../../lib/theme";
-import { TERM_CREDIT_LIMITS } from "../../lib/creditProgress";
+import { BIDDABLE_TERM_ORDER } from "../../lib/creditProgress";
 import type { Course, CourseGradingProfile } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
 import TermGlance from "./TermGlance";
 
-const TERM_ORDER = Object.keys(TERM_CREDIT_LIMITS);
+const TERM_ORDER = BIDDABLE_TERM_ORDER;
 
 interface Props {
   courses: Course[];

@@ -161,21 +161,23 @@ export interface AppSettings {
   id: true;
   live_bidding_terms: string[];
   pulse_check_cutoff: string;
+  term_credit_limits: Record<string, { min: number; max: number }>;
   updated_at: string;
 }
 
 // Cohort Bidding Pulse Check — see supabase/migrations/20260730090000_pulse_check.sql
-// and 20260730090200_pulse_check_allow_one_edit.sql. A student's own submission
-// can be edited exactly once (RLS-enforced via the `edited` flag, not just a
-// UI restriction) and is never readable by other students as a raw row —
-// only through the threshold-gated pulse_check_results_by_term() RPC below.
+// and 20260804160000_pulse_check_edit_cap_and_delete.sql. A student's own
+// submission can be edited up to 3 times and removed outright at any point
+// (both RLS-enforced via edit_count / a delete policy, not just a UI
+// restriction) and is never readable by other students as a raw row — only
+// through the threshold-gated pulse_check_results_by_term() RPC below.
 export interface PulseCheckSubmission {
   id: string;
   user_id: string;
   course_id: string;
   term: string; // denormalized from courses.term at submit time
   bid_points_estimate: number;
-  edited: boolean; // true after the one allowed edit — no further changes possible
+  edit_count: number; // 0-3; no further edits possible once it hits 3
   created_at: string;
 }
 

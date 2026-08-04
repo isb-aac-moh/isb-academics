@@ -12,9 +12,18 @@ export interface SecuredCourseEntry {
   course_id: string | null;
 }
 
-// ISB's own term-wise elective credit limits (Elective Bidding FAQ Q9 / Elective
-// Course Registration doc) — used to show per-term progress in the bid budget.
-export const TERM_CREDIT_LIMITS: Record<string, { min: number; max: number }> = {
+// Which terms/block weeks are ever biddable, and the order they display in —
+// structural (ISB's bidding calendar shape), unlike the min/max credit values
+// below, which are admin-editable via app_settings.term_credit_limits since
+// ISB can change those term to term without a code change + redeploy.
+export const BIDDABLE_TERM_ORDER = [
+  "Term 4", "Term 5", "Term 6", "Term 7",
+  "Block Week 1", "Block Week 2", "Block Week 3", "Block Week 4",
+];
+
+// Fallback used until app_settings.term_credit_limits loads, and to fill in
+// any term the admin-edited value is missing — see useAppSettings.
+export const DEFAULT_TERM_CREDIT_LIMITS: Record<string, { min: number; max: number }> = {
   "Term 4": { min: 3, max: 4 },
   "Term 5": { min: 3, max: 5 },
   "Term 6": { min: 3, max: 4 },
@@ -29,7 +38,7 @@ export const TERM_CREDIT_LIMITS: Record<string, { min: number; max: number }> = 
 // courses (Term 1-4) are never bid on (Elective Bidding FAQ, Flexi Core doc:
 // "there is no bidding involved in this process").
 export function isBiddableTerm(term: string) {
-  return term in TERM_CREDIT_LIMITS;
+  return BIDDABLE_TERM_ORDER.includes(term);
 }
 
 /**
