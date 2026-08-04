@@ -28,22 +28,22 @@ import type { Course, StudentAcademicProfile, User } from "../types";
 
 const TERM_ORDER = TERM_SEQUENCE.filter(isBiddableTerm);
 const EARLIER_TERMS = ["Term 1", "Term 2", "Term 3"];
-const GRADE_OPTIONS = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F", "Pass", "Fail"];
+const GRADE_OPTIONS = ["A", "A-", "B", "B-", "C", "C-", "D", "F", "Pass", "Fail"];
 const GRADE_GROUPS: DropdownGroup[] = [{ label: "Grade", options: GRADE_OPTIONS.map((g) => ({ value: g, label: g })) }];
 
 // ISB's actual scale, confirmed against a real elearn.isb.edu letter grade
 // report (Eshan's own Term 1: C=2, B=3, A-=3.5, credit-weighted average
 // reproduced that report's GPA of 3.18 exactly). Whole letters sit on integers
-// (A=4, B=3, C=2, D=1, F=0); +/- shifts by 0.5, capped at 4.0 for A+. Only
-// C/B/A- are directly confirmed — the rest follow that same confirmed step
-// pattern, not independently verified.
+// (A=4, B=3, C=2, D=1, F=0); the "-" grades shift down by 0.5. ISB has no "+"
+// grades. Only C/B/A- are directly confirmed — the rest follow that same
+// confirmed step pattern, not independently verified.
 // Pass/Fail-designated courses are excluded from GPA per the Programme
 // Structure doc; the letter grade "F" (a real failing grade, not a Pass/Fail
 // course) still counts.
 const GRADE_POINTS: Record<string, number> = {
-  "A+": 4.0, "A": 4.0, "A-": 3.5,
-  "B+": 3.5, "B": 3.0, "B-": 2.5,
-  "C+": 2.5, "C": 2.0, "C-": 1.5,
+  "A": 4.0, "A-": 3.5,
+  "B": 3.0, "B-": 2.5,
+  "C": 2.0, "C-": 1.5,
   "D": 1.0, "F": 0.0,
 };
 
