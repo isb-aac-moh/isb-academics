@@ -10,6 +10,7 @@ export const REQUIRED_CREDITS_PER_AREA = 6;
 // runs unchanged against either the Bidding Planner or the Credit Tracker.
 export interface SecuredCourseEntry {
   course_id: string | null;
+  term: string;
 }
 
 // Which terms/block weeks are ever biddable, and the order they display in —
@@ -88,7 +89,7 @@ export function coursesCountingToward(
       : c.industry_specializations.includes(area as IndustrySpecialization);
 
   const convertedCodes = new Set(convertedFlexiCourses(profile, courses).map((c) => c.code));
-  const plannedCourseIds = new Set(bidEntries.map((e) => e.course_id));
+  const plannedCourseIds = new Set(bidEntries.filter((e) => isBiddableTerm(e.term)).map((e) => e.course_id));
 
   return courses.filter((c) => matches(c) && (convertedCodes.has(c.code) || plannedCourseIds.has(c.id)));
 }
@@ -96,10 +97,12 @@ export function coursesCountingToward(
 /** Total elective credits secured toward the 18-credit graduation requirement: converted Flexi + planned bid entries. */
 export function totalElectiveCreditsSecured(profile: StudentAcademicProfile, courses: Course[], bidEntries: SecuredCourseEntry[]): number {
   const convertedCredits = convertedFlexiCourses(profile, courses).reduce((sum, c) => sum + Number(c.credits), 0);
-  const plannedCredits = bidEntries.reduce((sum, e) => {
-    const course = courses.find((c) => c.id === e.course_id);
-    return sum + (course ? Number(course.credits) : 0);
-  }, 0);
+  const plannedCredits = bidEntries
+    .filter((e) => isBiddableTerm(e.term))
+    .reduce((sum, e) => {
+      const course = courses.find((c) => c.id === e.course_id);
+      return sum + (course ? Number(course.credits) : 0);
+    }, 0);
   return convertedCredits + plannedCredits;
 }
 
