@@ -755,6 +755,13 @@ function openModal(code){
 }
 document.getElementById('modalClose').addEventListener('click', ()=>document.getElementById('modalBg').classList.remove('open'));
 document.getElementById('modalBg').addEventListener('click', (e)=>{ if(e.target.id==='modalBg') document.getElementById('modalBg').classList.remove('open'); });
+document.getElementById('mBody').addEventListener('click', (e)=>{
+  const link = e.target.closest('.outline-link');
+  if(link){
+    e.preventDefault();
+    window.open(link.href, '_blank', 'noopener,noreferrer');
+  }
+});
 
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
