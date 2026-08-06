@@ -17,11 +17,23 @@ interface Props {
   bidEntries: BidPlanEntry[];
   pointsAvailable: number;
   liveBiddingTerms: string[];
+  termCreditLimits: Record<string, { min: number; max: number }>;
   onAdd: (courseId: string, term: string, points: number) => Promise<void>;
   onRemove: (id: string) => void;
 }
 
-export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, pointsAvailable, liveBiddingTerms, onAdd, onRemove }: Props) {
+export default function StepPlan({ profile, save, courses, gatingCourses, resources, bidEntries, pointsAvailable, liveBiddingTerms, termCreditLimits, onAdd, onRemove }: Props) {
+  // Credits already planned per term, so the picker can block adding a course
+  // that would push a term past the admin-set max (StepBudget only warns, doesn't block).
+  const creditsByTerm = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const e of bidEntries) {
+      const course = courses.find((c) => c.id === e.course_id);
+      if (!course) continue;
+      map[e.term] = (map[e.term] ?? 0) + Number(course.credits);
+    }
+    return map;
+  }, [bidEntries, courses]);
   const blockedConcentrations = useMemo(() => {
     const failed = new Set(profile.failed_gating_courses);
     return new Set(gatingCourses.filter((g) => failed.has(g.id)).map((g) => g.blocks_concentration));
@@ -62,6 +74,8 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
           bidEntries={bidEntries}
           pointsAvailable={pointsAvailable}
           liveBiddingTerms={liveBiddingTerms}
+          termCreditLimits={termCreditLimits}
+          creditsByTerm={creditsByTerm}
           onAdd={onAdd}
           onRemove={onRemove}
         />
@@ -74,6 +88,8 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
         bidEntries={bidEntries}
         pointsAvailable={pointsAvailable}
         liveBiddingTerms={liveBiddingTerms}
+        termCreditLimits={termCreditLimits}
+        creditsByTerm={creditsByTerm}
         onAdd={onAdd}
         onRemove={onRemove}
       />
@@ -82,10 +98,11 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
 }
 
 function GeneralElectivesCard({
-  courses, profile, save, resources, bidEntries, pointsAvailable, liveBiddingTerms, onAdd, onRemove,
+  courses, profile, save, resources, bidEntries, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, onAdd, onRemove,
 }: {
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; liveBiddingTerms: string[];
+  termCreditLimits: Record<string, { min: number; max: number }>; creditsByTerm: Record<string, number>;
   onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
   const entryIdByCourseId = new Map(bidEntries.filter((e) => e.course_id).map((e) => [e.course_id as string, e.id]));
@@ -108,6 +125,8 @@ function GeneralElectivesCard({
         entryIdByCourseId={entryIdByCourseId}
         pointsAvailable={pointsAvailable}
         liveBiddingTerms={liveBiddingTerms}
+        termCreditLimits={termCreditLimits}
+        creditsByTerm={creditsByTerm}
         onAdd={onAdd}
         onRemove={onRemove}
       />
@@ -120,11 +139,12 @@ function GeneralElectivesCard({
 }
 
 function AreaCard({
-  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, liveBiddingTerms, onAdd, onRemove,
+  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, onAdd, onRemove,
 }: {
   area: string; kind: "concentration" | "specialization"; blocked: boolean;
   profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; liveBiddingTerms: string[];
+  termCreditLimits: Record<string, { min: number; max: number }>; creditsByTerm: Record<string, number>;
   onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
   const credits = creditsCountingToward(area as never, kind, profile, courses, bidEntries);
@@ -161,6 +181,8 @@ function AreaCard({
         entryIdByCourseId={entryIdByCourseId}
         pointsAvailable={pointsAvailable}
         liveBiddingTerms={liveBiddingTerms}
+        termCreditLimits={termCreditLimits}
+        creditsByTerm={creditsByTerm}
         onAdd={onAdd}
         onRemove={onRemove}
       />
@@ -179,10 +201,11 @@ function AreaCard({
  * extra click to see what's coming next.
  */
 function CourseListByTerm({
-  courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, liveBiddingTerms, onAdd, onRemove,
+  courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, onAdd, onRemove,
 }: {
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   allCourses: Course[]; resources: Resource[]; entryIdByCourseId: Map<string, string>; pointsAvailable: number; liveBiddingTerms: string[];
+  termCreditLimits: Record<string, { min: number; max: number }>; creditsByTerm: Record<string, number>;
   onAdd: (courseId: string, term: string, points: number) => Promise<void>; onRemove: (id: string) => void;
 }) {
   const liveNow = courses.filter((c) => isLiveNow(c.term, liveBiddingTerms));
@@ -201,6 +224,8 @@ function CourseListByTerm({
         resources={resources}
         alreadyAdded={entryId !== undefined}
         pointsAvailable={pointsAvailable}
+        termLimit={termCreditLimits[c.term]}
+        creditsInTerm={creditsByTerm[c.term] ?? 0}
         onAdd={(pts) => onAdd(c.id, c.term, pts)}
         onRemove={entryId ? () => onRemove(entryId) : undefined}
       />
@@ -234,15 +259,17 @@ function CourseListByTerm({
 }
 
 function CourseRow({
-  course, profile, save, allCourses, resources, alreadyAdded, pointsAvailable, onAdd, onRemove,
+  course, profile, save, allCourses, resources, alreadyAdded, pointsAvailable, termLimit, creditsInTerm, onAdd, onRemove,
 }: {
   course: Course; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   allCourses: Course[]; resources: Resource[]; alreadyAdded: boolean; pointsAvailable: number;
+  termLimit?: { min: number; max: number }; creditsInTerm: number;
   onAdd: (points: number) => Promise<void>; onRemove?: () => void;
 }) {
   const [points, setPoints] = useState(MIN_BID_PER_COURSE);
   const [submitting, setSubmitting] = useState(false);
   const exceedsBudget = points > pointsAvailable;
+  const exceedsTermLimit = termLimit !== undefined && creditsInTerm + Number(course.credits) > termLimit.max;
   async function handleAdd() {
     setSubmitting(true);
     try {
@@ -296,11 +323,12 @@ function CourseRow({
               />
               <button
                 onClick={handleAdd}
-                disabled={exceedsBudget || submitting}
+                disabled={exceedsBudget || exceedsTermLimit || submitting}
                 style={{
                   padding: "6px 11px", borderRadius: 7, border: "none", fontSize: 12, fontWeight: 700, fontFamily: FONT.sans,
-                  background: exceedsBudget || submitting ? COLOR.border : COLOR.navyHero, color: exceedsBudget || submitting ? COLOR.ink3 : "#fff",
-                  cursor: exceedsBudget || submitting ? "not-allowed" : "pointer",
+                  background: exceedsBudget || exceedsTermLimit || submitting ? COLOR.border : COLOR.navyHero,
+                  color: exceedsBudget || exceedsTermLimit || submitting ? COLOR.ink3 : "#fff",
+                  cursor: exceedsBudget || exceedsTermLimit || submitting ? "not-allowed" : "pointer",
                 }}
               >
                 {submitting ? "Adding…" : "Add"}
@@ -309,6 +337,11 @@ function CourseRow({
             {exceedsBudget && (
               <p style={{ fontSize: 10.5, color: COLOR.red, fontFamily: FONT.sans, textAlign: "right", maxWidth: 160 }}>
                 Only {pointsAvailable} pts left of your 4,500 budget — lower your bid to add this.
+              </p>
+            )}
+            {!exceedsBudget && exceedsTermLimit && termLimit && (
+              <p style={{ fontSize: 10.5, color: COLOR.red, fontFamily: FONT.sans, textAlign: "right", maxWidth: 160 }}>
+                {course.term} is capped at {termLimit.max} credit{termLimit.max === 1 ? "" : "s"} — this would push you to {creditsInTerm + Number(course.credits)}.
               </p>
             )}
           </div>
