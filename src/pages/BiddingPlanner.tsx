@@ -126,6 +126,7 @@ export default function BiddingPlanner() {
             bidEntries={entries}
             pointsAvailable={pointsAvailable}
             liveBiddingTerms={liveBiddingTerms}
+            termCreditLimits={termCreditLimits}
             onAdd={(courseId, term, points) => addEntry({ course_id: courseId, term, planned_points: points })}
             onRemove={removeEntry}
           />
