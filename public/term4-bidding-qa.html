@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Term 4 Elective Bidding — Q&A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#101820;
+    --paper:#F7F5F0;
+    --paper-raised:#FFFFFF;
+    --rule:#D8D3C6;
+    --navy:#1B3358;
+    --navy-deep:#0F1F38;
+    --brass:#9C7A3C;
+    --brass-soft:#C9A96A;
+    --stamp-red:#8C3B2E;
+    --green-ok:#3D6B4F;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Source Serif 4', serif;
+    --sans: 'Inter', sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.012) 0px, rgba(0,0,0,0.012) 1px, transparent 1px, transparent 3px),
+      var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ===== HEADER / LEDGER MASTHEAD ===== */
+  header{
+    position:relative;
+    padding:64px 24px 40px;
+    max-width:1000px;
+    margin:0 auto;
+    border-bottom:3px double var(--ink);
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--navy);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px;height:8px;
+    background:var(--stamp-red);
+    border-radius:50%;
+    display:inline-block;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(2.2rem, 5vw, 3.6rem);
+    line-height:1.04;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+  h1 em{
+    font-style:italic;
+    color:var(--navy);
+  }
+  .sub{
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    max-width:640px;
+    color:#3a3a3a;
+    margin:0 0 28px;
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:#6b6558;
+    letter-spacing:.02em;
+  }
+  .meta-row span b{color:var(--ink); font-weight:600;}
+
+  /* ===== PHASE RAIL (signature element) ===== */
+  .rail-wrap{
+    max-width:1000px;
+    margin:0 auto;
+    padding:44px 24px 8px;
+  }
+  .rail-title{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:#7a7466;
+    margin-bottom:16px;
+  }
+  .rail{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:0;
+    border:1px solid var(--rule);
+    background:var(--paper-raised);
+  }
+  .rail a{
+    text-decoration:none;
+    color:var(--ink);
+    padding:16px 12px 14px;
+    border-right:1px solid var(--rule);
+    position:relative;
+    transition:background .15s ease;
+    display:block;
+  }
+  .rail a:last-child{border-right:none;}
+  .rail a:hover{background:#EFEAE0;}
+  .rail .pnum{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--brass);
+    letter-spacing:.1em;
+    display:block;
+    margin-bottom:6px;
+  }
+  .rail .pname{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:14px;
+    line-height:1.25;
+    display:block;
+  }
+  @media (max-width:760px){
+    .rail{grid-template-columns:repeat(3,1fr);}
+    .rail a:nth-child(3){border-right:none;}
+    .rail a:nth-child(n+4){border-top:1px solid var(--rule);}
+  }
+  @media (max-width:480px){
+    .rail{grid-template-columns:repeat(2,1fr);}
+    .rail a:nth-child(even){border-right:none;}
+    .rail a:nth-child(n+3){border-top:1px solid var(--rule);}
+  }
+
+  /* ===== MAIN ===== */
+  main{
+    max-width:1000px;
+    margin:0 auto;
+    padding:56px 24px 100px;
+  }
+
+  section.phase{
+    margin-bottom:64px;
+    scroll-margin-top:24px;
+  }
+  .phase-head{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    padding-bottom:18px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:8px;
+  }
+  .phase-head .num{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--paper);
+    background:var(--navy);
+    padding:5px 10px;
+    letter-spacing:.05em;
+    white-space:nowrap;
+  }
+  .phase-head h2{
+    font-family:var(--serif);
+    font-size:clamp(1.5rem,3vw,2rem);
+    margin:0;
+    line-height:1.15;
+  }
+  .phase-window{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--stamp-red);
+    margin:14px 0 6px;
+    letter-spacing:.01em;
+  }
+  .phase-window::before{content:"⏱ "; opacity:.7;}
+  .phase-desc{
+    font-size:15px;
+    line-height:1.65;
+    color:#403c34;
+    max-width:680px;
+    margin:0 0 28px;
+  }
+
+  /* Q&A pairs */
+  .qa{
+    display:grid;
+    grid-template-columns:44px 1fr;
+    gap:0 18px;
+    padding:22px 0;
+    border-top:1px solid var(--rule);
+  }
+  .qa:last-child{border-bottom:1px solid var(--rule);}
+  .qmark{
+    font-family:var(--serif);
+    font-weight:700;
+    font-style:italic;
+    font-size:26px;
+    color:var(--brass-soft);
+    line-height:1;
+    padding-top:2px;
+  }
+  .qa-body q{
+    quotes:none;
+  }
+  .q-text{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:15.5px;
+    color:var(--navy-deep);
+    margin:0 0 8px;
+    line-height:1.4;
+  }
+  .a-text{
+    font-size:14.5px;
+    line-height:1.7;
+    color:#333;
+    margin:0;
+  }
+  .a-text + .a-text{margin-top:10px;}
+  .a-text b{color:var(--ink);}
+  .a-text code{
+    font-family:var(--mono);
+    background:#EFEAE0;
+    padding:1px 6px;
+    font-size:13px;
+    border:1px solid var(--rule);
+  }
+  .flag{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:2px 8px;
+    margin-top:10px;
+    border:1px solid currentColor;
+  }
+  .flag.warn{color:var(--stamp-red);}
+  .flag.ok{color:var(--green-ok);}
+  .flag.note{color:var(--navy);}
+
+  /* Scenario callout blocks */
+  .scenario{
+    margin-top:26px;
+    border:1px solid var(--navy);
+    background:#EDF1F6;
+    padding:20px 22px;
+    position:relative;
+  }
+  .scenario::before{
+    content:"WORKED EXAMPLE";
+    position:absolute;
+    top:-10px;
+    left:18px;
+    background:var(--navy);
+    color:var(--paper);
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.14em;
+    padding:3px 10px;
+  }
+  .scenario p{
+    font-size:14px;
+    line-height:1.7;
+    margin:10px 0 0;
+    color:#1c2b3f;
+  }
+  .scenario p:first-of-type{margin-top:6px;}
+  .scenario .steps{
+    margin:12px 0 0;
+    padding-left:0;
+    list-style:none;
+  }
+  .scenario .steps li{
+    font-family:var(--mono);
+    font-size:12.5px;
+    padding:6px 0 6px 22px;
+    position:relative;
+    border-top:1px dashed #B9C6D6;
+  }
+  .scenario .steps li:first-child{border-top:none;}
+  .scenario .steps li::before{
+    content:"→";
+    position:absolute;
+    left:0;
+    color:var(--brass);
+  }
+
+  /* Credit / points ledger table */
+  .ledger{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:24px;
+    font-size:13.5px;
+  }
+  .ledger caption{
+    text-align:left;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:#7a7466;
+    margin-bottom:10px;
+  }
+  .ledger th,.ledger td{
+    padding:10px 14px;
+    border:1px solid var(--rule);
+    text-align:left;
+  }
+  .ledger thead th{
+    background:var(--navy);
+    color:var(--paper);
+    font-family:var(--mono);
+    font-weight:500;
+    font-size:11.5px;
+    letter-spacing:.04em;
+  }
+  .ledger tbody tr:nth-child(even){background:#EFEAE0;}
+
+  /* Footer */
+  footer{
+    max-width:1000px;
+    margin:0 auto;
+    padding:40px 24px 80px;
+    border-top:3px double var(--ink);
+  }
+  footer p{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#7a7466;
+    line-height:1.8;
+  }
+  footer a{color:var(--navy);}
+
+  ::selection{background:var(--brass-soft); color:var(--navy-deep);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Term 4 Bidding,<br><em>phase by phase.</em></h1>
+  <div class="eyebrow">Brought to you by Academic Affairs Council, Co'27</div>
+  <p class="sub">A working Q&A for the six-phase elective term cycle — what each round lets you do, what it doesn't, and how a dropped course, an attended class, or a missed deadline actually plays out.</p>
+  <div class="meta-row">
+    <span>Cycle: <b>Elective Term (6 phases)</b></span>
+    <span>Total bid points: <b>4,500</b></span>
+    <span>Min. bid / course: <b>100 pts</b></span>
+    <span>Applies to: <b>Term 4 &amp; 6</b></span>
+  </div>
+</header>
+
+<div class="rail-wrap">
+  <div class="rail-title">Jump to phase</div>
+  <div class="rail">
+    <a href="#p1"><span class="pnum">01</span><span class="pname">Add — Initial Bid</span></a>
+    <a href="#p2"><span class="pnum">02</span><span class="pname">Pre-Sample Drop</span></a>
+    <a href="#p3"><span class="pnum">03</span><span class="pname">Post-Sample Drop</span></a>
+    <a href="#p4"><span class="pnum">04</span><span class="pname">Post-Sampling Add</span></a>
+    <a href="#p5"><span class="pnum">05</span><span class="pname">Final Drop</span></a>
+    <a href="#p6"><span class="pnum">06</span><span class="pname">Counselling</span></a>
+  </div>
+</div>
+
+<main>
+
+  <!-- PHASE 1 -->
+  <section class="phase" id="p1">
+    <div class="phase-head">
+      <span class="num">PHASE 1</span>
+      <h2>Add — Initial Sealed Bidding</h2>
+    </div>
+    <div class="phase-window">First Saturday of the prior term, 10:00h → Monday 08:00h, Week 2 of the prior term · Duration: 2 days</div>
+    <p class="phase-desc">Your only entry point into the cycle. You submit sealed bids on faculty-course combinations without seeing anyone else's numbers. Miss this and Phase 4 or the offline counselling round are your only ways back in.</p>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">How many courses can I bid on, and how many bid points do I have?</p>
+        <p class="a-text">You have <b>4,500 points total</b>. Term Max Credits in Term 4 is <b>4</b> (min 3), so you can hold bids across as many courses as you like up to that credit ceiling. Minimum bid per course is <b>100 points</b>.</p>
+        <p class="a-text">The system automatically reserves 100 points per remaining required credit, so you can't accidentally bid yourself out of graduation requirements.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">What happens if two students place the same bid?</p>
+        <p class="a-text">Your <b>tiebreaker score</b> — a random number assigned and shared during Phase 1 — decides it. Lower score wins priority. It's fixed for the term once assigned.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Can I edit a bid after submitting it?</p>
+        <p class="a-text">Yes, any time before the round closes. Bids auto-save; there's no manual submit button. When the countdown hits zero, whatever's in your Bid Consideration Set locks in.</p>
+      </div>
+    </div>
+
+    <div class="scenario">
+      <p><b>Registering 4 courses instead of the minimum 3</b> — perfectly fine, since Term 4's max is 4 credits. Nothing stops you from bidding the ceiling in Phase 1 and deciding later which one to keep or drop.</p>
+    </div>
+  </section>
+
+  <!-- PHASE 2 -->
+  <section class="phase" id="p2">
+    <div class="phase-head">
+      <span class="num">PHASE 2</span>
+      <h2>Pre-Sample Drop</h2>
+    </div>
+    <div class="phase-window">Friday 10:00h → Saturday 10:00h, Week 2 (prior term) · Duration: 1 day</div>
+    <p class="phase-desc">Still before the term has started — no classes exist yet. You get your first look at indicative clearing prices (ICP1) and can rebalance by dropping, but you cannot add or increase bids.</p>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Can I attend a class and then decide here?</p>
+        <p class="a-text">No — Phase 2 runs entirely within the <b>prior term</b>, before Term 4 classes begin. There's nothing to attend yet. This phase is for reacting to <b>indicative clearing prices</b>, not classroom experience.</p>
+        <span class="flag note">Classes haven't started</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">What can I actually do here?</p>
+        <p class="a-text">Drop any tentatively registered or waitlisted course — points refund post-processing. You cannot place new bids or raise existing ones. Real-time bid fluctuations aren't shown, only the indicative price.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">What if ASA drops a course I bid on?</p>
+        <p class="a-text">Points are refunded immediately. That course is gone for good — <b>once dropped from the offerings, it can't be added back.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 3 -->
+  <section class="phase" id="p3">
+    <div class="phase-head">
+      <span class="num">PHASE 3</span>
+      <h2>Post-Sample Drop</h2>
+    </div>
+    <div class="phase-window">Term Days 1–2, until 2 hours after the last class on Day 2 (~Tuesday) · Duration: ~2 days</div>
+    <p class="phase-desc">Classes have actually started. This is the phase built for exactly the "attend first, then decide" approach — you can sit in a session and drop what doesn't work before locking in.</p>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">I registered 4 courses in Phase 1. I want to attend a class before deciding which to drop — and I'm not adding anything new. Does that work?</p>
+        <p class="a-text">Yes. This is precisely what Phase 3 is for. You attend the first session(s), then use <code>Drop</code> next to whichever course you no longer want. Points refund post-processing, and you're left with your remaining registered courses — no need to touch Phase 4 at all.</p>
+        <span class="flag ok">Fits your case exactly</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">If I attend a class, drop that course, then add a different one later in Phase 4 — do I lose that attended class?</p>
+        <p class="a-text">Not automatically lost, but not automatically carried either. The deck states: <b>attendance from a dropped course is transferable to the first new course added as a replacement</b> — but this transfer is done <b>offline via the LMS</b>, not by the system itself.</p>
+        <p class="a-text">So the mechanism exists, but it requires manual processing. If you drop in Phase 3 and later add a replacement in Phase 4, follow up with ASA/LMS to confirm the transfer actually posted.</p>
+        <span class="flag warn">Manual, offline step — confirm with ASA</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Can I still see courses I dropped in earlier phases?</p>
+        <p class="a-text">Yes — the Overview shows Pre-Enrolled Courses, Tentatively Registered/Waitlisted Courses, and Dropped Courses, so your full history through Phase 3 stays visible.</p>
+      </div>
+    </div>
+
+    <div class="scenario">
+      <p><b>Your exact scenario — attend, then drop, no new add:</b></p>
+      <ul class="steps">
+        <li>Phase 1: bid and get tentatively registered for 4 courses (Term 4 max is 4)</li>
+        <li>Term begins; Days 1–2 classes run</li>
+        <li>You attend one or more of the 4 classes</li>
+        <li>Phase 3 window is open (until 2 hrs after last class, Day 2)</li>
+        <li>Click <code>Drop</code> on the course you don't want — confirm the prompt</li>
+        <li>Bid points refund post Phase 3 processing</li>
+        <li>You're left with 3 courses — meets the Term 4 minimum elective credit (3)</li>
+        <li>No add needed, no attendance-transfer question arises</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PHASE 4 -->
+  <section class="phase" id="p4">
+    <div class="phase-head">
+      <span class="num">PHASE 4</span>
+      <h2>Post-Sampling Add — Final Add</h2>
+    </div>
+    <div class="phase-window">Term Day 3 (Wednesday) · 60-minute window</div>
+    <p class="phase-desc">Your last shot at adding anything. Fresh sealed bids only — nothing carries over automatically from earlier phases except waitlist priority.</p>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Do I have to participate in Phase 4?</p>
+        <p class="a-text">Only if you want to add a course. If you're happy with what survived Phase 3, you can skip Phase 4 entirely — there's no penalty for sitting it out if you're not adding anything.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">I was waitlisted earlier — does that carry in?</p>
+        <p class="a-text">Yes, students already on a waitlist from earlier phases get priority. But note: a <b>new, independent waitlist</b> forms in Phase 4, separate from the one carried from Phase 1.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">What if I missed Phase 1 entirely — can Phase 4 fix that?</p>
+        <p class="a-text"><b>No.</b> The deck is explicit: students who didn't participate in Phase 1 cannot participate in Phase 4 either. Your only path is the offline Phase 6 counselling round.</p>
+        <span class="flag warn">No Phase 1 → no Phase 4</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 5 -->
+  <section class="phase" id="p5">
+    <div class="phase-head">
+      <span class="num">PHASE 5</span>
+      <h2>Final Drop</h2>
+    </div>
+    <div class="phase-window">Term Day 3 (Wednesday), 1 hour after Phase 4 concludes · 60-minute window</div>
+    <p class="phase-desc">The very last chance to drop anything. After this closes, your course list for the term is locked — no further adds, no further drops.</p>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Can I drop below my minimum required credits here?</p>
+        <p class="a-text">No — the system blocks any drop that would take you below the term's minimum elective credit requirement, with an on-screen error explaining exactly that.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Does attendance transfer apply in Phase 5 too?</p>
+        <p class="a-text">The deck doesn't state this for Phase 5 — the attendance-transfer language is specific to Phase 3. Since Phase 5 has no add option (it's drop-only), there's no "replacement course" for attendance to transfer to anyway.</p>
+        <span class="flag note">Drop-only round — no add, no transfer</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">What happens to waitlists after Phase 5?</p>
+        <p class="a-text">All waitlists dissolve once Phase 5 closes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 6 -->
+  <section class="phase" id="p6">
+    <div class="phase-head">
+      <span class="num">PHASE 6</span>
+      <h2>Counselling Round</h2>
+    </div>
+    <div class="phase-window">Term Day 3 (Wednesday), offline · Same-day</div>
+    <p class="phase-desc">An offline safety net, not a bidding round. Run by ASA directly for students still short of requirements after everything else has closed.</p>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Who is this for?</p>
+        <p class="a-text">Students with fewer than the minimum required term courses, or anyone still short of graduation requirements after Phase 5. ASA assists directly wherever seats remain.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">Can I drop a course allotted here?</p>
+        <p class="a-text">No — courses allocated in Phase 6 cannot be dropped.</p>
+        <span class="flag warn">Final and non-reversible</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <span class="qmark">Q</span>
+      <div class="qa-body">
+        <p class="q-text">What price do I pay for a Phase 6 course?</p>
+        <p class="a-text">Clearing Price 2 (from Phase 4) is applied to all courses registered through this round.</p>
+      </div>
+    </div>
+  </section>
+
+  <table class="ledger">
+    <caption>Quick reference — what each phase actually lets you do</caption>
+    <thead>
+      <tr><th>Phase</th><th>Add new bid</th><th>Increase bid</th><th>Drop</th><th>Classes running?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1 · Add</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+      <tr><td>2 · Pre-Sample Drop</td><td>No</td><td>No</td><td>Yes</td><td>No</td></tr>
+      <tr><td>3 · Post-Sample Drop</td><td>No</td><td>No</td><td>Yes</td><td><b>Yes — Days 1–2</b></td></tr>
+      <tr><td>4 · Post-Sampling Add</td><td>Yes</td><td>—</td><td>No</td><td>Yes</td></tr>
+      <tr><td>5 · Final Drop</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>6 · Counselling</td><td>Offline only</td><td>—</td><td>No</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<footer>
+  <p>Source: ISB Academic &amp; Student Affairs — Elective Term Bidding presentation.<br>
+  Hyderabad: <a href="mailto:registro_hyd@isb.edu">registro_hyd@isb.edu</a> · Mohali: <a href="mailto:registro_moh@isb.edu">registro_moh@isb.edu</a><br>
+  Compiled reference, not an official ASA document. Confirm phase-specific edge cases directly with Registro.</p>
+</footer>
+
+</body>
+</html>

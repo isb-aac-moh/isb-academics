@@ -7,6 +7,7 @@ import CreditTracker from "./pages/CreditTracker";
 import AdminPage from "./pages/AdminPage";
 import CourseResources from "./pages/CourseResources";
 import TermFourDossier from "./pages/TermFourDossier";
+import TermFourBiddingQA from "./pages/TermFourBiddingQA";
 import NoticeBoard from "./pages/NoticeBoard";
 import PulseCheck from "./pages/PulseCheck";
 import Layout from "./components/Layout";
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/pulse-check" element={<PulseCheck />} />
         <Route path="/resources" element={<CourseResources />} />
         <Route path="/term4" element={<TermFourDossier />} />
+        <Route path="/term4-bidding-qa" element={<TermFourBiddingQA />} />
 
         <Route element={<RequireAdmin user={user} />}>
           <Route path="/notices" element={<NoticeBoard />} />
