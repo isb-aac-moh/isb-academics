@@ -82,6 +82,41 @@
     color:#3a3a3a;
     margin:0 0 28px;
   }
+  .cta-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+    margin:0 0 28px;
+  }
+  .assistant-cta{
+    display:inline-block;
+    line-height:1.5;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    text-decoration:none;
+    color:var(--paper);
+    background:var(--navy);
+    border:1px solid var(--navy);
+    padding:14px 22px;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .assistant-cta:hover{
+    background:var(--navy-deep);
+    transform:translateY(-1px);
+  }
+  .assistant-cta .arrow{
+    color:var(--brass-soft);
+    font-size:14px;
+  }
+  .cta-note{
+    font-family:var(--mono);
+    font-size:11px;
+    color:#7a7466;
+    letter-spacing:.02em;
+  }
   .meta-row{
     display:flex;
     flex-wrap:wrap;
@@ -361,6 +396,14 @@
   <h1>Term 4 Bidding,<br><em>phase by phase.</em></h1>
   <div class="eyebrow">Brought to you by Academic Affairs Council, Co'27</div>
   <p class="sub">A working Q&A for the six-phase elective term cycle — what each round lets you do, what it doesn't, and how a dropped course, an attended class, or a missed deadline actually plays out.</p>
+  <div class="cta-row">
+    <a class="assistant-cta"
+       href="https://chatgpt.com/g/g-6a7d818d3bc88191bfaa8dae6d351db7-term-4-bidding-assistant"
+       target="_blank" rel="noopener noreferrer">
+      Ask the Term 4 Bidding Assistant&nbsp;<span class="arrow" aria-hidden="true">↗</span>
+    </a>
+    <span class="cta-note">Opens ChatGPT in a new tab</span>
+  </div>
   <div class="meta-row">
     <span>Cycle: <b>Elective Term (6 phases)</b></span>
     <span>Total bid points: <b>4,500</b></span>
