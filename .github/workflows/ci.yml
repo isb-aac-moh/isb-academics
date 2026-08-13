@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      # `npm run lint` is intentionally not run here: eslint 9 is installed but
+      # the repo has no eslint.config.js, so the command always fails. Add a
+      # config, then add `- run: npm run lint` above the build step.
+
+      # `build` runs `tsc -b` first, so this also typechecks.
+      - run: npm run build
