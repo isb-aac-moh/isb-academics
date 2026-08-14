@@ -35,7 +35,10 @@ export function Window({ title, onClose, children }: Props) {
           <CloseIcon className="w-4 h-4" />
         </button>
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
+      {/* Reserve room for the mobile tab bar so the last line of content is never trapped behind it. */}
+      <div className="flex-1 min-h-0 overflow-y-auto pb-[calc(3.25rem+env(safe-area-inset-bottom))] md:pb-0">
+        {children}
+      </div>
     </div>
   );
 }

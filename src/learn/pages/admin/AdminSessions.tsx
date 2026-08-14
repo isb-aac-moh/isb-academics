@@ -7,7 +7,7 @@ interface Props {
   onCourseChange: () => void;
 }
 
-type Draft = { title: string; summary: string; resource_url: string };
+type Draft = { title: string; summary: string; resource_url: string; formula_sheet: string };
 
 export function AdminSessions({ course, onCourseChange }: Props) {
   const [drafts, setDrafts] = useState<Record<number, Draft>>({});
@@ -30,6 +30,7 @@ export function AdminSessions({ course, onCourseChange }: Props) {
         title: data[s]?.title ?? "",
         summary: data[s]?.summary ?? "",
         resource_url: data[s]?.resource_url ?? "",
+        formula_sheet: data[s]?.formula_sheet ?? "",
       };
     }
     setDrafts(next);
@@ -58,6 +59,7 @@ export function AdminSessions({ course, onCourseChange }: Props) {
         title: draft.title.trim() || null,
         summary: draft.summary.trim() || null,
         resource_url: draft.resource_url.trim() || null,
+        formula_sheet: draft.formula_sheet.trim() || null,
       };
       await upsertSessionContent(content);
     } catch (err) {
@@ -112,6 +114,14 @@ export function AdminSessions({ course, onCourseChange }: Props) {
                 value={drafts[session]?.summary ?? ""}
                 onChange={(e) =>
                   setDrafts((d) => ({ ...d, [session]: { ...d[session], summary: e.target.value } }))
+                }
+              />
+              <textarea
+                className="input mb-2"
+                placeholder="Formula sheet shown during practice (optional, Markdown)"
+                value={drafts[session]?.formula_sheet ?? ""}
+                onChange={(e) =>
+                  setDrafts((d) => ({ ...d, [session]: { ...d[session], formula_sheet: e.target.value } }))
                 }
               />
               <input

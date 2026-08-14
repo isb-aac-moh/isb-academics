@@ -4,11 +4,12 @@ import { AdminScenarios } from "./admin/AdminScenarios";
 import { AdminConcepts } from "./admin/AdminConcepts";
 import { AdminSessions } from "./admin/AdminSessions";
 import { AdminCourse } from "./admin/AdminCourse";
+import { AdminMaterials } from "./admin/AdminMaterials";
 import { AdminMonitoring } from "./admin/AdminMonitoring";
 import { fetchCourses } from "../lib/db";
 import type { Course } from "../types";
 
-type Tab = "monitoring" | "questions" | "scenarios" | "concepts" | "sessions" | "course";
+type Tab = "monitoring" | "questions" | "scenarios" | "concepts" | "sessions" | "materials" | "course";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "monitoring", label: "Monitoring" },
@@ -16,6 +17,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "scenarios", label: "Scenarios" },
   { id: "concepts", label: "Concepts" },
   { id: "sessions", label: "Sessions" },
+  { id: "materials", label: "Materials" },
   { id: "course", label: "Course" },
 ];
 
@@ -82,6 +84,7 @@ export function AdminPage() {
       {tab === "scenarios" && courseId && <AdminScenarios courseId={courseId} />}
       {tab === "concepts" && courseId && <AdminConcepts courseId={courseId} />}
       {tab === "sessions" && activeCourse && <AdminSessions course={activeCourse} onCourseChange={loadCourses} />}
+      {tab === "materials" && activeCourse && <AdminMaterials course={activeCourse} />}
       {tab === "course" && (
         <AdminCourse courses={courses} courseId={courseId} onCoursesChange={loadCourses} />
       )}

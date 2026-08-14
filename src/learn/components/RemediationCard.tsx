@@ -25,7 +25,7 @@ export function RemediationCard({
   onContinue,
 }: Props) {
   return (
-    <div className="w-full max-w-lg">
+    <div className="w-full max-w-3xl">
       <div className="card p-5 mb-3">
         <p className="text-sm font-medium mb-3">{question.prompt}</p>
         <div className="flex flex-col gap-2">

@@ -1,15 +1,23 @@
 @import "tailwindcss";
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
 
-/* Design tokens for the Learn section, carried over from the standalone learning app so its
-   pages keep the look they were built with. They live under --c-* and are exposed to Tailwind
-   as utilities (bg-surface, text-ink-soft, ...) used only by src/components/learn and
-   src/pages/learn. The rest of the app styles itself through the COLOR/FONT objects in
-   src/lib/theme.ts and does not touch these.
+/* ---------------------------------------------------------------------------
+   Learn section design tokens, carried over from the standalone learning app so its pages keep
+   the look they were built with (ISB Master Brand Guideline — Legacy/Innovation Blue, Future
+   Green, Inter). Everything else in this app styles itself through the COLOR/FONT objects in
+   src/lib/theme.ts and never touches these.
 
-   The source app also shipped a dark-mode block. It is deliberately not carried over: the
-   surrounding shell — sidebar, header, every other page — is light only, so a Learn panel
-   that flipped dark on a system preference would sit wrong against it. */
+   The source app's dark-mode block is deliberately not carried over: the surrounding shell —
+   sidebar, header, every other page — is light only, so a Learn panel flipping dark on a system
+   preference would sit wrong inside it.
+   --------------------------------------------------------------------------- */
 @theme {
+  --font-display: "Inter", ui-sans-serif, sans-serif;
+  --font-learn: "Inter", ui-sans-serif, sans-serif;
+
   --color-base: var(--c-base);
   --color-surface: var(--c-surface);
   --color-surface-2: var(--c-surface-2);
@@ -50,6 +58,134 @@ body {
   background: #F4F2EC;
 }
 
+/* The learning app set these on `body`. Scoped to its own subtree here, because app-wide they
+   would repaint every other page's background and restyle headings that rely on theme.ts. */
+.learn-root {
+  background: var(--c-base);
+  color: var(--c-ink);
+  font-family: var(--font-learn);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* The Learn desktop's icon rail and its floating Window are both `position: fixed`, written when
+   this was a standalone app that owned the whole viewport. Here it owns a column beside the
+   sidebar, so a transform on the wrapper makes it their containing block and they measure from
+   the content area instead of the window edge.
+
+   Desktop only, deliberately. Below md the sidebar is a drawer rather than a column, so there is
+   nothing to avoid — and the same transform would anchor the mobile tab bar to the bottom of this
+   element rather than the bottom of the screen, pushing it out of sight. */
+@media (min-width: 768px) {
+  .learn-root {
+    transform: translateZ(0);
+    min-height: 100dvh;
+  }
+}
+
+.learn-root h1,
+.learn-root h2,
+.learn-root h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Subtle paper grain — breaks the flat-vector digital feel without costing a shader mount.
+   Sits inside the Learn subtree rather than over the whole viewport, so it does not veil the
+   sidebar. z-index stays low enough for the floating Window to remain above it. */
+.learn-root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ISB's "highlighter line" design element — a Future Green stroke behind emphasised phrases,
+   used instead of a second text colour (per the guideline: text stays Innovation Blue/ink,
+   only the stroke changes colour). */
+.highlight {
+  background-image: linear-gradient(var(--c-highlight) 0 0);
+  background-repeat: no-repeat;
+  background-position: 0 90%;
+  background-size: 100% 0.32em;
+}
+
+/* Combine as className="btn btn-primary" etc. — Tailwind v4's @apply can't chain custom component classes. */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold
+      transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply bg-accent text-accent-ink hover:brightness-110 shadow-[0_1px_2px_rgba(0,0,0,0.08)];
+  }
+  .btn-ghost {
+    @apply text-ink-soft hover:text-ink hover:bg-surface-2;
+  }
+  .btn-danger {
+    @apply bg-bad text-accent-ink hover:brightness-110;
+  }
+
+  .card {
+    @apply bg-surface border border-line rounded-2xl transition-all duration-200;
+  }
+  .card-hover {
+    @apply hover:border-accent/50 hover:shadow-[0_8px_24px_-12px_rgba(46,59,66,0.16)] hover:-translate-y-0.5;
+  }
+
+  .input {
+    @apply bg-surface border border-line rounded-xl px-3.5 py-2.5 text-ink placeholder:text-ink-soft/70
+      focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 transition-all duration-200;
+  }
+
+  /* Range input for the embedded widgets. Styled explicitly because the native control ignores
+     the brand palette and renders a different size on every platform. */
+  .viz-slider {
+    @apply w-full h-6 bg-transparent cursor-pointer appearance-none;
+  }
+  .viz-slider::-webkit-slider-runnable-track {
+    @apply h-1.5 rounded-full bg-surface-2;
+  }
+  .viz-slider::-moz-range-track {
+    @apply h-1.5 rounded-full bg-surface-2;
+  }
+  .viz-slider::-webkit-slider-thumb {
+    @apply appearance-none w-4 h-4 -mt-[5px] rounded-full bg-accent border-2 border-surface
+      shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-150;
+  }
+  .viz-slider::-moz-range-thumb {
+    @apply w-4 h-4 rounded-full bg-accent border-2 border-surface
+      shadow-[0_1px_3px_rgba(0,0,0,0.2)];
+  }
+  .viz-slider:active::-webkit-slider-thumb {
+    @apply scale-125;
+  }
+}
+
+/* Visible keyboard focus on every interactive element — Tailwind's default outline:none-on-click
+   pattern (via focus:outline-none in .input above) must never remove focus-visible for keyboard users. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline-width: 2px !important;
+  outline-style: solid !important;
+  outline-color: var(--c-accent) !important;
+  outline-offset: 2px !important;
+}
+
 @keyframes dropdown-in {
   from { opacity: 0; transform: translateY(-4px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -67,9 +203,40 @@ body {
   animation: row-in 200ms ease-out;
 }
 
+@keyframes streak-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise-in {
+  animation: rise-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.slide-in-right {
+  animation: slide-in-right 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Respect the OS-level motion preference — near-zero duration (not animation:none) keeps
+   fill-mode:both end-states intact instead of snapping back to an unstyled default. */
 @media (prefers-reduced-motion: reduce) {
-  .dropdown-panel-enter, .row-enter {
-    animation: none;
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

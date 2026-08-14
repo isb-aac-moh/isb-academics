@@ -10,9 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
     "@supabase/supabase-js": "^2.103.3",
     "@tailwindcss/vite": "4.3.3",
+    "@types/katex": "^0.16.8",
     "clsx": "^2.1.1",
+    "katex": "^0.18.4",
     "lucide-react": "^1.8.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

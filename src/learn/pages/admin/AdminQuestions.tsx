@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-import { fetchQuestions, fetchScenarios } from "../../lib/db";
+import { deleteQuestion, fetchQuestions, fetchScenarios, insertQuestion } from "../../lib/db";
 import type { Provenance, Question, QuestionType, Scenario } from "../../types";
 
 interface Props {
@@ -53,23 +52,24 @@ export function AdminQuestions({ courseId }: Props) {
       return;
     }
     const id = `${form.type === "formula" ? "f" : "c"}-${crypto.randomUUID().slice(0, 8)}`;
-    const { error } = await supabase.from("questions").insert({
-      id,
-      course_id: courseId,
-      type: form.type,
-      topic: form.topic.trim(),
-      session: form.session,
-      prompt: form.prompt.trim(),
-      choices,
-      correct_answer: form.correct_answer.trim(),
-      source: form.source.trim() || `Session ${form.session}`,
-      scenario_id: form.scenario_id || null,
-      scenario_order: form.scenario_order ? Number(form.scenario_order) : null,
-      difficulty: form.difficulty,
-      provenance: form.provenance,
-    });
-    if (error) {
-      setStatus(`Error: ${error.message}`);
+    try {
+      await insertQuestion({
+        id,
+        course_id: courseId,
+        type: form.type,
+        topic: form.topic.trim(),
+        session: form.session,
+        prompt: form.prompt.trim(),
+        choices,
+        correct_answer: form.correct_answer.trim(),
+        source: form.source.trim() || `Session ${form.session}`,
+        scenario_id: form.scenario_id || null,
+        scenario_order: form.scenario_order ? Number(form.scenario_order) : null,
+        difficulty: form.difficulty,
+        provenance: form.provenance,
+      });
+    } catch (e) {
+      setStatus(`Error: ${e instanceof Error ? e.message : "could not save that question."}`);
       return;
     }
     setStatus("Saved.");
@@ -78,7 +78,7 @@ export function AdminQuestions({ courseId }: Props) {
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("questions").delete().eq("id", id);
+    await deleteQuestion(id);
     void load();
   }
 

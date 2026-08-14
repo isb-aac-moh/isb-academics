@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import type { Concept, Course, CourseContent, Question, SessionContent, Student } from "../types";
+import type { Concept, Course, CourseContent, Material, Question, SessionContent, Student } from "../types";
 import {
   fetchConcepts,
   fetchCourseContent,
   fetchCourses,
+  fetchMaterials,
   fetchQuestions,
   fetchSessionContent,
   fetchMastery,
 } from "../lib/db";
 import { groupBySession, type SessionGroup } from "../lib/sessions";
+import { MaterialsList } from "../components/MaterialsList";
 import { MasteryBar } from "../components/MasteryBar";
 import { Markdown, extractHeadings } from "../components/Markdown";
 import { TableOfContents } from "../components/TableOfContents";
@@ -43,6 +45,7 @@ export function SessionsPage({ profile }: Props) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [sessionContent, setSessionContent] = useState<Record<number, SessionContent>>({});
   const [courseContent, setCourseContent] = useState<CourseContent | null>(null);
+  const [materials, setMaterials] = useState<Material[]>([]);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -52,13 +55,14 @@ export function SessionsPage({ profile }: Props) {
 
   async function load() {
     setGroups(null);
-    const [courses, qs, cs, mastery, sc, cc] = await Promise.all([
+    const [courses, qs, cs, mastery, sc, cc, mats] = await Promise.all([
       fetchCourses(),
       fetchQuestions(courseId),
       fetchConcepts(courseId),
       fetchMastery(profile.id),
       fetchSessionContent(courseId),
       fetchCourseContent(courseId),
+      fetchMaterials(courseId),
     ]);
     const thisCourse = courses.find((c) => c.id === courseId) ?? null;
     setCourse(thisCourse);
@@ -66,6 +70,7 @@ export function SessionsPage({ profile }: Props) {
     setConcepts(cs);
     setSessionContent(sc);
     setCourseContent(cc);
+    setMaterials(mats);
     setGroups(groupBySession(qs, cs, mastery, thisCourse?.total_sessions ?? 0, sc));
   }
 
@@ -85,15 +90,12 @@ export function SessionsPage({ profile }: Props) {
         .filter((g) => g.title.toLowerCase().includes(q) || g.topics.length > 0)
     : groups;
 
-  // On mobile there's no room for sidebar + content side by side without one hiding the other —
-  // drill in instead: list only, then content only, with a back step per level.
-  const showSidebarOnMobile = !activeSession;
-
   return (
     <div className="flex flex-col md:flex-row h-full">
-      {/* Session/concept sub-nav */}
+      {/* Session/concept sub-nav. Desktop only — on a phone nine stacked sessions pushed the actual
+          content below the fold, so mobile gets dropdowns at the top of the content instead. */}
       <aside
-        className={`${showSidebarOnMobile ? "block" : "hidden"} md:block md:w-64 shrink-0 border-b md:border-b-0 md:border-r border-line px-3 py-4 md:overflow-y-auto`}
+        className="hidden md:block md:w-64 shrink-0 border-r border-line px-3 py-4 md:overflow-y-auto"
       >
         <div className="flex items-center gap-2 bg-base border border-line rounded-lg px-2.5 py-2 mb-4">
           <SearchIcon className="w-3.5 h-3.5 text-ink-soft shrink-0" />
@@ -160,17 +162,62 @@ export function SessionsPage({ profile }: Props) {
       {/* Detail pane — fills whatever width the window gives it; only flowing paragraph text
           gets its own reading-width cap, everything else (headings, cards, CTAs) uses the space. */}
       <div className="flex-1 min-w-0 px-4 py-6 md:px-8 md:py-8 overflow-y-auto">
-        {activeSession && (
-          <button
-            onClick={() =>
-              navigate(activeTopic ? `/learn/sessions/${courseId}/${activeSession}` : `/learn/sessions/${courseId}`)
-            }
-            className="md:hidden flex items-center gap-1 text-sm text-ink-soft hover:text-ink transition-colors mb-4 -ml-1"
-          >
-            <ChevronRightIcon className="rotate-180" />
-            {activeTopic ? `Session ${activeSession}` : "Sessions"}
-          </button>
-        )}
+        {/* Mobile wayfinding: which subject you are in, then how to move around it. Native selects
+            on purpose — they open the OS picker, which handles nine options better than a list
+            that would otherwise occupy the whole screen. */}
+        <div className="md:hidden mb-7">
+          <h1 className="text-2xl font-bold tracking-[-0.02em] mb-1">{course.name}</h1>
+          <p className="text-sm text-ink-soft mb-4">
+            {course.code ? `${course.code} · ` : ""}
+            {course.total_sessions} sessions
+          </p>
+
+          <label className="block">
+            <span className="text-xs font-semibold text-ink-soft mb-1.5 block">Session</span>
+            <select
+              value={activeSession ?? ""}
+              onChange={(e) =>
+                navigate(
+                  e.target.value
+                    ? `/learn/sessions/${courseId}/${e.target.value}`
+                    : `/learn/sessions/${courseId}`,
+                )
+              }
+              className="input w-full"
+            >
+              <option value="">Choose a session…</option>
+              {groups.map((g) => (
+                <option key={g.session} value={g.session}>
+                  Session {g.session} — {g.title}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {currentGroup && currentGroup.topics.length > 0 && (
+            <label className="block mt-3">
+              <span className="text-xs font-semibold text-ink-soft mb-1.5 block">Concept</span>
+              <select
+                value={activeTopic ?? ""}
+                onChange={(e) =>
+                  navigate(
+                    e.target.value
+                      ? `/learn/sessions/${courseId}/${currentGroup.session}/${e.target.value}`
+                      : `/learn/sessions/${courseId}/${currentGroup.session}`,
+                  )
+                }
+                className="input w-full"
+              >
+                <option value="">All concepts in this session</option>
+                {currentGroup.topics.map((t) => (
+                  <option key={t.topic} value={t.topic}>
+                    {t.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
         {currentConcept && currentTopicMeta ? (
           <div className="rise-in">
             <div className="text-xs uppercase tracking-wide text-accent font-semibold mb-2">
@@ -178,7 +225,7 @@ export function SessionsPage({ profile }: Props) {
               {questionsForTopic.length === 1 ? "" : "s"}
             </div>
             <h2 className="text-2xl font-bold mb-4">{accentLastWord(currentConcept.title)}</h2>
-            <Markdown text={currentConcept.note} className="text-ink-soft leading-relaxed mb-6 max-w-2xl" />
+            <Markdown text={currentConcept.note} className="text-ink-soft leading-relaxed mb-6 max-w-3xl" />
 
             {currentConcept.resource_url && (
               <a
@@ -212,10 +259,14 @@ export function SessionsPage({ profile }: Props) {
                 Session {currentGroup.session}
               </div>
               <h2 className="text-2xl font-bold mb-2">{currentGroup.title}</h2>
+              <MaterialsList
+                materials={materials.filter((m) => m.session === currentGroup.session)}
+                heading={`Session ${currentGroup.session} files`}
+              />
               {sessionContent[currentGroup.session]?.summary && (
                 <Markdown
                   text={sessionContent[currentGroup.session]?.summary ?? ""}
-                  className="text-ink-soft mb-4 max-w-2xl"
+                  className="text-ink-soft mb-4 max-w-3xl"
                 />
               )}
               {sessionContent[currentGroup.session]?.resource_url && (
@@ -295,7 +346,8 @@ export function SessionsPage({ profile }: Props) {
           </div>
         ) : (
           <div className="rise-in">
-            <h2 className="text-2xl font-bold mb-2">{course.name}</h2>
+            {/* Mobile already shows the course name in the wayfinding block above. */}
+            <h2 className="hidden md:block text-2xl font-bold mb-2">{course.name}</h2>
             {courseContent?.announcements && (
               <div className="bg-accent/10 border border-accent/20 rounded-lg px-4 py-3 mb-4 max-w-2xl">
                 <div className="text-xs uppercase tracking-wide text-accent font-semibold mb-1">
@@ -308,7 +360,11 @@ export function SessionsPage({ profile }: Props) {
             )}
             <Markdown
               text={courseContent?.outline || "Choose a session on the left to read what it covers, then practice it."}
-              className="text-ink-soft leading-relaxed mb-4 max-w-2xl"
+              className="text-ink-soft leading-relaxed mb-6 max-w-3xl"
+            />
+            <MaterialsList
+              materials={materials.filter((m) => m.session === null)}
+              heading="Course documents"
             />
             {(courseContent?.cheatsheet_url ||
               courseContent?.exam_samples_url ||

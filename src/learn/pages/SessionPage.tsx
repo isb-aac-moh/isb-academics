@@ -7,6 +7,7 @@ import type {
   MasteryLevel,
   Question,
   Scenario,
+  SessionContent,
   Student,
   TopicMastery,
 } from "../types";
@@ -18,6 +19,7 @@ import {
   fetchMastery,
   fetchQuestions,
   fetchScenarios,
+  fetchSessionContent,
   recordAttempt,
   upsertMastery,
 } from "../lib/db";
@@ -29,8 +31,14 @@ import { ScenarioSetup } from "../components/ScenarioSetup";
 import { RemediationCard } from "../components/RemediationCard";
 import { ProfileSummary } from "../components/ProfileSummary";
 import { Confetti } from "../components/Confetti";
+import { FormulaSheet } from "../components/FormulaSheet";
 
 const STREAK_MILESTONES = new Set([3, 5, 8]);
+
+/** Wide enough to stop the old 512px column from stranding most of the window, still short enough
+    to keep prose at a readable measure. The Window around it already supplies the outer boundary,
+    so nothing in here draws a second one. */
+const COLUMN = "w-full max-w-3xl";
 
 const ROUND_SIZE = 8;
 /** A chain is never truncated, so a round can run past ROUND_SIZE. Only starting a new chain while
@@ -71,6 +79,7 @@ export function SessionPage({ profile, onXpChange }: Props) {
   const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [scenarios, setScenarios] = useState<Record<string, Scenario>>({});
   const [concepts, setConcepts] = useState<Record<string, Concept>>({});
+  const [sessionContent, setSessionContent] = useState<Record<number, SessionContent>>({});
   const [mastery, setMastery] = useState<Record<string, TopicMastery>>({});
   const [startLevels, setStartLevels] = useState<Record<string, MasteryLevel>>({});
 
@@ -113,13 +122,15 @@ export function SessionPage({ profile, onXpChange }: Props) {
   }, [stage]);
 
   async function initRound() {
+    if (!course) return;
     setStage("loading");
     try {
-      const [all, cs, m, scs] = await Promise.all([
+      const [all, cs, m, scs, sc] = await Promise.all([
         fetchQuestions(),
         fetchConcepts(),
         fetchMastery(profile.id),
         fetchScenarios(),
+        fetchSessionContent(course),
       ]);
       const wanted = topicsFilter ? new Set(topicsFilter.split(",")) : null;
       const filtered = all.filter((q) => {
@@ -137,6 +148,7 @@ export function SessionPage({ profile, onXpChange }: Props) {
       setAllQuestions(all);
       setConcepts(cs);
       setScenarios(scs);
+      setSessionContent(sc);
       setMastery(m);
       setStartLevels(levels);
       setAskedIds(new Set());
@@ -331,16 +343,20 @@ export function SessionPage({ profile, onXpChange }: Props) {
     const concept = concepts[current.topic];
     if (!concept) return null; // guaranteed non-null by advance's hasConcept check
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8">
+      // Top-aligned, not vertically centred: a concept note can now run long enough to carry an
+      // embedded simulator, and centring those makes the top of the note start below the fold.
+      <div className="flex flex-col items-center px-5 sm:px-8 py-8">
         <Confetti trigger={confettiTrigger} />
-        <ConceptCard concept={concept} onContinue={handleConceptContinue} />
+        <div className={COLUMN}>
+          <ConceptCard concept={concept} onContinue={handleConceptContinue} />
+        </div>
       </div>
     );
   }
 
   if (stage === "remediate" && miss) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8">
+      <div className="flex flex-col items-center px-5 sm:px-8 py-8">
         <RemediationCard
           question={miss.question}
           chosen={miss.chosen}
@@ -416,34 +432,38 @@ export function SessionPage({ profile, onXpChange }: Props) {
   }
 
   if (!current) return null;
+  const sheet = sessionContent[current.session];
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8">
+    <div className="flex flex-col items-center px-5 sm:px-8 py-8">
       <Confetti trigger={confettiTrigger} />
-      <div className="w-full max-w-lg flex justify-between text-sm text-ink-soft mb-2 tabular">
-        <span>
-          Question {answered.length + 1} / {Math.max(ROUND_SIZE, answered.length + 1 + pending.length)}
-        </span>
-        <span>
-          Score {score} · Streak {streak}
-        </span>
-      </div>
-      <div className="w-full max-w-lg h-1 rounded-full bg-surface-2 overflow-hidden mb-4">
-        <div
-          className="h-full bg-accent transition-all duration-300"
-          style={{ width: `${Math.min(100, (answered.length / ROUND_SIZE) * 100)}%` }}
-        />
-      </div>
-      {current.scenario_id && scenarios[current.scenario_id] && (
-        <div className="w-full max-w-lg">
+      <div className={COLUMN}>
+        <div className="flex justify-between text-sm text-ink-soft mb-2 tabular">
+          <span>
+            Question {answered.length + 1} / {Math.max(ROUND_SIZE, answered.length + 1 + pending.length)}
+          </span>
+          <span>
+            Score {score} · Streak {streak}
+          </span>
+        </div>
+        <div className="h-1 rounded-full bg-surface-2 overflow-hidden mb-5">
+          <div
+            className="h-full bg-accent transition-all duration-300"
+            style={{ width: `${Math.min(100, (answered.length / ROUND_SIZE) * 100)}%` }}
+          />
+        </div>
+        {current.scenario_id && scenarios[current.scenario_id] && (
           <ScenarioSetup
             scenario={scenarios[current.scenario_id]}
             part={chainTotal - pending.length}
             total={chainTotal}
             previousAnswer={lastChainAnswer}
           />
-        </div>
+        )}
+        <QuestionCard key={current.id} question={current} onContinue={handleAnswerContinue} />
+      </div>
+      {sheet?.formula_sheet && (
+        <FormulaSheet sheet={sheet.formula_sheet} session={current.session} title={sheet.title} />
       )}
-      <QuestionCard key={current.id} question={current} onContinue={handleAnswerContinue} />
     </div>
   );
 }

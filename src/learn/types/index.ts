@@ -51,6 +51,8 @@ export interface Question {
   scenario_order: number | null;
   difficulty: number;
   provenance: Provenance;
+  /** Optional nudge, revealed on demand before the answer. */
+  hint: string | null;
 }
 
 export interface Concept {
@@ -67,6 +69,21 @@ export interface SessionContent {
   title: string | null;
   summary: string | null;
   resource_url: string | null;
+  /** Markdown formula reference, shown in a drawer during practice. */
+  formula_sheet: string | null;
+}
+
+export type MaterialKind = "slides" | "case" | "solution" | "coursepack" | "other";
+
+export interface Material {
+  id: string;
+  course_id: string;
+  /** Null means the file belongs to the course as a whole, not one session. */
+  session: number | null;
+  title: string;
+  kind: MaterialKind;
+  storage_path: string;
+  sort_order: number;
 }
 
 export interface CourseContent {

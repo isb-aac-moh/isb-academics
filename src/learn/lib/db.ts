@@ -6,7 +6,11 @@ import type {
   Course,
   CourseContent,
   FlaggedQuestion,
+  Material,
+  MaterialKind,
+  Provenance,
   Question,
+  QuestionType,
   Scenario,
   SessionContent,
   Student,
@@ -46,6 +50,7 @@ const SESSION_COLS = "course_id:course_code, session, title, summary, resource_u
 const SCENARIO_COLS = "id, course_id:course_code, session, title, setup, source";
 const MASTERY_COLS =
   "student_id:user_id, course_id:course_code, topic, level, consecutive_correct, total_correct, total_attempts, last_seen_at";
+const MATERIAL_COLS = "id, course_id:course_code, session, title, kind, storage_path, sort_order";
 
 /** Every course with practice content, including disabled ones — admin needs to see those too.
     Name and code come from the shared bidding catalogue rather than being duplicated here. */
@@ -108,6 +113,42 @@ export async function upsertConcept(concept: Concept): Promise<void> {
   const { error } = await supabase
     .from("learn_concepts")
     .upsert({ ...rest, course_code: course_id }, { onConflict: "course_code,topic" });
+  if (error) throw error;
+}
+
+export async function deleteConcept(courseId: string, topic: string): Promise<void> {
+  const { error } = await supabase
+    .from("learn_concepts")
+    .delete()
+    .eq("course_code", courseId)
+    .eq("topic", topic);
+  if (error) throw error;
+}
+
+/** Admin question authoring. Lives here rather than in the page so the page never has to know
+    the table is `learn_questions` or that course_id is stored as course_code. */
+export async function insertQuestion(question: {
+  id: string;
+  course_id: string;
+  type: QuestionType;
+  topic: string;
+  session: number;
+  prompt: string;
+  choices: string[];
+  correct_answer: string;
+  source: string;
+  scenario_id: string | null;
+  scenario_order: number | null;
+  difficulty: number;
+  provenance: Provenance;
+}): Promise<void> {
+  const { course_id, ...rest } = question;
+  const { error } = await supabase.from("learn_questions").insert({ ...rest, course_code: course_id });
+  if (error) throw error;
+}
+
+export async function deleteQuestion(id: string): Promise<void> {
+  const { error } = await supabase.from("learn_questions").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -325,4 +366,54 @@ export async function fetchAttempts(userId: string): Promise<Attempt[]> {
     .eq("user_id", userId);
   if (error) throw error;
   return data as unknown as Attempt[];
+}
+
+const MATERIALS_BUCKET = "course-materials";
+
+export async function fetchMaterials(courseId?: string): Promise<Material[]> {
+  let query = supabase.from("learn_materials").select(MATERIAL_COLS).order("session").order("sort_order");
+  if (courseId) query = query.eq("course_code", courseId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as unknown as Material[];
+}
+
+/** The bucket is private, so students never get a raw path — every view is a short-lived signed URL. */
+export async function materialUrl(storagePath: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from(MATERIALS_BUCKET)
+    .createSignedUrl(storagePath, 60 * 60);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+export async function uploadMaterial(
+  file: File,
+  courseId: string,
+  session: number | null,
+  title: string,
+  kind: MaterialKind,
+): Promise<void> {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `${courseId}/${session ?? "course"}/${Date.now()}-${safeName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(MATERIALS_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false });
+  if (uploadError) throw uploadError;
+
+  const { error } = await supabase
+    .from("learn_materials")
+    .insert({ course_code: courseId, session, title, kind, storage_path: path });
+  // Leaving an orphaned object behind would silently eat the storage quota, so undo the upload.
+  if (error) {
+    await supabase.storage.from(MATERIALS_BUCKET).remove([path]);
+    throw error;
+  }
+}
+
+export async function deleteMaterial(id: string, storagePath: string): Promise<void> {
+  const { error } = await supabase.from("learn_materials").delete().eq("id", id);
+  if (error) throw error;
+  await supabase.storage.from(MATERIALS_BUCKET).remove([storagePath]);
 }

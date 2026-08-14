@@ -87,13 +87,15 @@ export function HomePage({ profile, onGoHome }: Props) {
         </button>
       </header>
 
-      <div className="fixed left-4 md:left-6 top-20 z-10 flex flex-col gap-7 rise-in" style={{ animationDelay: "60ms" }}>
+      {/* Hidden on mobile — MobileNav carries these same destinations there, and showing both
+          would give the phone two competing navigations. */}
+      <div className="fixed left-4 md:left-6 top-20 z-10 hidden md:flex flex-col gap-7 rise-in" style={{ animationDelay: "60ms" }}>
         {leftIcons.map((item) => (
           <DesktopIcon key={item.label} {...item} />
         ))}
       </div>
       {rightIcons.length > 0 && (
-        <div className="fixed right-4 md:right-6 top-20 z-10 flex flex-col gap-7 rise-in" style={{ animationDelay: "100ms" }}>
+        <div className="fixed right-4 md:right-6 top-20 z-10 hidden md:flex flex-col gap-7 rise-in" style={{ animationDelay: "100ms" }}>
           {rightIcons.map((item) => (
             <DesktopIcon key={item.label} {...item} />
           ))}

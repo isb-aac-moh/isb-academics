@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-import { fetchConcepts, upsertConcept } from "../../lib/db";
+import { deleteConcept, fetchConcepts, upsertConcept } from "../../lib/db";
 import type { Concept } from "../../types";
 
 interface Props {
@@ -52,7 +51,7 @@ export function AdminConcepts({ courseId }: Props) {
   }
 
   async function handleDelete(topic: string) {
-    await supabase.from("concepts").delete().eq("course_id", courseId).eq("topic", topic);
+    await deleteConcept(courseId, topic);
     void load();
   }
 
