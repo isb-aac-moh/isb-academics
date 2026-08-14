@@ -46,7 +46,15 @@ export function HomeGuide({ profile }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const primaryCourse = courses.find((c) => c.enabled);
+  // Read the live courses rather than naming one: Operations went live alongside Marketing, and
+  // hardcoded copy saying otherwise is wrong the moment a course is enabled in admin.
+  const liveCourses = courses.filter((c) => c.enabled);
+  const liveNames =
+    liveCourses.length === 0
+      ? null
+      : liveCourses.length === 1
+        ? `${liveCourses[0].name} is live today`
+        : `${liveCourses.slice(0, -1).map((c) => c.name).join(", ")} and ${liveCourses[liveCourses.length - 1].name} are live today`;
 
   return (
     <div className="px-6 py-8 md:px-10 md:py-10 flex flex-col lg:flex-row gap-10">
@@ -61,19 +69,23 @@ export function HomeGuide({ profile }: Props) {
         <p className="text-ink-soft leading-relaxed mb-8 max-w-lg">
           Short, adaptive practice rounds pulled straight from your course material. No long study
           sessions — just enough, often enough, that the answers stop feeling like guesses.
-          Marketing is live today; more ISB courses are on the way.
+          {liveNames && ` ${liveNames}; more ISB courses are on the way.`}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-10 max-w-md">
           <button onClick={() => navigate("/learn/practice")} className="btn btn-primary flex-1 py-3">
             Start smart practice
           </button>
-          {primaryCourse && (
+          {/* One live course goes straight there; more than one goes to the picker, otherwise every
+              course after the first has no way in from this screen. */}
+          {liveCourses.length > 0 && (
             <button
-              onClick={() => navigate(`/learn/sessions/${primaryCourse.id}`)}
+              onClick={() =>
+                navigate(liveCourses.length === 1 ? `/learn/sessions/${liveCourses[0].id}` : "/learn/subjects")
+              }
               className="btn btn-ghost border border-line flex-1 py-3"
             >
-              Browse {primaryCourse.name}
+              {liveCourses.length === 1 ? `Browse ${liveCourses[0].name}` : "Browse courses"}
             </button>
           )}
         </div>
