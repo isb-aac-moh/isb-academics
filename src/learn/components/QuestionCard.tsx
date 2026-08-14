@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import type { Question } from "../types";
+import type { Question, QuestionType } from "../types";
 import { Markdown } from "./Markdown";
+
+/** Keyed by QuestionType rather than branched on, so adding a type fails the build here instead
+    of silently mislabelling. `short_answer` questions are read in Sessions, not played, so this
+    card only sees one if a course ever mixes them with multiple-choice. */
+const TYPE_LABEL: Record<QuestionType, string> = {
+  formula: "Compute it",
+  case_fact: "Case recall",
+  short_answer: "Write it",
+};
 
 interface Props {
   question: Question;
@@ -44,7 +53,7 @@ export function QuestionCard({ question, onContinue }: Props) {
     <div className="w-full rise-in">
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="text-xs uppercase tracking-wide text-accent font-semibold">
-          {question.type === "formula" ? "Compute it" : "Case recall"} · Session {question.session}
+          {TYPE_LABEL[question.type]} · Session {question.session}
         </div>
         <div
           className={`text-xs font-semibold tabular tracking-tight ${slow && !submitted ? "text-bad" : "text-ink-soft"}`}

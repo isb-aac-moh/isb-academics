@@ -94,7 +94,15 @@ export function AdminCourse({ courses, courseId, onCoursesChange }: Props) {
     }
     setNewCourseStatus("Adding…");
     try {
-      await upsertCourse({ id, name, code: null, total_sessions: 0, enabled: false, sort_order: courses.length });
+      await upsertCourse({
+        id,
+        name,
+        code: null,
+        total_sessions: 0,
+        enabled: false,
+        sort_order: courses.length,
+        has_practice: false,
+      });
     } catch (err) {
       setNewCourseStatus(`Error: ${(err as Error).message}`);
       return;

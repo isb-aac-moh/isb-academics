@@ -13,6 +13,7 @@ import {
 import { groupBySession, type SessionGroup } from "../lib/sessions";
 import { MaterialsList } from "../components/MaterialsList";
 import { MasteryBar } from "../components/MasteryBar";
+import { QuestionBank } from "../components/QuestionBank";
 import { Markdown, extractHeadings } from "../components/Markdown";
 import { TableOfContents } from "../components/TableOfContents";
 import { ChevronRightIcon, CheckIcon, SearchIcon } from "../components/icons";
@@ -238,19 +239,25 @@ export function SessionsPage({ profile }: Props) {
               </a>
             )}
 
-            <div className="card p-4 mb-6 max-w-xs">
-              <div className="text-xs text-ink-soft mb-2">Your mastery of this concept</div>
-              <MasteryBar level={currentTopicMeta.level} />
-            </div>
+            {course.has_practice ? (
+              <>
+                <div className="card p-4 mb-6 max-w-xs">
+                  <div className="text-xs text-ink-soft mb-2">Your mastery of this concept</div>
+                  <MasteryBar level={currentTopicMeta.level} />
+                </div>
 
-            <button
-              onClick={() =>
-                navigate(`/learn/practice?course=${courseId}&topic=${encodeURIComponent(currentTopicMeta.topic)}`)
-              }
-              className="btn btn-primary"
-            >
-              Start practicing
-            </button>
+                <button
+                  onClick={() =>
+                    navigate(`/learn/practice?course=${courseId}&topic=${encodeURIComponent(currentTopicMeta.topic)}`)
+                  }
+                  className="btn btn-primary"
+                >
+                  Start practicing
+                </button>
+              </>
+            ) : (
+              <QuestionBank questions={questionsForTopic} className="max-w-3xl" />
+            )}
           </div>
         ) : currentGroup ? (
           <div className="rise-in xl:flex xl:items-start xl:gap-10">
@@ -284,33 +291,39 @@ export function SessionsPage({ profile }: Props) {
               ) : (
                 <>
                   <p className="text-ink-soft mb-6 max-w-2xl">
-                    Everything this session covers — read through it, then practice.
+                    {course.has_practice
+                      ? "Everything this session covers — read through it, then practice."
+                      : "Everything this session covers, each concept followed by the questions the exam could ask on it."}
                   </p>
-                  <button
-                    onClick={() => navigate(`/learn/practice?course=${courseId}&session=${currentGroup.session}`)}
-                    className="btn btn-primary mb-8"
-                  >
-                    Practice this session
-                  </button>
-                  {(() => {
-                    const weakest = [...currentGroup.topics]
-                      .sort((a, b) => a.level - b.level)
-                      .slice(0, 2)
-                      .map((t) => t.topic);
-                    if (weakest.length < 2) return null;
-                    return (
+                  {course.has_practice && (
+                    <>
                       <button
-                        onClick={() =>
-                          navigate(
-                            `/learn/practice?course=${courseId}&topics=${weakest.map(encodeURIComponent).join(",")}`,
-                          )
-                        }
-                        className="btn ml-3 mb-8"
+                        onClick={() => navigate(`/learn/practice?course=${courseId}&session=${currentGroup.session}`)}
+                        className="btn btn-primary mb-8"
                       >
-                        Practice your 2 weakest
+                        Practice this session
                       </button>
-                    );
-                  })()}
+                      {(() => {
+                        const weakest = [...currentGroup.topics]
+                          .sort((a, b) => a.level - b.level)
+                          .slice(0, 2)
+                          .map((t) => t.topic);
+                        if (weakest.length < 2) return null;
+                        return (
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/learn/practice?course=${courseId}&topics=${weakest.map(encodeURIComponent).join(",")}`,
+                              )
+                            }
+                            className="btn ml-3 mb-8"
+                          >
+                            Practice your 2 weakest
+                          </button>
+                        );
+                      })()}
+                    </>
+                  )}
                   <div className="flex flex-col divide-y divide-line">
                     {currentGroup.topics.map((t) => {
                       const concept = concepts[t.topic];
@@ -322,19 +335,26 @@ export function SessionsPage({ profile }: Props) {
                             text={concept.note}
                             className="text-ink-soft leading-relaxed mb-3 max-w-2xl"
                           />
-                          <div className="flex items-center gap-5 flex-wrap">
-                            <div className="w-full max-w-[220px]">
-                              <MasteryBar level={t.level} />
+                          {course.has_practice ? (
+                            <div className="flex items-center gap-5 flex-wrap">
+                              <div className="w-full max-w-[220px]">
+                                <MasteryBar level={t.level} />
+                              </div>
+                              <button
+                                onClick={() =>
+                                  navigate(`/learn/practice?course=${courseId}&topic=${encodeURIComponent(t.topic)}`)
+                                }
+                                className="text-sm text-accent font-medium hover:underline shrink-0"
+                              >
+                                Practice this concept
+                              </button>
                             </div>
-                            <button
-                              onClick={() =>
-                                navigate(`/learn/practice?course=${courseId}&topic=${encodeURIComponent(t.topic)}`)
-                              }
-                              className="text-sm text-accent font-medium hover:underline shrink-0"
-                            >
-                              Practice this concept
-                            </button>
-                          </div>
+                          ) : (
+                            <QuestionBank
+                              questions={questions.filter((q) => q.topic === t.topic)}
+                              className="max-w-3xl mt-4"
+                            />
+                          )}
                         </div>
                       );
                     })}

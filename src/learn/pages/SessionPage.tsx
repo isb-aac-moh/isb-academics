@@ -135,6 +135,10 @@ export function SessionPage({ profile, onXpChange }: Props) {
       const wanted = topicsFilter ? new Set(topicsFilter.split(",")) : null;
       const filtered = all.filter((q) => {
         if (q.course_id !== course) return false;
+        // Short-answer questions have no choices to pick between — they are read in Sessions, not
+        // played here. Courses made entirely of them never reach this screen (see the picker
+        // below); this keeps a mixed course safe too.
+        if (q.type === "short_answer") return false;
         if (wanted) return wanted.has(q.topic);
         if (topicFilter) return q.topic === topicFilter;
         if (sessionFilter) return q.session === Number(sessionFilter);
@@ -302,6 +306,10 @@ export function SessionPage({ profile, onXpChange }: Props) {
   }
 
   if (!course) {
+    // Reference-only courses (all short-answer, nothing to pick between) are left out rather than
+    // shown and then dead-ending in an empty round.
+    const playable = courses.filter((c) => c.has_practice);
+    const readOnly = courses.filter((c) => c.enabled && !c.has_practice);
     return (
       <div className="px-6 py-10 md:px-10">
         <h2 className="text-2xl font-bold mb-2">Which course?</h2>
@@ -309,7 +317,7 @@ export function SessionPage({ profile, onXpChange }: Props) {
           Smart Practice adapts within one course at a time — pick which one to mix questions from.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 max-w-xl">
-          {courses.map((c) =>
+          {playable.map((c) =>
             c.enabled ? (
               <button key={c.id} onClick={() => setCourse(c.id)} className="card card-hover text-left p-5">
                 <div className="font-semibold mb-1">{c.name}</div>
@@ -323,6 +331,20 @@ export function SessionPage({ profile, onXpChange }: Props) {
             ),
           )}
         </div>
+        {readOnly.length > 0 && (
+          <p className="text-sm text-ink-soft mt-6 max-w-2xl">
+            {readOnly.map((c) => c.name).join(", ")}{" "}
+            {readOnly.length === 1 ? "is" : "are"} written-answer only, so there is nothing to play
+            here —{" "}
+            <button
+              onClick={() => navigate(`/learn/sessions/${readOnly[0].id}`)}
+              className="text-accent font-medium hover:underline"
+            >
+              read the question bank instead
+            </button>
+            .
+          </p>
+        )}
       </div>
     );
   }

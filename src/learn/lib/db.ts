@@ -53,14 +53,23 @@ const MASTERY_COLS =
 const MATERIAL_COLS = "id, course_id:course_code, session, title, kind, storage_path, sort_order";
 
 /** Every course with practice content, including disabled ones — admin needs to see those too.
-    Name and code come from the shared bidding catalogue rather than being duplicated here. */
+    Name and code come from the shared bidding catalogue rather than being duplicated here.
+    `has_practice` is derived from the questions rather than stored, so it can never disagree with
+    the content: a course whose questions are all `short_answer` has nothing Smart Practice can
+    play, and every screen that offers practice reads this one field to decide. */
 export async function fetchCourses(): Promise<Course[]> {
-  const { data, error } = await supabase
-    .from("learn_courses")
-    .select("course_code, total_sessions, enabled, sort_order, courses!inner(name, code)")
-    .order("sort_order");
-  if (error) throw error;
-  return (data ?? []).map((row) => {
+  const [courses, playable] = await Promise.all([
+    supabase
+      .from("learn_courses")
+      .select("course_code, total_sessions, enabled, sort_order, courses!inner(name, code)")
+      .order("sort_order"),
+    supabase.from("learn_questions").select("course_code").neq("type", "short_answer"),
+  ]);
+  if (courses.error) throw courses.error;
+  if (playable.error) throw playable.error;
+
+  const withPractice = new Set((playable.data ?? []).map((row) => row.course_code as string));
+  return (courses.data ?? []).map((row) => {
     const course = row.courses as unknown as { name: string; code: string | null };
     return {
       id: row.course_code as string,
@@ -69,6 +78,7 @@ export async function fetchCourses(): Promise<Course[]> {
       total_sessions: row.total_sessions as number,
       enabled: row.enabled as boolean,
       sort_order: row.sort_order as number,
+      has_practice: withPractice.has(row.course_code as string),
     };
   });
 }

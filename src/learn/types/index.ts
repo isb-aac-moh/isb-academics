@@ -1,4 +1,6 @@
-export type QuestionType = "formula" | "case_fact";
+/** `short_answer` questions have no `choices`: the exam asks for a written answer, so
+    `correct_answer` holds the model answer and the question is read, not played. */
+export type QuestionType = "formula" | "case_fact" | "short_answer";
 
 /** Where a question came from. `authored` content is the only content the professor never touched,
     which makes it filterable and reversible if the real exam turns out narrower than expected. */
@@ -34,6 +36,9 @@ export interface Course {
   total_sessions: number;
   enabled: boolean;
   sort_order: number;
+  /** Derived, not stored: false when every question in the course is `short_answer`, i.e. the
+      course is a Q&A reference rather than something Smart Practice can play. */
+  has_practice: boolean;
 }
 
 export interface Question {
