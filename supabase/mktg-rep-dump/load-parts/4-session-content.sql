@@ -1,0 +1,1825 @@
+-- Learning agent data, part 4-session-content.
+-- Run the parts in numeric order: later ones reference rows created by earlier ones.
+-- Safe to run once only — re-running duplicates learn_attempts, whose keys are generated.
+
+begin;
+
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 2, 'Segmentation, Targeting & Positioning', '
+## Where this session goes
+
+Session 1 said positioning happens in the consumer''s mind. This session is the machinery for getting it there: how to find groups worth serving, how to choose between them, and how to write down what you will mean to the one you pick.
+
+## The 4 Ps are not universal
+
+Other frameworks add **Purpose** (the why — profit, health, environment, behaviour change), **People** (employees, not customers: compensation, wellness, culture) and **Processes** (supply chain, manufacturing).
+
+The **4 As** — Acceptability, Accessibility, Awareness, Affordability — are the same ideas relabelled from the customer''s side rather than the firm''s.
+
+> Trap: If someone asks about the 4 As, they are asking about the marketing mix. Do not treat it as a separate framework you have not seen.
+
+## Segmentation bases
+
+| Basis | What it splits on | Examples |
+|---|---|---|
+| **Geographic** | Region, country, city | McDonald''s is upscale in India, low-end in the US. Haldiram''s pani puri is under $1 in India, ~$10 in England |
+| **Demographic** | Age, income, education | The most common, because it describes segments in **reachable** terms |
+| **Behavioural** | Purchase history, usage, loyalty | Amazon, Starbucks loyalty programmes |
+| **Psychographic** | Lifestyle, values, attitudes | Red Bull (thrill), Lululemon (fitness) |
+| **Benefit** | The specific benefit sought | Toothpaste: whitening vs sensitivity vs cavities |
+
+> Trap: Even when you segment behaviourally or psychographically, you still have to describe the segment **demographically** to actually reach it. Media is bought on demographics — there is no "adventurous people" targeting option.
+
+> Worked example: The (RED) iPhone sells on standing apart plus a social cause. In China the AIDS-funding angle is not communicated at all — red carries festive meaning there and disease associations are avoided. Same product, different psychographic framing by geography.
+
+## Targeting
+
+Pick the segment that best maximises your objective — which is not always profit. Patagonia''s objective includes environmental welfare, and that changes which segments are attractive.
+
+An attractive segment is large and growing, has strong unmet pain, fits your core competencies, lets you make a believable offer, and does not trip regulatory requirements.
+
+The matrix is attractiveness against **your capability**.
+
+> Trap: The dangerous cell is low capability in a highly attractive market. Everyone can see it is attractive, strong competitors are already there, and they will punish the entry. Attractiveness alone is a trap.
+
+> Trap: Watch for **leakage** — a message aimed at one segment reaching and upsetting another. Limit reach and avoid content that alienates adjacent segments.
+
+Segments are derived with **factor analysis** (collapse 50+ variables into 2–3 dimensions) then **cluster analysis** (group similar customers, maximise dissimilarity between clusters).
+
+## Niche targeting
+
+A niche lets you build a monopoly in a small segment and extract full value, while staying beneath the notice of dominant players. The smallest possible segment is one consumer served exactly as needed — **most pain, most need, least served**.
+
+> Worked example: Red Bull entered the US as a **mixer** to go with vodka, not as a cola competitor. The taurine and bull-testicle rumour circulated and Red Bull stayed silent, letting the mystique build. Coke and Pepsi dismissed it — "our segment doesn''t drink that." By the time they noticed, Red Bull was too entrenched to acquire or displace.
+
+The lesson is that entering a *different* segment avoids retaliation until it is too late for the incumbent. Attacking head-on invites a response from someone with more money than you.
+
+## When not to differentiate
+
+Differentiation is expensive, and it is not always right.
+
+- If market demand **exceeds** combined supply capacity, a third firm can enter doing the same thing and still profit. Price wars only start when firms need to steal each other''s customers.
+- **Co-location** is deliberate non-differentiation: petrol stations, jewellery shops and museums cluster because customers prefer clusters — it lowers the risk of a wasted trip and raises category traffic.
+
+> Trap: Price-sensitive consumers are a reason to differentiate **more**, not less. Without differentiation you get pulled into a price war with no margin, and price-sensitive customers are exactly the ones who will leave for a cheaper option.
+
+## Positioning
+
+The place a brand occupies in the consumer''s mental map, relative to competitors.
+
+> Prof: The positioning statement is written **first**, as an internal guide. Differentiation is how that positioning gets implemented through product, price and channels.
+
+**Positioning statements are internal only and never published.**
+
+> Trap: Publishing one reveals who you think you compete with and invites comparative advertising. When BMW and Audi fought publicly, the outcome was that consumers bought Japanese cars instead — the fight legitimised the question and a third party won it.
+
+The template: "To customers who are **<target market>**, our **<brand>** offers **<points of difference>** relative to **<frame of reference>**, because **<reasons to believe>**."
+
+> Prof: Writing one is not inherently hard. It is hard when you skipped the 5C analysis and the segmentation work that has to come first.
+
+## BMW: how it got there
+
+BMW entered North America in the 1950s through independent distributors and opened BMW North America around 1975–76, launching "The Ultimate Driving Machine."
+
+Between 1986 and 1989, Acura, Infiniti and Lexus entered with cheaper high-quality alternatives and BMW''s sales fell. From 1992 it recovered by reorganising dealers, launching new models and running inventive campaigns including James Bond placement — achieving the highest return on marketing spend among US auto manufacturers. **Lexus spent twice what BMW did to sell the same volume.**
+
+| Series | Share | Profile | Loyalty |
+|---|---|---|---|
+| 3-series | 50% | ~35, mostly male, tech-savvy, high earners, unmarried | **Least loyal** |
+| 5-series | 32% | Slightly older, some married, no children yet | Middle |
+| 7-series | 16% | Older, senior roles, $300K+, married with college-age kids | **Most loyal** |
+
+Read that with STP in hand: half the volume comes from the *least* loyal segment, so BMW must keep refilling the 3-series every generation. That is the problem the next session''s campaign is aimed at.
+', null, '
+## STP
+
+- **Segmentation** → what groups exist
+- **Targeting** → which to pursue (attractiveness × **your capability**)
+- **Positioning** → the place you occupy in their mind
+
+## Segmentation bases
+
+Geographic · Demographic · Behavioural · Psychographic · Benefit
+
+Derived via **factor analysis** (reduce dimensions) then **cluster analysis**
+
+> Trap: Whatever basis you segment on, you still describe the segment demographically to reach it.
+
+## Positioning statement (internal only, never published)
+
+> "To customers who are **<target market>**, our **<brand>** offers **<point of difference>** relative to **<frame of reference>**, because **<reason to believe>**."
+
+## Growth plays
+
+- **Adjacent segment** — expand along a spectrum (Toyota)
+- **Niche** — most pain, most need, least served (Red Bull, Rolex)
+
+## When not to differentiate
+
+- Demand exceeds combined supply capacity
+- Co-location raises total category traffic
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 3, 'Marketing Analytics & Break-Even', '
+## Where this session goes
+
+Session 2 set up BMW''s problem: half its volume comes from its least loyal segment. This session shows what BMW did about it — and then turns to the arithmetic that lets you judge any marketing decision rather than admire it.
+
+## BMW Films, analysed
+
+Launched in 2000, deliberately during a **six-month window with no new product launches** — the campaign had to carry the brand alone. Five short films with top directors and actors: $15M production, about $15M promotion, $30M total. Released only on BMWfilms.com, behind registration and a player download.
+
+About **2M registrations and 6M+ views** — roughly 3 views per registered user. Average viewer was 30 years old, $88K income, 63% college-educated. Students described the films as fast, adrenaline-driven, funny, unpredictable and unconventional.
+
+### Why it worked
+
+The real target was **future 3-series buyers** — college-age consumers with internet access, years away from affording the car. The film was built for them, which is why it landed with that group.
+
+Everything that looks like a distribution mistake was a filter. 7-series customers, on $300K+, were **deliberately excluded**: the registration friction screened them out, and the tone was neither prestigious nor luxurious — that segment found it disrespectful.
+
+> Prof: Effective targeting means the message will **not** appeal to other segments. Preventing leakage is as important as reaching the target.
+
+That is the transferable idea. A campaign everyone likes has usually positioned nothing.
+
+Afterwards BMW used the registration data to spot future high earners and invited them to test drives, keeping them engaged years before they could afford to buy.
+
+### What it cost, and what was missed
+
+$$\frac{\$30\text{M}}{2\text{M registrants}} \approx \$15 \text{ per person}$$
+
+A prime-time TV ad runs about **$0.02 per viewer**. Not a like-for-like comparison — a registered, profiled, self-selected viewer is worth more than an incidental one — but you should raise it before you are asked.
+
+> Trap: The distribution gap is the standard exam criticism. The films ran **only** on BMWfilms.com — not on BMW.com, not on auto magazine sites, not at auto shows, not on CDs or DVDs at dealerships. Exclusivity was the strategy, but nothing about it required staying off BMW''s own homepage.
+
+## The analytics block
+
+Now the tools. Everything below is a rearrangement of one identity:
+
+$$\text{Profit} = (P - C)Q - F$$
+
+Unit contribution is $P - C$.
+
+$$\%\text{Margin} = \frac{P - C}{P} \qquad \%\text{Markup} = \frac{P - C}{C} \qquad Q_{BE} = \frac{F}{P - C}$$
+
+Margin divides by **price**, markup divides by **cost**. Same numerator, and markup is always the bigger number. Exclude sunk costs from the break-even.
+
+### Cannibalisation
+
+A new product that eats into your existing one is not automatically bad — the question is how much it can eat before the launch stops being worth doing.
+
+$$\text{Cannibalisation rate} = \frac{\text{units cannibalised}}{\text{new product units}} \qquad \text{Cost} = \text{units cannibalised} \times \text{old margin}$$
+
+The **break-even cannibalisation rate** is the point where new-product profit exactly offsets the cannibalisation loss.
+
+> Worked example: The cricket bat, Year 2. Benefit from the launch is ₹3.53 crores. Expected cannibalisation is 22% against a break-even cannibalisation rate of **29%** — so up to 29% is tolerable and the launch survives at 22%. Not comfortably, but it survives.
+
+> Trap: If **both** positioning strategies produce losses, the answer is neither. "Pick the less bad one" is not the expected answer.
+
+## Signalling quality
+
+Consumers distrust claims about new products because they cannot verify them before buying — **adverse selection**. So a claim needs a signal, and a signal only works if a firm with a bad product could not afford to send it:
+
+- Celebrity endorsement (Virat Kohli using the bat)
+- Money-back guarantee or no-questions-asked returns
+- Extended warranty
+- Strategic scarcity, or demarketing
+- Live demonstrations
+- **Premium pricing itself as a quality signal**
+- Exclusive or premium distribution channels
+
+Each of these is expensive or risky if the product is poor, which is exactly why they carry information.
+
+## Golden rule of pricing, first pass
+
+Raise price only when demand is **inelastic** — formally, $\dfrac{p - mc}{p} = \dfrac{1}{\varepsilon}$.
+
+- **Niche segment** — smaller volume, less price-sensitive, higher price justified
+- **Mainstream segment** — larger volume, more price-sensitive, lower price needed
+
+> Trap: Volume discounts are why marginal cost differs between the two positioning strategies. If you carry one unit cost across both scenarios you will get the comparison wrong while appearing rigorous.
+', null, '
+## Profit
+
+$$\text{Profit} = (p - c) \times q - F$$
+
+Unit contribution $= p - c$
+
+## Margin vs markup
+
+$$\%\text{Margin} = \frac{p - c}{p} \qquad \%\text{Markup} = \frac{p - c}{c}$$
+
+Margin divides by **price**, markup divides by **cost**. Converting between them:
+
+$$\text{margin} = \frac{\text{markup}}{1 + \text{markup}} \qquad \text{markup} = \frac{\text{margin}}{1 - \text{margin}}$$
+
+## Break-even
+
+$$Q_{BE} = \frac{F}{p - c}$$
+
+Ignore sunk costs. For a change in margin:
+
+$$\frac{Q_{BE}^{\text{new}}}{Q^{\text{old}}} = \frac{\text{old contribution}}{\text{new contribution}}$$
+
+## Cannibalisation
+
+$$BECR = \frac{\text{new product contribution}}{\text{old product contribution}}$$
+
+$$\text{Cannibalisation rate} = \frac{\text{old units lost}}{\text{new product units sold}}$$
+
+> Trap: Actual rate $>$ BECR means the launch loses money.
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 1, 'Marketing Fundamentals', '
+## What marketing actually is
+
+Most people arrive with a definition of marketing that means "advertising." That definition will not survive this course.
+
+**Marketing is creating, communicating, delivering and extracting value for consumers.** Four verbs, and notice the last one — extracting value is part of the job, not something the finance team handles afterwards. A firm that creates enormous value and captures none of it is not doing good marketing. It is doing charity with extra steps.
+
+This course is about B2C.
+
+> Prof: "Make what you can sell, not sell what you can make." This returns in Session 5 with Unilever and is the spine of the whole course.
+
+That sentence is the difference between marketing and sales. Sales starts with the product you have. Marketing starts with the customer you want.
+
+## 3 Cs, then 5 Cs
+
+Before deciding anything, you have to understand the situation. Start with three:
+
+**Customer, Company, Competition.** Then add two more that people forget until they matter:
+
+- **Context** — regulatory environment, laws, tariffs
+- **Collaborators** — partners, government subsidies, R&D alliances
+
+## Setting strategy: STP
+
+- **Segmentation** — divide the total market into distinct groups
+- **Targeting** — select which group to focus on
+- **Positioning** — how the brand is perceived in the consumer''s mind
+
+Note the order, and that positioning happens **in the consumer''s mind**, not in your deck. You do not decide your positioning; you decide what you will do to influence it.
+
+A **positioning map** plots competing products on the axes consumers actually care about, such as price against quality.
+
+> Trap: The axes need not be labelled in advance. Statistical techniques generate the map from consumer data — you are *discovering* which dimensions matter, not assuming them. A map drawn from your own intuition tells you what you already believed.
+
+## Customer value
+
+**Value = benefits − costs**, and both sides have economic and non-economic parts. That second half is where most of the interesting behaviour lives.
+
+- Non-economic **benefit** — the emotional attachment of "I built this" (the IKEA effect)
+- Non-economic **cost** — patients disliking an AI diagnosis because it makes them feel un-special
+
+Neither appears on a price tag, and both change what people buy.
+
+## Value proposition
+
+What you deliver that consumers need and rivals cannot.
+
+| Term | Definition | Purpose |
+|---|---|---|
+| **Points of parity** | Needs both you and the rival fulfil | Neutralise the competition |
+| **Points of differentiation** | Needs you fulfil that rivals cannot | The basis of your value proposition |
+
+Points of parity are not wasted effort. They are the price of entry — the reasons a customer *cannot* rule you out. Differentiation is what makes them choose you.
+
+> Trap: Communicate consumer **needs**, not internal capabilities. "A reliable phone" is a value proposition. "Six sigma certified" is a fact about you that no customer asked for, and it forces them to do the translation themselves.
+
+## The 4 Ps
+
+- **Product** — core (battery life, display, camera, processor, size) plus augmented (ecosystem, warranty, financing, brand, after-sales). Brand usually sits in product strategy and also feeds positioning.
+- **Price** — the only P that **generates revenue**. Every other one costs money. Price also signals quality.
+- **Place** — direct, through retailers (P&G to Walmart), or online. The iPhone launching exclusively on AT&T was a place-based differentiator.
+- **Promotion** — advertising, communications, persuasion, sales incentives. BMW Films is the standing example.
+
+## Two kinds of differentiation
+
+| Type | Basis | Test | Examples |
+|---|---|---|---|
+| **Horizontal** | Taste | No option is objectively better | Phone colour, vanilla vs chocolate, pulp vs no-pulp |
+| **Vertical** | Quality | Everyone prefers more of it | Battery life, megapixels, screen resolution |
+
+The distinction matters because it determines whether you can charge more. On a vertical dimension everyone wants more, so more commands a premium. On a horizontal one, half the market actively prefers the other option — and offering both is a variety decision, not a quality one.
+
+**Conjoint analysis** identifies which attributes consumers weigh most, so you differentiate where it counts rather than where it is easy.
+
+## Umbrella brands
+
+One name across many products — Coke and Diet Coke. The benefit is borrowed brand equity; the risk is that a failure damages the parent.
+
+> Worked example: Toyota launched **Lexus** as a separate brand to protect the quality perception; BMW launched **Mini Cooper** separately to avoid diluting its premium image. Apple did the opposite — iPhone and iPad are line extensions under one umbrella, because each success reinforces the others.
+
+A new brand is warranted when the risk of damage is high, or when the image would be misaligned.
+', null, '
+## Definitions
+
+- **Marketing** = creating, communicating, delivering and **extracting** value
+- **Value** = benefits − costs (each having economic and non-economic parts)
+
+## Frameworks
+
+- **3 Cs** — Customer, Company, Competition
+- **5 Cs** — + Context, Collaborators
+- **STP** — Segmentation → Targeting → Positioning
+- **4 Ps** — Product, Price, Place, Promotion (**Price** is the only one that generates revenue)
+- **4 As** — Acceptability, Affordability, Accessibility, Awareness
+- **Product levels** — Core → Actual → Augmented
+- **Planning process** — 5 Cs → STP → 4 Ps
+
+## Value proposition
+
+- **Points of parity** — you and the rival both deliver → neutralise
+- **Points of differentiation** — only you deliver → the proposition
+
+## Differentiation
+
+- **Horizontal** — taste-based, no objective winner
+- **Vertical** — quality-based, everyone prefers more
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 4, '5 Cs & Customer Decision-Making', '
+## Where this session goes
+
+You now have frameworks for the market and the arithmetic to test decisions. What is still missing is the customer — specifically, how they actually decide, and what happens when a firm misreads what its customers want from it.
+
+## The 5 Cs, properly
+
+| C | The question |
+|---|---|
+| **Customer** | Who are they — needs, wants, lifestyle, preferences, willingness to pay? And **how do they decide**? |
+| **Company** | Core competence, strengths, weaknesses, goals |
+| **Competition** | Who competes for our customers — their strengths, weaknesses, and **likely reactions to our actions** |
+| **Context** | Regulation, economy, culture, technology |
+| **Collaborators** | Who can help us, and can they **capture enough value** by helping? |
+
+Two of those cells are easy to skim past and shouldn''t be. Competitors have *reactions* — a plan that assumes they stand still is not a plan. And collaborators need to make money from helping you, or they will stop.
+
+> Prof: Willingness to pay links straight back to horizontal and vertical differentiation. Which attributes will a consumer pay more for, which do they merely want, and which do they not care about? Higher-income consumers pay for quality improvements; others will not.
+
+## The customer decision-making process
+
+Awareness of need → Identify alternatives → Get information → Evaluate alternatives → **Purchase decision** → Use → Post-purchase evaluation → repeat purchase, or back around the loop.
+
+> Trap: The **acquisition/retention split happens at the purchase decision**. Everything before it is acquisition spend; everything after is retention. Exam questions test whether you know which side of that line a given activity sits on — and the boundary is where CLV, next session''s topic, gets its two different formulas.
+
+## United Breaks Guitars
+
+United is one of the three largest airlines in the world. Its economy value proposition is **affordable connectivity** — mainstream, not premium.
+
+2009 customer satisfaction: Southwest 81, Continental 68, Delta 64, American 60, US Airways 59, Northwest 57, **United 56 — last**.
+
+In 2008 Dave Carroll flew Halifax to Omaha and United broke his guitar. No compensation. Fifteen months later he posted the video. The VP of Customer Relations offered $2,400; Carroll declined; United donated $3,000 to a music school. United responded publicly **only on Twitter**, including "The fact is that 99.95% of our customers'' bags are delivered on time and without incident."
+
+Carroll became a celebrity, made a fuss when his bag went missing on a later United flight, and wrote two more songs.
+
+### Should United improve customer service?
+
+Every instinct says yes. Hold that instinct and weigh three things: the **service-profit relationship**, **vertical differentiation**, and **who the target segment actually is**.
+
+> Prof: There will come a point where offering more customer service does not bring a return on investment. You should stop increasing it at that point. There is an optimal level of customer service for every product and service.
+
+*Optimal*, not maximum. Service costs money, and for a price-driven segment that money comes out of the fare.
+
+Vertical differentiation means that in a market where consumers differ in willingness to pay, firms deliberately offer higher and lower quality. Consumers who will not pay much consume the lower-quality option — and serving them properly at that price is a legitimate position, not a failure.
+
+> Trap: The expected answer is **not** "United should have apologised better." Highest possible customer service is not always desirable. Do what is right for your target segment, not what the internet demands. A payment large enough to satisfy a viral complainant is a payment you have now promised everyone with a camera.
+
+## Uber: pickup quality and ML
+
+The other half of the session is about turning a vague complaint into something buildable.
+
+Six stages, each with pain on both sides — and often the same event seen twice:
+
+| Stage | Rider pain | Driver pain |
+|---|---|---|
+| Contextualize | The car passed me, I have to walk | I can''t see the rider |
+| Assist | Wrong pickup location, I have to coordinate | Rider is elsewhere, I loop around |
+| Depict | I''m at the location, the driver isn''t | Rider is not where depicted |
+| Navigate | Driver stopped on the wrong side | Lost time to bad navigation |
+| Track | The car icon spins, the ETA keeps changing | Rider cancels after I''ve driven minutes |
+| Meet | I can''t find my car among all the Ubers | I can''t find my rider in a crowd |
+
+That table is the real deliverable. "Pickups are bad" is unbuildable; "the ETA keeps updating while the icon spins" is something an engineer can attack.
+
+$$\text{Pickup Quality} = \min\big[0.30\,(\text{ETA vs ATA}) + 0.20\,(\text{Driver idle}) + 0.30\,(\text{Location error}) + 0.20\,(\text{Cancellation})\big]$$
+
+Note that two components measure the *driver''s* experience — a rider-only metric would have optimised the supply side into the ground.
+
+> Trap: A complete analysis requires doing this **for each of Uber''s five target segments separately**. A single blended metric hides the segment where the experience is worst, which is usually the one about to churn.
+
+### Building the model
+
+Business analyst leads (define the problem → decide whether ML is even appropriate → gather and label data) → data scientist leads (preprocess, define features, select the approach, improve the model) → UX leads (make decisions, design the experience).
+
+> Trap: "Evaluate if ML is appropriate" is an explicit step, not a formality. Plenty of pickup problems are fixed with better map data or a clearer UI and no model at all.
+
+Takeaways: start with the customer, use quantitative metrics to define success, build cross-functionally, and think **"glocal"** — global strategy with local nuance.
+', null, '
+## 5 Cs
+
+Customer · Company · Competition · Context · Collaborators
+
+> Collaborators must be able to **capture enough value** to keep helping you.
+
+## Customer decision-making process
+
+Awareness → Identify alternatives → Get info → Evaluate → **Purchase** → Use → Post-purchase evaluation → Repeat
+
+- **Acquisition** is everything before the purchase decision
+- **Retention** is everything after
+
+## Uber pickup quality
+
+**Minimize [(0.30 × ETA vs ATA) + (0.20 × Driver Idle Time) + (0.30 × Pickup Location Error) + (0.20 × Ride Cancellation)]**
+
+## Service level
+
+- There is an **optimal** level of customer service, not a maximum
+- **Vertical differentiation** — deliberately serving low-WTP segments with lower quality is a strategy, not a failure
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 7, 'Lean Deep Dive, Quality Dimensions & Statistical Foundations', '
+## Where this session sits
+
+Lean gets finished here, and then the course pivots. Everything so far has been about *flow* — how fast, how much, how long. The rest is about **quality**: not how much you produce, but how reliably it matches what you promised.
+
+## Lean, finished
+
+Lean is a philosophy of waste elimination, where waste (*muda*) is the gap between your process and the ideal one: demand arrives, output appears instantly, zero flow time, zero inventory. Unachievable — and every deviation from it is still waste.
+
+That definition is deliberately uncomfortable. It refuses to let you call a two-day inspection acceptable because it is normal. You may not be able to remove it, but you do not get to stop calling it waste.
+
+The tools all do one job, synchronising flow: batch size reduction, pull/JIT, Kanban, quality checks at every station, cross-trained resources, cellular layout.
+
+> Trap: Lean firms do not mandate small batches. They reduce the **cost** of small batches — closer layouts, faster changeovers — and small batches follow naturally. Mandating the batch size without cutting changeover cost just destroys capacity, which is how a lean programme makes a plant slower.
+
+### Inventory hides problems
+
+Manufacturers use inventory to cover missed dates and scrap; lean firms cut inventory to make those failures **visible**, then fix root causes. Removing the buffer is a diagnostic instrument, not just a saving. Service firms hide the same problems in time buffers, like Swiggy padding an estimate by five minutes.
+
+> Worked example: Toyota sorted inputs by disruption risk after the 2011 earthquake. Plastic resin substitutes easily, so no buffer. Semiconductors take years to rebuild, so it held a calculated 2 to 6 months of stock — and was the only major automaker largely unaffected by the 2021 chip shortage. Everyone else copied "eliminate inventory" without the distinction between excess stock and disruption buffer.
+
+Starbucks shows the limit: for grab-and-go customers less flow time is value, for atmosphere customers dwell time **is** the product. Lean needs one clear ideal process, and Starbucks has two.
+
+## Two questions hiding in one word
+
+Now the pivot. A restaurant promises delivery under 30 minutes. Is that good quality? You cannot answer, because "quality" is concealing two separate questions.
+
+**Quality of design** is what the customer needs — the spec itself. Is *under 30 minutes* the right promise? That is a marketing question.
+
+**Quality of conformance** is how reliably the actual process hits that spec. That is an operations question, and process capability measures it.
+
+Keeping them apart matters because the fixes are unrelated. Bad design is fixed by changing what you sell; bad conformance by changing how you work.
+
+### Grab-A-Bite, before Anisha
+
+The market is office lunch, so the spec is delivery **under 30 minutes**. Baseline mean 21.38 min, σ 7.73 min.
+
+Your process does not produce one delivery time — it produces a distribution. The promise is a hard line. Conformance is therefore a geometry question: how much of your distribution falls on the wrong side?
+
+- **Percent defective** — 12.5% of actual deliveries came in over 30 minutes
+- **Sigma capability** — $\min\left[\frac{USL-\mu}{\sigma},\ \frac{\mu-LSL}{\sigma}\right]$, with LSL taken as 0 since delivery time cannot be negative
+
+$$\min\left[\frac{30 - 21.38}{7.73},\ \frac{21.38 - 0}{7.73}\right] = \min[1.12,\ 2.77] = \mathbf{1.12\sigma}$$
+
+> Trap: In class this was rounded aloud to "about 1.5 sigma," but the arithmetic on those exact numbers gives 1.12. Know the formula and be able to compute it — do not memorise the quoted figure. Check your own slide annotation before the exam.
+
+> Trap: Why the minimum and not an average? Defects pile up on whichever side is closer. Averaging 1.12 and 2.77 reports 1.9σ and hides that one shoulder of the distribution is sitting almost on the promise.
+
+## Central Limit Theorem
+
+To monitor a process you need to know how much a measurement *should* wobble. That is what the CLT provides.
+
+Individual delivery times scatter widely. Averages of many deliveries barely move. Formally, sample means of size $n$ are normally distributed regardless of the original distribution:
+
+$$\bar{X} \sim N\left(\mu,\ \frac{\sigma}{\sqrt{n}}\right)$$
+
+Two claims worth separating. First, **normal regardless of the parent distribution** — which is why the normal shows up everywhere in process control even when nothing measured is normal. Second, the spread is $\sigma/\sqrt{n}$, narrower than the process by a factor of $\sqrt{n}$. To halve your uncertainty you need four times the data.
+
+## Hypothesis testing
+
+The null hypothesis is the status quo — the coin is fair, the process mean is still 90 minutes. Data is judged against the null, and the burden of proof sits with the data. If what you observed would be very unlikely under the null, you reject it and raise the flag.
+
+> Prof: You are never proving the new thing is true. You are asking whether the old story can still explain what you just saw.
+
+Next session turns this into control charts: group outputs into buckets, plot the sample means, and test deviations statistically.
+', null, '
+## Capability
+
+$$\text{Percent defective} = P(X < LSL) + P(X > USL)$$
+
+$$\text{Sigma capability} = \min\left[\frac{USL - \mu}{\sigma},\ \frac{\mu - LSL}{\sigma}\right]$$
+
+$$C_p = \frac{USL - LSL}{6\sigma} \qquad C_{pk} = \frac{\text{sigma capability}}{3}$$
+
+> Trap: Always the **minimum**, never the average. The nearest spec limit is where the defects are. If only one limit is given, that is the only one you compute.
+
+## Central Limit Theorem
+
+Sample means are normal regardless of the parent distribution:
+
+$$\bar{X} \sim N\left(\mu,\ \frac{\sigma}{\sqrt{n}}\right)$$
+
+The standard error is $\sigma/\sqrt{n}$.
+
+## Z-score
+
+$$z = \frac{x - \mu}{\sigma} \qquad \text{for a sample mean:} \quad z = \frac{\bar{x} - \mu}{\sigma/\sqrt{n}}$$
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 8, 'Process Capability, SPC & Six Sigma', '
+## The problem this session solves
+
+You changed the process and this week''s numbers look better. Did it work, or did you get a good week?
+
+That question needs a method, not an opinion — and the method has to work every day, not just once.
+
+## Specification limits belong to the customer
+
+First, a distinction that the whole session rests on. USL and LSL are **imposed from outside**. Grab-A-Bite''s 30-minute upper limit came from the customer promise, not from the kitchen. The LSL of zero is arguably irrelevant here — for delivery time it is effectively minus infinity, since nobody complains about early food.
+
+> Trap: Sigma capability takes the **minimum** of the two Z values to catch the worst tail. Skewed distributions pile defects on one side, and the minimum finds the side nearer the mean. Doubling the tail probability is an upper bound on the defect rate, not the actual rate.
+
+## Did the improvement work? Hypothesis testing
+
+Anisha''s pilot: sample mean **19.2 minutes** from n = 100. Null hypothesis is that nothing changed — μ = 21.39, σ = 7.73.
+
+> Trap: 19.2 is not a draw from the population distribution. It is a draw from the **sampling distribution of the mean**, which is $N\left(21.39,\ \tfrac{7.73}{\sqrt{100}}\right)$. Using σ instead of σ/√n is the most common error on this topic and it changes the answer by a factor of ten.
+
+$$z = \frac{19.2 - 21.39}{7.73/\sqrt{100}} = -2.83 \quad\Rightarrow\quad p = 0.0023 \ \text{(one-sided)}$$
+
+One-sided because only improvement counts — a delivery process getting *slower* is not evidence the change worked. And 0.0023 is comfortably enough to reject the null for food delivery; a vaccine would demand far more.
+
+## Reducing the mean vs reducing the variance
+
+Improvement can come from moving the mean, tightening σ, or both. They are not interchangeable.
+
+> Trap: Lowering the mean is not automatically good. With a two-sided spec, pulling the mean too far creates defects on the *other* side — you relocated the failures rather than removing them. Grab-A-Bite is one-sided, so lower is simply better here. Do not carry that instinct into a two-sided problem.
+
+A pathological case from class: mean falls 1000 → 100 while σ falls only 10 → 9. The coefficient of variation gets **worse**, yet the absolute defect count improves. Judge by defects against the spec — the customer experiences defects and has never heard of your CV.
+
+## Daily tracking
+
+Seven days of pilot data were tested day by day, not pooled.
+
+> Trap: Lumping the days together averages out exactly the variability you are looking for. Each day can have its own mean and σ — traffic, weekday versus weekend.
+
+Testing each day against μ = 19.32, σ = 7.73 flagged days 2, 3 and 6 as anomalous. That is not a verdict, it is a starting point for finding the external source.
+
+## Control limits are not specification limits
+
+| | Specification limits | Control limits |
+|---|---|---|
+| Set by | The customer | The process itself |
+| Question | What does the customer want? | Is the process the same as yesterday? |
+| Formula | Given | $\mu \pm 3\dfrac{\sigma}{\sqrt{n}}$ |
+
+For Grab-A-Bite with $n = 50$:
+
+$$19.32 \pm 3\frac{7.73}{\sqrt{50}} \quad\Rightarrow\quad UCL = 22.6,\ LCL = 16.04$$
+
+Plot the daily sample mean. Crossing a limit triggers an investigation — it is a flag, not proof of a problem.
+
+> Trap: "In control" and "capable" are independent properties. A process can sit comfortably inside its control limits while producing defects, because control limits say nothing about what the customer asked for.
+
+> Trap: The lower limit still matters in a one-sided business. If deliveries suddenly get much faster, you want to know why — someone may be skipping a step. An unexplained improvement is an uncontrolled process.
+
+### How wide should the limits be?
+
+- **Narrow** — more false alarms, but you catch every real change. Right for vaccines and aerospace.
+- **Wide** — fewer false alarms, but real shifts can pass unnoticed.
+
+±3σ is convention, not law. The choice balances the cost of a needless investigation against the cost of a missed change, and those costs differ by industry.
+
+## What Six Sigma is actually for
+
+> Prof: Six Sigma is not primarily about near-zero defects in steady state. Its real value is **robustness when the process inevitably shifts**.
+
+Every process drifts — a supplier changes, the weather turns, an experienced operator leaves. With σ tight enough, a mean shift still leaves output inside spec, so you keep producing while you hunt the root cause instead of shutting the line down. You are buying insurance against drift, not a headline defect count.
+
+**DMAIC**: Define, Measure, Analyse, Improve, Control. The Control phase is the loop — get the process in control, then improve again from the new baseline. It is the phase people skip and the one that makes the rest worth doing.
+
+Six sigma is a target. In many contexts 4.5 sigma is plenty, and "is it worth it here?" is a real business question.
+', null, '
+## Hypothesis test on a sample mean
+
+$$\text{Standard error} = \frac{\sigma}{\sqrt{n}} \qquad z = \frac{\bar{x} - \mu_0}{\sigma/\sqrt{n}}$$
+
+Use a one-sided p-value when only one direction counts as improvement.
+
+> Trap: Divide by $\sigma/\sqrt{n}$, never by $\sigma$. This is the most common error in the topic — with $n = 100$ it understates $z$ tenfold.
+
+## Control limits
+
+$$UCL = \mu + 3\frac{\sigma}{\sqrt{n}} \qquad LCL = \mu - 3\frac{\sigma}{\sqrt{n}}$$
+
+Width is a business choice; $\pm 3\sigma$ is convention.
+
+## Specification vs control limits
+
+- **Spec limits** — customer-imposed: "what does the customer want?"
+- **Control limits** — process-derived: "is the process the same as yesterday?"
+
+## Capability recap
+
+$$\text{Sigma capability} = \min\left[\frac{USL - \mu}{\sigma},\ \frac{\mu - LSL}{\sigma}\right] \qquad C_{pk} = \frac{\text{sigma}}{3}$$
+
+## DMAIC
+
+Define → Measure → Analyse → Improve → **Control** (the loop back)
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 5, 'Queuing Design: Scale, Pooling & Cross-Training', '
+## The question this session answers
+
+Last session established that variability causes queues and that you cannot remove variability. That leaves an obvious follow-up: **so what can you actually do about waiting?**
+
+Three answers, none of which require hiring anyone — pool, scale, or change what you promised.
+
+## The nursing station, worked end to end
+
+First, a complete example to anchor everything else.
+
+$R_i$ = 3.5 patients/hr. Each nurse serves 3/hr (20 min each). Two nurses. $CV_i = CV_p = 1$.
+
+$$\rho = \frac{3.5}{2 \times 3} = 0.583$$
+
+Average wait in queue is about **11 minutes**. Then Little''s Law fills in the rest of the table — note that it applies inside the queue just as it does anywhere else:
+
+| Where | Inventory | Time |
+|---|---|---|
+| In queue | 0.64 patients | 11 min |
+| In service | 1.16 patients | 20 min |
+| **Total system** | **1.8 patients** | **31 min** |
+
+> Trap: The nurses are busy only 58% of the time and a queue still forms. That is not a contradiction, and it is worth sitting with. Variability scrambles arrivals and service into lumps — queues build during bursts and dissolve in the gaps, but the long-run average stays at 0.64. Idle time cannot be banked; backlog is real.
+
+## Waiting is a function of utilisation and variability
+
+- As utilisation approaches 100%, waiting time explodes toward infinity. You need spare capacity to dissolve a queue; at 100% there is never any catch-up time.
+- As variability rises, the explosion starts sooner.
+- When arrival rate equals service rate with any variability at all, the system is **unstable** and the queue grows without bound. Capacity effectively leaks.
+
+That last point deserves emphasis because it is counterintuitive: a process with exactly enough capacity does not cope. It fails.
+
+## Economies of scale
+
+Now the surprising one. Scale the nursing station 10× — 35 arrivals/hr, 20 nurses, **same utilisation** — and the wait collapses to about **30 seconds**.
+
+Utilisation did not change, so where did the wait go?
+
+Into probability. A queue forms only when *every* server is busy at the moment you arrive. With two nurses that happens often. With twenty, all twenty being simultaneously busy is exponentially less likely. The variability is still there; it is being absorbed across more servers.
+
+Run those 20 nurses at 13 instead and you get about 9.5 minutes of wait at roughly **90% utilisation**. That is the real prize: **scale is what lets you run hot without long waits.** Small operations must hold slack. Large ones need not.
+
+> Prof: This is the whole quick-commerce bet. The economics only work at near-monopoly density. The current burn is a wager on getting there.
+
+## The service strategy triangle
+
+Sometimes the answer is not to reduce the wait but to change the promise. Three corners: **fast response**, **low cost**, **high variety**. Pick two.
+
+| You want | You sacrifice | Examples |
+|---|---|---|
+| Fast + high variety | Low cost | Emergency rooms, fire engines, ambulances |
+| Fast + low cost | High variety | McDonald''s, Subway, Burger King |
+| High variety + low cost | Fast response | Neighbourhood tailors, government offices, local mechanics |
+
+The ISB ambulance is free about 90% of the time **by design** — that idleness is the product, not waste. McDonald''s variety is an illusion: the same four or five items through the same steps every time, which is exactly why it is fast and cheap. A neighbourhood tailor keeps his server constantly busy and you accept the wait in exchange for getting precisely what you asked for.
+
+Quick commerce wants fast plus low cost, but high delivery variability forces it into the high-cost corner. Dark stores cut variety somewhat — not enough to escape.
+
+## Queue design
+
+- **One queue feeding many servers beats many dedicated queues.** Splitting the nursing station into two dedicated lines pushes the wait from 11 to about **14 minutes**, because you lose the ability to send the next patient to whoever frees up first. Same staff, same demand, three minutes destroyed by layout.
+- Separate queues are justified only when service types genuinely differ — express lanes, self-check-in. "It feels fairer" is not a reason; a single queue is also more fair.
+- **Sequential (tandem) queues add variability at every stage.** Splitting one 20-minute service into a chain pushed total wait from 11 to about **28 minutes**. The exception is when specialisation genuinely makes each stage faster.
+- **Priority queuing** moves waiting from one group to another. Give 20% of patients immediate service and their wait drops while everyone else''s rises — which is next session''s subject.
+', null, '
+## Utilisation
+
+$$\rho = \frac{R_i}{c \times R_p}$$
+
+## Waiting (Kingman / VUT)
+
+$$W_q = \left(\frac{CV_i^2 + CV_p^2}{2}\right) \times \left(\frac{\rho^{\sqrt{2(c+1)}-1}}{c(1-\rho)}\right) \times T_p$$
+
+$$T = W_q + T_p$$
+
+## Little''s Law inside the queue
+
+$$I_q = R_i \times W_q \qquad I_s = R_i \times T_p \qquad I = R_i \times T$$
+
+## Design rules
+
+- One queue, many servers **beats** many dedicated queues
+- Tandem queues **add** variability at every stage
+- Priority **redistributes** waiting, it does not remove it
+- Pooling absorbs variability; scale lets you run hot without long waits
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 9, 'The Newsvendor Model', '
+## The problem
+
+You order once, demand is uncertain, and leftovers cannot be sold at full price. Newspapers, fresh food, fashion, hotel rooms, vaccine doses — all the same shape.
+
+You have to commit before you learn. That is what makes it hard, and it is why the obvious answer is wrong.
+
+Cookie example from class: sell at $2.49, cost $1.24, salvage $0.99. How many dozen do you make this morning?
+
+## Why "order the average" fails
+
+Ordering average demand would be right if being one short cost the same as being one long. It almost never does.
+
+Here, failing to sell a cookie you made costs you $0.25. Failing to *have* a cookie someone wanted costs you $1.25 of margin you never earned. Running out is five times worse — so the right answer is not the average, it is deliberately more than the average.
+
+That asymmetry is the entire model.
+
+## Two ways to answer it
+
+**Brute force.** Build the expected-profit table in Excel and read off the peak. It lands at **13 dozen**. Correct, and it teaches you nothing about why.
+
+**Marginal thinking.** Ask, unit by unit: is the next unit worth making? Make it while the marginal expected profit is still positive. That question has a clean answer.
+
+## The critical ratio
+
+- **$C_u$ (underage)** = what you lose by being one unit short = price − cost = **1.25**
+- **$C_o$ (overage)** = what you lose by being one unit long = cost − salvage = **0.25**
+
+$$\text{Optimal service level} = \frac{C_u}{C_u + C_o} = \frac{1.25}{1.50} = 83.3\%$$
+
+Then stock the smallest $Q$ where $P(D \le Q) \ge 0.833$, which gives Q* = 13.
+
+> Prof: The critical ratio does not depend on the demand distribution at all. The distribution only enters at the last step, when you convert a service level into a quantity.
+
+That separation is genuinely useful: the economics decide **how safe you want to be**, the demand data decides **what quantity delivers that safety**. They are different inputs from different people.
+
+## A stockout is not always a failure
+
+> Trap: A low service level is a feature, not a bug. Vegetables have a high $C_o$ — they rot — so the optimal service level is low and stocking out is the **correct** answer. Chasing 99% availability on perishables destroys money, and a manager boasting that they never run out of lettuce is describing a problem.
+
+$C_u$ and $C_o$ should include intangibles: goodwill, the value of an attractor product that brings customers to the platform at all, and the cost of capital for durables. Exams like to bury one of these in the case text.
+
+## Variants
+
+- **Discrete demand** — go one above the cutoff if the upside probability still beats the threshold. Continuous demand stops exactly at the optimal service level.
+- **More variable demand** — raises the stocking level and *lowers* profit. You buy protection and pay for it; uncertainty is expensive even when handled optimally.
+- **A demand oracle** changes the decision itself, not just your confidence. Revalue the whole problem, do not just plug in a tighter σ.
+- **Quick response** (a second ordering opportunity) drops the optimal service level from 75% to 50%, because being short is no longer terminal.
+- **Hotel last-minute rooms** — same structure, different $C_u$ and $C_o$.
+', null, '
+## Newsvendor
+
+$$C_u = \text{price} - \text{cost} \qquad C_o = \text{cost} - \text{salvage}$$
+
+$$\text{Critical ratio} = \frac{C_u}{C_u + C_o}$$
+
+That ratio **is** the optimal service level.
+
+## Turning the ratio into a quantity
+
+- Discrete demand: smallest $Q$ where $P(D \le Q) \ge CR$
+- Normal demand:
+
+$$Q^* = \mu + z \cdot \sigma, \qquad z = \Phi^{-1}(CR)$$
+
+## Reading it
+
+- High $C_u$ (losing a sale hurts) → high service level → stock more
+- High $C_o$ (leftovers hurt) → low service level → stocking out is correct
+
+> Trap: The critical ratio is independent of the demand distribution. The distribution enters only when converting the service level into $Q$.
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 5, 'Branding & Unilever Brazil', '
+## The decision
+
+Should Unilever launch a low-cost detergent for Brazil''s low-income Northeast — a segment it has never served?
+
+The case is designed to expose whether you actually believe low-income consumers are worth understanding, or merely worth pitying. Most people fail it on the first pass by assuming poor customers want cheap things.
+
+## Why they cannot simply ignore the segment
+
+> Prof: In the end Unilever''s decision was quite simple. The mission is "to serve the needs of all people everywhere" — we are not a luxury brand company. And: never let what happened in India with Nirma happen again.
+
+Nirma undercut Hindustan Lever from below and took enormous share. That is the strategic argument: a premium brand that abandons the bottom of the market does not leave it empty. It hands a competitor a base from which to attack upward.
+
+So the question is not only "is this segment profitable?" but "what happens if we leave it to somebody else?"
+
+## The customer insight that unlocks it
+
+Northeast Brazil consumers are **price sensitive but also value conscious** — those are different things, and confusing them is the classic error.
+
+> Worked example: Only **28% of households in Northeast Brazil owned a washing machine, against 67% elsewhere**. They wash by hand, using soap that yellows clothes, so they then need bleach. Cleaning power and whitening are not premium features to this customer — they are the core need, and hand-washing makes them matter *more*, not less.
+
+> Trap: "Low income means they only want cheap" is wrong and it is the assumption that kills the launch. Price-conscious is not value-conscious. These customers will pay for the benefits that matter and refuse to pay for ones that do not — a more demanding customer than a rich one, not a less demanding one.
+
+## The branding decision
+
+Options considered: reposition Omo downward? Reposition Minerva or Campeiro? Extend Omo or Minerva? Unilever ultimately created a **new brand, Ala**, positioned between Minerva quality and Campeiro cheapness.
+
+Incremental cost per kg: reposition an existing brand **$0**, extend an existing brand **$0.05**, launch a new brand **$0.10**. They chose the most expensive option — protecting Omo was worth ten cents a kilo.
+
+| Choice | Like Minerva (premium) | Like Campeiro (cheap) |
+|---|---|---|
+| Formula | 1.40 | 0.90 |
+| Packaging | Cardboard, 0.35 | Plastic, 0.10 |
+| Price as % of Omo | 60% | 50% |
+| Price $/kg | 1.80 | 1.50 |
+| Promotion | Above the line, 0.15 | Below the line, 0.05 |
+| Distribution | Wholesalers, 0.10 | Distributors, 0.05 |
+
+Read that table as a set of coupled decisions rather than a menu. A premium formula with below-the-line promotion and distributor reach is not a coherent product.
+
+## Break-even cannibalisation
+
+$$BECR = \frac{\text{new unit margin}}{\text{old unit margin}} \qquad \text{Cannibalisation rate} = \frac{\text{volume lost from existing brands}}{\text{volume from the new brand}}$$
+
+Compute Unilever''s current average margin per kg and the new product''s margin per kg, then compare.
+
+> Trap: Unilever loses money if the actual cannibalisation rate is **above** the BECR. New volume has to come from competitors or from category expansion — volume taken from your own brands is a transfer to a worse margin, not growth.
+
+## Takeaways
+
+- **Make what you can sell, not sell what you can make**
+- Find the right positioning and build to it
+- Marketing to low-income consumers does not have to be charity — it can be profitable, but it is hard
+- **Be disciplined**: deliver the important customer benefits, and only those. The discipline is in what you leave out.
+- Be willing to re-engineer the marketing mix and to break company norms
+- Look at the business through your customers'' eyes
+
+## Chain-store paradox
+
+A side note on why an incumbent might fight even when fighting costs it money.
+
+| | Incumbent fights | Incumbent accommodates |
+|---|---|---|
+| Entrant enters | −$2M, −$2M | $2M, $2M |
+| Entrant stays out | 0, $5M | |
+
+Fighting is worse for the incumbent in this single game. In **repeated** interactions it pays, because the reputation deters the next entrant — which is exactly the Nirma lesson from the other side.
+
+## Branding
+
+A brand is a device that creates value **above and beyond the core product benefits** — relevant for search, experience and credence goods.
+
+- **For the firm**: makes marketing actions more effective, and creates a separable asset
+- **For the customer**: identifies the offering, differentiates it, signals quality credibly, and delivers emotional, social and self-expressive benefits
+
+## Product lifecycle
+
+Development → Introduction → Growth → Maturity → Decline, with sales and profit curves that peak at different times — profit usually earlier than sales, which is why a growing product can be a worsening business.
+', null, '
+## Break-even cannibalisation
+
+$$BECR = \frac{\text{new unit margin}}{\text{old unit margin}}$$
+
+$$\text{Cannibalisation rate} = \frac{\text{volume lost from existing brands}}{\text{volume of the new brand}}$$
+
+Lose money when actual rate $>$ BECR. New volume must come from **competitors or category growth**.
+
+## Positioning statement (Prof''s S5 variant)
+
+> "For **<target segment>**, **<brand>** offers better **<points of difference>** than **<relevant competition>**, because it is **<reason>**."
+
+## Key distinction
+
+- **Price conscious** — wants the lowest price
+- **Value conscious** — pays for benefits that matter, refuses those that do not
+
+## Brand value
+
+- To the firm: marketing effectiveness + a separable asset
+- To the customer: identification, differentiation, quality signal, emotional/social/self-expressive benefit
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 2, 'Linking Process Flow to Financial Performance', '
+## Where this session sits
+
+Session 1 gave you three process metrics and a law connecting them. Useful — but a CFO does not fund process improvements because the flow time is elegant.
+
+This session builds the bridge to money, and the bridge is one sentence: **inventory that is not earning is still depreciating.**
+
+## Why airlines struggle to make money
+
+An aircraft earns only when it is in the air. Every minute on the ground is a drag on an extremely expensive asset. So the operational metric is **turnaround time** — landing to next takeoff.
+
+What makes it hard is that TAT is not fully inside the airline''s control. Weather, air traffic and cascading delays all intervene. So airlines attack the parts they can:
+
+- Standardised fleets — IndiGo flies one aircraft type, so maintenance is faster
+- Sky bridges instead of stairs and buses
+- Pre-stocking supplies at the origin airport
+- Dedicated gates for scheduling control; Delta effectively controls Atlanta
+
+> Trap: Boarding-order optimisation is the famous one, and it is mathematically negligible. Zone, window-middle-aisle, back-to-front — none of it moves TAT enough to matter. Do not reach for it in an exam answer; it signals that you optimised the visible thing rather than the important one.
+
+## Rent-A-Dress: a healthy business that loses money
+
+200 dresses ship per day, a 10-day rental, $250 per rental ($25/day). Revenue $25,000 a day, operating costs about $2,500. It loses roughly $3,900 a day.
+
+Nothing in the operating business explains that. Apply Little''s Law stage by stage and the explanation appears:
+
+| Stage | Flow rate | Flow time | Inventory |
+|---|---|---|---|
+| At customer | 200/day | 10 days | 2,000 |
+| Shipping (out + in) | 200/day | 1 day each | 400 |
+| Inspection | 200/day | 5 days | 1,000 |
+| Quick clean | 140/day | 1 day | 140 |
+| Buffer before max clean | 60/day | 2 days | 120 |
+| Max clean | 60/day | 2 days | 120 |
+| Rental-ready | — | — | 500 |
+| **Total** | | | **4,400** |
+
+Only 2,000 of 4,400 dresses are with a customer at any moment. Everything else is in transit, being inspected, or waiting.
+
+Turnaround inside operations: 2,000 units of non-customer inventory ÷ 200/day = **10 days**. A dress earns for 10 days and sits idle for 10 days — it earns roughly half the time it exists, while depreciating all of it.
+
+## Where the money goes
+
+| Line | Amount |
+|---|---|
+| Revenue | $25,000/day |
+| Shipping | −$1,000 |
+| Inspection | −$200 |
+| Quick clean | −$700 |
+| Max clean | −$600 |
+| EBITDA | ~$22,500 |
+| Depreciation | see below |
+| **Net** | **−$3,900/day** |
+
+Then depreciation lands:
+
+$$4{,}400 \times \$6 = \$26{,}400/\text{day}$$
+
+Depreciation on **idle** inventory is what kills it. The operating business is fine. The asset base is too big for the revenue it produces.
+
+> Trap: The instinct is to shorten the rental to 5 days so each dress serves more customers. It does not work. Earning time per dress falls, the idle time in operations does not change, so total inventory has to *rise* to serve the same demand — and depreciation rises with it. You shortened the earning half and left the wasteful half alone.
+
+## Break-even
+
+A dress earns for roughly half its cycle, so revenue per cycle is 5P. Variable cost per cycle is about $12.50, and depreciation over a 22-day cycle is
+
+$$22 \times \$6 = \$132$$
+
+$$5P > \$144.50 \quad\Rightarrow\quad P > \$28.90$$
+
+The current price is $25. The business is priced below break-even, and the viable band is narrow: a 2-day rental at $120/day is psychologically unacceptable, and a 15-day rental at $375 has no value proposition for a single occasion.
+
+## The fix that works
+
+Improve inspection from 5 days to about 2. Fewer dresses need max clean. Total inventory drops from 4,400 to about 3,658, depreciation falls to about $21,950/day, and the business swings to roughly **+$525/day**.
+
+Same customers, same price, same revenue. The entire swing came from dresses spending fewer days doing nothing.
+
+> Trap: That is barely break-even and highly sensitive to the batching assumption on max clean. If fewer dresses arrive, the 2-day wait gets worse and it flips back to a loss. Do not present it as a comfortable win.
+
+## Same dynamic, other industries
+
+Once you have the pattern, you see it everywhere the asset is the business:
+
+- **Hotels** — a vacant room is a sunk cost; turnaround between guests is the metric
+- **Restaurants** — table turns drive revenue
+- **Car rental** — Enterprise keeps a fleet under two years old and is fanatical about turnaround; Hertz makes no age guarantee and always has spare cars on the lot
+- **Consulting** — bench time is lost revenue; time-and-materials firms care far more than project-billing firms like Infosys
+', null, '
+## Linking flow to financials
+
+$$\text{Asset utilisation} = \frac{\text{earning inventory}}{\text{total inventory}}$$
+
+$$\text{Turnaround in ops} = \frac{\text{non-customer inventory}}{\text{flow rate}}$$
+
+$$\text{Depreciation/day} = I \times d$$
+
+where $d$ is depreciation per unit per day.
+
+## Break-even price
+
+$$(\text{earning days}) \times P = \text{variable cost} + (\text{cycle days} \times d)$$
+
+> Trap: A dress earns for only part of its cycle. Use earning days, not cycle days, on the revenue side.
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 3, 'Flow Time, Capacity & Bottlenecks', '
+## The shift this session makes
+
+The first two sessions were diagnosis: describe a process, measure it, connect it to money. This one is the first about **improvement** — and it starts by separating two questions that people routinely merge.
+
+- **How long does one unit take?** That is flow time, and it is governed by the *critical path*.
+- **How many units per hour can we do?** That is capacity, and it is governed by the *bottleneck*.
+
+Different questions, different levers, different answers. Confusing them is the most expensive mistake in this course, because the fix for one does nothing for the other.
+
+## Theoretical vs actual flow time
+
+**Theoretical flow time** is the minimum work time if a single rush order went through uninterrupted, with no waiting anywhere. It is the floor — the best the process could do for one unit — and it is the sum of activity times **on the critical path**.
+
+For Kristen''s Cookies, one dozen: wash and mix 6 + spread 2 + setup 1 + bake 9 + cool 5 + pack 2 + billing 1 = **26 minutes**.
+
+Actual flow time is always higher, because of batching, variability and resource contention.
+
+> Prof: A passport application has about 15 minutes of theoretical flow time and takes weeks. The gap between those two numbers is the entire subject of process improvement.
+
+### Choosing the flow unit
+
+One dozen was chosen because it is the most probable order on a campus. The oven holds one dozen and the mixer holds three — but **operational constraints should not pick your flow unit, customer demand should.** Choosing "three dozen" because the mixer likes it gives you a tidy analysis of a process nobody asked for.
+
+## Critical path
+
+Theoretical flow time is the **longest path** through the process, not the sum of everything in it.
+
+> Worked example: A car with a chassis line (5 hrs) and a body line (6 hrs) running in parallel, feeding assembly. The critical path A-D-E is 8 hours. Speeding up anything on the 5-hour branch changes nothing — the car still waits for the body.
+
+Three levers to cut theoretical flow time, in rough order of how often they get missed:
+
+1. Work faster on critical-path activities
+2. Move activities off the critical path so they run in parallel
+3. Shrink the batch so stages can overlap
+
+> Worked example: Uranium enrichment, one batch of 7,200 takes 22 hours. Split it into two batches of 3,600 and flow time drops to 13 hours, because the second batch starts stage one while the first is on stage two. No machine got faster; the stages stopped waiting for each other.
+
+## Capacity and the bottleneck
+
+Now the other question. You do not control flow rate directly — flow rate is an outcome. You control **capacity**, and capacity meets demand to produce it:
+
+- Demand < capacity → flow rate = demand. **Demand-constrained**; the fix is marketing.
+- Demand > capacity → flow rate = capacity. **Capacity-constrained**; now operations matters.
+
+Working out which of those you are in should be the first question, because it decides whether anything else in this session helps you.
+
+The **bottleneck** is the resource pool with the lowest capacity — not the average, not the sum. The minimum.
+
+> Prof: An hour lost at the bottleneck is an hour lost for the whole process. An hour saved anywhere else is a mirage.
+
+That mirage is genuinely convincing. Speeding up a non-bottleneck makes that station''s numbers better and its people feel more productive, and produces zero extra output.
+
+### Kristen''s Cookies, one dozen, one oven
+
+| Resource | Time per unit | Capacity |
+|---|---|---|
+| Mixer | 6 min | 10/hr |
+| Crystal | 8 min | 7.5/hr |
+| Roommate | 4 min | 15/hr |
+| Oven | 10 min | **6/hr** |
+
+The oven is the bottleneck at 6 dozen/hr. The roommate is idle more than half the time, and that is fine.
+
+## Adding capacity, and why you must rebalance
+
+Buy a second oven and capacity does not double — it rises to 7.5/hr, because Crystal becomes the new bottleneck. The raw gain is 1.5 dozen/hr for a whole oven.
+
+Now move the 2-minute spreading task from Crystal to the roommate. Crystal drops to 6 min, roommate rises to 6 min, ovens run at 10 min each. Combined oven capacity is 12/hr, and nothing else is below it.
+
+> Trap: The second oven is worth 1.5 dozen/hr if you install it and walk away, or 4 dozen/hr if you rebalance the line afterwards. Same capital, very different return. Always rebalance after an investment — exam questions routinely stop at the purchase to see whether you notice.
+
+## Demand mix changes the answer
+
+Switch the flow unit to 2-dozen orders with one oven and the oven takes 20 min, giving 3 units/hr — still 6 dozen/hr, no gain. With two ovens it is 6 units/hr, which is 12 dozen/hr, double the baseline.
+
+That is a real business conclusion: a discount for larger same-flavour orders can pay for itself when it shifts the demand mix toward better bottleneck utilisation. You are not buying volume, you are buying a mix.
+', null, '
+## Flow time
+
+$$\text{Theoretical flow time} = \sum_{\text{critical path}} \text{activity times}$$
+
+The critical path is the **longest** path through the process.
+
+$$\text{Actual flow time} = \text{theoretical} + \text{waiting}$$
+
+## Capacity
+
+$$\text{Capacity of a resource} = \frac{\text{number of units of that resource}}{\text{time per flow unit}}$$
+
+For one resource in units/hour: $\dfrac{60}{\text{minutes per unit}}$
+
+$$\text{Process capacity} = \min_i(\text{capacity}_i) \quad \leftarrow \text{the bottleneck}$$
+
+$$\text{Flow rate} = \min(\text{demand},\ \text{process capacity})$$
+
+## Utilisation
+
+$$\rho = \frac{\text{flow rate}}{\text{capacity}} \qquad \rho_{\text{implied}} = \frac{\text{demand}}{\text{capacity}}$$
+
+> Trap: Utilisation caps at 100%. Implied utilisation does not — a value above 100% is what identifies the bottleneck at current demand.
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 8, 'Pricing Strategy', '
+## Where this session goes
+
+Last session gave you EVC — a ceiling built from the customer''s alternative. This session puts it to work on a real pricing decision, then generalises to the rule that governs every price you will ever set.
+
+## Atlantic Computer: two ways to price the same bundle
+
+The Tronn server plus PESA software, against a rival (Zinc) selling at a status-quo price of $2,000.
+
+The awkward fact: one Atlantic bundle genuinely does the work of two Zinc servers. Priced as a single server, Atlantic is charging half price for the same capability — and the software was previously given away free, which makes the sales force reluctant to start charging.
+
+**EVC-based pricing** starts from the **variable cost** as the floor.
+
+- Variable cost: $1,538 (floor)
+- EVC-based price: $2,431 above that floor
+- Split the floor-to-ceiling range in half to get the recommendation
+
+**Value-in pricing** starts from the **current price** as the reference instead.
+
+- Cost of one Atlantic bundle: $5,000 (labour + electricity + software)
+- Cost of two Zinc servers: $9,400
+- Extra value created:
+
+$$\frac{\$4{,}400}{2} = \$2{,}200 \text{ over the } \$2{,}000 \text{ reference} = \$4{,}200$$
+
+> Trap: Value-in pricing **always** yields a higher number than EVC-based pricing, because it anchors on the current market price rather than on your cost. Both are acceptable. Use EVC when you need a defensible floor under competitive pressure; use value-in when you are advocating for a higher price. Say which you used — a number without its anchor is what gets challenged.
+
+### What will actually happen
+
+A price recommendation that ignores everyone else''s reaction is half an answer.
+
+- **Consumers will resist.** The software was free before; charging about $1,400 for it will cause backlash, and customers will ask for evaluation contracts before committing.
+- **Consumers run their own numbers**, which will not match yours. Labour savings may be zero if existing staff simply absorb the extra servers — which is why Atlantic uses a **2× multiplier rather than 4×**, deliberately conceding value to allow for customer conservatism.
+- **Zinc will cut prices**, possibly from a $1,700 reference down to $1,200–$1,400. Be ready for a price war.
+- Zinc may build its own performance software, so Atlantic has to keep innovating.
+
+> Prof: Even if Zinc cuts its margin to zero, the Atlantic bundle still creates more value for the consumer. That is the point of value-based pricing.
+
+## The golden rule of pricing
+
+$$\frac{p - mc}{p} = \frac{1}{\varepsilon}$$
+
+Percent margin equals one over price elasticity. More elastic demand (more price-sensitive customers) means a lower optimal margin and a lower price.
+
+Plainly: if consumers keep buying when you raise the price, raise the price.
+
+### What reduces price sensitivity
+
+Note how many of these are design decisions rather than facts about the market:
+
+- High switching costs
+- **Price-quality inference** — a higher price reads as higher quality
+- Shared costs, where somebody else pays part (an employer, an insurer)
+- No easily comparable alternatives
+- Small share of the total bundle
+- Inability to stockpile
+
+> Trap: **Elasticity and sensitivity are not the same word.** Elasticity is a measurable number you put into a formula. Sensitivity is qualitative — "more" or "less". Exam questions use the words precisely, so a question about sensitivity is not asking you to compute anything.
+
+Elasticity is measured with conjoint analysis, logit regression on actual purchase data, and consumer choice models. The 2×2: actual purchase versus stated preference, crossed with natural versus experimental settings.
+
+## Price discrimination
+
+If different customers have different elasticities, one price leaves money on the table for some and loses sales among others.
+
+| Degree | Basis | Example |
+|---|---|---|
+| **First** | Individual | Personalised pricing |
+| **Second** | Self-selection off a menu | Bundles vs unbundled, business vs economy |
+| **Third** | Segment | Student and senior discounts |
+| **Behavioural** | Observed past behaviour | Amazon inferring sensitivity from purchase history |
+| **Intertemporal** | Time | Skimming downward, or rising for network-effect products |
+
+> Worked example: Bundling is second-degree discrimination. It works by combining **negatively correlated valuations** — you value A highly and B little, I am the reverse, so a single bundle price extracts more from both of us than separate prices would, because each of us is mostly paying for the half we wanted.
+
+## Psychological pricing
+
+- Prices ending in 9 work through **category perception**, not the one cent. $79.99 sits in a different mental bucket from $80, and the saving is irrelevant.
+- Higher prices raise perceived **and even experienced** quality — the MRI wine study showed the brain responding differently to identical wine at a higher stated price. People were not lying about enjoying it more.
+- **Prospect theory**: losses loom larger than gains. Segregate gains, aggregate losses when framing a price.
+
+## Exam format
+
+> Prof: The final is **MCQ only, half quantitative and half qualitative**, written on paper with OMR sheets. **One cheat sheet is allowed — both sides, printed or handwritten.** Basic calculators are permitted. Questions differ across sections. The cases were taught for conceptual learning, not for memorising case facts.
+', null, '
+## Golden rule of pricing
+
+$$\frac{p - mc}{p} = \frac{1}{\varepsilon}$$
+
+Percent margin equals one over price elasticity. More elastic demand → lower optimal price and margin.
+
+## EVC vs value-in pricing
+
+- **EVC-based** — anchors on **variable cost** as the floor, then splits floor-to-ceiling
+- **Value-in** — anchors on the **current market price**, then splits the gap to EVC
+- Value-in always gives a higher number
+
+## What lowers price sensitivity
+
+Switching costs · price-quality inference · shared costs · no comparable alternative · small share of total spend · cannot stockpile
+
+## Price discrimination
+
+1st individual · 2nd self-selection (bundling) · 3rd segment · behavioural · intertemporal
+
+> Bundling works on **negatively correlated valuations**.
+
+## Psychological
+
+- Charm pricing works via **category perception**, not the cent
+- Prospect theory: **segregate gains, aggregate losses**
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 1, 'Introduction to Operations Management', '
+## The argument that opens the course
+
+Before a single framework appeared, the class spent ten minutes arguing about one word: **efficiency**.
+
+Output over input. Lower inventory. Beating the competition''s benchmarks. Every answer offered got shot down, and the shooting-down was the lesson.
+
+> Prof: Blanket definitions do not work. Every business''s definition of "good" is a function of the promise it has made to its customers — its value proposition. Operations Management is the discipline of delivering on that promise.
+
+Nothing else in this course makes sense without that. You will never be handed a universal formula for good operations. You will be asked, every single time: *given this firm''s promise, what must its processes achieve, and how would we know if they are?*
+
+## Strategy, operations, process
+
+The formal version of that argument is three questions stacked inside each other.
+
+| Layer | The question | Dimensions to rank |
+|---|---|---|
+| Competitive strategy | What is our value proposition? How do we compete? | Price, Time, Quality, Variety |
+| Operations strategy | Given that, what must operations do **particularly well**? | Cost, Responsiveness, Quality, Flexibility |
+| Process structure | How do we structure processes to build those competencies? | Process choice and management |
+
+The arrows run both ways. Strategy shapes process, but what is operationally feasible also limits which promises you can credibly make.
+
+> Prof: Aligning these two ends is "60% of what a top-tier strategy consultancy actually does." Most engagements are, underneath, a diagnosis of a mismatch between what a firm promises and how its work is organised.
+
+### Domino''s: where "30 minutes or free" came from
+
+Ask who Domino''s competed with in 2008 India and the obvious answers — other pizza chains, other restaurants — are both wrong. It competed with **a customer making their own snack at home**.
+
+Once you see that, the promise writes itself. To beat homemade pakoda you must win on **quick** and **hot**. Not variety. Not price. Those are what the alternative already does well.
+
+And that promise then cascades into a process:
+
+- 4 min order to oven
+- 6 min bake
+- 5 min cut and pack
+- 8 min delivery
+- = 23 min of work, plus a 7 min buffer, equals the 30 minute guarantee
+
+Every downstream decision traces back to the 8-minute delivery target: store density, and one delivery person per order rather than batching two nearby ones.
+
+> Trap: Batching two nearby deliveries looks more efficient and is the wrong answer here. Simple coordinated rules beat locally optimal customisation when orders can fall through the cracks.
+
+### Swiggy, and a misalignment that hurt people
+
+Swiggy''s promise moved from speed alone to speed **plus variety**, which cascades into onboarding diverse cuisines, spreading them geographically so fast delivery stays feasible everywhere, and keeping the app simple enough that variety does not become friction.
+
+The counter-example shown in class: delivery partners paid purely per delivery, with no fixed component, are incentivised to ride without stopping. A strategic choice about incentives produced a real human cost — which is what strategy-to-process alignment looks like when it works exactly as designed and the design was wrong.
+
+## Four more misalignments
+
+None of these are on a slide, and together they are the fastest way to feel the framework.
+
+- **NeXT** — built computers for research labs, then obsessed over a perfect one-foot cube case. Industrial-design precision was irrelevant to the promise and only raised the price.
+- **Andre Agassi** — ran 15km a day until his coach pointed out that tennis is lateral 10m sprints and direction changes. He had trained hard at the wrong thing.
+- **Adam Smith International** — a project-management middleman questioning why it kept so many in-house experts when its promise was managing external contractors.
+- **Airtel vs Jio** — same industry, deliberately opposite alignment. Jio optimised price and reach; Airtel optimised reliability, layering fail-safe 5G on existing 4G and buying Indus Towers to turn opex into capex.
+
+## The process view
+
+Departments each see their own slice, which is why nobody in a company can explain why an order took three weeks. The fix is to stop looking at the org chart and follow the work.
+
+A process is a **network of activities and buffers converting inputs to outputs**, with resources doing the work and an information structure coordinating it.
+
+Five questions to adopt it:
+
+1. What are the boundaries — what goes in, what comes out?
+2. What is the flow unit?
+3. Attach yourself to that flow unit and trace its steps.
+4. Who does the work at each step?
+5. What information is needed at each step, and where does it come from?
+
+> Trap: Raw materials are not resources. Dough, cheese and vegetables are part of what is flowing. Resources are the doers of work — the chef, the oven, the rider. This is exactly the line between cost of goods sold and the process''s actual inventory.
+
+Domino''s flow unit is an *unfulfilled order*, and roughly 5% of orders are infeasible and deliberately ignored — the process view works on long-run averages. Edge cases are fires, and by definition rare.
+
+## Why financial measures are not enough
+
+Revenue, net income, ROA and cash flow are all real. As **diagnostics** they are useless, and for three specific reasons: they are **infrequent**, **aggregate** (they hide where in the process the problem is) and **lagging** (they tell you something broke, not what to fix).
+
+Process metrics are the opposite: leading, disaggregated, actionable.
+
+## Little''s Law
+
+Three numbers describe any process, and one equation ties them together:
+
+- **Flow rate ($R$)** — units per unit time
+- **Flow time ($T$)** — entry to exit for one unit
+- **Inventory ($I$)** — units inside right now
+
+$$I = R \times T$$
+
+The technique that matters: when several distinct flow-unit types share a resource, split $R$, $T$ and $I$ **by segment** before applying the law. Applying it to a mixed population is simply wrong, and it is what the cafeteria problem exists to catch.
+', null, '
+## Little''s Law
+
+$$I = R \times T$$
+
+- $R$ = flow rate (units per unit time)
+- $T$ = flow time (entry to exit)
+- $I$ = inventory (units in process)
+
+Rearranged:
+
+$$T = \frac{I}{R} \qquad R = \frac{I}{T}$$
+
+## Conditions for validity
+
+1. Consistent units across $I$, $R$ and $T$
+2. Long-run averages, not a snapshot
+3. System is stable — what came in has gone out
+4. The **same population** is counted in all three
+
+> Trap: Condition 4 is the one exams test. Mixed customer types sharing one queue must be split by segment first.
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 4, 'Variability & Queuing I', '
+## Two halves
+
+The first half finishes capacity — how to raise it, and how to choose what to make with it. The second half opens the subject that occupies the rest of the course: **variability**, and why queues form even when you have enough capacity.
+
+## Theory of Constraints
+
+Identify the constraint, elevate it, then repeat — because once you fix one bottleneck, something else becomes the bottleneck. It is a cycle, not a project, and firms that treat it as a project stop one step too early.
+
+Four levers to raise capacity:
+
+- Add resources (simple, expensive)
+- **Line balancing** — spread work evenly across people
+- Change the product mix
+- Change the batch size
+
+> Prof: Eli Goldratt''s *The Goal* is the source, and it is worth reading before placements. Vector Consulting was founded on these principles and recruits from ISB.
+
+## Flow time and capacity are orthogonal
+
+This is the point people get wrong, and it is worth stating flatly: changing one does not necessarily change the other.
+
+> Worked example: Add a second oven at Kristen''s Cookies. Capacity rises from 6 to 10/hr. Theoretical flow time stays at 26 minutes. You can bake **more**, not **faster**.
+
+The bottleneck does not even have to sit on the critical path. If Scan is the bottleneck on the upper branch but the critical path runs through a longer lower branch, then flow time is set by the lower branch and capacity by Scan. Two different questions, two different answers, in the same process.
+
+## Product mix: margin per bottleneck minute
+
+In a make-to-stock business, capacity matters more than flow time. So which product should you make?
+
+> Trap: Ranking by margin per unit is the naive answer. Rank by **margin per minute of bottleneck time**, because the scarce resource is the bottleneck minute — not the unit, and not your attention.
+
+| Product | Margin | Oven time | Margin per oven minute |
+|---|---|---|---|
+| Oatmeal raisin | $3.10 | 25 min | **0.124** |
+| Chocolate chip | $2.50 | 26 min | 0.096 |
+
+Oatmeal raisin wins — but only because both products share the same bottleneck.
+
+> Trap: When products have **different** bottlenecks, margin-per-minute comparison breaks down. You cannot put a bottleneck time and a non-bottleneck time in the same denominator; they are not the same currency. That is when you need linear programming.
+
+## Linear programming, briefly
+
+Decision variables are units of each product. The objective is total margin. Constraints are demand per product and total time available on each resource. For the cookie case it returns 100 chocolate chip and 13 oatmeal raisin. Airlines, retailers and FMCG firms use exactly this for assortment and production planning.
+
+## Batching and capacity
+
+Batching exists when setup time is large relative to per-unit time — a glass mould that takes 24 hours to set up and one minute per unit afterwards.
+
+$$\text{Capacity} = \frac{X}{F + R \cdot X}$$
+
+where $X$ is batch size, $F$ is setup time and $R$ is per-unit time. Bigger batches spread the setup over more units, so capacity rises.
+
+## Variability
+
+Now the turn. A fully deterministic process with capacity above demand never forms a queue — not a short one, none at all. Real processes are not deterministic, and that difference is not a rounding error. It is where all the waiting comes from.
+
+- **Predictable** variability (seasonality, trend) can be planned around
+- **Unpredictable** variability always hurts
+
+> Prof: Think of it like a regression. Predictable variability is the explained variance — your regressors. Unpredictable variability is the residual. You can plan for the first and only buffer against the second.
+
+### The beads game
+
+Three dice in series, each roll being that stage''s capacity for the round. A single die averages 3.5, so intuition says the line should run near that.
+
+> Trap: The long-run throughput is **less than 3.5** — the simulation settled around 2.8 and never reached it. A high roll only helps if there is inventory upstream waiting to use it. Good luck cannot be stored; bad luck blocks everything behind it. Variability interactions in series are always detrimental. A single stage, with nothing to starve it, does average exactly 3.5.
+
+## The five things that determine a queue
+
+Everything from here is built from these:
+
+- Arrival rate ($R_i$)
+- Service rate per server ($R_p$)
+- Variability in arrivals ($CV_i$)
+- Variability in service ($CV_p$)
+- Number of servers ($c$)
+
+Those five feed Kingman''s approximation to give average wait and queue length.
+', null, '
+## Capacity
+
+$$\text{Capacity with batching} = \frac{X}{F + R \cdot X}$$
+
+- $X$ = batch size, $F$ = setup time, $R$ = run time per unit
+
+$$\text{Margin per bottleneck minute} = \frac{\text{margin per unit}}{\text{bottleneck time per unit}}$$
+
+> Trap: Only valid when products share a bottleneck. Different bottlenecks need linear programming.
+
+## Coefficient of variation
+
+$$CV = \frac{\sigma}{\text{mean}}$$
+
+$CV_i$ uses inter-arrival times, $CV_p$ uses service times. $CV = 1$ means fully random (exponential).
+
+## Utilisation
+
+$$\rho = \frac{R_i}{c \times R_p}$$
+
+## Waiting time (Kingman / VUT)
+
+$$W_q = \underbrace{\left(\frac{CV_i^2 + CV_p^2}{2}\right)}_{\text{Variability}} \times \underbrace{\left(\frac{\rho^{\sqrt{2(c+1)}-1}}{c(1-\rho)}\right)}_{\text{Utilisation}} \times \underbrace{T_p}_{\text{Time}}$$
+
+Read it as **V × U × T**.
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 7, 'Distribution & Economic Value', '
+## Where this session goes
+
+Two topics that both answer the question "how does value actually reach the customer, and who captures it along the way?" — first the channel, then the price.
+
+## Distribution is the expensive P
+
+Place is often the **most expensive of the 4 Ps**, and firms frequently do not realise it because the cost is buried in margin given away rather than money spent.
+
+**Indirect channel**: Manufacturer → Retailer → Consumer.
+**Direct / vertically integrated**: Manufacturer (owning retail) → Consumer.
+
+The trade-offs: price to the consumer (double marginalisation), retail service quality (moral hazard), profits, control over the 4 Ps, technology and skill leakage, and who owns the customer relationship.
+
+Why use retailers at all: geographic coverage, infrastructure, customer access and information, in-store and after-sales service, and retailer competency you would otherwise have to build from nothing.
+
+## Double marginalisation, and three fixes
+
+Here is the problem that makes channels interesting. The manufacturer marks up over its cost, then the retailer marks up again over that. The final price ends up **higher than the price a single integrated firm would set** — and both parties earn less than they would have.
+
+That is worth pausing on: it is not a fight over the split. Both sides lose. The structure itself destroys value, because each party sets its margin without accounting for the volume the other loses.
+
+Three fixes:
+
+1. **Price ceiling / maximum suggested retail price (MSRP)**
+2. **Two-part tariff** — a fixed upfront fee plus a per-unit price set at the manufacturer''s marginal cost
+3. **Co-provision of retail service, or revenue sharing**
+
+> Trap: The two-part tariff works because setting the per-unit price at marginal cost removes the retailer''s incentive to mark up — the retailer now behaves like an integrated firm. The manufacturer takes its profit through the fixed fee instead. Get the per-unit price wrong and you have reintroduced the whole problem while adding a fee.
+
+## Horizontal channel conflict
+
+- Retailers competing with each other → **exclusive territories**
+- A retailer pushing a rival''s product → **exclusive dealing**
+- Showrooming and webrooming → align incentives so you do not fight the behaviour
+
+## Economic value to the customer
+
+Now pricing, and the single most valuable question in it: **what would this customer do if we did not exist, and what would that cost them?**
+
+Cost-plus pricing asks what the product cost you. The customer does not care. EVC builds the price from their side of the table:
+
+$$\text{EVC} = \text{Reference value} + \text{Net differential value}$$
+
+- **Reference value** — what the next-best alternative costs the customer
+- **Net differential value** — the extra benefits you provide, minus the extra costs you impose
+
+> Prof: Competitors are not always obvious. Soap can compete with entertainment for the same rupee.
+
+Identify the wrong reference and every number after it is anchored to the wrong thing.
+
+### Worked example: the reusable diaper
+
+A washable, reusable diaper that lasts a month. Variable cost **₹400**, against ₹3–4 for a disposable.
+
+| Component | Working | Value |
+|---|---|---|
+| Reference value | $30 \times 4 \times 15$ | **₹1,800/month** |
+| Benefit: no anti-rash cream needed | | +₹500 |
+| Cost: extra washing | | −₹100 |
+| Net differential value | | **+₹400** |
+| **Total EVC** | 1,800 + 400 | **₹2,200/month** |
+
+Note what the reference value is: money the parent is *already spending* without thinking of it as a price. That is why it anchors so well.
+
+**EVC is the price ceiling. Variable cost (₹400) is the floor.** The viable range is ₹400 to ₹2,200, and a common starting point is the midpoint, adjusted for competitive pressure.
+
+> Trap: EVC is the **maximum defensible price**, not the recommended price. Charging the full ₹2,200 leaves the customer exactly as well off as before — no reason to switch, and every reason to resent it if they do. You have to share the value you created.
+
+### Why EVC works better in B2B
+
+In B2B you can show the customer the calculation directly, and they have a procurement team that thinks in those terms. In B2C, consumers do not internalise the full value, so the **perceived** EVC sits below the actual one — and perceived value is what sets your real ceiling.
+
+> Trap: If you cannot communicate the value, you cannot charge for it. For genuinely new products with no clear reference, market research — focus groups, small-market pilots, conjoint — is essential. Firms that rely on internal estimates routinely misjudge willingness to pay.
+', null, '
+## EVC
+
+$$\text{EVC} = \text{Reference value} + \text{Net differential value}$$
+
+$$\text{Net differential value} = \text{extra benefits} - \text{extra costs}$$
+
+- **Reference value** = cost of the customer''s next-best alternative
+- **EVC** = price **ceiling**; **variable cost** = price floor
+- Common start: midpoint of floor and ceiling, then adjust
+
+> Trap: EVC is the maximum defensible price, not the recommendation. Share the value or nobody switches.
+
+## Channel
+
+- **Double marginalisation** — two successive markups push the final price above the integrated optimum
+- Fixes: **price ceiling / MSRP**, **two-part tariff** (fixed fee + per-unit at marginal cost), **revenue sharing**
+- **Exclusive territories** solve retailer-vs-retailer conflict
+- **Exclusive dealing** stops a retailer favouring a rival
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 9, 'Marketing Communications', '
+## Where this session goes
+
+Everything so far has been about deciding what to offer and what to charge. This last session is about telling people — and about the fact that most advertising measurement is less trustworthy than it looks.
+
+## Four roles of advertising
+
+Advertising is not one activity. Knowing which role you are playing determines what "good" looks like.
+
+- **Informative** — tell people the product exists and what it does
+- **Persuasive** — change preference
+- **Money-burning** — the spend **itself** is the signal. Visible expense says deep pockets, long-term commitment and confidence in quality; it also intimidates competitors and suppliers.
+- **Reminder (pulsing)** — refresh memory for a brand everyone already knows, like Coca-Cola
+
+The third one is the least intuitive and the most interesting: the message can be almost irrelevant, because what carries information is that you could afford to send it at all.
+
+**Ad response curve**: no return below a critical spend, then real response, then flat. Spending below the threshold is worse than not spending — you pay without ever crossing into the range where anything happens.
+
+> Worked example: **Counter-signalling.** Established brands reduce logo prominence — Starbucks and Lululemon both did it. It works because only a brand everyone already recognises can afford to stop shouting. Under Armour tried it and failed, because it had not yet earned the recognition that makes restraint legible.
+
+## Golden rule of advertising
+
+$$\frac{A}{pQ} = \left(\frac{p - c}{p}\right) \times \varepsilon_{DA}$$
+
+Ad spend as a share of revenue equals percent margin times the elasticity of demand with respect to advertising.
+
+Both terms must be present. Advertise more when margin is high **and** demand is genuinely ad-sensitive — a high-margin product nobody''s purchase is influenced by advertising does not justify the spend.
+
+## The 7 Ms
+
+Market → Mission → Message → Media → Money → Measurement, plus message design.
+
+> Trap: **Mission drives media choice.** Mass media is efficient for awareness; targeted and personal channels are efficient for action. The hierarchy-of-effects lines cross around "interest" — before that mass media wins, after it personal selling and word of mouth do. Offline word of mouth is **41% more persuasive** than online.
+
+## Message design
+
+**Rational appeals** — demonstration, spokesperson, testimonials, comparative ads.
+**Emotional appeals** — fear, humour, happiness, family.
+
+> Trap: Avoid combative advertising unless you can actually kill the rival. A public fight usually benefits the **third player** who stayed out of it — the same dynamic as BMW and Audi handing the market to Japanese cars. Also avoid negative associations with your own product, even in a joke.
+
+## India media context
+
+Digital ad spend **exceeds** TV despite TV commanding more consumption time. India''s digital spend skews toward **display** over search, the reverse of the US pattern — worth knowing because it means Indian digital budgets are buying awareness where American ones are buying intent.
+
+## Measurement and budgeting
+
+**Parfitt-Collins** (also taught as Peckham/Collins) connects money to market share through three gates:
+
+$$\%\text{Aware} \times \%\text{Try} \times \%\text{Repeat} = \%\text{Market share}$$
+
+It **multiplies**, so missing any one gate collapses the share regardless of the other two.
+
+> Worked example: You need a 6% break-even share, with trial at 30% and repeat at 40%.
+
+$$\%\text{Aware} = \frac{0.06}{0.30 \times 0.40} = 50\%$$
+
+Now you have a media brief rather than an argument. And if the required awareness comes out above 100%, the plan is impossible — which tells you the problem is trial or repeat, and those are product problems that no budget fixes.
+
+**GRP = Reach × Frequency.** 20% reach × 3 exposures = 60 GRPs — but the same 60 could be 60% reach × 1, which is a completely different campaign.
+
+Effectiveness testing: focus groups, physiological measures, eye tracking, fMRI, Starch scores for print (Noted / Associated / Read), aided and unaided recall, and cross-market GRP tests.
+
+> Prof: **Cheap talk** — do not believe claims when incentives are misaligned. Demand proof or a contract. The Peanuts example: Lucy always pulls the football away, whatever she promised.
+
+## Air France: sponsored search
+
+Standard digital KPIs are CPC, CTR and TCR. To those add **ROA**, average revenue per booking, and probability of booking.
+
+> Trap: The 1000% ROA figures in the case reflect **attribution error**, not real returns. A customer who was always going to book searches for the airline, clicks the paid link above the organic one, and books — and the campaign claims a booking it did not cause. Spotting that is the point of the question.
+
+The method: segment publishers by **probability of booking × CPC**. Then diagnose — a low CTR is an **ad** problem, a low TCR is a **website** problem. That split is the most reusable idea here, because it tells you which team owns the fix.
+
+Kayak is the odd one out: it charged a flat listing fee rather than bid-based CPC, so comparing its return to auction-based publishers compares two different things.
+
+Because digital campaigns give near-real-time data and can be halted instantly, **testing recommendations is low-risk** — which changes what a good recommendation looks like. Not "here is the answer," but "here is the test, here is what we learn, here is when we stop."
+
+> Prof: The remaining Air France slides were deferred and **will not appear on the final exam**.
+', null, '
+## Golden rule of advertising
+
+$$\frac{A}{pQ} = \left(\frac{p - c}{p}\right) \times \varepsilon_{DA}$$
+
+Ad spend as a share of revenue = percent margin × advertising elasticity.
+
+## Parfitt-Collins
+
+$$\%\text{Aware} \times \%\text{Try} \times \%\text{Repeat} = \%\text{Market share}$$
+
+Rearranged:
+
+$$\%\text{Aware} = \frac{\text{target share}}{\%\text{Try} \times \%\text{Repeat}}$$
+
+## GRP
+
+$$\text{GRP} = \text{Reach} \times \text{Frequency}$$
+
+20% reach × 3 exposures = 60 GRPs.
+
+## Digital KPIs
+
+CPC · CTR · TCR · **ROA** · revenue per booking · probability of booking
+
+Low **CTR** → fix the ad. Low **TCR** → fix the website.
+
+> Trap: Implausibly high ROA usually means attribution error.
+
+## Roles of advertising
+
+Informative · Persuasive · Money-burning (signal) · Reminder (pulsing)
+', '2026-08-10T10:05:39.501564+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('OPMG', 6, 'Priority Queuing & the Start of Lean', '
+## Where this session goes
+
+Last session ended on a hint: priority queuing moves waiting around. This session makes that precise, then turns to attacking variability at its source — and finishes with a simulation where every team lost money.
+
+## Priority queuing: redistribution, not creation
+
+Baseline: 13 nurses, 35 arrivals/hour, average wait **9.43 min**.
+
+Now split arrivals into 20% emergency and 80% non-emergency, and give emergencies priority. **The overall average wait does not change.** Same arrivals, same capacity, same total waiting — it just moves.
+
+That has to be true when you think about it. Priority is a sorting rule, and sorting cannot manufacture capacity. All it can do is take minutes from one group and give them to another.
+
+How to compute each class:
+
+**The priority class, as its own system.** From an emergency patient''s point of view the routine flow is invisible — nurses drop what they are doing. So model emergencies against the full server pool: arrival rate $0.20 \times 35 = 7$/hr against 13 servers. Utilisation about 18%, so the wait is effectively **0 minutes**.
+
+**The rest, by weighted average:**
+
+$$0.20 \times 0 + 0.80 \times W = 9.43 \quad\Rightarrow\quad W \approx 11.8 \text{ minutes}$$
+
+So routine patients moved from 9.43 to 11.8 minutes to buy emergencies a wait of zero.
+
+> Trap: Push the emergency share to 50% and both groups can end up worse off. The priority class is now big enough to congest itself, while the non-priority class waits behind far more people. Priority is only close to free when the priority class is **small**. A fast track covering half your customers is not a fast track.
+
+## Reducing variability at the source
+
+If variability causes queues, the most direct attack is on the variability itself.
+
+$CV = \dfrac{\sigma}{\text{mean}}$. The default assumption when you have no data is $CV_i = CV_p = 1$ (exponential) — the pessimistic case, and mathematically convenient.
+
+| Reduce | How | Real example |
+|---|---|---|
+| **CVp** (service) | SOPs, standardisation | Amazon assigning drivers to fixed buildings so route familiarity tightens service times |
+| **CVi** (arrivals) | Appointments, demand shaping | Appointments drive CVi toward 0, so any remaining queue comes from service variability alone |
+| **CVp** (service) | Pre-sorting work | Call-centre IVR routing by call type before an agent picks up |
+
+That middle row is the powerful one. An appointment system does not add capacity — it removes the randomness in arrivals, and gets much of the benefit for free.
+
+## The behavioural side
+
+Eleven minutes is not good or bad on its own. Perceived waiting is a different quantity from actual waiting, and it is cheaper to change.
+
+- **Anxiety** — a hospital wait feels far longer than the same wait for a table
+- **Not knowing how long** — telling people the wait shortens the felt wait
+- **Unexplained delay** — airlines state a reason on purpose
+- **Perceived unfairness** — priority queues feel unfair, which is why firms physically separate them
+- **Unoccupied time** — wifi, hold music and magazines all shrink felt wait
+- **Pre-service waits feel longer than in-service waits** — slow order-taking kills a restaurant, slow food does not. A doctor''s waiting room is a signal that service has begun.
+
+## Lean simulation
+
+A painting workshop game: coloured toys through several stations. Round one, **every team lost money.**
+
+The cause was capacity mismatch. The grey station needed shape changes and more colours, so it was the bottleneck. Faster upstream stations kept producing anyway, and work-in-progress piled up in front of grey — generating cost with no revenue. Everything the earlier sessions predicted, felt rather than derived.
+
+Five improvements were available: Kanban, auto-inspect, reduced tool changeover, workshop layout, and batch size reduction.
+
+- **Kanban (pull)** — the downstream station must request before upstream sends. Production happens at the rate needed, not the rate possible.
+- **Batch size 4 → 1** — less average WIP, faster flow, less stranded inventory at the end.
+- **Reduced tool changeover** — aimed straight at the grey bottleneck.
+- **Layout** — inter-station transfer from 4 seconds to 1.
+
+> Trap: The winning teams did not pick the single best improvement. They paired Kanban with smaller batches. The improvements are **multiplicative** — a pull signal with a batch of 4 still moves work in lumps of 4, so half the benefit of the pull system never arrives.
+', null, '
+## Priority queuing
+
+Overall average wait is **unchanged** by adding priority classes.
+
+**Priority class** — treat as its own system:
+
+$$\rho_p = \frac{\text{share}_p \times R_i}{c \times R_p}$$
+
+**Non-priority class** — solve the weighted average:
+
+$$(\text{share}_p \times W_p) + (\text{share}_{np} \times W_{np}) = W_{\text{overall}}$$
+
+## Variability
+
+$$CV = \frac{\sigma}{\text{mean}}$$
+
+Default when unknown: $CV_i = CV_p = 1$. Appointments drive $CV_i \to 0$; SOPs lower $CV_p$.
+
+## Lean levers
+
+Pull (Kanban) · small batches · quality at each station · cross-trained resources · cellular layout
+
+> Trap: Improvements combine **multiplicatively** — a pull signal with a large batch still moves work in lumps.
+', '2026-08-11T09:15:48.041053+00:00');
+insert into public.learn_session_content (course_code, session, title, summary, resource_url, formula_sheet, updated_at) values ('MKTG', 6, 'Brand Management & CLV', '
+## Where this session goes
+
+Two halves that look unrelated and are not. The first is how to manage brands as assets. The second is how to value a customer as an asset. Both are about what you own that does not appear on a balance sheet.
+
+## How brands are managed
+
+Through the 4 Ps — and **consistency among them is the key**. All four should reinforce the same brand image. A premium price with discount distribution does not read as a bargain; it reads as confusion.
+
+## House of brands vs branded house
+
+| | Independent brands (house of brands) | Brand extensions (branded house) |
+|---|---|---|
+| **Pros** | More positioning opportunities; makes acquisitions easier; failures are less risky for company image | Efficiency of communication; instant brand image transfer; deters competition |
+| **Cons** | More expensive and complicated to manage; lose the benefit of a big brand | Risk of dilution or ambiguity; bad news affects all products; less management autonomy |
+
+The trade is essentially insurance versus leverage. A house of brands contains failures and pays for the containment. A branded house transfers strength instantly and transfers weakness just as fast.
+
+## Two directions to extend
+
+- **Vertical brand extension** — greater benefits at a higher price (upscale), or fewer at a lower price (downscale). Moves along the price-benefit line.
+- **Horizontal brand extension** — often a different category at a similar price.
+
+Downscale vertical extensions are the dangerous ones: they reach more customers and quietly redefine what the brand means.
+
+## Brand repositioning
+
+Changing what the brand means. Amazon, Starbucks and Spotify have all done it. Three reasons to: the target market changed, competitors acted, or the context changed.
+
+## Co-branding
+
+Brand images of partners spill onto each other. The benefit is image transfer; the risk is brand confusion.
+
+> Worked example: **(RED) in 2007** is the standing example of co-branding gone wrong — Converse, Apple, Gap, Amex, Motorola and Armani Exchange all at once. With that many partners the association stopped meaning anything in particular, which is the failure mode: not damage, dilution.
+
+## Luxury branding
+
+Luxury brands signal status on a spectrum from **loud** to **subtle**. Logo design and size do the signalling, the 4 Ps must line up, and the brand story matters. Consumer segments nest by increasing wealth — and the wealthier the segment, the more subtle the signal tends to become, because the point of a signal is to be legible to the people who matter and invisible to those who do not.
+
+## Customer lifetime value
+
+Now the second asset. A mobile operator spends $400 to acquire a customer who pays $250 a year in margin. Good deal? Most people answer instantly and most answer wrong, because it depends on three things nobody mentioned.
+
+Build it in three steps.
+
+**Step 1 — no churn, no discounting.** AC $400, contribution $250/year, five years.
+CLV net = $1,250 − $400 = **$850**
+
+**Step 2 — add churn.** Retention 80%, so each year''s expected contribution is $250 \times 0.8^t$ dollars.
+$200 + $160 + $128 + $102 + $82 − $400 = **$272**
+
+**Step 3 — add discounting.** Discount rate 10%, so divide each expected contribution by $1.1^t$.
+$182 + $132 + $96 + $70 + $51 − $400 = **$131**
+
+> Trap: Notice how fast the number falls — $850 to $272 to $131 on the same customer. Almost all of that is churn, not discounting. If you forget the retention factor you will overstate CLV by roughly 3×, which is enough to justify an acquisition strategy that destroys value.
+
+### The infinite-horizon formula
+
+$$\text{CLV}_{\text{existing}} = m\left(\frac{r}{1 + d - r}\right) \qquad \text{CLV}_{\text{new}} = m\left(\frac{r}{1 + d - r}\right) - AC + m_0$$
+
+> Worked example: $m = 250$, $AC = 400$, $r = 80\%$, $d = 10\%$, $m_0 = 0$.
+
+$$\text{CLV} = 250\left(\frac{0.8}{0.3}\right) - 400 = 667 - 400 = 267$$
+
+Look at the denominator, $1 + d - r$: retention sits right beside the discount rate and moves the answer far more, because it compounds against every future year at once. That is why "reduce churn" outranks almost everything else in a mature subscription business.
+
+### What the simple formula hides
+
+- Contributions may rise over time — customers spend more, or you get cost efficiencies
+- Retention rates change — up with lock-in, down with dissatisfaction
+- **Customer heterogeneity** — a blended CLV across customers with different $r$ and $m$ is not the CLV of anybody
+
+### What CLV is for
+
+Deciding how and when to acquire a customer, retain one, **fire** one, or acquire an entire customer base or company. That third option is the one people forget: if a segment''s CLV is negative, serving it better is not the answer.
+
+It shows up in streaming (where CLV tracks market cap), financial services, mobile carriers, Medtronic insulin pumps, HP printers and toner, Gillette and Swiffer — every razor-and-blade model is a CLV bet.
+', null, '
+## CLV, built up
+
+**No churn, no discount:** $\ \text{CLV} = (m \times T) - AC$
+
+**With churn:** each year''s expected contribution is $m \cdot r^t$
+
+**With churn and discounting:**
+
+$$\text{CLV} = \sum_{t=1}^{T} \frac{m \cdot r^t}{(1+d)^t} - AC$$
+
+## Infinite horizon (constant $m$, $r$, $d$)
+
+$$\text{CLV}_{\text{existing}} = m\left(\frac{r}{1 + d - r}\right)$$
+
+$$\text{CLV}_{\text{not yet acquired}} = m\left(\frac{r}{1 + d - r}\right) - AC + m_0$$
+
+$m$ = margin · $r$ = retention rate · $d$ = discount rate · $AC$ = acquisition cost · $m_0$ = margin at time 0
+
+> Trap: Churn matters far more than discounting. Forgetting $r$ overstates CLV roughly threefold.
+
+## Brand architecture
+
+- **House of brands** — more positioning room, failures contained, costly to run
+- **Branded house** — communication efficiency, instant transfer, dilution risk
+- **Vertical extension** — more/fewer benefits at a higher/lower price
+- **Horizontal extension** — different category, similar price
+', '2026-08-10T10:05:39.501564+00:00');
+
+commit;
