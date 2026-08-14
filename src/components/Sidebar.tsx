@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, FileStack, CircleHelp, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, FileStack, CircleHelp, PanelLeftClose, PanelLeftOpen, Brain } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
@@ -25,6 +25,14 @@ export default function Sidebar({ user, onSignOut }: Props) {
 
   const isActive = (prefix: string) => location.pathname === prefix || location.pathname.startsWith(prefix + "/");
 
+  // Learn is a full-bleed desktop with its own floating windows, so it wants the width. Collapse
+  // to the icon rail on the way in and restore on the way out — still overridable by the toggle,
+  // since this only fires when crossing the boundary, not on every render inside the section.
+  const inLearn = isActive("/learn");
+  useEffect(() => {
+    setCollapsed(inLearn);
+  }, [inLearn]);
+
   const primaryNav = (
     <nav className="space-y-1">
       <NavItem icon={<GraduationCap size={16} />} label="Credit Tracker" active={isActive("/tracker")} onClick={() => go("/tracker")} collapsed={collapsed} />
@@ -33,6 +41,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
       <NavItem icon={<BookOpen size={16} />} label="Course Resources" active={isActive("/resources")} onClick={() => go("/resources")} collapsed={collapsed} />
       <NavItem icon={<FileStack size={16} />} label="Term 4 Dossier" active={isActive("/term4")} onClick={() => go("/term4")} collapsed={collapsed} />
       <NavItem icon={<CircleHelp size={16} />} label="Term 4 Bidding Q&A" active={isActive("/term4-bidding-qa")} onClick={() => go("/term4-bidding-qa")} collapsed={collapsed} />
+      <NavItem icon={<Brain size={16} />} label="Learn" active={isActive("/learn")} onClick={() => go("/learn")} collapsed={collapsed} />
       <NavItem
         icon={<Megaphone size={16} />}
         label="Notice Board"

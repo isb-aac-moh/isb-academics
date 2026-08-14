@@ -12,6 +12,7 @@ import NoticeBoard from "./pages/NoticeBoard";
 import PulseCheck from "./pages/PulseCheck";
 import Layout from "./components/Layout";
 import RequireAdmin from "./components/RequireAdmin";
+import LearnSection from "./learn/LearnSection";
 
 export default function App() {
   const { user, loading, notProvisioned, signOut } = useAuth();
@@ -35,6 +36,10 @@ export default function App() {
         <Route path="/resources" element={<CourseResources />} />
         <Route path="/term4" element={<TermFourDossier />} />
         <Route path="/term4-bidding-qa" element={<TermFourBiddingQA />} />
+
+        {/* Trailing splat: the Learn section renders its own descendant routes (its window
+            content) rather than being a single page. */}
+        <Route path="/learn/*" element={<LearnSection user={user} />} />
 
         <Route element={<RequireAdmin user={user} />}>
           <Route path="/notices" element={<NoticeBoard />} />
