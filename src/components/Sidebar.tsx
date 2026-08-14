@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, FileStack, CircleHelp, PanelLeftClose, PanelLeftOpen, Brain } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
@@ -85,16 +86,18 @@ export default function Sidebar({ user, onSignOut }: Props) {
             {user.name || user.email}
           </p>
         )}
-        <button
-          onClick={onSignOut}
-          title="Sign out"
-          style={{
-            display: "flex", alignItems: "center", gap: 6, marginTop: collapsed ? 0 : 8, justifyContent: collapsed ? "center" : "flex-start",
-            width: "100%", background: "none", border: "none", color: onLight ? COLOR.ink3 : "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0,
-          }}
-        >
-          <LogOut size={13} /> {!collapsed && "Sign out"}
-        </button>
+        <WithRailLabel label="Sign out" enabled={collapsed}>
+          <button
+            onClick={onSignOut}
+            aria-label={collapsed ? "Sign out" : undefined}
+            style={{
+              display: "flex", alignItems: "center", gap: 6, marginTop: collapsed ? 0 : 8, justifyContent: collapsed ? "center" : "flex-start",
+              width: "100%", background: "none", border: "none", color: onLight ? COLOR.ink3 : "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0,
+            }}
+          >
+            <LogOut size={13} /> {!collapsed && "Sign out"}
+          </button>
+        </WithRailLabel>
       </div>
     </div>
   );
@@ -168,14 +171,16 @@ export default function Sidebar({ user, onSignOut }: Props) {
                 <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>Academics</p>
               </div>
             )}
-            <button
-              onClick={() => setCollapsed((c) => !c)}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              style={{ background: "none", border: "none", color: collapsed ? COLOR.ink3 : "rgba(255,255,255,0.6)", padding: 4, cursor: "pointer", display: "flex" }}
-            >
-              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-            </button>
+            <WithRailLabel label="Expand sidebar" enabled={collapsed}>
+              <button
+                onClick={() => setCollapsed((c) => !c)}
+                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                title={collapsed ? undefined : "Collapse sidebar"}
+                style={{ background: "none", border: "none", color: collapsed ? COLOR.ink3 : "rgba(255,255,255,0.6)", padding: 4, cursor: "pointer", display: "flex" }}
+              >
+                {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+              </button>
+            </WithRailLabel>
           </div>
           <div className="mt-8">{primaryNav(collapsed, collapsed)}</div>
           {extraNav(collapsed, collapsed)}
@@ -183,6 +188,62 @@ export default function Sidebar({ user, onSignOut }: Props) {
         {bottomNav(collapsed, collapsed)}
       </aside>
     </>
+  );
+}
+
+/**
+ * Hover/focus label for the collapsed rail, where every item is an icon with no text beside it.
+ *
+ * Two things force this to be `position: fixed` and measured from the trigger, rather than the
+ * usual absolutely-positioned tooltip: the sidebar sets `overflowX: hidden` for the width
+ * animation, which would slice a label off at the 72px edge, and it also scrolls vertically.
+ *
+ * The handlers live on a wrapper rather than the control itself because `disabled` buttons — Notice
+ * Board, for non-admins — emit no pointer events, and that is exactly the item whose label a
+ * student most needs.
+ */
+function useRailLabel(enabled: boolean) {
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  const open = (e: React.SyntheticEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    // Anchor to the rail's outer edge, not the item's: the rail is padded, so measuring from the
+    // item put every label a few pixels back over the icons instead of clear of them. Anchoring to
+    // the sidebar also lines all the labels up in one column.
+    const rail = e.currentTarget.closest("aside");
+    const anchorRight = rail ? rail.getBoundingClientRect().right : r.right;
+    setPos({ top: Math.round(r.top + r.height / 2), left: Math.round(anchorRight + 8) });
+  };
+  const close = () => setPos(null);
+
+  if (!enabled) return { pos: null, bind: {} as Record<string, never> };
+  return { pos, bind: { onMouseEnter: open, onMouseLeave: close, onFocus: open, onBlur: close } };
+}
+
+function WithRailLabel({ label, enabled, children }: { label: string; enabled: boolean; children: React.ReactNode }) {
+  const { pos, bind } = useRailLabel(enabled);
+  return (
+    <span style={{ display: "block" }} {...bind}>
+      {children}
+      {/* Portalled to body rather than rendered in place. The sidebar is position: sticky, which
+          makes it a stacking context, so a z-index here could never rise above the Learn section —
+          that element carries a transform and comes later in the DOM, so it painted over the label
+          no matter how high the z-index went. */}
+      {enabled && pos && createPortal(
+        <span
+          role="tooltip"
+          style={{
+            position: "fixed", top: pos.top, left: pos.left, transform: "translateY(-50%)",
+            background: COLOR.navy, color: "#fff", fontFamily: FONT.sans, fontSize: 12, fontWeight: 600,
+            padding: "5px 9px", borderRadius: 6, whiteSpace: "nowrap", pointerEvents: "none", zIndex: 60,
+            boxShadow: "0 4px 14px -4px rgba(0,0,0,0.4)",
+          }}
+        >
+          {label}
+        </span>,
+        document.body,
+      )}
+    </span>
   );
 }
 
@@ -197,51 +258,58 @@ function NavItem({
     : onLight ? COLOR.ink2
     : "#fff";
   const badge = onLight ? COLOR.amber : COLOR.mint;
+  // Collapsing hides the SOON/PREVIEW badge too, so the hover label carries that state instead of
+  // leaving a disabled icon with no explanation for why it does nothing.
+  const hoverLabel = soon ? `${label} · coming soon` : preview ? `${label} · admin preview` : label;
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      title={collapsed ? label : undefined}
-      style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px" : "9px 10px", borderRadius: 8,
-        justifyContent: collapsed ? "center" : "flex-start",
-        background: active ? activeBg : "transparent", border: "none", cursor: disabled ? "default" : "pointer",
-        color: fg, fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, textAlign: "left",
-      }}
-    >
-      {icon}
-      {!collapsed && (
-        <>
-          <span style={{ flex: 1 }}>{label}</span>
-          {soon && <span style={{ fontSize: 9, fontWeight: 700, color: badge, letterSpacing: "0.04em" }}>SOON</span>}
-          {preview && <span style={{ fontSize: 9, fontWeight: 700, color: badge, letterSpacing: "0.04em", border: `1px solid ${badge}`, borderRadius: 4, padding: "1px 5px" }}>PREVIEW</span>}
-        </>
-      )}
-    </button>
+    <WithRailLabel label={hoverLabel} enabled={!!collapsed}>
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={collapsed ? hoverLabel : undefined}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px" : "9px 10px", borderRadius: 8,
+          justifyContent: collapsed ? "center" : "flex-start",
+          background: active ? activeBg : "transparent", border: "none", cursor: disabled ? "default" : "pointer",
+          color: fg, fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, textAlign: "left",
+        }}
+      >
+        {icon}
+        {!collapsed && (
+          <>
+            <span style={{ flex: 1 }}>{label}</span>
+            {soon && <span style={{ fontSize: 9, fontWeight: 700, color: badge, letterSpacing: "0.04em" }}>SOON</span>}
+            {preview && <span style={{ fontSize: 9, fontWeight: 700, color: badge, letterSpacing: "0.04em", border: `1px solid ${badge}`, borderRadius: 4, padding: "1px 5px" }}>PREVIEW</span>}
+          </>
+        )}
+      </button>
+    </WithRailLabel>
   );
 }
 
 /** Same look as NavItem, but an actual link that opens the tool in a new tab instead of routing internally. */
 function ExternalNavItem({ icon, label, href, collapsed, onLight }: { icon: React.ReactNode; label: string; href: string; collapsed?: boolean; onLight?: boolean }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={collapsed ? label : undefined}
-      style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px" : "9px 10px", borderRadius: 8,
-        justifyContent: collapsed ? "center" : "flex-start",
-        background: "transparent", color: onLight ? COLOR.ink2 : "#fff", fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, textAlign: "left", textDecoration: "none",
-      }}
-    >
-      {icon}
-      {!collapsed && (
-        <>
-          <span style={{ flex: 1 }}>{label}</span>
-          <ExternalLink size={12} color={onLight ? COLOR.ink3 : "rgba(255,255,255,0.5)"} />
-        </>
-      )}
-    </a>
+    <WithRailLabel label={`${label} · opens in a new tab`} enabled={!!collapsed}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={collapsed ? `${label} (opens in a new tab)` : undefined}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px" : "9px 10px", borderRadius: 8,
+          justifyContent: collapsed ? "center" : "flex-start",
+          background: "transparent", color: onLight ? COLOR.ink2 : "#fff", fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, textAlign: "left", textDecoration: "none",
+        }}
+      >
+        {icon}
+        {!collapsed && (
+          <>
+            <span style={{ flex: 1 }}>{label}</span>
+            <ExternalLink size={12} color={onLight ? COLOR.ink3 : "rgba(255,255,255,0.5)"} />
+          </>
+        )}
+      </a>
+    </WithRailLabel>
   );
 }
