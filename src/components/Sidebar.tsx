@@ -40,13 +40,13 @@ export default function Sidebar({ user, onSignOut }: Props) {
   // is white-on-navy.
   const primaryNav = (collapsed: boolean, onLight: boolean) => (
     <nav className="space-y-1">
+      <NavItem icon={<Brain size={16} />} label="Learn" active={isActive("/learn")} onClick={() => go("/learn")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<GraduationCap size={16} />} label="Credit Tracker" active={isActive("/tracker")} onClick={() => go("/tracker")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<BookOpen size={16} />} label="Course Resources" active={isActive("/resources")} onClick={() => go("/resources")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<FileStack size={16} />} label="Term 4 Dossier" active={isActive("/term4")} onClick={() => go("/term4")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<CircleHelp size={16} />} label="Term 4 Bidding Q&A" active={isActive("/term4-bidding-qa")} onClick={() => go("/term4-bidding-qa")} collapsed={collapsed} onLight={onLight} />
-      <NavItem icon={<Brain size={16} />} label="Learn" active={isActive("/learn")} onClick={() => go("/learn")} collapsed={collapsed} onLight={onLight} />
       <NavItem
         icon={<Megaphone size={16} />}
         label="Notice Board"

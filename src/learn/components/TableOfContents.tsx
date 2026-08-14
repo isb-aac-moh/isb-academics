@@ -13,8 +13,10 @@ export function TableOfContents({ headings }: Props) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  // self-stretch matters: the parent flex row is items-start, which would otherwise shrink this
+  // rail to the height of its own links, leaving the sticky child no room to stay put.
   return (
-    <nav className="hidden xl:block w-56 shrink-0">
+    <nav className="hidden xl:block w-56 shrink-0 self-stretch">
       <div className="sticky top-8">
         <div className="text-xs uppercase tracking-wide text-ink-soft font-semibold mb-3">Jump to</div>
         <ul className="flex flex-col border-l border-line">
