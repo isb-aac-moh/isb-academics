@@ -1,6 +1,50 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Design tokens for the Learn section, carried over from the standalone learning app so its
+   pages keep the look they were built with. They live under --c-* and are exposed to Tailwind
+   as utilities (bg-surface, text-ink-soft, ...) used only by src/components/learn and
+   src/pages/learn. The rest of the app styles itself through the COLOR/FONT objects in
+   src/lib/theme.ts and does not touch these.
+
+   The source app also shipped a dark-mode block. It is deliberately not carried over: the
+   surrounding shell — sidebar, header, every other page — is light only, so a Learn panel
+   that flipped dark on a system preference would sit wrong against it. */
+@theme {
+  --color-base: var(--c-base);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-ink: var(--c-ink);
+  --color-ink-soft: var(--c-ink-soft);
+  --color-line: var(--c-line);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-good: var(--c-good);
+  --color-good-soft: var(--c-good-soft);
+  --color-bad: var(--c-bad);
+  --color-bad-soft: var(--c-bad-soft);
+  --color-highlight: var(--c-highlight);
+}
+
+:root {
+  /* Ivory / Space White / Light Gray */
+  --c-base: #f4f8fa;
+  --c-surface: #ffffff;
+  --c-surface-2: #e6ebee;
+  /* Slate Gray / Mettle Gray */
+  --c-ink: #2e3b42;
+  --c-ink-soft: #5d6f7a;
+  --c-line: #d6e0e5;
+  /* Innovation Blue */
+  --c-accent: #245bff;
+  --c-accent-ink: #ffffff;
+  /* Future Green shades, dark enough for text/icon contrast on light surfaces */
+  --c-good: #12947e;
+  --c-good-soft: #e1fff9;
+  --c-bad: #c0453a;
+  --c-bad-soft: #f8e7e5;
+  /* Future Green — the brand's "highlighter line" emphasis stroke */
+  --c-highlight: #80edd9;
+}
 
 body {
   background: #F4F2EC;
