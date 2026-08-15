@@ -42,6 +42,14 @@ function DesktopIcon({ icon: Icon, label, onClick, badge }: DesktopIconProps) {
   );
 }
 
+/** A desktop icon is a narrow fixed-width tile, so a long course name wraps into a tall unreadable
+    column of two- and three-letter lines. Courses whose name does not fit get a short label here;
+    every other course falls back to its full name, which is what reads correctly in the prose that
+    uses it elsewhere (HomeGuide's "... are live today", SessionPage's read-only note). */
+const SHORT_LABELS: Record<string, string> = {
+  BANM2: "BANM",
+};
+
 /** The post-login "desktop" — a scene with icons as the primary way to get anywhere else in the
     app. Stays mounted behind every Window (see App.tsx), so it must not assume it's the only
     thing on screen. Course entry points come from the courses table — enabled courses are
@@ -65,7 +73,7 @@ export function HomePage({ profile, onGoHome }: Props) {
     { icon: HomeIcon, label: "Home", onClick: onGoHome },
     ...courses.map((c) => ({
       icon: BookIcon,
-      label: c.name,
+      label: SHORT_LABELS[c.id] ?? c.name,
       onClick: c.enabled || profile.is_admin ? () => navigate(`/learn/sessions/${c.id}`) : undefined,
       badge: c.enabled ? undefined : profile.is_admin ? "Preview" : "Soon",
     })),
