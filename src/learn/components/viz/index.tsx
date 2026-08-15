@@ -5,10 +5,12 @@ import { Clv } from "./Clv";
 import { ControlLimitWidth } from "./ControlLimitWidth";
 import { Eoq } from "./Eoq";
 import { Evc } from "./Evc";
+import { KanbanLoop } from "./KanbanLoop";
 import { LittlesLaw } from "./LittlesLaw";
 import { Newsvendor } from "./Newsvendor";
 import { ProcessFlow } from "./ProcessFlow";
 import { Queuing } from "./Queuing";
+import { SafetyStock } from "./SafetyStock";
 import { SixSigmaDrift } from "./SixSigmaDrift";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -22,6 +24,8 @@ export const VIZ: Record<string, ComponentType<any>> = {
   "process-flow": ProcessFlow,
   "control-limit-width": ControlLimitWidth,
   "six-sigma-drift": SixSigmaDrift,
+  "kanban-loop": KanbanLoop,
+  "safety-stock": SafetyStock,
   // Marketing
   clv: Clv,
   evc: Evc,
