@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Course, Student } from "../types";
 import { fetchCourses } from "../lib/db";
-import { HomeIcon, BookIcon, BoltIcon, UserIcon, ShieldIcon } from "../components/icons";
+import { REVISION_GUIDES } from "../lib/revisionGuides";
+import { HomeIcon, BookIcon, BoltIcon, CompassIcon, UserIcon, ShieldIcon } from "../components/icons";
 
 interface Props {
   profile: Student;
@@ -44,7 +45,8 @@ function DesktopIcon({ icon: Icon, label, onClick, badge }: DesktopIconProps) {
 /** The post-login "desktop" — a scene with icons as the primary way to get anywhere else in the
     app. Stays mounted behind every Window (see App.tsx), so it must not assume it's the only
     thing on screen. Course entry points come from the courses table — enabled courses are
-    clickable, disabled ones (e.g. Operations before its content lands) show a "Soon" badge. */
+    clickable, disabled ones (e.g. Operations before its content lands) show a "Soon" badge.
+    End-term revision guides follow the courses, one icon each. */
 export function HomePage({ profile, onGoHome }: Props) {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
@@ -53,6 +55,12 @@ export function HomePage({ profile, onGoHome }: Props) {
     void fetchCourses().then(setCourses);
   }, []);
 
+  // A guide is only offered once its course is (a course nobody can open yet shouldn't have a
+  // revision guide sitting open next to it); admins see it early, same as they do the courses.
+  const revisionGuides = Object.values(REVISION_GUIDES).filter((g) =>
+    courses.some((c) => c.id === g.course && (c.enabled || profile.is_admin)),
+  );
+
   const leftIcons: DesktopIconProps[] = [
     { icon: HomeIcon, label: "Home", onClick: onGoHome },
     ...courses.map((c) => ({
@@ -60,6 +68,14 @@ export function HomePage({ profile, onGoHome }: Props) {
       label: c.name,
       onClick: c.enabled || profile.is_admin ? () => navigate(`/learn/sessions/${c.id}`) : undefined,
       badge: c.enabled ? undefined : profile.is_admin ? "Preview" : "Soon",
+    })),
+    // Revision guides get their own compass icon rather than another book: they sit right beside the
+    // course books here, and are a different kind of thing — a frozen end-term document, not the
+    // course's live session content.
+    ...revisionGuides.map((g) => ({
+      icon: CompassIcon,
+      label: `${g.course} Revision`,
+      onClick: () => navigate(`/learn/revision/${g.course}`),
     })),
     { icon: BoltIcon, label: "Practice", onClick: () => navigate("/learn/practice") },
   ];
