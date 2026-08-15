@@ -108,13 +108,27 @@ export async function fetchQuestions(courseId?: string): Promise<Question[]> {
   return data as unknown as Question[];
 }
 
+/**
+ * Key for the concept and mastery maps.
+ *
+ * Both tables are keyed on (course_code, topic) in the database, deliberately: two courses are
+ * free to use the same topic name, and learn_topic_mastery's primary key was widened to include
+ * course_code precisely so one course's progress could not overwrite another's. These maps are
+ * built from unscoped fetches (ProfileSummary rolls up across every course), so they have to carry
+ * the same composite key or they reintroduce that collision one layer up — silently, and only once
+ * a future course happens to reuse a topic name like `break_even`.
+ */
+export function topicKey(courseId: string, topic: string): string {
+  return `${courseId}::${topic}`;
+}
+
 export async function fetchConcepts(courseId?: string): Promise<Record<string, Concept>> {
   let query = supabase.from("learn_concepts").select(CONCEPT_COLS);
   if (courseId) query = query.eq("course_code", courseId);
   const { data, error } = await query;
   if (error) throw error;
   const map: Record<string, Concept> = {};
-  for (const c of (data ?? []) as unknown as Concept[]) map[c.topic] = c;
+  for (const c of (data ?? []) as unknown as Concept[]) map[topicKey(c.course_id, c.topic)] = c;
   return map;
 }
 
@@ -332,7 +346,7 @@ export async function fetchMastery(userId: string, courseId?: string): Promise<R
   const { data, error } = await query;
   if (error) throw error;
   const map: Record<string, TopicMastery> = {};
-  for (const row of (data ?? []) as unknown as TopicMastery[]) map[row.topic] = row;
+  for (const row of (data ?? []) as unknown as TopicMastery[]) map[topicKey(row.course_id, row.topic)] = row;
   return map;
 }
 

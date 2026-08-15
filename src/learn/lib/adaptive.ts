@@ -1,4 +1,5 @@
 import type { Question, TopicMastery } from "../types";
+import { topicKey } from "./db";
 import { masteryWeight } from "./mastery";
 
 /** Questions that must be answered after a miss before that topic is re-asked. Two keeps the retry
@@ -82,7 +83,7 @@ export function pickNext(
     candidates.push(q);
   }
 
-  const weighted = candidates.map((q) => ({ q, w: masteryWeight(mastery[q.topic]) }));
+  const weighted = candidates.map((q) => ({ q, w: masteryWeight(mastery[topicKey(q.course_id, q.topic)]) }));
   const total = weighted.reduce((sum, item) => sum + item.w, 0);
 
   let roll = Math.random() * total;

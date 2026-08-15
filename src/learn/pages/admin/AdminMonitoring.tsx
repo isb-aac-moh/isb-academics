@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CohortStats, Concept, FlaggedQuestion, TopicStat } from "../../types";
-import { fetchCohortStats, fetchConcepts, fetchFlaggedQuestions, fetchTopicStats } from "../../lib/db";
+import { fetchCohortStats, fetchConcepts, fetchFlaggedQuestions, fetchTopicStats, topicKey } from "../../lib/db";
 
 const LOW_ACCURACY = 0.4;
 
@@ -67,9 +67,19 @@ export function AdminMonitoring() {
       ) : (
         <div className="flex flex-col gap-1.5 mb-8">
           {topicStats.slice(0, 8).map((t) => (
-            <div key={t.topic} className="card p-3 text-sm flex justify-between">
-              <span>{concepts[t.topic]?.title ?? t.topic.replace(/_/g, " ")}</span>
-              <span className="text-bad font-medium tabular">
+            <div
+              key={topicKey(t.course_code, t.topic)}
+              className="card p-3 text-sm flex justify-between items-baseline gap-3"
+            >
+              <span className="flex items-baseline gap-2 min-w-0">
+                <span className="truncate">
+                  {concepts[topicKey(t.course_code, t.topic)]?.title ?? t.topic.replace(/_/g, " ")}
+                </span>
+                <span className="shrink-0 text-[10px] uppercase tracking-wide text-ink-soft font-semibold">
+                  {t.course_code}
+                </span>
+              </span>
+              <span className="text-bad font-medium tabular shrink-0">
                 {Math.round(Number(t.accuracy) * 100)}% · {t.total} attempts
               </span>
             </div>
