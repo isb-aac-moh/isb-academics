@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Managing Inventory Under Uncertainty — Field Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#0A1B33;
+    --navy-panel:#0F2745;
+    --navy-panel-2:#14304F;
+    --grid-line: rgba(150,205,235,0.07);
+    --blue-line:#6FB7E0;
+    --blue-bright:#BFE6F7;
+    --paper:#EDE6D3;
+    --paper-2:#E4DBC4;
+    --ink:#1D1B14;
+    --ink-soft:#4A4636;
+    --amber:#F2B705;
+    --stop-red:#D6544F;
+    --go-green:#4E9A6E;
+    --violet:#9C8FD6;
+    --font-display:'Big Shoulders Display', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(111,183,224,0.10), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(111,183,224,0.08), transparent 55%),
+      var(--navy-deep);
+    background-attachment:fixed;
+    color:var(--blue-bright);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:34px 34px;
+    z-index:0;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--amber); color:var(--ink);}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  .masthead{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:38px 24px 18px;}
+  .masthead-top{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; border-bottom:1px solid rgba(191,230,247,0.25); padding-bottom:16px;}
+  .doc-code{font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; color:var(--blue-line); text-transform:uppercase;}
+  h1.title{font-family:var(--font-display); font-weight:800; font-size:clamp(30px, 5.6vw, 64px); line-height:0.94; margin:6px 0 0; letter-spacing:0.3px; color:#fff; text-transform:uppercase;}
+  .title .accent{color:var(--amber);}
+  .subtitle{font-family:var(--font-body); font-size:15px; color:var(--blue-bright); opacity:0.85; max-width:560px; margin-top:6px;}
+  .stamp{font-family:var(--font-mono); font-size:11px; text-align:right; color:var(--blue-line); letter-spacing:.08em; line-height:1.7;}
+  .stamp b{color:var(--blue-bright);}
+
+  .panel{position:relative; max-width:1180px; margin:0 auto; padding:0 24px 100px; z-index:1;}
+  .switchboard{display:flex; flex-wrap:wrap; gap:8px; margin:26px 0 28px; padding:10px; background:rgba(10,27,51,0.55); border:1px solid rgba(191,230,247,0.18); border-radius:10px;}
+  .stn{appearance:none; border:1px solid rgba(191,230,247,0.22); background:var(--navy-panel); color:var(--blue-bright); font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; padding:10px 14px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:background .15s ease, border-color .15s ease, transform .1s ease;}
+  .stn:hover{border-color:var(--blue-line); transform:translateY(-1px);}
+  .stn .lamp{width:7px; height:7px; border-radius:50%; background:rgba(191,230,247,0.3); transition:background .15s ease, box-shadow .15s ease; flex-shrink:0;}
+  .stn.active{background:var(--paper); color:var(--ink); border-color:var(--paper);}
+  .stn.active .lamp{background:var(--amber); box-shadow:0 0 8px 1px var(--amber);}
+  .stn .num{opacity:0.6;}
+  .stn.active .num{opacity:0.9;}
+
+  .sheet{background:var(--paper); color:var(--ink); border-radius:10px; padding:clamp(20px, 4vw, 48px); position:relative; box-shadow:0 24px 60px -20px rgba(0,0,0,0.55);}
+  .sheet::before{content:""; position:absolute; inset:10px; border:1px dashed rgba(29,27,20,0.14); border-radius:6px; pointer-events:none;}
+  .tab-panel{display:none; animation:fadeIn .35s ease;}
+  .tab-panel.show{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px;}
+  h2.head{font-family:var(--font-display); font-weight:800; font-size:clamp(26px,3.8vw,42px); text-transform:uppercase; letter-spacing:.3px; margin:0 0 6px; line-height:0.98;}
+  .dek{font-size:16px; max-width:700px; color:var(--ink-soft); margin-bottom:26px;}
+  h3.sub{font-family:var(--font-display); font-weight:700; font-size:21px; text-transform:uppercase; letter-spacing:.3px; margin:30px 0 10px;}
+  p{margin:0 0 12px;}
+  .lead{font-size:15.5px;}
+
+  .note{background:var(--paper-2); border-left:3px solid var(--amber); border-radius:4px; padding:14px 16px; margin:16px 0; font-size:14.5px;}
+  .note b{font-family:var(--font-mono); text-transform:uppercase; font-size:11px; letter-spacing:.08em; display:block; margin-bottom:4px; color:var(--ink-soft);}
+  .note.stop{border-left-color:var(--stop-red);}
+  .note.go{border-left-color:var(--go-green);}
+  .note.violet{border-left-color:var(--violet);}
+
+  .grid2{display:grid; grid-template-columns:1.05fr 1fr; gap:26px; align-items:start;}
+  @media(max-width:860px){.grid2{grid-template-columns:1fr;}}
+
+  .diagram-frame{background:var(--navy-panel); border-radius:8px; padding:18px; border:1px solid rgba(191,230,247,0.15);}
+  .diagram-frame svg{width:100%; height:auto; display:block;}
+  .diagram-cap{font-family:var(--font-mono); font-size:10.5px; color:var(--blue-line); text-align:center; margin-top:8px; letter-spacing:.05em;}
+
+  ul.tidy{padding-left:18px; margin:10px 0;}
+  ul.tidy li{margin-bottom:6px;}
+
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin:14px 0;}
+  .btn{font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; text-transform:uppercase; background:var(--ink); color:var(--paper); border:none; padding:10px 16px; border-radius:5px; cursor:pointer; transition:transform .1s ease, background .15s ease;}
+  .btn:hover{transform:translateY(-1px); background:#332f21;}
+  .btn.secondary{background:transparent; color:var(--ink); border:1px solid var(--ink);}
+
+  .toggle-wrap{display:flex; gap:0; margin:14px 0 20px; border:1px solid var(--ink); border-radius:6px; overflow:hidden; width:fit-content; flex-wrap:wrap;}
+  .toggle-wrap button{font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; padding:9px 16px; border:none; background:transparent; color:var(--ink); cursor:pointer;}
+  .toggle-wrap button.active{background:var(--ink); color:var(--paper);}
+
+  .ctrl-block{margin:12px 0;}
+  .ctrl-block label{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px;}
+  .ctrl-block label .live{color:var(--stop-red); font-weight:700;}
+  .ctrl-block input[type=range]{width:100%; accent-color:var(--stop-red);}
+
+  .readout-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:16px 0;}
+  .readout-card{background:var(--ink); color:var(--paper); border-radius:8px; padding:12px; text-align:center;}
+  .readout-card .val{font-family:var(--font-mono); font-weight:700; font-size:22px; color:var(--amber);}
+  .readout-card .lbl{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; opacity:.75; margin-top:4px;}
+  .readout-card.blue .val{color:var(--blue-bright);}
+  .readout-card.violet .val{color:var(--violet);}
+  .readout-card.green .val{color:var(--go-green);}
+  .readout-card.red .val{color:var(--stop-red);}
+
+  .formula-box{background:var(--ink); color:var(--paper); border-radius:6px; padding:12px 16px; font-family:var(--font-mono); font-size:14px; text-align:center; margin:14px 0;}
+
+  .cheat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-top:12px;}
+  .cheat-card{background:var(--navy-panel); border-radius:8px; padding:16px; border:1px solid rgba(191,230,247,0.15);}
+  .cheat-card h4{font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--amber); margin:0 0 8px;}
+  .cheat-card ul{margin:0; padding-left:16px; font-size:13px; color:var(--blue-bright);}
+  .cheat-card li{margin-bottom:5px;}
+  .cheat-card .f{font-family:var(--font-mono); font-size:12px; background:rgba(0,0,0,0.25); padding:6px 8px; border-radius:4px; margin-top:6px;}
+
+  .app-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-top:16px;}
+  .app-card{background:var(--navy-panel); border-radius:8px; padding:16px; border:1px solid rgba(191,230,247,0.15);}
+  .app-card h4{font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--blue-bright); margin:0 0 6px;}
+  .app-card p{font-size:13px; color:var(--blue-line); margin:0;}
+
+  .errtable{width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;}
+  .errtable th{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; text-align:left; padding:8px 10px; background:var(--ink); color:var(--paper);}
+  .errtable td{padding:10px; border-bottom:1px solid rgba(29,27,20,0.12); vertical-align:top;}
+  .errtable tr:last-child td{border-bottom:none;}
+
+  .quiz-top{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;}
+  .score-pill{font-family:var(--font-mono); font-size:12px; background:var(--ink); color:var(--paper); padding:8px 14px; border-radius:20px;}
+  .qcard{display:none;}
+  .qcard.show{display:block; animation:fadeIn .3s ease;}
+  .qnum{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px;}
+  .qtext{font-family:var(--font-body); font-weight:600; font-size:17.5px; margin-bottom:16px;}
+  .opt{display:block; width:100%; text-align:left; background:var(--paper-2); border:1px solid rgba(29,27,20,0.15); border-radius:6px; padding:12px 14px; margin-bottom:9px; font-family:var(--font-body); font-size:14.5px; color:var(--ink); cursor:pointer; transition:border-color .15s ease, background .15s ease;}
+  .opt:hover{border-color:var(--ink);}
+  .opt.correct{background:rgba(78,154,110,0.18); border-color:var(--go-green);}
+  .opt.wrong{background:rgba(214,84,79,0.16); border-color:var(--stop-red);}
+  .opt[disabled]{cursor:default;}
+  .feedback{display:none; margin-top:6px;}
+  .feedback.show{display:block;}
+  .quiz-nav{display:flex; justify-content:space-between; margin-top:20px;}
+  .quiz-summary{display:none; text-align:center; padding:20px 0;}
+  .quiz-summary.show{display:block;}
+  .quiz-summary .big{font-family:var(--font-display); font-size:52px; color:var(--ink); font-weight:800;}
+
+  .footer-strip{max-width:1180px; margin:0 auto; padding:0 24px 50px; font-family:var(--font-mono); font-size:11px; color:var(--blue-line); letter-spacing:.06em; text-align:center; opacity:.6;}
+
+  table.simple{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+  table.simple th{text-align:left; padding:7px 6px; font-family:var(--font-mono); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; border-bottom:2px solid var(--ink);}
+  table.simple td{padding:7px 6px; border-bottom:1px solid rgba(29,27,20,0.12);}
+
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div>
+      <div class="doc-code">OPMG3 // SESSION 09 // FIELD MANUAL</div>
+      <h1 class="title">Invent<span class="accent">o</span>ry Under Uncertainty</h1>
+      <div class="subtitle">Supply Chain Management (I): the newsvendor model for the one-shot ordering decision under uncertainty — commit to a quantity before demand is known, and get the trade-off right. Ongoing replenishment (EOQ, safety stock, reorder points, risk pooling) is Session 10.</div>
+    </div>
+    <div class="stamp">
+      INSTRUCTOR: <b>V. MALLADI</b><br>
+      REV: <b>2026-08</b><br>
+      STATIONS: <b>12</b>
+    </div>
+  </div>
+</header>
+
+<main class="panel">
+
+  <nav class="switchboard" id="switchboard">
+    <button class="stn active" data-tab="concepts"><span class="lamp"></span><span class="num">00</span> Concepts Refresher</button>
+    <button class="stn" data-tab="setup"><span class="lamp"></span><span class="num">01</span> The Setup</button>
+    <button class="stn" data-tab="average"><span class="lamp"></span><span class="num">02</span> Why Not the Average?</button>
+    <button class="stn" data-tab="marginal"><span class="lamp"></span><span class="num">03</span> The Fair Bet</button>
+    <button class="stn" data-tab="calculator"><span class="lamp"></span><span class="num">04</span> Newsvendor Calculator</button>
+    <button class="stn" data-tab="scones"><span class="lamp"></span><span class="num">05</span> Same Ratio, Diff. Shape</button>
+    <button class="stn" data-tab="sensitivity"><span class="lamp"></span><span class="num">06</span> What Changes the Answer?</button>
+    <button class="stn" data-tab="hotel"><span class="lamp"></span><span class="num">07</span> Case: Hotel California</button>
+    <button class="stn" data-tab="quickresponse"><span class="lamp"></span><span class="num">08</span> Quick Response</button>
+    <button class="stn" data-tab="applications"><span class="lamp"></span><span class="num">09</span> Real-World Uses</button>
+    <button class="stn" data-tab="quiz"><span class="lamp"></span>EXAM</button>
+    <button class="stn" data-tab="cheat"><span class="lamp"></span>Cheat Sheet</button>
+  </nav>
+
+
+  <div class="sheet">
+
+    <!-- ===================== 00 CONCEPTS REFRESHER ===================== -->
+    <section class="tab-panel show" id="tab-concepts">
+      <div class="eyebrow">Station 00 / Before you start</div>
+      <h2 class="head">Concepts Refresher</h2>
+      <div class="dek">This session leans on two ideas: expected value, and cumulative probability. Both are quick to rebuild if they've gone rusty.</div>
+
+      <h3 class="sub">1 · Expected value: a weighted average of outcomes</h3>
+      <p class="lead">If an outcome pays you <b>$A</b> with probability <b>p</b>, and a different outcome costs you <b>$B</b> with probability <b>(1−p)</b>, the expected value is just each payoff multiplied by its chance of happening, added together.</p>
+      <div class="formula-box">Expected value = (A × p) + (−B × (1−p))</div>
+      <div class="ctrl-block">
+        <label>Chance of the good outcome (p) <span class="live" id="evPLabel">50%</span></label>
+        <input type="range" min="0" max="100" step="1" value="50" id="evP">
+      </div>
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 140" id="evSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="diagram-cap" id="evReadout">Win $1.25 with 50% chance, lose $0.25 with 50% chance → expected value = $0.50</div>
+      </div>
+      <div class="note">
+        <b>Where this reappears</b>
+        Station 03 turns "should I stock one more unit?" into exactly this kind of bet, win a profit margin if it sells, lose a small amount if it doesn't.
+      </div>
+
+      <h3 class="sub">2 · Cumulative probability: "how much has piled up by here?"</h3>
+      <p class="lead"><b>P(D ≤ Q)</b> just means: add up the probabilities of every demand value from the smallest possible, up through Q. Drag Q and watch the shaded bars accumulate.</p>
+      <div class="ctrl-block">
+        <label>Q (stock level) <span class="live" id="cumQLabel">10</span></label>
+        <input type="range" min="3" max="18" step="1" value="10" id="cumQ">
+      </div>
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 170" id="cumSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="diagram-cap" id="cumReadout">P(D ≤ 10) = 50.0% — the shaded bars are every outcome at or below Q</div>
+      </div>
+      <div class="note go">
+        <b>Where this reappears</b>
+        Every "optimal quantity" answer in this manual comes from finding the Q where this cumulative number first crosses a target percentage, the "optimal service level" from Station 04 onward.
+      </div>
+    </section>
+
+    <!-- ===================== 01 THE SETUP ===================== -->
+    <section class="tab-panel" id="tab-setup">
+      <div class="eyebrow">Station 01 / Kristen's Cookies, one more time</div>
+      <h2 class="head">The Setup</h2>
+      <div class="dek">Kristen and her roommate now sell freshly baked chocolate chip cookies, by the dozen, and never sell yesterday's batch. Any dozen left at closing gets dumped at a steep discount in the last hour.</div>
+
+      <div class="grid2">
+        <div>
+          <h3 class="sub">The economics</h3>
+          <ul class="tidy">
+            <li><b>Retail price:</b> $2.49 / dozen</li>
+            <li><b>Production cost:</b> $1.24 / dozen</li>
+            <li><b>Leftover (salvage) price:</b> $0.99 / dozen, sold in the last hour</li>
+            <li><b>Mean daily demand:</b> 10.5 dozen</li>
+          </ul>
+          <div class="note">
+            <b>The catch</b>
+            They've hired help to run things for three days while they're away at a case competition. The help needs to know exactly how many dozens to bake each morning, before that day's demand is known, and cannot bake more mid-day. Demand is random each night, but the underlying distribution doesn't change day to day.
+          </div>
+        </div>
+        <div class="diagram-frame">
+          <svg viewBox="0 0 460 200" id="setupSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="diagram-cap">FIG 01.1 — actual nightly demand distribution (in dozens)</div>
+        </div>
+      </div>
+
+      <div class="note violet">
+        <b>The real question</b>
+        "How many dozens of cookies should they ask the help to make each day?" Every station after this one builds toward answering that one question, and then generalizes it far beyond cookies.
+      </div>
+    </section>
+
+    <!-- ===================== 02 WHY NOT AVERAGE ===================== -->
+    <section class="tab-panel" id="tab-average">
+      <div class="eyebrow">Station 02 / The obvious answer is wrong</div>
+      <h2 class="head">Why Not Just Bake the Average?</h2>
+      <div class="dek">Mean demand is 10.5, so round to 10 or 11 and call it a day? Drag Q along the actual expected-profit curve and see why that instinct leaves money on the table.</div>
+
+      <div class="ctrl-block">
+        <label>Stocking quantity (Q) <span class="live" id="avgQLabel">11</span></label>
+        <input type="range" min="2" max="19" step="1" value="11" id="avgQ">
+      </div>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 230" id="avgSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="diagram-cap">FIG 02.1 — expected profit vs. stocking quantity, computed from the real demand distribution</div>
+      </div>
+
+      <div class="readout-row">
+        <div class="readout-card blue"><div class="val" id="avgProfitVal">$11.56</div><div class="lbl">Expected profit at this Q</div></div>
+        <div class="readout-card" id="avgMarginalCard"><div class="val" id="avgMarginalVal">+$0.31</div><div class="lbl">Value of the next unit</div></div>
+      </div>
+
+      <div class="note">
+        <b>Reading the curve</b>
+        Expected profit keeps climbing past the mean of 10.5, because the two kinds of mistakes aren't equally painful. Understocking (running out) forfeits a full $1.25 of margin per missed dozen. Overstocking (leftovers) only costs $0.25 per unsold dozen. Since running out is 5× more expensive than a leftover, it pays to lean past the average, right up until the peak, where one more dozen stops being worth the risk.
+      </div>
+    </section>
+
+    <!-- ===================== 03 THE FAIR BET ===================== -->
+    <section class="tab-panel" id="tab-marginal">
+      <div class="eyebrow">Station 03 / The logic behind the peak</div>
+      <h2 class="head">The Marginal Unit &amp; the Fair Bet</h2>
+      <div class="dek">Forget the whole curve. Ask one question at a time: "I've decided to stock Q dozen, should I stock one more?"</div>
+
+      <ul class="tidy">
+        <li><b>If that extra dozen sells</b> (chance it does = P(D&gt;Q)): you earn price − cost = $2.49 − $1.24 = <b>$1.25</b></li>
+        <li><b>If it doesn't sell</b> (chance it doesn't = P(D≤Q)): you earn salvage − cost = $0.99 − $1.24 = <b>−$0.25</b></li>
+      </ul>
+      <p class="lead">That's a bet: win $1.25 with some probability, lose $0.25 the rest of the time. Drag the slider to set how likely the extra dozen is to actually sell, and watch when the bet stops being worth taking.</p>
+
+      <div class="ctrl-block">
+        <label>Chance this extra dozen sells: P(D&gt;Q) <span class="live" id="betPLabel">50%</span></label>
+        <input type="range" min="0" max="100" step="1" value="50" id="betP">
+      </div>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 160" id="betSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="diagram-cap" id="betReadout">At 50% chance of selling, expected value of stocking one more = +$0.63 — worth it</div>
+      </div>
+
+      <div class="note stop" id="betVerdictBox">
+        <b id="betVerdictLabel">Verdict</b>
+        <span id="betVerdictText">Positive expected value — stock the extra dozen.</span>
+      </div>
+
+      <div class="note violet">
+        <b>The breakeven point</b>
+        This bet is exactly fair when P(D&gt;Q) = Co / (Cu+Co) = 0.25 / 1.50 ≈ <b>16.7%</b> (about 1 in 6). Below that, the extra dozen is more likely to become a $0.25 loss than a $1.25 win, so stop adding units. That threshold, flipped around, is exactly the newsvendor rule: stock until P(D≤Q) reaches 100% − 16.7% = <b>83.3%</b>.
+      </div>
+    </section>
+
+    <!-- ===================== 04 NEWSVENDOR CALCULATOR ===================== -->
+    <section class="tab-panel" id="tab-calculator">
+      <div class="eyebrow">Station 04 / Turning the bet into a formula</div>
+      <h2 class="head">The Newsvendor Calculator</h2>
+      <div class="dek">Two costs, one ratio, one answer. Drag the economics and watch the optimal order quantity move against the real cookie demand distribution.</div>
+
+      <div class="ctrl-block">
+        <label>Retail price <span class="live" id="nvPriceLabel">$2.49</span></label>
+        <input type="range" min="2.0" max="3.5" step="0.01" value="2.49" id="nvPrice">
+      </div>
+      <div class="ctrl-block">
+        <label>Production cost <span class="live" id="nvCostLabel">$1.24</span></label>
+        <input type="range" min="0.8" max="2.0" step="0.01" value="1.24" id="nvCost">
+      </div>
+      <div class="ctrl-block">
+        <label>Salvage (leftover) price <span class="live" id="nvSalvageLabel">$0.99</span></label>
+        <input type="range" min="0" max="1.8" step="0.01" value="0.99" id="nvSalvage">
+      </div>
+
+      <div class="readout-row">
+        <div class="readout-card"><div class="val" id="nvCuVal">$1.25</div><div class="lbl">Cu = price − cost</div></div>
+        <div class="readout-card blue"><div class="val" id="nvCoVal">$0.25</div><div class="lbl">Co = cost − salvage</div></div>
+        <div class="readout-card violet"><div class="val" id="nvOSLVal">83.3%</div><div class="lbl">Optimal service level</div></div>
+        <div class="readout-card green"><div class="val" id="nvQVal">13</div><div class="lbl">Optimal order Q*</div></div>
+      </div>
+
+      <div class="formula-box">Optimal service level = Cu / (Cu + Co) &nbsp;&nbsp;·&nbsp;&nbsp; Q* = smallest Q where P(D ≤ Q) ≥ that ratio</div>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 200" id="nvSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="diagram-cap">FIG 04.1 — cumulative demand vs. the target service level (dashed line)</div>
+      </div>
+    </section>
+
+    <!-- ===================== 05 SCONES ===================== -->
+    <section class="tab-panel" id="tab-scones">
+      <div class="eyebrow">Station 05 / Same numbers, different demand shape</div>
+      <h2 class="head">Same Ratio, Different Shape</h2>
+      <div class="dek">Scones use the identical price, cost, and salvage as cookies, and even the same mean demand (10.5). Only the SHAPE of the demand distribution differs, cookie demand clusters near the mean; scone demand is spread evenly across the whole range.</div>
+
+      <div class="grid2">
+        <div class="diagram-frame">
+          <svg viewBox="0 0 400 190" id="sconeCookieSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="diagram-cap">FIG 05.1 — cookies: peaked demand → Q* = 13</div>
+        </div>
+        <div class="diagram-frame">
+          <svg viewBox="0 0 400 190" id="sconeUniformSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="diagram-cap">FIG 05.2 — scones: flat (uniform) demand → Q* = 16</div>
+        </div>
+      </div>
+
+      <div class="note go">
+        <b>The lesson</b>
+        The optimal SERVICE LEVEL (83.3%) only depends on the economics, Cu and Co, so it's identical for both products. The optimal QUANTITY depends on that service level AND the specific shape of the demand distribution, so it lands on 13 for cookies but 16 for scones, even with the same mean and same margins. Never assume Q* transfers across products just because the price and cost do.
+      </div>
+    </section>
+
+    <!-- ===================== 06 SENSITIVITY ===================== -->
+    <section class="tab-panel" id="tab-sensitivity">
+      <div class="eyebrow">Station 06 / Stress-testing the model</div>
+      <h2 class="head">What Changes the Answer?</h2>
+      <div class="dek">Four "what if" scenarios, each recomputed live against the real cookie demand distribution.</div>
+
+      <div class="toggle-wrap" id="sensToggle">
+        <button class="active" data-mode="base">Base case</button>
+        <button data-mode="cost">Cost rises to $1.49</button>
+        <button data-mode="free">Free leftovers ($0 salvage)</button>
+        <button data-mode="perfect">Perfect information</button>
+      </div>
+
+      <div id="sensNormal">
+        <div class="readout-row">
+          <div class="readout-card"><div class="val" id="sensCuVal">$1.25</div><div class="lbl">Cu</div></div>
+          <div class="readout-card blue"><div class="val" id="sensCoVal">$0.25</div><div class="lbl">Co</div></div>
+          <div class="readout-card violet"><div class="val" id="sensOSLVal">83.3%</div><div class="lbl">Optimal service level</div></div>
+          <div class="readout-card green"><div class="val" id="sensQVal">13</div><div class="lbl">Optimal Q*</div></div>
+        </div>
+        <p class="lead" id="sensExplain" style="font-size:13.5px; color:var(--ink-soft);">The base case: bake 13 dozen.</p>
+      </div>
+
+      <div id="sensPerfect" style="display:none;">
+        <div class="note violet">
+          <b>Perfect information changes the game entirely</b>
+          If you knew today's exact demand before deciding how much to bake, you'd simply bake exactly that number, every single day. No leftovers, ever. No stockouts, ever. The entire Cu / Co / service-level machinery exists ONLY because of uncertainty, remove the uncertainty and the newsvendor problem disappears.
+        </div>
+        <div class="readout-row">
+          <div class="readout-card green"><div class="val">$13.13</div><div class="lbl">Expected profit, perfect info</div></div>
+          <div class="readout-card blue"><div class="val">$12.01</div><div class="lbl">Expected profit, optimal Q under uncertainty</div></div>
+          <div class="readout-card"><div class="val">≈$1.11</div><div class="lbl">Value of perfect info, per day</div></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <b>So, is $5/week for "Oracle" (a perfect demand forecast) worth paying?</b>
+        The gap above, about $1.11/day, adds up to roughly $7.80/week if the forecast were truly perfect. That comfortably clears a $5/week subscription, so paying for better information is worth it here, as long as the forecast is genuinely reliable. This is the core idea behind the "value of information": compare what better information is worth against what it costs.
+      </div>
+    </section>
+
+    <!-- ===================== 07 HOTEL CALIFORNIA ===================== -->
+    <section class="tab-panel" id="tab-hotel">
+      <div class="eyebrow">Station 07 / Not just cupcakes and scones</div>
+      <h2 class="head">Case: Hotel California</h2>
+      <div class="dek">A luxury hotel, always fully booked via advance reservations at $200/night. New manager Rocky starts holding back rooms for last-minute walk-ins at a premium $300/night. He currently holds back 3 rooms. Is that optimal?</div>
+
+      <h3 class="sub">Mapping this onto Cu and Co</h3>
+      <p class="lead">Here, "stocking" means deciding how many rooms to <em>hold back</em> from advance booking. "Demand" is the number of last-minute requests that show up.</p>
+      <ul class="tidy">
+        <li><b>Understocking</b> (held back too few rooms): a walk-in wanted a room at $300 but none was reserved, that room instead sold in advance for only $200. Lost margin: <b>Cu = $300 − $200 = $100</b>.</li>
+        <li><b>Overstocking</b> (held back too many rooms): a reserved room never got a late request, and now sits empty, forfeiting the guaranteed $200 advance sale entirely. <b>Co = $200</b>.</li>
+      </ul>
+
+      <div class="readout-row">
+        <div class="readout-card"><div class="val">$100</div><div class="lbl">Cu</div></div>
+        <div class="readout-card blue"><div class="val">$200</div><div class="lbl">Co</div></div>
+        <div class="readout-card violet"><div class="val">33.3%</div><div class="lbl">Optimal service level</div></div>
+        <div class="readout-card green"><div class="val">2</div><div class="lbl">Optimal rooms to hold back</div></div>
+      </div>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 190" id="hotelSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="diagram-cap">FIG 07.1 — observed last-minute request distribution, from 150 days of records</div>
+      </div>
+
+      <div class="note stop">
+        <b>Verdict on Rocky's policy</b>
+        Optimal is 2 rooms held back, not 3. Rocky is over-reserving by one room, which means he's forfeiting a guaranteed $200 advance sale more often than the economics justify, purely on the (mistaken) instinct that "holding back more is safer." The newsvendor math says otherwise here, because a full empty room (Co=$200) is a much bigger loss than the $100 upside of catching one more late request.
+      </div>
+    </section>
+
+    <!-- ===================== 08 QUICK RESPONSE ===================== -->
+    <section class="tab-panel" id="tab-quickresponse">
+      <div class="eyebrow">Station 08 / Adapting the model</div>
+      <h2 class="head">Quick Response: When You Get a Second Chance</h2>
+      <div class="dek">A newsvendor buys papers at 25¢, sells at 85¢, salvages unsold copies at 5¢. What changes if they can place a second, pricier order once they've actually seen how demand is running?</div>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 150" id="qrTimelineSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="diagram-cap">FIG 08.1 — order once upfront, then react if demand runs hot</div>
+      </div>
+
+      <div class="toggle-wrap" id="qrToggle">
+        <button class="active" data-mode="no">Without quick response</button>
+        <button data-mode="yes">With quick response ($0.45/copy top-up)</button>
+      </div>
+
+      <div class="readout-row">
+        <div class="readout-card" id="qrCuCard"><div class="val" id="qrCuVal">$0.60</div><div class="lbl">Cu</div></div>
+        <div class="readout-card blue"><div class="val" id="qrCoVal">$0.20</div><div class="lbl">Co (unchanged either way)</div></div>
+        <div class="readout-card violet"><div class="val" id="qrOSLVal">75%</div><div class="lbl">Optimal service level</div></div>
+      </div>
+
+      <div class="note" id="qrExplain">
+        <b>Without quick response</b>
+        A stockout is a fully lost sale: you missed out on the entire 60¢ margin. That's a steep penalty for guessing low, so the model pushes you toward a high, conservative initial order (75% service level).
+      </div>
+    </section>
+
+    <!-- ===================== 09 APPLICATIONS ===================== -->
+    <section class="tab-panel" id="tab-applications">
+      <div class="eyebrow">Station 09 / Beyond cookies and hotel rooms</div>
+      <h2 class="head">Real-World Applications</h2>
+      <div class="dek">Any time a quantity must be committed before demand is known, and getting it wrong in either direction has a real cost, this exact Cu/Co logic applies.</div>
+
+      <div class="app-grid">
+        <div class="app-card">
+          <h4>Fashion retailing</h4>
+          <p>Online fashion retailers use the newsvendor model to allocate inventory depth across warehouses and sizes before a season's real demand is known, balancing markdown risk against stockout risk at massive scale.</p>
+        </div>
+        <div class="app-card">
+          <h4>Healthcare</h4>
+          <p>Hospitals apply the same structure to reserving operating room time, blocking out a fixed amount of OR capacity in advance, against uncertain future surgical demand.</p>
+        </div>
+        <div class="app-card">
+          <h4>Agriculture</h4>
+          <p>Seed producers plan seed-corn production a full growing season ahead of the farmers who will actually plant it, committing to quantities long before real orders arrive.</p>
+        </div>
+      </div>
+
+      <div class="note go">
+        <b>The pattern to recognize</b>
+        Whenever you hear "we have to decide how much to make/buy/reserve before we know exactly how much will be needed, and being wrong in either direction costs something," that's a newsvendor problem. Find Cu, find Co, compute the ratio, and you have a defensible answer.
+      </div>
+    </section>
+
+    <!-- ===================== QUIZ: NEWSVENDOR ===================== -->
+    <section class="tab-panel" id="tab-quiz">
+      <div class="eyebrow">Exam Simulation</div>
+      <h2 class="head">Timed-Style MCQ Set</h2>
+      <div class="dek">18 questions across stations 00–09. Pick an answer to see if you're right, then move on.</div>
+
+      <div class="quiz-top">
+        <div class="score-pill" id="scorePill">Score: 0 / 0</div>
+        <div class="score-pill" id="progPill">Question 1 of 18</div>
+      </div>
+      <div id="quizHost"></div>
+      <div class="quiz-summary" id="quizSummary">
+        <div style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-soft);">Final score</div>
+        <div class="big" id="finalScore">0 / 18</div>
+        <p id="finalMsg" class="lead" style="max-width:480px; margin:8px auto 18px;"></p>
+        <button class="btn" id="retakeQuiz">Retake the set</button>
+      </div>
+    </section>
+
+    <!-- ===================== CHEAT SHEET ===================== -->
+    <section class="tab-panel" id="tab-cheat">
+      <div class="eyebrow">Quick Reference</div>
+      <h2 class="head">Cheat Sheet</h2>
+      <div class="dek">Every definition and formula from this session, compressed for the margin of an exam.</div>
+
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <h4>The newsvendor problem</h4>
+          <ul><li>Commit to Q in advance</li><li>Demand D is random</li><li>Cannot adjust once D is known (unless Quick Response applies)</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Cost of understocking</h4>
+          <div class="f">Cu = price − cost (r − c)</div>
+          <ul><li>Opportunity cost of not stocking one more unit that would have sold</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Cost of overstocking</h4>
+          <div class="f">Co = cost − salvage (c − s)</div>
+          <ul><li>Out-of-pocket cost of a unit stocked but not demanded</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Optimal service level</h4>
+          <div class="f">SL* = Cu / (Cu + Co)</div>
+          <ul><li>"Newsvendor ratio" or critical ratio</li><li>Depends only on economics, not on demand shape</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Optimal quantity</h4>
+          <div class="f">Q* = smallest Q with P(D≤Q) ≥ SL*</div>
+          <ul><li>Depends on BOTH the service level AND the demand distribution's shape</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Kristen's Cookies numbers</h4>
+          <ul><li>Cu=$1.25, Co=$0.25, SL*=83.3%</li><li>Q*=13 dozen (cookies), 16 dozen (scones)</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Sensitivity rules</h4>
+          <ul><li>Cost ↑ → Cu ↓, Co ↑ → order less</li><li>Free leftovers → Co ↑ → order less</li><li>Perfect info → no mismatch cost, order = demand</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Hotel California</h4>
+          <ul><li>Cu=$100, Co=$200, SL*=33.3%</li><li>Optimal hold-back = 2 rooms, not 3</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Quick response</h4>
+          <ul><li>Stockout ≠ fully lost sale anymore</li><li>Cu shrinks → lower optimal service level → order less upfront</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Know which model you're in</h4>
+          <ul><li>Newsvendor: ONE order, ONE period, can't reorder — this session</li><li>EOQ / safety stock / ROP: ONGOING replenishment, many cycles, can reorder — Session 10</li></ul>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="footer-strip">SESSION 09 · MANAGING INVENTORY UNDER UNCERTAINTY · BUILT FOR REVISION, NOT FOR PRINT</div>
+
+<script>
+// ---------------- Tab switching ----------------
+const stns = document.querySelectorAll('.stn');
+const panels = document.querySelectorAll('.tab-panel');
+stns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    stns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const id = btn.dataset.tab;
+    panels.forEach(p=>p.classList.remove('show'));
+    document.getElementById('tab-'+id).classList.add('show');
+    document.querySelector('.sheet').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+
+// ---------------- Shared data: cookie demand distribution ----------------
+const COOKIE_VALUES = [3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
+const COOKIE_PROBS  = [0.5,1.4,2.8,4.6,6.9,9.7,11.6,12.5,12.5,11.6,9.7,6.9,4.6,2.8,1.4,0.5].map(x=>x/100);
+const SCONE_VALUES = COOKIE_VALUES;
+const SCONE_PROBS = COOKIE_VALUES.map(()=>1/16);
+const HOTEL_VALUES = [0,1,2,3,4,5,6,7];
+const HOTEL_FREQ = [25,15,30,40,20,5,5,10];
+const HOTEL_TOTAL = HOTEL_FREQ.reduce((a,b)=>a+b,0);
+const HOTEL_PROBS = HOTEL_FREQ.map(f=>f/HOTEL_TOTAL);
+
+function cumulative(probs){
+  let run=0; return probs.map(p=>{ run+=p; return run; });
+}
+function findQStar(values, probs, targetRatio){
+  const cum = cumulative(probs);
+  for(let i=0;i<values.length;i++){ if(cum[i] >= targetRatio-1e-9) return values[i]; }
+  return values[values.length-1];
+}
+function expectedProfit(Q, values, probs, price, cost, salvage){
+  let total=0;
+  for(let i=0;i<values.length;i++){
+    const D=values[i], p=probs[i];
+    const unitSales = Math.min(D,Q);
+    const leftovers = Math.max(Q-D,0);
+    const profit = -cost*Q + price*unitSales + salvage*leftovers;
+    total += p*profit;
+  }
+  return total;
+}
+
+// ---------------- Shared SVG bar-chart renderers ----------------
+function renderPDFBars(svgEl, values, probs, Q, w, h){
+  const n = values.length;
+  const maxP = Math.max(...probs);
+  const barW = (w-40)/n * 0.68;
+  const gap = (w-40)/n;
+  let svg='';
+  values.forEach((v,i)=>{
+    const x = 30 + i*gap + (gap-barW)/2;
+    const barH = (probs[i]/maxP)*(h-46);
+    const y = h-26-barH;
+    const shaded = Q!==undefined && v<=Q;
+    svg += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+barH.toFixed(1)+'" fill="'+(shaded?'#F2B705':'#6FB7E0')+'" rx="1.5"/>';
+    svg += '<text x="'+(x+barW/2).toFixed(1)+'" y="'+(h-12).toFixed(1)+'" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="8">'+v+'</text>';
+    if(i%2===0 || n<=10) svg += '<text x="'+(x+barW/2).toFixed(1)+'" y="'+(y-4).toFixed(1)+'" text-anchor="middle" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="7">'+(probs[i]*100).toFixed(1)+'%</text>';
+  });
+  svgEl.setAttribute('viewBox','0 0 '+w+' '+h);
+  svgEl.innerHTML = svg;
+}
+
+function renderCDFBars(svgEl, values, probs, thresholdRatio, w, h){
+  const n = values.length;
+  const cum = cumulative(probs);
+  const barW = (w-40)/n * 0.68;
+  const gap = (w-40)/n;
+  const qStar = findQStar(values, probs, thresholdRatio);
+  let svg='';
+  const threshY = h-26-(thresholdRatio)*(h-46);
+  svg += '<line x1="26" y1="'+threshY.toFixed(1)+'" x2="'+(w-14)+'" y2="'+threshY.toFixed(1)+'" stroke="#D6544F" stroke-dasharray="4 3" stroke-width="1.3"/>';
+  svg += '<text x="'+(w-16)+'" y="'+(threshY-4).toFixed(1)+'" text-anchor="end" fill="#D6544F" font-family="IBM Plex Mono" font-size="8">target '+(thresholdRatio*100).toFixed(1)+'%</text>';
+  values.forEach((v,i)=>{
+    const x = 30 + i*gap + (gap-barW)/2;
+    const barH = cum[i]*(h-46);
+    const y = h-26-barH;
+    const isQStar = v===qStar;
+    svg += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+barH.toFixed(1)+'" fill="'+(isQStar?'#D6544F':(cum[i]>=thresholdRatio?'#4E9A6E':'#6FB7E0'))+'" rx="1.5"/>';
+    svg += '<text x="'+(x+barW/2).toFixed(1)+'" y="'+(h-12).toFixed(1)+'" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="8">'+v+'</text>';
+  });
+  svgEl.setAttribute('viewBox','0 0 '+w+' '+h);
+  svgEl.innerHTML = svg;
+  return qStar;
+}
+
+// ---------------- Station 00: Concepts Refresher ----------------
+const evP = document.getElementById('evP');
+const evSvg = document.getElementById('evSvg');
+function renderEV(){
+  const p = parseFloat(evP.value)/100;
+  document.getElementById('evPLabel').textContent = (p*100).toFixed(0)+'%';
+  const A=1.25, B=0.25;
+  const ev = A*p - B*(1-p);
+  const w=460,h=140;
+  const barMaxH = 80;
+  const winH = p*barMaxH, loseH=(1-p)*barMaxH;
+  let svg='';
+  svg += '<rect x="100" y="'+(110-winH).toFixed(1)+'" width="70" height="'+winH.toFixed(1)+'" fill="#4E9A6E" rx="2"/>';
+  svg += '<text x="135" y="125" text-anchor="middle" fill="#4E9A6E" font-family="IBM Plex Mono" font-size="9">win $1.25</text>';
+  svg += '<rect x="220" y="'+(110-loseH).toFixed(1)+'" width="70" height="'+loseH.toFixed(1)+'" fill="#D6544F" rx="2"/>';
+  svg += '<text x="255" y="125" text-anchor="middle" fill="#D6544F" font-family="IBM Plex Mono" font-size="9">lose $0.25</text>';
+  svg += '<text x="380" y="20" fill="#F2B705" font-family="IBM Plex Mono" font-size="11">EV = $'+ev.toFixed(2)+'</text>';
+  evSvg.setAttribute('viewBox','0 0 '+w+' '+h);
+  evSvg.innerHTML = svg;
+  document.getElementById('evReadout').textContent = 'Win $1.25 with '+(p*100).toFixed(0)+'% chance, lose $0.25 with '+((1-p)*100).toFixed(0)+'% chance → expected value = $'+ev.toFixed(2);
+}
+evP.addEventListener('input', renderEV);
+renderEV();
+
+const cumQ = document.getElementById('cumQ');
+const cumSvg = document.getElementById('cumSvg');
+function renderCumDemo(){
+  const Q = parseInt(cumQ.value,10);
+  document.getElementById('cumQLabel').textContent = Q;
+  renderPDFBars(cumSvg, COOKIE_VALUES, COOKIE_PROBS, Q, 460, 170);
+  const idx = COOKIE_VALUES.indexOf(Q);
+  const cum = cumulative(COOKIE_PROBS)[idx];
+  document.getElementById('cumReadout').textContent = 'P(D ≤ '+Q+') = '+(cum*100).toFixed(1)+'% — the amber bars are every outcome at or below Q';
+}
+cumQ.addEventListener('input', renderCumDemo);
+renderCumDemo();
+
+// ---------------- Station 01: The Setup ----------------
+renderPDFBars(document.getElementById('setupSvg'), COOKIE_VALUES, COOKIE_PROBS, undefined, 460, 200);
+
+// ---------------- Station 02: Why not average ----------------
+const avgQ = document.getElementById('avgQ');
+const avgSvg = document.getElementById('avgSvg');
+const PRICE0=2.49, COST0=1.24, SALVAGE0=0.99;
+function renderAvg(){
+  const Q = parseInt(avgQ.value,10);
+  document.getElementById('avgQLabel').textContent = Q;
+  const w=460,h=230;
+  const qs=[]; for(let q=2;q<=19;q++) qs.push(q);
+  const profits = qs.map(q=>expectedProfit(q, COOKIE_VALUES, COOKIE_PROBS, PRICE0, COST0, SALVAGE0));
+  const minP=Math.min(...profits), maxP=Math.max(...profits);
+  const sx = (w-50)/(qs.length-1);
+  function py(v){ return (h-30) - (v-minP)/(maxP-minP)*(h-60); }
+  let path='';
+  qs.forEach((q,i)=>{ const x=30+i*sx; const y=py(profits[i]); path += (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1)+' '; });
+  let svg = '<path d="'+path+'" fill="none" stroke="#6FB7E0" stroke-width="2"/>';
+  const qi = qs.indexOf(Q);
+  const cx = 30+qi*sx, cy=py(profits[qi]);
+  svg += '<line x1="'+cx.toFixed(1)+'" y1="10" x2="'+cx.toFixed(1)+'" y2="'+(h-14).toFixed(1)+'" stroke="#F2B705" stroke-dasharray="4 3"/>';
+  svg += '<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" fill="#D6544F" stroke="#0F2745" stroke-width="1.5"/>';
+  // mean marker at 10.5
+  const meanIdx = (10.5-2);
+  const meanX = 30+meanIdx*sx;
+  svg += '<line x1="'+meanX.toFixed(1)+'" y1="10" x2="'+meanX.toFixed(1)+'" y2="'+(h-14).toFixed(1)+'" stroke="#9C8FD6" stroke-dasharray="2 2"/>';
+  svg += '<text x="'+meanX.toFixed(1)+'" y="20" text-anchor="middle" fill="#9C8FD6" font-family="IBM Plex Mono" font-size="8">mean=10.5</text>';
+  qs.forEach((q,i)=>{ if(q%3===0 || q===2||q===19){ const x=30+i*sx; svg += '<text x="'+x.toFixed(1)+'" y="'+(h-2).toFixed(1)+'" text-anchor="middle" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="8">'+q+'</text>'; } });
+  avgSvg.setAttribute('viewBox','0 0 '+w+' '+h);
+  avgSvg.innerHTML = svg;
+
+  document.getElementById('avgProfitVal').textContent = '$'+profits[qi].toFixed(2);
+  const marginal = (qi<profits.length-1) ? (profits[qi+1]-profits[qi]) : (profits[qi]-profits[qi-1]);
+  const mCard = document.getElementById('avgMarginalCard');
+  document.getElementById('avgMarginalVal').textContent = (marginal>=0?'+':'')+'$'+marginal.toFixed(2);
+  mCard.className = 'readout-card '+(marginal>=0?'green':'red');
+}
+avgQ.addEventListener('input', renderAvg);
+renderAvg();
+
+// ---------------- Station 03: The Fair Bet ----------------
+const betP = document.getElementById('betP');
+const betSvg = document.getElementById('betSvg');
+function renderBet(){
+  const p = parseFloat(betP.value)/100;
+  document.getElementById('betPLabel').textContent = (p*100).toFixed(0)+'%';
+  const Cu=1.25, Co=0.25;
+  const ev = Cu*p - Co*(1-p);
+  const w=460,h=160;
+  const trackX0=40, trackX1=420, trackY=90;
+  const breakEven = Co/(Cu+Co);
+  const pxPos = trackX0 + p*(trackX1-trackX0);
+  const bePos = trackX0 + breakEven*(trackX1-trackX0);
+  let svg='';
+  svg += '<line x1="'+trackX0+'" y1="'+trackY+'" x2="'+trackX1+'" y2="'+trackY+'" stroke="#BFE6F7" stroke-width="2"/>';
+  svg += '<line x1="'+bePos.toFixed(1)+'" y1="'+(trackY-14)+'" x2="'+bePos.toFixed(1)+'" y2="'+(trackY+14)+'" stroke="#D6544F" stroke-width="2"/>';
+  svg += '<text x="'+bePos.toFixed(1)+'" y="'+(trackY-20)+'" text-anchor="middle" fill="#D6544F" font-family="IBM Plex Mono" font-size="8">breakeven 16.7%</text>';
+  svg += '<circle cx="'+pxPos.toFixed(1)+'" cy="'+trackY+'" r="7" fill="'+(ev>=0?'#4E9A6E':'#D6544F')+'" stroke="#0F2745" stroke-width="2"/>';
+  svg += '<text x="'+pxPos.toFixed(1)+'" y="'+(trackY+30)+'" text-anchor="middle" fill="#F2B705" font-family="IBM Plex Mono" font-size="11">EV = '+(ev>=0?'+':'')+'$'+ev.toFixed(2)+'</text>';
+  svg += '<text x="'+trackX0+'" y="30" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="9">0% chance of selling</text>';
+  svg += '<text x="'+trackX1+'" y="30" text-anchor="end" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="9">100% chance of selling</text>';
+  betSvg.setAttribute('viewBox','0 0 '+w+' '+h);
+  betSvg.innerHTML = svg;
+  document.getElementById('betReadout').textContent = 'At '+(p*100).toFixed(0)+'% chance of selling, expected value of stocking one more = '+(ev>=0?'+':'')+'$'+ev.toFixed(2)+(ev>=0?' — worth it':' — not worth it');
+  const box = document.getElementById('betVerdictBox');
+  const label = document.getElementById('betVerdictLabel');
+  const text = document.getElementById('betVerdictText');
+  if(ev>0.005){ box.className='note go'; label.textContent='Verdict — stock it'; text.textContent='Positive expected value: stock the extra dozen.'; }
+  else if(ev<-0.005){ box.className='note stop'; label.textContent='Verdict — skip it'; text.textContent='Negative expected value: this dozen is more likely to become a leftover than a sale, stop here.'; }
+  else { box.className='note violet'; label.textContent='Verdict — exactly indifferent'; text.textContent='This is the breakeven point: the expected value of stocking one more is zero.'; }
+}
+betP.addEventListener('input', renderBet);
+renderBet();
+
+// ---------------- Station 04: Newsvendor Calculator ----------------
+const nvPrice = document.getElementById('nvPrice');
+const nvCost = document.getElementById('nvCost');
+const nvSalvage = document.getElementById('nvSalvage');
+const nvSvg = document.getElementById('nvSvg');
+function renderNV(){
+  const price = parseFloat(nvPrice.value);
+  const cost = parseFloat(nvCost.value);
+  const salvage = Math.min(parseFloat(nvSalvage.value), cost-0.01);
+  document.getElementById('nvPriceLabel').textContent = '$'+price.toFixed(2);
+  document.getElementById('nvCostLabel').textContent = '$'+cost.toFixed(2);
+  document.getElementById('nvSalvageLabel').textContent = '$'+salvage.toFixed(2);
+  const Cu = Math.max(0.01, price-cost);
+  const Co = Math.max(0.01, cost-salvage);
+  const OSL = Cu/(Cu+Co);
+  document.getElementById('nvCuVal').textContent = '$'+Cu.toFixed(2);
+  document.getElementById('nvCoVal').textContent = '$'+Co.toFixed(2);
+  document.getElementById('nvOSLVal').textContent = (OSL*100).toFixed(1)+'%';
+  const qStar = renderCDFBars(nvSvg, COOKIE_VALUES, COOKIE_PROBS, OSL, 460, 200);
+  document.getElementById('nvQVal').textContent = qStar;
+}
+[nvPrice,nvCost,nvSalvage].forEach(el=>el.addEventListener('input', renderNV));
+renderNV();
+
+// ---------------- Station 05: Scones ----------------
+renderCDFBars(document.getElementById('sconeCookieSvg'), COOKIE_VALUES, COOKIE_PROBS, 1.25/1.5, 400, 190);
+renderCDFBars(document.getElementById('sconeUniformSvg'), SCONE_VALUES, SCONE_PROBS, 1.25/1.5, 400, 190);
+
+// ---------------- Station 06: Sensitivity ----------------
+const sensToggle = document.getElementById('sensToggle');
+const sensNormal = document.getElementById('sensNormal');
+const sensPerfect = document.getElementById('sensPerfect');
+function renderSens(mode){
+  if(mode==='perfect'){
+    sensNormal.style.display='none';
+    sensPerfect.style.display='block';
+    return;
+  }
+  sensNormal.style.display='block';
+  sensPerfect.style.display='none';
+  let price=2.49, cost=1.24, salvage=0.99, explain='The base case: bake 13 dozen.';
+  if(mode==='cost'){ cost=1.49; explain='Cost rose from $1.24 to $1.49: Cu shrinks (less margin if it sells), Co grows (more lost on a leftover). Both push the ratio down, order fewer dozen.'; }
+  if(mode==='free'){ salvage=0; explain='Leftovers now go to a food bank for free instead of selling at $0.99: Co jumps up to the full production cost. Order fewer dozen to avoid giving more away.'; }
+  const Cu=price-cost, Co=cost-salvage, OSL=Cu/(Cu+Co);
+  const qStar = findQStar(COOKIE_VALUES, COOKIE_PROBS, OSL);
+  document.getElementById('sensCuVal').textContent = '$'+Cu.toFixed(2);
+  document.getElementById('sensCoVal').textContent = '$'+Co.toFixed(2);
+  document.getElementById('sensOSLVal').textContent = (OSL*100).toFixed(1)+'%';
+  document.getElementById('sensQVal').textContent = qStar;
+  document.getElementById('sensExplain').textContent = explain;
+}
+sensToggle.addEventListener('click',(e)=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#sensToggle button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderSens(e.target.dataset.mode);
+});
+renderSens('base');
+
+// ---------------- Station 07: Hotel California ----------------
+renderCDFBars(document.getElementById('hotelSvg'), HOTEL_VALUES, HOTEL_PROBS, 100/300, 460, 190);
+
+// ---------------- Station 08: Quick Response ----------------
+const qrSvg = document.getElementById('qrTimelineSvg');
+(function renderQRTimeline(){
+  const w=460,h=150;
+  let svg='';
+  svg += '<line x1="40" y1="90" x2="420" y2="90" stroke="#BFE6F7" stroke-width="2"/>';
+  const pts=[[70,'Order Q1|@ $0.25/copy'],[220,'Observe|exact demand D'],[350,'2nd order if D>Q1|@ $0.45/copy'],[420,'Return leftovers|if D<Q1 @ $0.05']];
+  pts.forEach(pt=>{
+    svg += '<circle cx="'+pt[0]+'" cy="90" r="5" fill="#F2B705" stroke="#0F2745" stroke-width="1.5"/>';
+    const lines = pt[1].split('|');
+    lines.forEach((ln,i)=>{ svg += '<text x="'+pt[0]+'" y="'+(115+i*11)+'" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="8">'+ln+'</text>'; });
+  });
+  qrSvg.setAttribute('viewBox','0 0 '+w+' '+h);
+  qrSvg.innerHTML = svg;
+})();
+
+document.getElementById('qrToggle').addEventListener('click',(e)=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#qrToggle button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  const mode = e.target.dataset.mode;
+  const explain = document.getElementById('qrExplain');
+  if(mode==='no'){
+    document.getElementById('qrCuVal').textContent='$0.60';
+    document.getElementById('qrOSLVal').textContent='75%';
+    explain.innerHTML = '<b>Without quick response</b>A stockout is a fully lost sale: you missed out on the entire 60¢ margin. That is a steep penalty for guessing low, so the model pushes you toward a high, conservative initial order (75% service level).';
+    explain.className='note';
+  } else {
+    document.getElementById('qrCuVal').textContent='$0.20';
+    document.getElementById('qrOSLVal').textContent='50%';
+    explain.innerHTML = '<b>With quick response</b>A stockout no longer means a lost sale, it just means fulfilling that unit through the pricier 45¢ channel instead of the original 25¢ one. The penalty for guessing low shrinks from 60¢ down to just 20¢ (the margin you give up by using the expensive channel), so the optimal service level drops to 50%, order less upfront, lean on the safety net instead.';
+    explain.className='note go';
+  }
+});
+
+// ---------------- QUIZ ----------------
+const QUESTIONS = [
+  {q:"What's the core challenge the newsvendor model addresses?",
+   opts:["Committing to an order quantity in advance, before random demand is realized, with no chance to adjust afterward","Setting the lowest possible price","Scheduling workers efficiently","Reducing changeover times between batches"], correct:0,
+   exp:"You must decide Q before you see D, and normally can't change Q once D is revealed."},
+  {q:"What does Cu (the cost of understocking) represent?",
+   opts:["The cost of making one extra unit","The opportunity cost of NOT having stocked one more unit that could have sold at full margin","The total daily revenue","The price customers pay"], correct:1,
+   exp:"Cu = price − cost: the margin you forfeit when you run out and can't sell that extra unit."},
+  {q:"What does Co (the cost of overstocking) represent?",
+   opts:["The out-of-pocket cost of a unit that's stocked but ends up unsold and must be salvaged for less","The price of ingredients","Daily staff wages","The retail price"], correct:0,
+   exp:"Co = cost − salvage: the loss on a unit you made but couldn't sell at full price."},
+  {q:"For Kristen's Cookies (price $2.49, cost $1.24, leftover salvage $0.99), what are Cu and Co?",
+   opts:["Cu=$1.25, Co=$0.25","Cu=$0.25, Co=$1.25","Cu=$2.49, Co=$0.99","Cu=$1.24, Co=$1.24"], correct:0,
+   exp:"Cu = 2.49−1.24 = $1.25. Co = 1.24−0.99 = $0.25."},
+  {q:"What is the optimal service level (critical ratio) formula?",
+   opts:["Cu / Co","Cu + Co","Cu / (Cu + Co)","Co / (Cu + Co)"], correct:2,
+   exp:"Optimal service level = Cu / (Cu + Co)."},
+  {q:"For Kristen's Cookies, what's the optimal service level?",
+   opts:["~16.7%","~50%","~75%","~83.3%"], correct:3,
+   exp:"1.25 / (1.25+0.25) = 1.25/1.50 ≈ 83.3%."},
+  {q:"Why does a high Cu relative to Co push the optimal service level UP, closer to 100%?",
+   opts:["It doesn't, service level is unrelated to costs","Understocking is much more painful than overstocking, so it pays to stock more to avoid running out","High Cu means cookies are cheap to make","It means demand is very predictable"], correct:1,
+   exp:"When running out is far costlier than a leftover, the model deliberately biases toward over-preparing."},
+  {q:"In the 'fair bet' framing for stocking one more unit (win Cu if it sells, lose Co if it doesn't), at what probability of selling does the bet become exactly break-even for Kristen's Cookies?",
+   opts:["~83.3%","~50%","~16.7%","~100%"], correct:2,
+   exp:"Breakeven chance of selling = Co/(Cu+Co) = 0.25/1.50 ≈ 16.7%, which is 1 − the optimal service level."},
+  {q:"What is the newsvendor rule for finding the optimal order quantity Q*?",
+   opts:["Q* = mean demand, always","Q* = the smallest Q such that P(D≤Q) ≥ Cu/(Cu+Co)","Q* = the largest demand ever observed","Q* = zero, since demand is unpredictable"], correct:1,
+   exp:"Find the smallest stocking level whose cumulative probability first reaches the target service level."},
+  {q:"For Kristen's Cookies, using the actual demand table, what is the optimal order quantity Q*?",
+   opts:["10 dozen (mean, rounded)","11 dozen","13 dozen","18 dozen"], correct:2,
+   exp:"Cumulative probability first reaches 83.3% at Q=13 (83.8%), while Q=12 only reaches 74.1%."},
+  {q:"Scones share the exact same price, cost, salvage, and even mean demand (10.5) as cookies, but a flatter (more spread out) demand distribution. What happens?",
+   opts:["Both the optimal service level and quantity stay exactly the same","The optimal service level stays the same (83.3%, since it only depends on Cu/Co), but the optimal quantity changes (rises to 16, since the distribution shape differs)","The optimal service level changes but quantity doesn't","Both become impossible to compute"], correct:1,
+   exp:"Service level depends only on economics; quantity depends on both the service level AND the shape of that specific demand distribution."},
+  {q:"If production cost rises (price and salvage unchanged), what happens to Cu, Co, and the optimal order quantity?",
+   opts:["Cu rises, Co falls, order more","Cu falls, Co rises, optimal service level falls, order less","Nothing changes","Only Co is affected"], correct:1,
+   exp:"Cu=price−cost shrinks as cost rises; Co=cost−salvage grows; both push the ratio, and the order quantity, down."},
+  {q:"If leftover cookies are given away for free (salvage = $0) instead of sold at a discount, what happens?",
+   opts:["Co decreases, order more","Co increases (losing the full cost instead of cost-minus-salvage), optimal service level falls, order less","Cu changes, Co stays the same","No effect on the decision"], correct:1,
+   exp:"Co = cost − salvage grows to equal the full production cost, making overstocking more painful, so the model orders less."},
+  {q:"If you somehow knew exact demand before deciding how much to produce, what happens to the newsvendor problem?",
+   opts:["The service-level formula becomes even more critical","The uncertainty disappears — you'd simply produce exactly the known demand every time, with zero mismatch cost","You should always overstock heavily","You should always understock heavily"], correct:1,
+   exp:"The entire Cu/Co machinery exists only because of uncertainty; remove the uncertainty and there's no newsvendor problem left to solve."},
+  {q:"In the Hotel California case, how should Cu and Co be defined for the 'how many rooms to hold back for late requests' decision?",
+   opts:["Cu = $200, Co = $100","Cu = $100 (extra margin from a late sale vs. an advance one), Co = $200 (a fully lost advance sale on an empty held-back room)","Cu and Co are both zero","Cu = Co = $300"], correct:1,
+   exp:"Understocking = missed $100 upside (300 vs 200). Overstocking = an empty room that forfeits the guaranteed $200 advance sale entirely."},
+  {q:"Using the Hotel California data, what's the optimal number of rooms to hold back, and is Rocky's policy of 3 correct?",
+   opts:["Optimal is 2; Rocky is holding back one room too many","Optimal is 3; Rocky's policy is exactly right","Optimal is 5; Rocky should hold back more","Optimal is 0; Rocky should never hold rooms back"], correct:0,
+   exp:"With optimal service level 33.3%, cumulative probability first clears that at Q=2 (46.7%), so Rocky's 3 is one room too many."},
+  {q:"In the Quick Response extension (a costlier second order is allowed once real demand is observed), why does Cu drop compared to the basic model?",
+   opts:["Cu doesn't change","Because a stockout is no longer a fully lost sale, it just becomes a costlier fulfillment via the second order, shrinking the penalty for guessing low","Because prices fall","Because Co also drops to zero"], correct:1,
+   exp:"The lost margin narrows from the full price-minus-original-cost gap down to just the difference between the cheap and pricier channel."},
+  {q:"What does a lower Cu (relative to Co) under Quick Response imply about the optimal INITIAL order quantity?",
+   opts:["Order more upfront than before","Order less upfront than before (lower optimal service level), leaning on the safety net of the second order instead","No change to the initial order","The initial order becomes irrelevant"], correct:1,
+   exp:"With the penalty for running out reduced, the model no longer needs to be as conservative on the first order."}
+];
+
+function initQuiz(questions, ids){
+  let qIdx=0, score=0, answered=[];
+  const quizHost = document.getElementById(ids.host);
+  const scorePill = document.getElementById(ids.scorePill);
+  const progPill = document.getElementById(ids.progPill);
+  const quizSummary = document.getElementById(ids.summary);
+
+  function renderQuiz(){
+    quizHost.innerHTML='';
+    quizSummary.classList.remove('show');
+    questions.forEach((item, idx)=>{
+      const card = document.createElement('div');
+      card.className='qcard'+(idx===qIdx?' show':'');
+      card.dataset.idx = idx;
+      card.innerHTML = `
+        <div class="qnum">Question ${idx+1} of ${questions.length}</div>
+        <div class="qtext">${item.q}</div>
+        <div class="opts"></div>
+        <div class="feedback note" id="${ids.host}-fb-${idx}"></div>
+        <div class="quiz-nav">
+          <button class="btn secondary prevQ" ${idx===0?'disabled':''}>← Back</button>
+          <button class="btn nextQ" ${idx===questions.length-1?'style=display:none;':''}>Next →</button>
+        </div>
+      `;
+      const optsWrap = card.querySelector('.opts');
+      item.opts.forEach((optText, oIdx)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.textContent = optText;
+        b.addEventListener('click', ()=>selectAnswer(idx,oIdx));
+        optsWrap.appendChild(b);
+      });
+      card.querySelector('.prevQ').addEventListener('click', ()=>goTo(idx-1));
+      card.querySelector('.nextQ').addEventListener('click', ()=>{
+        if(idx===questions.length-1){ showSummary(); } else { goTo(idx+1); }
+      });
+      quizHost.appendChild(card);
+    });
+    updateProgress();
+  }
+  function goTo(i){
+    qIdx=i;
+    quizHost.querySelectorAll('.qcard').forEach(c=>c.classList.toggle('show', parseInt(c.dataset.idx,10)===i));
+    updateProgress();
+  }
+  function updateProgress(){
+    progPill.textContent = `Question ${qIdx+1} of ${questions.length}`;
+    scorePill.textContent = `Score: ${score} / ${answered.filter(Boolean).length}`;
+  }
+  function selectAnswer(idx, oIdx){
+    if(answered[idx]!==undefined) return;
+    answered[idx]=true;
+    const item = questions[idx];
+    const card = quizHost.querySelector(`.qcard[data-idx="${idx}"]`);
+    const opts = card.querySelectorAll('.opt');
+    opts.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===item.correct) b.classList.add('correct');
+      if(i===oIdx && oIdx!==item.correct) b.classList.add('wrong');
+    });
+    if(oIdx===item.correct) score++;
+    const fb = card.querySelector('.feedback');
+    fb.classList.add('show', oIdx===item.correct?'go':'stop');
+    fb.innerHTML = `<b>${oIdx===item.correct?'Correct':'Not quite'}</b>${item.exp}`;
+    updateProgress();
+  }
+  function showSummary(){
+    quizHost.querySelectorAll('.qcard').forEach(c=>c.classList.remove('show'));
+    quizSummary.classList.add('show');
+    document.getElementById(ids.finalScore).textContent = `${score} / ${questions.length}`;
+    const pct = score/questions.length;
+    let msg;
+    if(pct===1) msg="Every question, nailed. You could teach this topic.";
+    else if(pct>=0.75) msg="Solid grasp — revisit the ones you missed once more before the exam.";
+    else if(pct>=0.5) msg="Halfway there. Re-run the interactive calculators for the stations you missed.";
+    else msg="Worth another full pass through the stations before the exam.";
+    document.getElementById(ids.finalMsg).textContent = msg;
+  }
+  document.getElementById(ids.retake).addEventListener('click', ()=>{
+    score=0; answered=[]; qIdx=0; renderQuiz();
+  });
+  renderQuiz();
+}
+
+initQuiz(QUESTIONS, {host:'quizHost', scorePill:'scorePill', progPill:'progPill', summary:'quizSummary', finalScore:'finalScore', finalMsg:'finalMsg', retake:'retakeQuiz'});
+</script>
+</body>
+</html>

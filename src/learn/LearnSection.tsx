@@ -9,6 +9,7 @@ import { HomeGuide } from "./pages/HomeGuide";
 import { LearnPage } from "./pages/LearnPage";
 import { SessionsPage } from "./pages/SessionsPage";
 import { SessionPage } from "./pages/SessionPage";
+import { RevisionGuidePage } from "./pages/RevisionGuidePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { useLearnProfile } from "./useLearnProfile";
 import type { User } from "../types";
@@ -19,6 +20,7 @@ const WINDOW_TITLES: Record<string, string> = {
   "": "Home",
   subjects: "Learn",
   sessions: "Sessions",
+  revision: "Revision guide",
   practice: "Smart practice",
   profile: "Profile",
   admin: "Admin",
@@ -70,6 +72,8 @@ export default function LearnSection({ user }: { user: User }) {
             <Route path="sessions/:course" element={<SessionsPage profile={profile} />} />
             <Route path="sessions/:course/:session" element={<SessionsPage profile={profile} />} />
             <Route path="sessions/:course/:session/:topic" element={<SessionsPage profile={profile} />} />
+            <Route path="revision/:course" element={<RevisionGuidePage />} />
+            <Route path="revision/:course/:session" element={<RevisionGuidePage />} />
             <Route
               path="practice"
               element={

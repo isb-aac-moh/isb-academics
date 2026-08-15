@@ -35,6 +35,17 @@ export function BookIcon({ className }: IconProps) {
   );
 }
 
+/** Revision guides. A compass rather than another book — the guides sit next to the course books on
+    the desktop, and two book silhouettes side by side would read as the same thing twice. */
+export function CompassIcon({ className }: IconProps) {
+  return (
+    <svg {...filled} className={className}>
+      <path d="M12 1.8A10.2 10.2 0 1 0 22.2 12 10.21 10.21 0 0 0 12 1.8m0 18.1A7.9 7.9 0 1 1 19.9 12 7.91 7.91 0 0 1 12 19.9" />
+      <path d="M16.4 7.6 10 10l-2.4 6.4 6.4-2.4zM12 13.2A1.2 1.2 0 1 1 13.2 12 1.2 1.2 0 0 1 12 13.2" />
+    </svg>
+  );
+}
+
 export function BoltIcon({ className }: IconProps) {
   return (
     <svg {...filled} className={className}>

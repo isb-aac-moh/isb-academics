@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lean Operations — Field Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#0A1B33;
+    --navy-panel:#0F2745;
+    --navy-panel-2:#14304F;
+    --grid-line: rgba(150,205,235,0.07);
+    --blue-line:#6FB7E0;
+    --blue-bright:#BFE6F7;
+    --paper:#EDE6D3;
+    --paper-2:#E4DBC4;
+    --ink:#1D1B14;
+    --ink-soft:#4A4636;
+    --amber:#F2B705;
+    --stop-red:#D6544F;
+    --go-green:#4E9A6E;
+    --font-display:'Big Shoulders Display', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(111,183,224,0.10), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(111,183,224,0.08), transparent 55%),
+      var(--navy-deep);
+    background-attachment:fixed;
+    color:var(--blue-bright);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:34px 34px;
+    z-index:0;
+  }
+
+  a{color:inherit;}
+  ::selection{background:var(--amber); color:var(--ink);}
+
+  :focus-visible{
+    outline:2px solid var(--amber);
+    outline-offset:2px;
+  }
+
+  /* ---------- Header ---------- */
+  .masthead{
+    position:relative;
+    z-index:1;
+    max-width:1180px;
+    margin:0 auto;
+    padding:38px 24px 18px;
+  }
+  .masthead-top{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+    border-bottom:1px solid rgba(191,230,247,0.25);
+    padding-bottom:16px;
+  }
+  .doc-code{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--blue-line);
+    text-transform:uppercase;
+  }
+  h1.title{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:clamp(40px, 7vw, 78px);
+    line-height:0.92;
+    margin:6px 0 0;
+    letter-spacing:0.5px;
+    color:#fff;
+    text-transform:uppercase;
+  }
+  .title .accent{color:var(--amber);}
+  .subtitle{
+    font-family:var(--font-body);
+    font-size:15px;
+    color:var(--blue-bright);
+    opacity:0.85;
+    max-width:520px;
+    margin-top:6px;
+  }
+  .stamp{
+    font-family:var(--font-mono);
+    font-size:11px;
+    text-align:right;
+    color:var(--blue-line);
+    letter-spacing:.08em;
+    line-height:1.7;
+  }
+  .stamp b{color:var(--blue-bright);}
+
+  /* ---------- Station selector (tabs) ---------- */
+  .panel{
+    position:relative;
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 24px 100px;
+    z-index:1;
+  }
+  .switchboard{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:26px 0 28px;
+    padding:10px;
+    background:rgba(10,27,51,0.55);
+    border:1px solid rgba(191,230,247,0.18);
+    border-radius:10px;
+  }
+  .stn{
+    appearance:none;
+    border:1px solid rgba(191,230,247,0.22);
+    background:var(--navy-panel);
+    color:var(--blue-bright);
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.05em;
+    padding:10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .stn:hover{border-color:var(--blue-line); transform:translateY(-1px);}
+  .stn .lamp{
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(191,230,247,0.3);
+    box-shadow:none;
+    transition:background .15s ease, box-shadow .15s ease;
+    flex-shrink:0;
+  }
+  .stn.active{
+    background:var(--paper);
+    color:var(--ink);
+    border-color:var(--paper);
+  }
+  .stn.active .lamp{
+    background:var(--amber);
+    box-shadow:0 0 8px 1px var(--amber);
+  }
+  .stn .num{opacity:0.6;}
+  .stn.active .num{opacity:0.9;}
+
+  /* ---------- Content sheet ---------- */
+  .sheet{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:10px;
+    padding:clamp(20px, 4vw, 48px);
+    position:relative;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.55);
+  }
+  .sheet::before{
+    content:"";
+    position:absolute; inset:10px;
+    border:1px dashed rgba(29,27,20,0.14);
+    border-radius:6px;
+    pointer-events:none;
+  }
+  .tab-panel{display:none; animation:fadeIn .35s ease;}
+  .tab-panel.show{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  h2.head{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:clamp(30px,4.4vw,46px);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin:0 0 6px;
+    line-height:0.98;
+  }
+  .dek{
+    font-size:16px;
+    max-width:680px;
+    color:var(--ink-soft);
+    margin-bottom:28px;
+  }
+  h3.sub{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:22px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin:34px 0 10px;
+  }
+  p{margin:0 0 12px;}
+  .lead{font-size:16px;}
+
+  /* field note callout */
+  .note{
+    background:var(--paper-2);
+    border-left:3px solid var(--amber);
+    border-radius:4px;
+    padding:14px 16px;
+    margin:16px 0;
+    font-size:14.5px;
+  }
+  .note b{font-family:var(--font-mono); text-transform:uppercase; font-size:11px; letter-spacing:.08em; display:block; margin-bottom:4px; color:var(--ink-soft);}
+  .note.stop{border-left-color:var(--stop-red);}
+  .note.go{border-left-color:var(--go-green);}
+
+  .grid2{display:grid; grid-template-columns:1.1fr 1fr; gap:28px; align-items:start;}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr;}}
+
+  .diagram-frame{
+    background:var(--navy-panel);
+    border-radius:8px;
+    padding:18px;
+    border:1px solid rgba(191,230,247,0.15);
+  }
+  .diagram-frame svg{width:100%; height:auto; display:block;}
+  .diagram-cap{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--blue-line);
+    text-align:center;
+    margin-top:8px;
+    letter-spacing:.05em;
+  }
+
+  ul.tidy{padding-left:18px; margin:10px 0;}
+  ul.tidy li{margin-bottom:6px;}
+
+  .waste-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
+    gap:10px;
+    margin:18px 0 8px;
+  }
+  .waste-card{
+    background:var(--navy-panel);
+    color:var(--blue-bright);
+    border-radius:8px;
+    padding:14px 12px;
+    font-size:12.5px;
+    text-align:center;
+    border:1px solid rgba(191,230,247,0.15);
+    font-family:var(--font-mono);
+  }
+
+  /* buttons */
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin:14px 0;}
+  .btn{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    padding:10px 16px;
+    border-radius:5px;
+    cursor:pointer;
+    transition:transform .1s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px); background:#332f21;}
+  .btn.secondary{background:transparent; color:var(--ink); border:1px solid var(--ink);}
+  .btn.stop{background:var(--stop-red); color:#fff;}
+  .btn.go{background:var(--go-green); color:#fff;}
+
+  /* ============ TAB: Batch ============ */
+  .slider-block{margin:18px 0 8px;}
+  .slider-block input[type=range]{width:100%; accent-color:var(--stop-red);}
+  .batch-readout{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin:16px 0;
+  }
+  .readout-card{
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:8px;
+    padding:14px;
+    text-align:center;
+  }
+  .readout-card .val{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:26px;
+    color:var(--amber);
+  }
+  .readout-card .lbl{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    opacity:.75;
+    margin-top:4px;
+  }
+
+  .stageline{position:relative; padding:30px 6px 10px;}
+  .stages{display:flex; justify-content:space-between; gap:8px;}
+  .stage-box{
+    flex:1;
+    background:var(--navy-panel-2);
+    border:1px solid rgba(191,230,247,0.25);
+    border-radius:6px;
+    text-align:center;
+    padding:14px 4px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--blue-bright);
+    position:relative;
+    min-height:70px;
+  }
+  .stage-box .fill{
+    position:absolute; left:0; bottom:0; width:100%;
+    background:rgba(242,183,5,0.35);
+    height:0%;
+    border-radius:0 0 5px 5px;
+    transition:height .2s linear;
+  }
+  .stage-box span{position:relative; z-index:1;}
+  .dots-row{display:flex; justify-content:center; gap:4px; margin-top:6px; position:relative; z-index:1; flex-wrap:wrap;}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--amber);}
+  .arrow{align-self:center; color:var(--blue-line); font-size:18px;}
+
+  /* ============ TAB: Push Pull ============ */
+  .toggle-wrap{display:flex; gap:0; margin:14px 0 22px; border:1px solid var(--ink); border-radius:6px; overflow:hidden; width:fit-content;}
+  .toggle-wrap button{
+    font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.05em;
+    padding:9px 20px; border:none; background:transparent; color:var(--ink); cursor:pointer;
+  }
+  .toggle-wrap button.active{background:var(--ink); color:var(--paper);}
+
+  .pp-diagram{display:none;}
+  .pp-diagram.show{display:block;}
+
+  /* ============ TAB: Kanban ============ */
+  .kanban-stage{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:26px;
+    margin:20px 0;
+    align-items:center;
+  }
+  .kcenter-box{
+    background:var(--navy-panel);
+    border:1px solid rgba(191,230,247,0.2);
+    border-radius:8px;
+    padding:22px 14px;
+    text-align:center;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--blue-bright);
+  }
+  .kcenter-box .count{font-size:30px; color:var(--amber); font-weight:700;}
+  .kcard-anim{
+    width:34px; height:22px;
+    background:var(--amber);
+    border:2px solid var(--ink);
+    border-radius:3px;
+    position:relative;
+    margin:10px auto 0;
+    transition:transform .6s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ============ TAB: Jidoka ============ */
+  .ladder{display:flex; gap:8px; align-items:flex-end; margin:22px 0 8px; flex-wrap:wrap;}
+  .ladder-step{
+    flex:1; min-width:80px;
+    background:var(--navy-panel);
+    border:1px solid rgba(191,230,247,0.2);
+    border-radius:6px 6px 0 0;
+    text-align:center;
+    padding:10px 6px 12px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--blue-bright);
+    transition:background .3s ease, transform .3s ease, box-shadow .3s ease;
+  }
+  .ladder-step .cost{display:block; font-size:16px; color:var(--amber); margin-bottom:4px; letter-spacing:1px;}
+  .ladder-step.hit{background:var(--stop-red); color:#fff; transform:translateY(-6px); box-shadow:0 8px 18px rgba(214,84,79,0.4);}
+  .ladder-step.hit .cost{color:#fff;}
+  .ladder-step.saved{background:var(--go-green); color:#fff; transform:translateY(-6px); box-shadow:0 8px 18px rgba(78,154,110,0.4);}
+  .ladder-step.saved .cost{color:#fff;}
+
+  /* ============ TAB: Flexible resources ============ */
+  .cookie-diagram{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  .cookie-col{background:var(--navy-panel); border-radius:8px; padding:14px; border:1px solid rgba(191,230,247,0.15);}
+  .cookie-col h4{margin:0 0 8px; font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--blue-line);}
+  .worker-row{display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; color:var(--blue-bright); margin-bottom:6px;}
+  .task-chip{background:var(--navy-panel-2); border-radius:4px; padding:4px 8px; border:1px solid rgba(191,230,247,0.2);}
+  .task-chip.stuck{border-color:var(--stop-red); color:#ffb3b0;}
+  .task-chip.helping{border-color:var(--go-green); color:#b7e8c8;}
+
+  /* ============ TAB: Cellular ============ */
+  .layout-compare{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:18px 0;}
+  @media(max-width:720px){.layout-compare{grid-template-columns:1fr;}}
+
+  /* ============ TAB: Kaizen iceberg ============ */
+  .iceberg-wrap{background:var(--navy-panel); border-radius:8px; padding:16px; border:1px solid rgba(191,230,247,0.15);}
+  .iceberg-slider{margin:14px 0;}
+  .rock-list{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+  .rock{
+    font-family:var(--font-mono); font-size:11px; padding:5px 9px; border-radius:4px;
+    background:rgba(214,84,79,0.15); color:#ffb3b0; border:1px solid rgba(214,84,79,0.4);
+    transition:opacity .3s ease;
+  }
+  .rock.hidden-rock{opacity:0.18;}
+
+  /* ============ TAB: Quiz ============ */
+  .quiz-top{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;}
+  .score-pill{
+    font-family:var(--font-mono); font-size:12px; background:var(--ink); color:var(--paper);
+    padding:8px 14px; border-radius:20px;
+  }
+  .qcard{display:none;}
+  .qcard.show{display:block; animation:fadeIn .3s ease;}
+  .qnum{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px;}
+  .qtext{font-family:var(--font-body); font-weight:600; font-size:18px; margin-bottom:16px;}
+  .opt{
+    display:block; width:100%; text-align:left;
+    background:var(--paper-2); border:1px solid rgba(29,27,20,0.15);
+    border-radius:6px; padding:12px 14px; margin-bottom:9px;
+    font-family:var(--font-body); font-size:14.5px; color:var(--ink);
+    cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .opt:hover{border-color:var(--ink);}
+  .opt.correct{background:rgba(78,154,110,0.18); border-color:var(--go-green);}
+  .opt.wrong{background:rgba(214,84,79,0.16); border-color:var(--stop-red);}
+  .opt[disabled]{cursor:default;}
+  .feedback{display:none; margin-top:6px;}
+  .feedback.show{display:block;}
+  .quiz-nav{display:flex; justify-content:space-between; margin-top:20px;}
+  .quiz-summary{display:none; text-align:center; padding:20px 0;}
+  .quiz-summary.show{display:block;}
+  .quiz-summary .big{font-family:var(--font-display); font-size:52px; color:var(--ink); font-weight:800;}
+
+  /* ============ TAB: Cheat sheet ============ */
+  .cheat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-top:12px;}
+  .cheat-card{background:var(--navy-panel); border-radius:8px; padding:16px; border:1px solid rgba(191,230,247,0.15);}
+  .cheat-card h4{font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--amber); margin:0 0 8px;}
+  .cheat-card ul{margin:0; padding-left:16px; font-size:13px; color:var(--blue-bright);}
+  .cheat-card li{margin-bottom:5px;}
+
+  .footer-strip{
+    max-width:1180px; margin:0 auto; padding:0 24px 50px;
+    font-family:var(--font-mono); font-size:11px; color:var(--blue-line);
+    letter-spacing:.06em; text-align:center; opacity:.6;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div>
+      <div class="doc-code">OPMG3 // SESSION 06 // FIELD MANUAL</div>
+      <h1 class="title">Lean<br>Operat<span class="accent">i</span>ons</h1>
+      <div class="subtitle">A walk-through of the philosophy and the six tools lean uses to synchronize flow with demand, at the lowest possible cost.</div>
+    </div>
+    <div class="stamp">
+      INSTRUCTOR: <b>V. MALLADI</b><br>
+      REV: <b>2026-08</b><br>
+      STATIONS: <b>11</b>
+    </div>
+  </div>
+</header>
+
+<main class="panel">
+
+  <!-- ===================== STATION SELECTOR ===================== -->
+  <nav class="switchboard" id="switchboard">
+    <button class="stn active" data-tab="philosophy"><span class="lamp"></span><span class="num">00</span> Philosophy</button>
+    <button class="stn" data-tab="batch"><span class="lamp"></span><span class="num">01</span> Batch Size</button>
+    <button class="stn" data-tab="pushpull"><span class="lamp"></span><span class="num">02</span> Push / Pull</button>
+    <button class="stn" data-tab="kanban"><span class="lamp"></span><span class="num">03</span> Kanban</button>
+    <button class="stn" data-tab="jidoka"><span class="lamp"></span><span class="num">04</span> Jidoka</button>
+    <button class="stn" data-tab="flex"><span class="lamp"></span><span class="num">05</span> Flexible Res.</button>
+    <button class="stn" data-tab="cellular"><span class="lamp"></span><span class="num">06</span> Cellular Layout</button>
+    <button class="stn" data-tab="kaizen"><span class="lamp"></span><span class="num">07</span> Kaizen</button>
+    <button class="stn" data-tab="service"><span class="lamp"></span><span class="num">08</span> Services</button>
+    <button class="stn" data-tab="quiz"><span class="lamp"></span>EXAM</button>
+    <button class="stn" data-tab="cheat"><span class="lamp"></span>Cheat Sheet</button>
+  </nav>
+
+  <div class="sheet">
+
+    <!-- ===================== 00 PHILOSOPHY ===================== -->
+    <section class="tab-panel show" id="tab-philosophy">
+      <div class="eyebrow">Station 00 / Foundations</div>
+      <h2 class="head">The Philosophy</h2>
+      <div class="dek">Lean isn't a toolbox you bolt onto a process. It's a business system for organizing product development, operations, suppliers, and customer relations, aimed at one thing: matching what you produce to what the customer actually wants, using less of everything to get there.</div>
+
+      <div class="grid2">
+        <div>
+          <h3 class="sub">Two things it optimizes for</h3>
+          <p class="lead">Every lean tool traces back to two goals working together:</p>
+          <ul class="tidy">
+            <li><b>Synchronization of all flows with customer demand</b> — build what's needed, not what's convenient to build.</li>
+            <li><b>At the lowest possible cost</b> — less human effort, less space, less capital, less time, fewer defects.</li>
+          </ul>
+          <div class="note">
+            <b>Intuition</b>
+            Think of it like cooking a meal exactly as guests arrive, hot, fresh, portioned to appetite, instead of cooking a huge batch at 3pm and letting it sit under a heat lamp all evening. Same ingredients, wildly different amount of waste.
+          </div>
+        </div>
+        <div class="diagram-frame">
+          <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+            <text x="160" y="24" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="10">SYNCHRONIZATION</text>
+            <path d="M20 60 Q 60 20 100 60 T 180 60 T 260 60 T 300 60" stroke="#6FB7E0" stroke-width="2" fill="none"/>
+            <path d="M20 60 Q 60 100 100 60 T 180 60 T 260 60 T 300 60" stroke="#F2B705" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+            <text x="160" y="90" text-anchor="middle" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="9">supply flow / demand flow, kept in phase</text>
+            <line x1="20" y1="130" x2="300" y2="130" stroke="rgba(191,230,247,0.2)"/>
+            <text x="160" y="150" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="10">AT LOWEST COST</text>
+            <text x="160" y="172" text-anchor="middle" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="9">less effort · less space</text>
+            <text x="160" y="186" text-anchor="middle" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="9">less capital · less time · fewer defects</text>
+          </svg>
+          <div class="diagram-cap">FIG 00.1 — the two pillars of lean</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Waste = the gap</h3>
+      <p class="lead">Lean defines waste very precisely: <b>the gap between the performance of an ideal process and the actual process.</b> Anything that doesn't move the product closer to what the customer wants is waste, even if it feels productive.</p>
+      <div class="waste-grid">
+        <div class="waste-card">Overproduction</div>
+        <div class="waste-card">Waiting</div>
+        <div class="waste-card">Inessential motion</div>
+        <div class="waste-card">Inessential handling</div>
+        <div class="waste-card">Correction of defects (rework)</div>
+        <div class="waste-card">Excess inventory</div>
+        <div class="waste-card">Non-value adding processing</div>
+      </div>
+
+      <div class="note go">
+        <b>Where we're headed</b>
+        Six tools do the actual work of closing that gap: cut batch sizes, pull instead of push, build quality at the source, use flexible resources, redesign layout into cells, and reduce variability. Each has its own station on this page.
+      </div>
+    </section>
+
+    <!-- ===================== 01 BATCH SIZE ===================== -->
+    <section class="tab-panel" id="tab-batch">
+      <div class="eyebrow">Station 01 / Lean Tool #1</div>
+      <h2 class="head">Cut Batch Size</h2>
+      <div class="dek">The line: A → B → C → D, each stage takes 1 minute per job, feeding a finished-goods buffer. Same line, same stages — but drag the slider and watch what happens the moment you stop moving work one unit at a time.</div>
+
+      <div class="slider-block">
+        <label style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.05em;">Transfer batch size: <span id="batchLabel">1</span> unit(s)</label>
+        <input type="range" min="1" max="4" step="1" value="1" id="batchSlider">
+      </div>
+
+      <div class="batch-readout">
+        <div class="readout-card"><div class="val" id="valFlow">4 min</div><div class="lbl">Flow time (T)</div></div>
+        <div class="readout-card"><div class="val" id="valCap">60/hr</div><div class="lbl">Capacity (R)</div></div>
+        <div class="readout-card"><div class="val" id="valInv">4 units</div><div class="lbl">Inventory (I = R×T)</div></div>
+      </div>
+
+      <div class="diagram-frame">
+        <div class="stageline">
+          <div class="stages" id="stageBoxes">
+            <div class="stage-box"><div class="fill" id="fillA"></div><span>A</span><div class="dots-row" id="dotsA"></div></div>
+            <div class="stage-box"><div class="fill" id="fillB"></div><span>B</span><div class="dots-row" id="dotsB"></div></div>
+            <div class="stage-box"><div class="fill" id="fillC"></div><span>C</span><div class="dots-row" id="dotsC"></div></div>
+            <div class="stage-box"><div class="fill" id="fillD"></div><span>D</span><div class="dots-row" id="dotsD"></div></div>
+            <div class="stage-box" style="background:rgba(242,183,5,0.08); border-style:dashed;"><span>FGI</span><div class="dots-row" id="dotsFGI"></div></div>
+          </div>
+        </div>
+        <div class="diagram-cap">FIG 01.1 — one batch moving through the line at the selected size</div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="runBatch">▶ Run one batch through the line</button>
+      </div>
+
+      <h3 class="sub">Why capacity doesn't move but flow time explodes</h3>
+      <p class="lead">In steady state, a station can still finish one batch every <span id="explainCycle">4</span> minutes, so throughput stays at 60 units/hour no matter the batch size. But a <em>single unit</em> now has to wait for its whole batch to accumulate at every stage before moving on — that waiting is pure queue time, and Little's Law (I = R × T) says that queue must show up as extra inventory sitting in the system.</p>
+
+      <div class="note stop">
+        <b>So why batch at all?</b>
+        If changeovers between jobs are slow or expensive, splitting into single units means paying that setup cost constantly. That's the real trade-off: batch size shrinks toward one only as fast as you can shrink setup time. That's exactly what SMED (Single-Minute Exchange of Die) targets — make changeovers so fast that small batches stop being expensive.
+      </div>
+    </section>
+
+    <!-- ===================== 02 PUSH PULL ===================== -->
+    <section class="tab-panel" id="tab-pushpull">
+      <div class="eyebrow">Station 02 / Lean Tool #2</div>
+      <h2 class="head">Pull, not Push — and JIT</h2>
+      <div class="dek">Same three boxes — Supplier, Process, Customer — but the trigger for production flips depending on which philosophy you run.</div>
+
+      <div class="toggle-wrap" id="ppToggle">
+        <button class="active" data-mode="push">PUSH</button>
+        <button data-mode="pull">PULL</button>
+      </div>
+
+      <div class="diagram-frame">
+        <div class="pp-diagram show" id="pp-push">
+          <svg viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="45" width="70" height="40" rx="4" fill="none" stroke="#BFE6F7"/>
+            <text x="45" y="69" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="10">SUPPLIER</text>
+            <path d="M80 65 L120 65" stroke="#6FB7E0" stroke-width="2" marker-end="url(#arrow)"/>
+            <polygon points="130,55 155,55 145,75 120,75" fill="none" stroke="#F2B705"/>
+            <text x="137" y="90" text-anchor="middle" fill="#F2B705" font-family="IBM Plex Mono" font-size="8">inputs</text>
+            <path d="M155 65 L195 65" stroke="#D6544F" stroke-width="2.5" marker-end="url(#arrowRed)"/>
+            <rect x="195" y="45" width="70" height="40" rx="4" fill="none" stroke="#BFE6F7"/>
+            <text x="230" y="69" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="10">PROCESS</text>
+            <path d="M265 65 L300 65" stroke="#6FB7E0" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="310" y="30" fill="#D6544F" font-family="IBM Plex Mono" font-size="9">trigger: input arrived</text>
+            <defs>
+              <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#6FB7E0"/></marker>
+              <marker id="arrowRed" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#D6544F"/></marker>
+            </defs>
+          </svg>
+          <p style="font-family:var(--font-mono); font-size:11px; color:var(--blue-bright); text-align:center; margin-top:4px;">Material shows up → station produces, whether or not the next step is ready.</p>
+        </div>
+
+        <div class="pp-diagram" id="pp-pull">
+          <svg viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="45" width="70" height="40" rx="4" fill="none" stroke="#BFE6F7"/>
+            <text x="45" y="69" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="10">SUPPLIER</text>
+            <path d="M80 65 L120 65" stroke="#6FB7E0" stroke-width="2" marker-end="url(#arrow2)"/>
+            <rect x="140" y="45" width="70" height="40" rx="4" fill="none" stroke="#BFE6F7"/>
+            <text x="175" y="69" text-anchor="middle" fill="#BFE6F7" font-family="IBM Plex Mono" font-size="10">PROCESS</text>
+            <path d="M210 65 L245 65" stroke="#6FB7E0" stroke-width="2" marker-end="url(#arrow2)"/>
+            <polygon points="245,55 270,55 260,75 235,75" fill="none" stroke="#F2B705"/>
+            <text x="252" y="90" text-anchor="middle" fill="#F2B705" font-family="IBM Plex Mono" font-size="8">outputs</text>
+            <path d="M270 65 L300 65" stroke="#6FB7E0" stroke-width="2" marker-end="url(#arrow2)"/>
+            <rect x="300" y="45" width="34" height="40" rx="4" fill="none" stroke="#BFE6F7" opacity="0"/>
+            <path d="M300 100 Q220 130 175 90" stroke="#4E9A6E" stroke-width="2.5" fill="none" marker-end="url(#arrowGreen)"/>
+            <text x="230" y="118" text-anchor="middle" fill="#4E9A6E" font-family="IBM Plex Mono" font-size="9">signal: "I need more"</text>
+            <defs>
+              <marker id="arrow2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#6FB7E0"/></marker>
+              <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#4E9A6E"/></marker>
+            </defs>
+          </svg>
+          <p style="font-family:var(--font-mono); font-size:11px; color:var(--blue-bright); text-align:center; margin-top:4px;">Downstream need shows up → only then does the station produce.</p>
+        </div>
+        <div class="diagram-cap">FIG 02.1 — what actually triggers the process to run</div>
+      </div>
+
+      <div class="grid2" style="margin-top:22px;">
+        <div>
+          <h3 class="sub">The factory-floor version</h3>
+          <p class="lead"><b>Push:</b> as soon as cloth arrives at the cutting station, cutting starts, because material is sitting there and the machine is free. It doesn't check whether sewing (downstream) actually needs those pieces yet. Cut pieces pile up in front of sewing.</p>
+          <p class="lead"><b>Pull:</b> sewing only asks cutting for more once it has actually used up what it had. Cutting only cuts when that request arrives. Nothing gets made until there's a real, immediate need for it.</p>
+        </div>
+        <div>
+          <h3 class="sub">JIT is what pull looks like in practice</h3>
+          <p class="lead"><b>JIT (Just-In-Time)</b> = have exactly what's needed, how much is needed, when it's needed, where it's needed. A "hand-to-mouth" flow of material — nothing early, nothing extra, nothing sitting around "just in case."</p>
+          <div class="note">
+            <b>Needed by whom?</b>
+            In JIT/pull, every station treats the station right after it as its customer. The trigger always comes from whoever consumes the output next, not from a forecast made in advance.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 03 KANBAN ===================== -->
+    <section class="tab-panel" id="tab-kanban">
+      <div class="eyebrow">Station 03 / Implementing Pull</div>
+      <h2 class="head">Kanban Production Control</h2>
+      <div class="dek">Pull is a philosophy. Kanban is the physical mechanism that makes it real: a card that travels backward and acts as a permission slip to produce exactly one more unit.</div>
+
+      <div class="diagram-frame">
+        <div class="kanban-stage">
+          <div class="kcenter-box">
+            <div style="font-size:12px; margin-bottom:6px;">PROCESSING CENTER i</div>
+            <div class="count" id="wipCount">3</div>
+            <div style="font-size:10px; opacity:.7;">units of WIP buffer</div>
+            <div class="kcard-anim" id="kcard"></div>
+            <div style="font-size:9px; margin-top:6px; color:var(--amber);">kanban card</div>
+          </div>
+          <div class="kcenter-box">
+            <div style="font-size:12px; margin-bottom:6px;">PROCESSING CENTER i+1</div>
+            <div style="font-size:22px; color:var(--go-green); font-family:var(--font-mono);">consuming →</div>
+            <div style="font-size:10px; opacity:.7; margin-top:6px;">click below each time this station uses one unit</div>
+          </div>
+        </div>
+        <div class="diagram-cap">FIG 03.1 — card travels back, unit travels forward</div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="consumeUnit">Consume 1 unit downstream → send kanban card back</button>
+        <button class="btn secondary" id="resetKanban">Reset buffer to 3</button>
+      </div>
+      <p id="kanbanMsg" style="font-family:var(--font-mono); font-size:12px; color:var(--go-green); min-height:18px;"></p>
+
+      <div class="note">
+        <b>Rule of the card</b>
+        No card, no production. Station i is not allowed to make another unit until a card physically (or digitally) arrives authorizing it — which only happens once i+1 has actually consumed one. That single rule is what keeps WIP from silently piling up between stations.
+      </div>
+    </section>
+
+    <!-- ===================== 04 JIDOKA ===================== -->
+    <section class="tab-panel" id="tab-jidoka">
+      <div class="eyebrow">Station 04 / Lean Tool #3</div>
+      <h2 class="head">Quality at the Source — Jidoka</h2>
+      <div class="dek">Same defect. The only thing that changes is how far it travels before someone catches it — and that alone changes the cost by orders of magnitude.</div>
+
+      <div class="ladder" id="ladder">
+        <div class="ladder-step" data-step="0"><span class="cost">$</span>Own Station<br><small>very minor</small></div>
+        <div class="ladder-step" data-step="1"><span class="cost">$$</span>Next Station<br><small>minor delay</small></div>
+        <div class="ladder-step" data-step="2"><span class="cost">$$$</span>End of Line<br><small>rework / reschedule</small></div>
+        <div class="ladder-step" data-step="3"><span class="cost">$$$$</span>Final Inspection<br><small>delivery delay</small></div>
+        <div class="ladder-step" data-step="4"><span class="cost">$$$$$</span>End User<br><small>warranty · reputation</small></div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn stop" id="letPass">Let the defect pass through</button>
+        <button class="btn go" id="stopSource">Stop the line at the source</button>
+      </div>
+      <p id="jidokaMsg" style="font-family:var(--font-mono); font-size:12px; min-height:18px;"></p>
+
+      <div class="note stop">
+        <b>The radical version of Jidoka</b>
+        Stop the production line the instant a defect is found — until the root cause is identified, even if it isn't fixed yet. It feels like it kills output. It's actually the cheap option, because every stage a defect travels through multiplies the cost of the fix.
+      </div>
+      <p class="lead">Think of it like a spell-checker that flags a typo the second you type it, versus one that only checks after you've printed and mailed 500 copies. Same typo — wildly different cleanup bill.</p>
+    </section>
+
+    <!-- ===================== 05 FLEXIBLE RESOURCES ===================== -->
+    <section class="tab-panel" id="tab-flex">
+      <div class="eyebrow">Station 05 / Lean Tool #4</div>
+      <h2 class="head">Flexible Resources</h2>
+      <div class="dek">Workers who can only do one task lock your capacity to whatever that one station allows. Cross-trained workers can flow to wherever the backlog actually is — the Kristen Cookie Co. idea.</div>
+
+      <div class="toggle-wrap" id="flexToggle">
+        <button class="active" data-mode="rigid">RIGID TEAM</button>
+        <button data-mode="flex">FLEXIBLE TEAM</button>
+      </div>
+
+      <div class="cookie-diagram">
+        <div class="cookie-col">
+          <h4>Worker 1 — Mixing</h4>
+          <div class="worker-row" id="w1task"><span class="task-chip">Mixing dough</span></div>
+        </div>
+        <div class="cookie-col">
+          <h4>Worker 2 — Baking</h4>
+          <div class="worker-row" id="w2task"><span class="task-chip">Waiting on oven</span></div>
+        </div>
+      </div>
+      <p id="flexMsg" style="font-family:var(--font-mono); font-size:12px; color:var(--blue-bright);">Rigid team: each worker sticks to one task, even when the other task has a backlog.</p>
+
+      <h3 class="sub">Three payoffs</h3>
+      <ul class="tidy">
+        <li><b>More capacity</b> — a flexible worker shifts to whichever step is backed up right now, instead of standing idle.</li>
+        <li><b>More learning</b> — rotating through stations means you actually see how your work affects the next person's, which is exactly what surfaces kaizen ideas.</li>
+        <li><b>Better job satisfaction</b> — the same 60-second task all day is numbing; variety keeps people engaged.</li>
+      </ul>
+    </section>
+
+    <!-- ===================== 06 CELLULAR LAYOUT ===================== -->
+    <section class="tab-panel" id="tab-cellular">
+      <div class="eyebrow">Station 06 / Lean Tool #5</div>
+      <h2 class="head">Functional → Cellular Layout</h2>
+      <div class="dek">Group machines by what they <em>are</em>, and parts zig-zag across the whole factory. Group machines by what they <em>build</em>, and parts flow straight through.</div>
+
+      <div class="layout-compare">
+        <div class="diagram-frame">
+          <svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+            <text x="130" y="16" text-anchor="middle" fill="#F2B705" font-family="IBM Plex Mono" font-size="10">FUNCTIONAL</text>
+            <rect x="10" y="30" width="60" height="26" fill="none" stroke="#BFE6F7"/><text x="40" y="47" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Roof Cut</text>
+            <rect x="100" y="30" width="60" height="26" fill="none" stroke="#BFE6F7"/><text x="130" y="47" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Base Cut</text>
+            <rect x="190" y="30" width="60" height="26" fill="none" stroke="#BFE6F7"/><text x="220" y="47" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Base Asm</text>
+            <rect x="55" y="100" width="60" height="26" fill="none" stroke="#BFE6F7"/><text x="85" y="117" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Final Asm</text>
+            <rect x="150" y="150" width="60" height="26" fill="none" stroke="#BFE6F7"/><text x="180" y="167" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">QC</text>
+            <path d="M40 56 C 40 90, 85 70, 85 100" stroke="#D6544F" stroke-width="1.4" fill="none"/>
+            <path d="M130 56 C 130 90, 85 70, 85 100" stroke="#D6544F" stroke-width="1.4" fill="none"/>
+            <path d="M220 56 C 220 100, 100 130, 85 126" stroke="#D6544F" stroke-width="1.4" fill="none"/>
+            <path d="M115 113 C 160 130, 175 140, 180 150" stroke="#D6544F" stroke-width="1.4" fill="none"/>
+          </svg>
+          <div class="diagram-cap">FIG 06.1 — crisscrossing travel between departments</div>
+        </div>
+        <div class="diagram-frame">
+          <svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+            <text x="130" y="16" text-anchor="middle" fill="#4E9A6E" font-family="IBM Plex Mono" font-size="10">CELLULAR</text>
+            <rect x="10" y="80" width="55" height="26" fill="none" stroke="#BFE6F7"/><text x="37" y="97" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Roof Cut</text>
+            <rect x="80" y="80" width="55" height="26" fill="none" stroke="#BFE6F7"/><text x="107" y="97" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Base Cut</text>
+            <rect x="150" y="80" width="55" height="26" fill="none" stroke="#BFE6F7"/><text x="177" y="97" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Base Asm</text>
+            <rect x="150" y="140" width="55" height="26" fill="none" stroke="#BFE6F7"/><text x="177" y="157" text-anchor="middle" fill="#BFE6F7" font-size="8" font-family="IBM Plex Mono">Final Asm</text>
+            <path d="M65 93 L80 93" stroke="#4E9A6E" stroke-width="2" marker-end="url(#ag)"/>
+            <path d="M135 93 L150 93" stroke="#4E9A6E" stroke-width="2" marker-end="url(#ag)"/>
+            <path d="M177 106 L177 140" stroke="#4E9A6E" stroke-width="2" marker-end="url(#ag)"/>
+            <defs><marker id="ag" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#4E9A6E"/></marker></defs>
+            <rect x="4" y="72" width="206" height="100" fill="none" stroke="#4E9A6E" stroke-dasharray="3 3" rx="6"/>
+            <text x="107" y="185" text-anchor="middle" fill="#4E9A6E" font-family="IBM Plex Mono" font-size="8">one product family, one straight flow</text>
+          </svg>
+          <div class="diagram-cap">FIG 06.2 — one dedicated cell, straight-through flow</div>
+        </div>
+      </div>
+
+      <div class="note">
+        <b>Why it matters</b>
+        In the functional layout, every part has to travel to wherever its next operation lives, waiting in queues at each shared department along the way. A cell puts every operation a product family needs, in sequence, right next to each other — no crisscrossing, no shared-resource queues, and it's much easier to spot a problem the moment it happens (which ties straight back to Jidoka).
+      </div>
+    </section>
+
+    <!-- ===================== 07 KAIZEN ===================== -->
+    <section class="tab-panel" id="tab-kaizen">
+      <div class="eyebrow">Station 07 / Continuous Improvement</div>
+      <h2 class="head">Kaizen &amp; the Iceberg</h2>
+      <div class="dek">Inventory is water. Problems are rocks. High water hides the rocks — which feels safe, until you realize you're sailing over a reef.</div>
+
+      <div class="iceberg-wrap">
+        <label style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.05em;">Inventory / water level: <span id="waterLabel">High</span></label>
+        <div class="iceberg-slider"><input type="range" min="0" max="100" value="80" id="waterSlider" style="width:100%; accent-color:#6FB7E0;"></div>
+        <svg viewBox="0 0 400 160" style="width:100%; height:auto;">
+          <rect x="0" y="0" width="400" height="160" fill="#08182E"/>
+          <rect id="waterRect" x="0" y="30" width="400" height="130" fill="rgba(111,183,224,0.28)"/>
+          <line id="waterLine" x1="0" y1="30" x2="400" y2="30" stroke="#6FB7E0" stroke-width="1.5"/>
+          <text x="30" y="20" fill="#6FB7E0" font-family="IBM Plex Mono" font-size="9">exploratory stress ↴</text>
+        </svg>
+        <div class="rock-list" id="rockList">
+          <span class="rock" data-threshold="20">Missed due dates</span>
+          <span class="rock" data-threshold="30">Late deliveries</span>
+          <span class="rock" data-threshold="40">Scrap &amp; rework</span>
+          <span class="rock" data-threshold="45">Too much paperwork</span>
+          <span class="rock" data-threshold="55">Engineering change orders</span>
+          <span class="rock" data-threshold="60">Poor quality</span>
+          <span class="rock" data-threshold="70">100% inspection</span>
+          <span class="rock" data-threshold="75">Long queues</span>
+          <span class="rock" data-threshold="85">Machine downtime</span>
+          <span class="rock" data-threshold="90">Too much space</span>
+        </div>
+        <div class="diagram-cap">Drag the slider down to lower the water and expose the rocks</div>
+      </div>
+
+      <h3 class="sub">Kaizen in three moves</h3>
+      <ul class="tidy">
+        <li><b>Increase problem visibility</b> — deliberately cut inventory (exploratory stress) so hidden problems surface.</li>
+        <li><b>Targeted improvements</b> — active worker involvement, dedicated time to experiment, suppliers included.</li>
+        <li><b>Root cause analysis</b> — ask "why" five times, fix the root cause not the symptom, then change, monitor, and adjust.</li>
+      </ul>
+    </section>
+
+    <!-- ===================== 08 SERVICES ===================== -->
+    <section class="tab-panel" id="tab-service">
+      <div class="eyebrow">Station 08 / Lean beyond the factory</div>
+      <h2 class="head">Time is Inventory, in Services</h2>
+      <div class="dek">A service business usually can't stockpile a haircut or a coffee for later. So the thing lean tries to cut isn't shelf inventory — it's how long the customer waits.</div>
+
+      <div class="grid2">
+        <div>
+          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;">
+            <tr style="border-bottom:1px solid rgba(29,27,20,0.2);"><td style="padding:8px 4px; font-family:var(--font-mono); font-weight:600;">Manufacturing</td><td style="padding:8px 4px; font-family:var(--font-mono); font-weight:600;">Services</td></tr>
+            <tr><td style="padding:6px 4px;">Physical inventory buffers problems</td><td style="padding:6px 4px;">Wait time / queue buffers problems</td></tr>
+            <tr><td style="padding:6px 4px;">Cutting stock exposes defects, downtime</td><td style="padding:6px 4px;">Cutting wait exposes bottlenecks, understaffing</td></tr>
+            <tr><td style="padding:6px 4px;">Little's Law: I = R × T</td><td style="padding:6px 4px;">Same law — T is now customer wait time</td></tr>
+          </table>
+        </div>
+        <div class="note stop">
+          <b>Field case — Starbucks</b>
+          A lean speed initiative shaved seconds off every order across 11,000+ stores. But one regular customer, who treated her Starbucks visit as a 20-minute escape rather than a transaction, felt rushed the moment staff started hurrying her order along — and left "bothered, but didn't know why."
+        </div>
+      </div>
+      <div class="note">
+        <b>The catch</b>
+        Speed is only "good operations" if it's what the customer actually values. This loops all the way back to Station 00: good operations means capabilities aligned with your strategic position — for some customers that's speed, for others it's the unhurried experience itself. Lean optimizes flow, not any one fixed definition of "better."
+      </div>
+    </section>
+
+    <!-- ===================== EXAM / QUIZ ===================== -->
+    <section class="tab-panel" id="tab-quiz">
+      <div class="eyebrow">Exam Simulation</div>
+      <h2 class="head">Timed-Style MCQ Set</h2>
+      <div class="dek">16 questions across every station. Pick an answer to see if you're right, then move to the next.</div>
+
+      <div class="quiz-top">
+        <div class="score-pill" id="scorePill">Score: 0 / 0</div>
+        <div class="score-pill" id="progPill">Question 1 of 16</div>
+      </div>
+
+      <div id="quizHost"></div>
+
+      <div class="quiz-summary" id="quizSummary">
+        <div style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-soft);">Final score</div>
+        <div class="big" id="finalScore">0 / 16</div>
+        <p id="finalMsg" class="lead" style="max-width:480px; margin:8px auto 18px;"></p>
+        <button class="btn" id="retakeQuiz">Retake the set</button>
+      </div>
+    </section>
+
+    <!-- ===================== CHEAT SHEET ===================== -->
+    <section class="tab-panel" id="tab-cheat">
+      <div class="eyebrow">Quick Reference</div>
+      <h2 class="head">Cheat Sheet</h2>
+      <div class="dek">The whole session, compressed to what you'd want in the margin of an exam.</div>
+
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <h4>Key idea</h4>
+          <ul><li>Strive for the ideal by eliminating waste</li><li>A philosophy of process management, not just a toolkit</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Underlying rationale</h4>
+          <ul><li>Real needs always deviate from plans made in advance</li><li>Problems will always crop up</li><li>Attack the root cause — never just work around it</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Two principles</h4>
+          <ul><li>Synchronization of flows with demand</li><li>Make problems self-evident, and stop when one is detected</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>The 6 tools</h4>
+          <ul><li>01 — Cut batch sizes</li><li>02 — Pull rather than push (JIT)</li><li>03 — Kanban (implements pull)</li><li>04 — Quality at source (Jidoka)</li><li>05 — Flexible resources</li><li>06 — Cellular / product layout</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Batch example numbers</h4>
+          <ul><li>Single-piece: T=4min, R=60/hr, I=4</li><li>Batch of 4: T=16min, R=60/hr, I=16</li><li>Capacity unchanged; flow time & WIP scale with batch size</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Jidoka cost ladder</h4>
+          <ul><li>Own station: $</li><li>Next station: $$</li><li>End of line: $$$</li><li>Final inspection: $$$$</li><li>End user: $$$$$</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Iceberg (kaizen)</h4>
+          <ul><li>Inventory = water level</li><li>Problems = rocks underneath</li><li>Lower inventory → rocks surface → forced to fix them</li></ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Services</h4>
+          <ul><li>Time plays the role inventory plays in manufacturing</li><li>Starbucks case: speed ≠ good operations if it breaks what the customer values</li></ul>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="footer-strip">SESSION 06 · LEAN OPERATIONS · BUILT FOR REVISION, NOT FOR PRINT</div>
+
+<script>
+// ---------------- Tab switching ----------------
+const stns = document.querySelectorAll('.stn');
+const panels = document.querySelectorAll('.tab-panel');
+stns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    stns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const id = btn.dataset.tab;
+    panels.forEach(p=>p.classList.remove('show'));
+    document.getElementById('tab-'+id).classList.add('show');
+    document.querySelector('.sheet').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+
+// ---------------- Station 01: Batch slider ----------------
+const batchSlider = document.getElementById('batchSlider');
+const batchLabel = document.getElementById('batchLabel');
+const valFlow = document.getElementById('valFlow');
+const valCap = document.getElementById('valCap');
+const valInv = document.getElementById('valInv');
+const explainCycle = document.getElementById('explainCycle');
+const stageIds = ['A','B','C','D'];
+
+function updateBatch(){
+  const b = parseInt(batchSlider.value,10);
+  batchLabel.textContent = b;
+  const flow = 4*b;
+  const inv = 1*flow; // R=1/min constant
+  valFlow.textContent = flow+' min';
+  valCap.textContent = '60/hr';
+  valInv.textContent = inv+' units';
+  explainCycle.textContent = flow;
+  stageIds.forEach(s=>{
+    const dotsRow = document.getElementById('dots'+s);
+    dotsRow.innerHTML='';
+    for(let i=0;i<b;i++){
+      const d=document.createElement('div'); d.className='dot'; dotsRow.appendChild(d);
+    }
+  });
+  document.getElementById('dotsFGI').innerHTML='';
+}
+batchSlider.addEventListener('input', updateBatch);
+updateBatch();
+
+document.getElementById('runBatch').addEventListener('click', ()=>{
+  const b = parseInt(batchSlider.value,10);
+  const perStageMs = Math.max(300, b*300); // scaled animation time
+  const fills = ['fillA','fillB','fillC','fillD'].map(id=>document.getElementById(id));
+  fills.forEach(f=>f.style.height='0%');
+  let i=0;
+  function fillNext(){
+    if(i>=fills.length) return;
+    const f=fills[i];
+    f.style.transition='height '+perStageMs+'ms linear';
+    requestAnimationFrame(()=>{ f.style.height='100%'; });
+    setTimeout(()=>{
+      f.style.transition='height .15s ease';
+      f.style.height='0%';
+      i++;
+      fillNext();
+    }, perStageMs+120);
+  }
+  fillNext();
+});
+
+// ---------------- Station 02: Push / Pull toggle ----------------
+document.getElementById('ppToggle').addEventListener('click', (e)=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#ppToggle button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  const mode = e.target.dataset.mode;
+  document.getElementById('pp-push').classList.toggle('show', mode==='push');
+  document.getElementById('pp-pull').classList.toggle('show', mode==='pull');
+});
+
+// ---------------- Station 03: Kanban ----------------
+let wip = 3;
+const wipCountEl = document.getElementById('wipCount');
+const kcard = document.getElementById('kcard');
+const kanbanMsg = document.getElementById('kanbanMsg');
+document.getElementById('consumeUnit').addEventListener('click', ()=>{
+  if(wip<=0){ kanbanMsg.textContent='Buffer empty — no card can be issued until center i replenishes.'; return; }
+  wip--; wipCountEl.textContent = wip;
+  kcard.style.transform='translateX(-46px)';
+  kanbanMsg.textContent='Card sent back → Center i is now authorized to produce 1 more unit.';
+  setTimeout(()=>{ kcard.style.transform='translateX(0)'; wip++; wipCountEl.textContent=wip; kanbanMsg.textContent='Center i produced 1 unit — buffer restored. This only happened because the card arrived.'; }, 900);
+});
+document.getElementById('resetKanban').addEventListener('click', ()=>{ wip=3; wipCountEl.textContent=wip; kanbanMsg.textContent=''; });
+
+// ---------------- Station 04: Jidoka ----------------
+const ladderSteps = document.querySelectorAll('.ladder-step');
+const jidokaMsg = document.getElementById('jidokaMsg');
+document.getElementById('letPass').addEventListener('click', ()=>{
+  ladderSteps.forEach(s=>s.classList.remove('hit','saved'));
+  let i=0;
+  function step(){
+    if(i>0) ladderSteps[i-1].classList.remove('hit');
+    if(i>=ladderSteps.length){ jidokaMsg.style.color='#D6544F'; jidokaMsg.textContent='Defect reached the END USER — warranty cost, admin cost, reputation, lost market share.'; return; }
+    ladderSteps[i].classList.add('hit');
+    i++;
+    setTimeout(step, 420);
+  }
+  jidokaMsg.textContent='';
+  step();
+});
+document.getElementById('stopSource').addEventListener('click', ()=>{
+  ladderSteps.forEach(s=>s.classList.remove('hit','saved'));
+  ladderSteps[0].classList.add('saved');
+  jidokaMsg.style.color='#4E9A6E';
+  jidokaMsg.textContent='Line stopped at the source — cost stays at $, root cause investigated immediately.';
+});
+
+// ---------------- Station 05: Flexible resources ----------------
+const w1 = document.getElementById('w1task');
+const w2 = document.getElementById('w2task');
+const flexMsg = document.getElementById('flexMsg');
+document.getElementById('flexToggle').addEventListener('click',(e)=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#flexToggle button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  const mode = e.target.dataset.mode;
+  if(mode==='rigid'){
+    w1.innerHTML='<span class="task-chip">Mixing dough</span>';
+    w2.innerHTML='<span class="task-chip stuck">Waiting on oven</span>';
+    flexMsg.textContent='Rigid team: each worker sticks to one task, even when the other task has a backlog.';
+  } else {
+    w1.innerHTML='<span class="task-chip">Mixing dough</span><span class="task-chip helping">→ hops over to help pack</span>';
+    w2.innerHTML='<span class="task-chip helping">Baking + gets help packing</span>';
+    flexMsg.textContent='Flexible team: whoever is free shifts to wherever the backlog actually is — total output per hour goes up.';
+  }
+});
+
+// ---------------- Station 07: Iceberg ----------------
+const waterSlider = document.getElementById('waterSlider');
+const waterRect = document.getElementById('waterRect');
+const waterLine = document.getElementById('waterLine');
+const waterLabel = document.getElementById('waterLabel');
+const rocks = document.querySelectorAll('.rock');
+function updateWater(){
+  const v = parseInt(waterSlider.value,10); // 0-100, 100=full inventory (water high, y small)
+  const y = 30 + (100-v)*1.0; // scale
+  waterRect.setAttribute('y', y);
+  waterRect.setAttribute('height', 160-y);
+  waterLine.setAttribute('y1', y); waterLine.setAttribute('y2', y);
+  waterLabel.textContent = v>66?'High':(v>33?'Medium':'Low');
+  rocks.forEach(r=>{
+    const t = parseInt(r.dataset.threshold,10);
+    r.classList.toggle('hidden-rock', v>t);
+  });
+}
+waterSlider.addEventListener('input', updateWater);
+updateWater();
+
+// ---------------- QUIZ ----------------
+const QUESTIONS = [
+  {q:"In the A→B→C→D line (1 min/job each), what is the theoretical flow time for one unit moving through single-piece?",
+   opts:["1 min","4 min","16 min","60 min"], correct:1,
+   exp:"One unit spends 1 minute at each of the 4 stages, moving through one at a time: 1+1+1+1 = 4 minutes."},
+  {q:"What is the capacity of that same line?",
+   opts:["4 units/min","1 unit/min (60/hr)","0.25 units/min","16 units/hr"], correct:1,
+   exp:"Capacity is set by the slowest (bottleneck) stage. Every stage here takes 1 min/job, so throughput is 1 unit/min = 60/hour."},
+  {q:"Using Little's Law (I = R×T), how much WIP does the single-piece flow line need?",
+   opts:["1 unit","4 units","5 units","16 units"], correct:1,
+   exp:"I = R × T = (1 unit/min) × (4 min) = 4 units in process at any time."},
+  {q:"If the same line transfers work in batches of 4, what happens to flow time?",
+   opts:["Stays at 4 min","Drops to 1 min","Rises to 16 min","Becomes infinite"], correct:2,
+   exp:"Each stage must finish all 4 units before passing the batch on: 4 min/stage × 4 stages = 16 minutes."},
+  {q:"Why might a company still choose to batch, despite the flow-time penalty?",
+   opts:["Batching always raises capacity","Long/expensive setups make batching worth it","Batching removes the need for QC","Customers prefer batched delivery"], correct:1,
+   exp:"If changeovers are slow or costly, batching amortizes that cost across more units — the reason SMED (fast changeovers) matters."},
+  {q:"In a PUSH system, what triggers production at a station?",
+   opts:["A signal from the downstream customer","Availability of inputs upstream","A forecast approved by leadership","Nothing — it's random"], correct:1,
+   exp:"Push systems produce whenever material/capacity is available, regardless of whether downstream actually needs it yet."},
+  {q:"What defines a PULL system?",
+   opts:["Upstream decides what to build","Downstream demand/consumption triggers upstream production","It needs zero inventory","It only applies to services"], correct:1,
+   exp:"In pull, the next station (or customer) signals a real need before the previous station produces anything."},
+  {q:"What does JIT (Just-In-Time) mean here?",
+   opts:["Producing as fast as physically possible","Having exactly what's needed, in the amount and place needed, exactly when needed","Producing large batches ahead of demand","Outsourcing to save time"], correct:1,
+   exp:"JIT is the 'hand-to-mouth' material flow that is the practical expression of pull."},
+  {q:"In a kanban system, what physically authorizes a station to produce more?",
+   opts:["The manager's daily schedule","A kanban card sent back from the downstream station","The month-end sales forecast","A supplier email"], correct:1,
+   exp:"The card travels backward from the consuming station and acts as the visible permission slip to produce one more unit."},
+  {q:"Under Jidoka, where is a defect cheapest to fix?",
+   opts:["At the end user","At final inspection","At your own station, the moment it happens","At the end of the line"], correct:2,
+   exp:"Cost escalates the further a defect travels ($ → $$$$$); catching it immediately at the source is cheapest."},
+  {q:"What does a 'radical' implementation of Jidoka actually require?",
+   opts:["Firing whoever made the mistake","Stopping the line until root cause is identified, even if not yet fixed","Adding more end-of-line inspectors","Ignoring minor defects to protect output"], correct:1,
+   exp:"The point is to surface and understand the root cause immediately, not let defective flow continue while someone investigates later."},
+  {q:"In the Kristen Cookie Co. example, why does cross-training increase capacity?",
+   opts:["It cuts the ingredients needed","Workers shift to whichever task has a backlog instead of sitting idle","It removes the need for an oven","It only helps if someone quits"], correct:1,
+   exp:"Flexible workers redeploy to wherever the bottleneck is at that moment, so total throughput rises without adding headcount."},
+  {q:"What's the main problem with a purely functional layout (all Roof Cut machines together, all Base Cut together, etc.)?",
+   opts:["It's too expensive to build","Material travels back and forth between departments, adding time and complexity","It needs more workers than a cell","It only works for one product"], correct:1,
+   exp:"The crisscrossing routes force parts to constantly move between separated departments, unlike a cell's straight-through flow."},
+  {q:"What does the iceberg diagram illustrate about high inventory?",
+   opts:["It improves customer satisfaction","It hides problems like late deliveries, scrap, and downtime","It has no downside","It always increases capacity"], correct:1,
+   exp:"Inventory is the water level; lowering it exposes the rocks (problems) that were previously hidden beneath the surface."},
+  {q:"In lean SERVICE operations, what substitutes for physical inventory as the thing lean tries to cut?",
+   opts:["Employee headcount","Customer/order waiting time","Office square footage","Marketing spend"], correct:1,
+   exp:"Services often can't stockpile inventory, so wait time plays the buffering role inventory plays in manufacturing."},
+  {q:"What's the cautionary takeaway from the Starbucks case?",
+   opts:["Speeding up service always improves the experience","Chasing speed/efficiency without regard to what customers value can hurt the experience","Starbucks should abandon lean entirely","Customers never notice operational changes"], correct:1,
+   exp:"The featured customer felt rushed and lost the relaxed experience she valued — lean must stay aligned with what 'good operations' means to that customer, not just raw speed."}
+];
+
+let qIdx = 0, score = 0, answered = [];
+const quizHost = document.getElementById('quizHost');
+const scorePill = document.getElementById('scorePill');
+const progPill = document.getElementById('progPill');
+const quizSummary = document.getElementById('quizSummary');
+
+function renderQuiz(){
+  quizHost.innerHTML='';
+  quizSummary.classList.remove('show');
+  QUESTIONS.forEach((item, idx)=>{
+    const card = document.createElement('div');
+    card.className='qcard'+(idx===qIdx?' show':'');
+    card.dataset.idx = idx;
+    card.innerHTML = `
+      <div class="qnum">Question ${idx+1} of ${QUESTIONS.length}</div>
+      <div class="qtext">${item.q}</div>
+      <div class="opts"></div>
+      <div class="feedback note" id="fb-${idx}"></div>
+      <div class="quiz-nav">
+        <button class="btn secondary prevQ" ${idx===0?'disabled':''}>← Back</button>
+        <button class="btn nextQ" ${idx===QUESTIONS.length-1?'style=display:none;':''}>Next →</button>
+      </div>
+    `;
+    const optsWrap = card.querySelector('.opts');
+    item.opts.forEach((optText, oIdx)=>{
+      const b = document.createElement('button');
+      b.className='opt';
+      b.textContent = optText;
+      b.addEventListener('click', ()=>selectAnswer(idx,oIdx));
+      optsWrap.appendChild(b);
+    });
+    card.querySelector('.prevQ').addEventListener('click', ()=>goTo(idx-1));
+    card.querySelector('.nextQ').addEventListener('click', ()=>{
+      if(idx===QUESTIONS.length-1){ showSummary(); } else { goTo(idx+1); }
+    });
+    quizHost.appendChild(card);
+  });
+  updateProgress();
+}
+
+function goTo(i){
+  qIdx = i;
+  document.querySelectorAll('.qcard').forEach(c=>c.classList.toggle('show', parseInt(c.dataset.idx,10)===i));
+  updateProgress();
+}
+
+function updateProgress(){
+  progPill.textContent = `Question ${qIdx+1} of ${QUESTIONS.length}`;
+  scorePill.textContent = `Score: ${score} / ${answered.filter(Boolean).length}`;
+}
+
+function selectAnswer(idx, oIdx){
+  if(answered[idx]!==undefined) return;
+  answered[idx]=true;
+  const item = QUESTIONS[idx];
+  const card = quizHost.querySelector(`.qcard[data-idx="${idx}"]`);
+  const opts = card.querySelectorAll('.opt');
+  opts.forEach((b,i)=>{
+    b.disabled = true;
+    if(i===item.correct) b.classList.add('correct');
+    if(i===oIdx && oIdx!==item.correct) b.classList.add('wrong');
+  });
+  if(oIdx===item.correct) score++;
+  const fb = card.querySelector('.feedback');
+  fb.classList.add('show', oIdx===item.correct?'go':'stop');
+  fb.innerHTML = `<b>${oIdx===item.correct?'Correct':'Not quite'}</b>${item.exp}`;
+  updateProgress();
+}
+
+function showSummary(){
+  quizHost.querySelectorAll('.qcard').forEach(c=>c.classList.remove('show'));
+  quizSummary.classList.add('show');
+  document.getElementById('finalScore').textContent = `${score} / ${QUESTIONS.length}`;
+  const pct = score/QUESTIONS.length;
+  let msg;
+  if(pct===1) msg="Every station, nailed. You could teach this session.";
+  else if(pct>=0.75) msg="Solid grasp — revisit the ones you missed once more before the exam.";
+  else if(pct>=0.5) msg="Halfway there. Go back through the stations you got wrong and re-run the interactive demos.";
+  else msg="Worth another full pass through the stations before the exam — start from Philosophy.";
+  document.getElementById('finalMsg').textContent = msg;
+}
+
+document.getElementById('retakeQuiz').addEventListener('click', ()=>{
+  score=0; answered=[]; qIdx=0; renderQuiz();
+});
+
+renderQuiz();
+</script>
+</body>
+</html>
