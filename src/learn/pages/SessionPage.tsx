@@ -21,6 +21,7 @@ import {
   fetchScenarios,
   fetchSessionContent,
   recordAttempt,
+  topicKey,
   upsertMastery,
 } from "../lib/db";
 import { pickNext, retryFitsInRound, type RetryEntry } from "../lib/adaptive";
@@ -30,6 +31,7 @@ import { ConceptCard } from "../components/ConceptCard";
 import { ScenarioSetup } from "../components/ScenarioSetup";
 import { RemediationCard } from "../components/RemediationCard";
 import { ProfileSummary } from "../components/ProfileSummary";
+import { QuestionReview } from "../components/QuestionReview";
 import { Confetti } from "../components/Confetti";
 import { FormulaSheet } from "../components/FormulaSheet";
 
@@ -91,6 +93,13 @@ export function SessionPage({ profile, onXpChange }: Props) {
   const [current, setCurrent] = useState<Question | null>(null);
   const [askedIds, setAskedIds] = useState<Set<string>>(new Set());
   const [answered, setAnswered] = useState<Question[]>([]);
+  /** What the student picked, per question id. Null means skipped. Drives the review view; a
+      skipped question is deliberately absent from `answered` so it costs no round slot. */
+  const [answerLog, setAnswerLog] = useState<Record<string, string | null>>({});
+  /** Index into `seenOrder` while reviewing an earlier question; null means playing the live one. */
+  const [reviewIndex, setReviewIndex] = useState<number | null>(null);
+  /** Every question already served this round, answered or skipped, in the order it was served. */
+  const [seenOrder, setSeenOrder] = useState<Question[]>([]);
   const [seenTopics, setSeenTopics] = useState<Set<string>>(new Set());
   const [retryQueue, setRetryQueue] = useState<RetryEntry[]>([]);
   const [miss, setMiss] = useState<MissContext | null>(null);
@@ -146,7 +155,10 @@ export function SessionPage({ profile, onXpChange }: Props) {
       });
 
       const levels: Record<string, MasteryLevel> = {};
-      for (const q of filtered) levels[q.topic] = m[q.topic]?.level ?? 0;
+      for (const q of filtered) {
+        const key = topicKey(q.course_id, q.topic);
+        levels[key] = m[key]?.level ?? 0;
+      }
 
       setPool(filtered);
       setAllQuestions(all);
@@ -159,6 +171,9 @@ export function SessionPage({ profile, onXpChange }: Props) {
       setAnswered([]);
       setSeenTopics(new Set());
       setRetryQueue([]);
+      setSeenOrder([]);
+      setAnswerLog({});
+      setReviewIndex(null);
       setMiss(null);
       setPending([]);
       setLastChainAnswer(null);
@@ -209,8 +224,8 @@ export function SessionPage({ profile, onXpChange }: Props) {
 
     // Teach before the first question on a topic only when it has never been attempted. A student
     // already at Familiar goes straight to the question.
-    const unseen = !seen.has(next.topic) && Boolean(conceptMap[next.topic]);
-    const neverAttempted = (m[next.topic]?.level ?? 0) === 0;
+    const unseen = !seen.has(next.topic) && Boolean(conceptMap[topicKey(next.course_id, next.topic)]);
+    const neverAttempted = (m[topicKey(next.course_id, next.topic)]?.level ?? 0) === 0;
     setStage(unseen && neverAttempted ? "concept" : "playing");
   }
 
@@ -228,9 +243,10 @@ export function SessionPage({ profile, onXpChange }: Props) {
   async function handleAnswerContinue(correct: boolean, chosen: string) {
     if (!current) return;
 
-    const previous = mastery[current.topic] ?? blankMastery(profile.id, current.course_id, current.topic);
+    const currentKey = topicKey(current.course_id, current.topic);
+    const previous = mastery[currentKey] ?? blankMastery(profile.id, current.course_id, current.topic);
     const updated = applyAnswer(previous, correct);
-    const newMastery = { ...mastery, [current.topic]: updated };
+    const newMastery = { ...mastery, [currentKey]: updated };
     setMastery(newMastery);
 
     const newAsked = new Set(askedIds).add(current.id);
@@ -259,6 +275,8 @@ export function SessionPage({ profile, onXpChange }: Props) {
 
     setAskedIds(newAsked);
     setAnswered((prev) => [...prev, current]);
+    setSeenOrder((prev) => [...prev, current]);
+    setAnswerLog((prev) => ({ ...prev, [current.id]: chosen }));
     const newSeenTopics = new Set(seenTopics).add(current.topic);
     setSeenTopics(newSeenTopics);
 
@@ -288,6 +306,23 @@ export function SessionPage({ profile, onXpChange }: Props) {
       newAnsweredCount,
       current.correct_answer,
     );
+  }
+
+  /**
+   * Passes on the current question without answering it.
+   *
+   * Nothing is recorded: no attempt, no XP, no mastery change, and `answered` is untouched so a
+   * skip does not consume one of the round's ROUND_SIZE slots — skipping shortens nothing, it just
+   * moves past a question the student does not want right now. The id does go into `askedIds`, so
+   * the same question is not served again later in this round.
+   */
+  function handleSkip() {
+    if (!current) return;
+    const newAsked = new Set(askedIds).add(current.id);
+    setAskedIds(newAsked);
+    setSeenOrder((prev) => [...prev, current]);
+    setAnswerLog((prev) => ({ ...prev, [current.id]: null }));
+    advance(pool, mastery, newAsked, seenTopics, concepts, pending, retryQueue, answered.length, null);
   }
 
   function handleRemediationContinue() {
@@ -362,7 +397,7 @@ export function SessionPage({ profile, onXpChange }: Props) {
   }
 
   if (stage === "concept" && current) {
-    const concept = concepts[current.topic];
+    const concept = concepts[topicKey(current.course_id, current.topic)];
     if (!concept) return null; // guaranteed non-null by advance's hasConcept check
     return (
       // Top-aligned, not vertically centred: a concept note can now run long enough to carry an
@@ -382,7 +417,7 @@ export function SessionPage({ profile, onXpChange }: Props) {
         <RemediationCard
           question={miss.question}
           chosen={miss.chosen}
-          concept={concepts[miss.question.topic]}
+          concept={concepts[topicKey(miss.question.course_id, miss.question.topic)]}
           previousLevel={miss.previousLevel}
           newLevel={miss.newLevel}
           willRetry={miss.willRetry}
@@ -418,9 +453,10 @@ export function SessionPage({ profile, onXpChange }: Props) {
         )}
 
         {(() => {
+          // Keyed by course+topic, so the map key is not displayable — the row's own topic is.
           const moved = Object.entries(mastery)
-            .filter(([topic]) => startLevels[topic] !== undefined)
-            .map(([topic, m]) => ({ topic, from: startLevels[topic], to: m.level }))
+            .filter(([key]) => startLevels[key] !== undefined)
+            .map(([key, m]) => ({ key, topic: m.topic, from: startLevels[key], to: m.level }))
             .filter((r) => r.from !== r.to);
           if (moved.length === 0) return null;
           return (
@@ -430,7 +466,7 @@ export function SessionPage({ profile, onXpChange }: Props) {
               </div>
               {moved.map((r) => (
                 <div
-                  key={r.topic}
+                  key={r.key}
                   className="flex justify-between gap-3 text-sm py-1.5 border-b border-line last:border-0"
                 >
                   <span className="text-ink-soft">{r.topic.replace(/_/g, " ")}</span>
@@ -454,6 +490,31 @@ export function SessionPage({ profile, onXpChange }: Props) {
   }
 
   if (!current) return null;
+
+  // Reviewing an earlier question. Read-only by design — see QuestionReview for why re-answering
+  // is not offered.
+  if (reviewIndex !== null && seenOrder[reviewIndex]) {
+    const reviewed = seenOrder[reviewIndex];
+    const atEnd = reviewIndex >= seenOrder.length - 1;
+    return (
+      <div className="flex flex-col items-center px-5 sm:px-8 py-8">
+        <div className={COLUMN}>
+          <QuestionReview
+            key={reviewed.id}
+            question={reviewed}
+            chosen={answerLog[reviewed.id] ?? null}
+            position={reviewIndex + 1}
+            total={seenOrder.length}
+            canGoBack={reviewIndex > 0}
+            onBack={() => setReviewIndex(reviewIndex - 1)}
+            forwardLabel={atEnd ? "Back to current question" : "Next"}
+            onForward={() => setReviewIndex(atEnd ? null : reviewIndex + 1)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   const sheet = sessionContent[current.session];
   return (
     <div className="flex flex-col items-center px-5 sm:px-8 py-8">
@@ -482,6 +543,22 @@ export function SessionPage({ profile, onXpChange }: Props) {
           />
         )}
         <QuestionCard key={current.id} question={current} onContinue={handleAnswerContinue} />
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-4">
+          <button
+            onClick={() => setReviewIndex(seenOrder.length - 1)}
+            disabled={seenOrder.length === 0}
+            className="text-sm text-ink-soft hover:text-ink transition-colors disabled:opacity-40 disabled:hover:text-ink-soft"
+          >
+            ← Review previous
+          </button>
+          <button
+            onClick={handleSkip}
+            className="text-sm text-ink-soft hover:text-ink transition-colors"
+            title="Move on without answering — this does not count against your score"
+          >
+            Skip this one →
+          </button>
+        </div>
       </div>
       {sheet?.formula_sheet && (
         <FormulaSheet sheet={sheet.formula_sheet} session={current.session} title={sheet.title} />

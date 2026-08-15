@@ -9,6 +9,7 @@ import {
   fetchQuestions,
   fetchSessionContent,
   fetchMastery,
+  topicKey,
 } from "../lib/db";
 import { groupBySession, type SessionGroup } from "../lib/sessions";
 import { MaterialsList } from "../components/MaterialsList";
@@ -72,7 +73,7 @@ export function SessionsPage({ profile }: Props) {
     setSessionContent(sc);
     setCourseContent(cc);
     setMaterials(mats);
-    setGroups(groupBySession(qs, cs, mastery, thisCourse?.total_sessions ?? 0, sc));
+    setGroups(groupBySession(courseId, qs, cs, mastery, thisCourse?.total_sessions ?? 0, sc));
   }
 
   if (!groups || !course) {
@@ -80,7 +81,7 @@ export function SessionsPage({ profile }: Props) {
   }
 
   const currentGroup = groups.find((g) => g.session === activeSession) ?? null;
-  const currentConcept = activeTopic ? concepts[activeTopic] : null;
+  const currentConcept = activeTopic ? concepts[topicKey(course.id, activeTopic)] : null;
   const currentTopicMeta = currentGroup?.topics.find((t) => t.topic === activeTopic) ?? null;
   const questionsForTopic = activeTopic ? questions.filter((q) => q.topic === activeTopic) : [];
 
@@ -326,7 +327,7 @@ export function SessionsPage({ profile }: Props) {
                   )}
                   <div className="flex flex-col divide-y divide-line">
                     {currentGroup.topics.map((t) => {
-                      const concept = concepts[t.topic];
+                      const concept = concepts[topicKey(course.id, t.topic)];
                       if (!concept) return null;
                       return (
                         <div key={t.topic} className="py-6 first:pt-0">

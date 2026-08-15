@@ -1,4 +1,5 @@
 import type { Concept, MasteryLevel, Question, SessionContent, TopicMastery } from "../types";
+import { topicKey } from "./db";
 
 export interface SessionTopic {
   topic: string;
@@ -15,8 +16,12 @@ export interface SessionGroup {
 
 /** Groups topics by the session their questions belong to. Session titles and count come from the
     course's own data (courses.total_sessions, session_content.title) — not a hardcoded map, since
-    every course has its own session numbering and titles. */
+    every course has its own session numbering and titles.
+
+    `courseId` is what the concept and mastery maps are keyed on alongside the topic; those maps may
+    be fetched unscoped, so a bare topic name is not enough to look a row up unambiguously. */
 export function groupBySession(
+  courseId: string,
   questions: Question[],
   concepts: Record<string, Concept>,
   mastery: Record<string, TopicMastery>,
@@ -37,8 +42,8 @@ export function groupBySession(
     const topics: SessionTopic[] = topicCounts
       ? Array.from(topicCounts.entries()).map(([topic, questionCount]) => ({
           topic,
-          title: concepts[topic]?.title ?? topic.replace(/_/g, " "),
-          level: mastery[topic]?.level ?? 0,
+          title: concepts[topicKey(courseId, topic)]?.title ?? topic.replace(/_/g, " "),
+          level: mastery[topicKey(courseId, topic)]?.level ?? 0,
           questionCount,
         }))
       : [];

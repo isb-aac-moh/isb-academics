@@ -1,4 +1,5 @@
 import type { Attempt, Concept, Question, Student } from "../types";
+import { topicKey } from "../lib/db";
 import { useCountUp } from "../lib/useCountUp";
 import { StreakFlame } from "./StreakFlame";
 
@@ -6,6 +7,8 @@ const XP_PER_LEVEL = 100;
 const MIN_ATTEMPTS_TO_RANK = 2;
 
 interface TopicAccuracy {
+  key: string;
+  courseId: string;
   topic: string;
   title: string;
   correct: number;
@@ -13,30 +16,60 @@ interface TopicAccuracy {
   accuracy: number;
 }
 
+/**
+ * Accuracy per topic, rolled up across every course the student has practised.
+ *
+ * Keyed on course + topic rather than topic alone. This panel is fed by unscoped fetches, and
+ * topic names are only unique *within* a course — MKTG and OPMG happen not to collide today, but
+ * nothing stops a future course from also calling something `break_even`. Keyed on the bare name,
+ * two courses' attempts would silently merge into one row carrying whichever course's title was
+ * read last.
+ */
 function computeTopicAccuracy(
   attempts: Attempt[],
   questions: Question[],
   concepts: Record<string, Concept>,
 ): TopicAccuracy[] {
-  const topicOf: Record<string, string> = {};
-  for (const q of questions) topicOf[q.id] = q.topic;
+  const questionById: Record<string, Question> = {};
+  for (const q of questions) questionById[q.id] = q;
 
-  const stats: Record<string, { correct: number; total: number }> = {};
+  const stats: Record<string, { courseId: string; topic: string; correct: number; total: number }> = {};
   for (const a of attempts) {
-    const topic = topicOf[a.question_id];
-    if (!topic) continue;
-    stats[topic] ??= { correct: 0, total: 0 };
-    stats[topic].total += 1;
-    if (a.correct) stats[topic].correct += 1;
+    const q = questionById[a.question_id];
+    if (!q) continue;
+    const key = topicKey(q.course_id, q.topic);
+    stats[key] ??= { courseId: q.course_id, topic: q.topic, correct: 0, total: 0 };
+    stats[key].total += 1;
+    if (a.correct) stats[key].correct += 1;
   }
 
-  return Object.entries(stats).map(([topic, s]) => ({
-    topic,
-    title: concepts[topic]?.title ?? topic.replace(/_/g, " "),
+  return Object.entries(stats).map(([key, s]) => ({
+    key,
+    courseId: s.courseId,
+    topic: s.topic,
+    title: concepts[key]?.title ?? s.topic.replace(/_/g, " "),
     correct: s.correct,
     total: s.total,
     accuracy: s.correct / s.total,
   }));
+}
+
+/** One row of the strongest/weakest lists. The course chip is what keeps a cross-course list
+    readable — "Break-Even Volume" alone does not say which exam it belongs to. */
+function TopicRow({ item, tone }: { item: TopicAccuracy; tone: "good" | "bad" }) {
+  return (
+    <div className="flex justify-between items-baseline gap-3 text-sm">
+      <span className="flex items-baseline gap-2 min-w-0">
+        <span className="truncate">{item.title}</span>
+        <span className="shrink-0 text-[10px] uppercase tracking-wide text-ink-soft font-semibold">
+          {item.courseId}
+        </span>
+      </span>
+      <span className={`${tone === "good" ? "text-good" : "text-bad"} font-medium tabular shrink-0`}>
+        {Math.round(item.accuracy * 100)}%
+      </span>
+    </div>
+  );
 }
 
 interface Props {
@@ -117,10 +150,7 @@ export function ProfileSummary({ profile, attempts, questions, concepts }: Props
               <h3 className="text-xs uppercase tracking-wide text-ink-soft mb-2 font-medium">Doing well on</h3>
               <div className="flex flex-col gap-1.5">
                 {strongest.map((t) => (
-                  <div key={t.topic} className="flex justify-between text-sm">
-                    <span>{t.title}</span>
-                    <span className="text-good font-medium tabular">{Math.round(t.accuracy * 100)}%</span>
-                  </div>
+                  <TopicRow key={t.key} item={t} tone="good" />
                 ))}
               </div>
             </div>
@@ -130,10 +160,7 @@ export function ProfileSummary({ profile, attempts, questions, concepts }: Props
               <h3 className="text-xs uppercase tracking-wide text-ink-soft mb-2 font-medium">Needs more practice</h3>
               <div className="flex flex-col gap-1.5">
                 {weakest.map((t) => (
-                  <div key={t.topic} className="flex justify-between text-sm">
-                    <span>{t.title}</span>
-                    <span className="text-bad font-medium tabular">{Math.round(t.accuracy * 100)}%</span>
-                  </div>
+                  <TopicRow key={t.key} item={t} tone="bad" />
                 ))}
               </div>
             </div>

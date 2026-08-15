@@ -127,6 +127,8 @@ export interface CohortStats {
 }
 
 export interface TopicStat {
+  /** Topic names are unique only within a course, so cohort stats carry the course too. */
+  course_code: string;
   topic: string;
   total: number;
   accuracy: number;
