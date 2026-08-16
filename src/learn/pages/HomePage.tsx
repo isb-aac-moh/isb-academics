@@ -48,6 +48,7 @@ function DesktopIcon({ icon: Icon, label, onClick, badge }: DesktopIconProps) {
     uses it elsewhere (HomeGuide's "... are live today", SessionPage's read-only note). */
 const SHORT_LABELS: Record<string, string> = {
   BANM2: "BANM",
+  MADM2: "MADM",
 };
 
 /** The post-login "desktop" — a scene with icons as the primary way to get anywhere else in the

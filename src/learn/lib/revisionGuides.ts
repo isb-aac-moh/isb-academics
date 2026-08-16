@@ -68,6 +68,54 @@ export const REVISION_GUIDES: Record<string, RevisionGuide> = {
       },
     ],
   },
+  MADM2: {
+    course: "MADM2",
+    title: "MADM End-Term Revision Guide",
+    subtitle:
+      "Five field manuals covering Prof. Dutta's half of the course, from activity-based costing through to transfer pricing across borders.",
+    sessions: [
+      {
+        slug: "6",
+        label: "Session 6",
+        title: "Activity-Based Costing",
+        blurb:
+          "Why a firm's own cost system misleads it about which products make money — traditional volume-based allocation, the four-level cost hierarchy, cross-subsidy, and when ABC is worth building.",
+        file: "/madm-revision/session-06.html",
+      },
+      {
+        slug: "7",
+        label: "Session 7",
+        title: "Customers, Control and Budgets",
+        blurb:
+          "ABC pointed at customers rather than products, then the structure that decides who is measured on what: decentralisation, responsibility centres, and the budget as forecast, contract and target at once.",
+        file: "/madm-revision/session-07.html",
+      },
+      {
+        slug: "8",
+        label: "Session 8",
+        title: "Variance Analysis",
+        blurb:
+          "Separating what the sales team owns from what the plant owns. The flexible budget, the decomposition tree, price versus quantity, and the Buckeye National Bank case.",
+        file: "/madm-revision/session-08.html",
+      },
+      {
+        slug: "9",
+        label: "Session 9",
+        title: "Transfer Pricing I",
+        blurb:
+          "How an investment centre is scored — ROI, residual income and EVA — and the rule that sets an internal price: incremental cost plus opportunity cost, against the buyer's external alternative.",
+        file: "/madm-revision/session-09.html",
+      },
+      {
+        slug: "10",
+        label: "Session 10",
+        title: "Transfer Pricing II",
+        blurb:
+          "Which policy to set, what a mandated full-cost formula costs, how negotiations turn into holdup, and how the whole apparatus becomes a tax question once divisions sit in different countries.",
+        file: "/madm-revision/session-10.html",
+      },
+    ],
+  },
 };
 
 export function getRevisionGuide(course: string | undefined): RevisionGuide | null {

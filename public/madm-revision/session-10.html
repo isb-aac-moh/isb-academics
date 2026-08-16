@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transfer Pricing II — Field Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#0A1B33;
+    --navy-panel:#0F2745;
+    --navy-panel-2:#14304F;
+    --grid-line: rgba(150,205,235,0.07);
+    --blue-line:#6FB7E0;
+    --blue-bright:#BFE6F7;
+    --paper:#EDE6D3;
+    --paper-2:#E4DBC4;
+    --ink:#1D1B14;
+    --ink-soft:#4A4636;
+    --amber:#F2B705;
+    --stop-red:#D6544F;
+    --go-green:#4E9A6E;
+    --violet:#9C8FD6;
+    --font-display:'Big Shoulders Display', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(111,183,224,0.10), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(111,183,224,0.08), transparent 55%),
+      var(--navy-deep);
+    background-attachment:fixed;
+    color:var(--blue-bright);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:34px 34px;
+    z-index:0;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--amber); color:var(--ink);}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  .masthead{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:38px 24px 18px;}
+  .masthead-top{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; border-bottom:1px solid rgba(191,230,247,0.25); padding-bottom:16px;}
+  .doc-code{font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; color:var(--blue-line); text-transform:uppercase;}
+  h1.title{font-family:var(--font-display); font-weight:800; font-size:clamp(30px, 5.6vw, 64px); line-height:0.94; margin:6px 0 0; letter-spacing:0.3px; color:#fff; text-transform:uppercase;}
+  .title .accent{color:var(--amber);}
+  .subtitle{font-family:var(--font-body); font-size:15px; color:var(--blue-bright); opacity:0.85; max-width:560px; margin-top:6px;}
+  .stamp{font-family:var(--font-mono); font-size:11px; text-align:right; color:var(--blue-line); letter-spacing:.08em; line-height:1.7;}
+  .stamp b{color:var(--blue-bright);}
+
+  .panel{position:relative; max-width:1180px; margin:0 auto; padding:0 24px 100px; z-index:1;}
+  .switchboard{display:flex; flex-wrap:wrap; gap:8px; margin:26px 0 28px; padding:10px; background:rgba(10,27,51,0.55); border:1px solid rgba(191,230,247,0.18); border-radius:10px;}
+  .stn{appearance:none; border:1px solid rgba(191,230,247,0.22); background:var(--navy-panel); color:var(--blue-bright); font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; padding:10px 14px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:background .15s ease, border-color .15s ease, transform .1s ease;}
+  .stn:hover{border-color:var(--blue-line); transform:translateY(-1px);}
+  .stn .lamp{width:7px; height:7px; border-radius:50%; background:rgba(191,230,247,0.3); transition:background .15s ease, box-shadow .15s ease; flex-shrink:0;}
+  .stn.active{background:var(--paper); color:var(--ink); border-color:var(--paper);}
+  .stn.active .lamp{background:var(--amber); box-shadow:0 0 8px 1px var(--amber);}
+  .stn .num{opacity:0.6;}
+  .stn.active .num{opacity:0.9;}
+
+  .sheet{background:var(--paper); color:var(--ink); border-radius:10px; padding:clamp(20px, 4vw, 48px); position:relative; box-shadow:0 24px 60px -20px rgba(0,0,0,0.55);}
+  .sheet::before{content:""; position:absolute; inset:10px; border:1px dashed rgba(29,27,20,0.14); border-radius:6px; pointer-events:none;}
+  .tab-panel{display:none; animation:fadeIn .35s ease;}
+  .tab-panel.show{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px;}
+  h2.head{font-family:var(--font-display); font-weight:800; font-size:clamp(26px,3.8vw,42px); text-transform:uppercase; letter-spacing:.3px; margin:0 0 6px; line-height:0.98;}
+  .dek{font-size:16px; max-width:700px; color:var(--ink-soft); margin-bottom:26px;}
+  h3.sub{font-family:var(--font-display); font-weight:700; font-size:21px; text-transform:uppercase; letter-spacing:.3px; margin:30px 0 10px;}
+  p{margin:0 0 12px;}
+  .lead{font-size:15.5px;}
+
+  .note{background:var(--paper-2); border-left:3px solid var(--amber); border-radius:4px; padding:14px 16px; margin:16px 0; font-size:14.5px;}
+  .note b{font-family:var(--font-mono); text-transform:uppercase; font-size:11px; letter-spacing:.08em; display:block; margin-bottom:4px; color:var(--ink-soft);}
+  .note.stop{border-left-color:var(--stop-red);}
+  .note.go{border-left-color:var(--go-green);}
+  .note.violet{border-left-color:var(--violet);}
+
+  .grid2{display:grid; grid-template-columns:1.05fr 1fr; gap:26px; align-items:start;}
+  @media(max-width:860px){.grid2{grid-template-columns:1fr;}}
+
+  .diagram-frame{background:var(--navy-panel); border-radius:8px; padding:18px; border:1px solid rgba(191,230,247,0.15);}
+  .diagram-frame svg{width:100%; height:auto; display:block;}
+  .diagram-cap{font-family:var(--font-mono); font-size:10.5px; color:var(--blue-line); text-align:center; margin-top:8px; letter-spacing:.05em;}
+
+  ul.tidy{padding-left:18px; margin:10px 0;}
+  ul.tidy li{margin-bottom:6px;}
+
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin:14px 0;}
+  .btn{font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; text-transform:uppercase; background:var(--ink); color:var(--paper); border:none; padding:10px 16px; border-radius:5px; cursor:pointer; transition:transform .1s ease, background .15s ease;}
+  .btn:hover{transform:translateY(-1px); background:#332f21;}
+  .btn.secondary{background:transparent; color:var(--ink); border:1px solid var(--ink);}
+
+  .toggle-wrap{display:flex; gap:0; margin:14px 0 20px; border:1px solid var(--ink); border-radius:6px; overflow:hidden; width:fit-content; flex-wrap:wrap;}
+  .toggle-wrap button{font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; padding:9px 16px; border:none; background:transparent; color:var(--ink); cursor:pointer;}
+  .toggle-wrap button.active{background:var(--ink); color:var(--paper);}
+
+  .ctrl-block{margin:12px 0;}
+  .ctrl-block label{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px;}
+  .ctrl-block label .live{color:var(--stop-red); font-weight:700;}
+  .ctrl-block input[type=range]{width:100%; accent-color:var(--stop-red);}
+
+  .readout-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:16px 0;}
+  .readout-card{background:var(--ink); color:var(--paper); border-radius:8px; padding:12px; text-align:center;}
+  .readout-card .val{font-family:var(--font-mono); font-weight:700; font-size:22px; color:var(--amber);}
+  .readout-card .lbl{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; opacity:.75; margin-top:4px;}
+  .readout-card.blue .val{color:var(--blue-bright);}
+  .readout-card.violet .val{color:var(--violet);}
+  .readout-card.green .val{color:var(--go-green);}
+  .readout-card.red .val{color:var(--stop-red);}
+
+  .formula-box{background:var(--ink); color:var(--paper); border-radius:6px; padding:12px 16px; font-family:var(--font-mono); font-size:14px; text-align:center; margin:14px 0;}
+
+  .cheat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-top:12px;}
+  .cheat-card{background:var(--navy-panel); border-radius:8px; padding:16px; border:1px solid rgba(191,230,247,0.15);}
+  .cheat-card h4{font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--amber); margin:0 0 8px;}
+  .cheat-card ul{margin:0; padding-left:16px; font-size:13px; color:var(--blue-bright);}
+  .cheat-card li{margin-bottom:5px;}
+  .cheat-card .f{font-family:var(--font-mono); font-size:12px; background:rgba(0,0,0,0.25); padding:6px 8px; border-radius:4px; margin-top:6px;}
+
+  .app-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-top:16px;}
+  .app-card{background:var(--navy-panel); border-radius:8px; padding:16px; border:1px solid rgba(191,230,247,0.15);}
+  .app-card h4{font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--blue-bright); margin:0 0 6px;}
+  .app-card p{font-size:13px; color:var(--blue-line); margin:0;}
+
+  .errtable{width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;}
+  .errtable th{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; text-align:left; padding:8px 10px; background:var(--ink); color:var(--paper);}
+  .errtable td{padding:10px; border-bottom:1px solid rgba(29,27,20,0.12); vertical-align:top;}
+  .errtable tr:last-child td{border-bottom:none;}
+
+  .quiz-top{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;}
+  .score-pill{font-family:var(--font-mono); font-size:12px; background:var(--ink); color:var(--paper); padding:8px 14px; border-radius:20px;}
+  .qcard{display:none;}
+  .qcard.show{display:block; animation:fadeIn .3s ease;}
+  .qnum{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px;}
+  .qtext{font-family:var(--font-body); font-weight:600; font-size:17.5px; margin-bottom:16px;}
+  .opt{display:block; width:100%; text-align:left; background:var(--paper-2); border:1px solid rgba(29,27,20,0.15); border-radius:6px; padding:12px 14px; margin-bottom:9px; font-family:var(--font-body); font-size:14.5px; color:var(--ink); cursor:pointer; transition:border-color .15s ease, background .15s ease;}
+  .opt:hover{border-color:var(--ink);}
+  .opt.correct{background:rgba(78,154,110,0.18); border-color:var(--go-green);}
+  .opt.wrong{background:rgba(214,84,79,0.16); border-color:var(--stop-red);}
+  .opt[disabled]{cursor:default;}
+  .feedback{display:none; margin-top:6px;}
+  .feedback.show{display:block;}
+  .quiz-nav{display:flex; justify-content:space-between; margin-top:20px;}
+  .quiz-summary{display:none; text-align:center; padding:20px 0;}
+  .quiz-summary.show{display:block;}
+  .quiz-summary .big{font-family:var(--font-display); font-size:52px; color:var(--ink); font-weight:800;}
+
+  .footer-strip{max-width:1180px; margin:0 auto; padding:0 24px 50px; font-family:var(--font-mono); font-size:11px; color:var(--blue-line); letter-spacing:.06em; text-align:center; opacity:.6;}
+
+  table.simple{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+  table.simple th{text-align:left; padding:7px 6px; font-family:var(--font-mono); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; border-bottom:2px solid var(--ink);}
+  table.simple td{padding:7px 6px; border-bottom:1px solid rgba(29,27,20,0.12);}
+
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div>
+      <div class="doc-code">MADM2 // SESSION 10 // FIELD MANUAL</div>
+      <h1 class="title">Transfer <span class="accent">Pricing</span> II</h1>
+      <div class="subtitle">Transfer pricing in practice: which policy to set, what a mandated full-cost formula costs, how negotiations turn into holdup, and how the whole apparatus becomes a tax question across borders.</div>
+    </div>
+    <div class="stamp">
+      INSTRUCTOR: <b>S. DUTTA</b><br>
+      REV: <b>2026-08</b><br>
+      STATIONS: <b>7</b>
+    </div>
+  </div>
+</header>
+
+<main class="panel">
+  <nav class="switchboard" id="switchboard">
+    <button class="stn active" data-tab="policy"><span class="lamp"></span><span class="num">00</span> Choosing a Policy</button>
+    <button class="stn" data-tab="fullcost"><span class="lamp"></span><span class="num">01</span> The Full-Cost-Plus Trap</button>
+    <button class="stn" data-tab="negotiation"><span class="lamp"></span><span class="num">02</span> Negotiation and Holdup</button>
+    <button class="stn" data-tab="international"><span class="lamp"></span><span class="num">03</span> Tax and Arm's Length</button>
+    <button class="stn" data-tab="close"><span class="lamp"></span><span class="num">04</span> Closing the Course</button>
+    <button class="stn" data-tab="quiz"><span class="lamp"></span>EXAM</button>
+    <button class="stn" data-tab="cheat"><span class="lamp"></span>Cheat Sheet</button>
+  </nav>
+
+  <div class="sheet">
+<section class="tab-panel show" id="tab-policy">
+  <div class="eyebrow">Station 00</div>
+
+  <h2 class="head">Choosing a <span style="color:var(--amber)">Policy</span></h2>
+  <div class="dek">Why have a policy at all? Because resolving disputes case by case pulls top management in constantly, undermines the decentralisation the firm chose, eats executive time, and asks the centre to arbitrate with local information it does not have.</div>
+
+  <table class="errtable">
+    <tr><th>Policy</th><th>Strength</th><th>Weakness</th><th>Share of firms</th></tr>
+    <tr><td><b>Market-based</b></td><td>Objective, and equals the right answer at full capacity</td><td>Needs a competitive external market to exist</td><td>~30%</td></tr>
+    <tr><td><b>Negotiated</b></td><td>Preserves autonomy; uses the divisions' own information</td><td>Haggling, conflict, bargaining-power outcomes</td><td>~24%</td></tr>
+    <tr><td><b>Cost-based</b></td><td>Simple to administer, always available</td><td>Distorts sourcing whenever sourcing is delegated</td><td>~46%</td></tr>
+  </table>
+  <p style="font-size:13.5px; color:var(--ink-soft);">Cost-based splits into variable cost 5%, full cost 24% and cost-plus 17%.</p>
+
+  <div class="note go"><b>The rule that falls out</b>Cost-based policies are workable when sourcing is <b>mandated</b> internally, because then the price only moves reported profit and cannot change a decision. Once sourcing is delegated, negotiated prices are the better default.</div>
+
+</section>
+<section class="tab-panel" id="tab-fullcost">
+  <div class="eyebrow">Station 01</div>
+
+  <h2 class="head">The Full-Cost-Plus <span style="color:var(--stop-red)">Trap</span></h2>
+  <div class="dek">The worked example the session turns on, and the practice final tests it directly.</div>
+
+  <h3 class="sub">The setup</h3>
+  <ul class="tidy">
+    <li>Divisions may source where they like; internal transfers are priced at the seller's budgeted full cost plus 10%</li>
+    <li>Division A's budgeted full cost is $350 &mdash; $150 variable, $200 fixed unitised over budgeted volume</li>
+    <li>A's capacity is 100,000 units and it can sell only 70,000 externally</li>
+    <li>Division B needs 20,000 units and can buy outside at $300</li>
+  </ul>
+
+  <div class="grid2">
+    <div>
+      <h3 class="sub">What Division B sees</h3>
+      <table class="simple">
+        <tr><th></th><th>Internal</th><th>External</th></tr>
+        <tr><td>Cost per unit</td><td>$385</td><td>$300</td></tr>
+        <tr><td>Total for 20,000</td><td>$7.7M</td><td>$6.0M</td></tr>
+      </table>
+      <div class="note stop"><b>B's choice</b>Buy external. Any manager evaluated on divisional profit would.</div>
+    </div>
+    <div>
+      <h3 class="sub">What the company sees</h3>
+      <ul class="tidy">
+        <li>A has idle capacity, so the true incremental cost of internal supply is <b>$150</b></li>
+        <li>Buying outside spends $300 to avoid a $150 cost</li>
+        <li>Loss = $150 a unit &times; 20,000 = <b>$3 million</b></li>
+      </ul>
+      <div class="note go"><b>Diagnosis</b>The manager is rational. The policy is at fault.</div>
+    </div>
+  </div>
+
+  <div class="note violet"><b>Two features caused it</b>Unitised fixed cost that is not incremental, and a mark-up that is pure internal profit. The buying division treats the sum of both as its real cost of internal supply.</div>
+
+</section>
+<section class="tab-panel" id="tab-negotiation">
+  <div class="eyebrow">Station 02</div>
+
+  <h2 class="head">Seth, Brenda and <span style="color:var(--stop-red)">Holdup</span></h2>
+  <div class="dek">Seth's components division designed a custom part with Brenda's refrigerator division, spending $240,000 on design and mock-ups on nothing firmer than an understanding that he would be the front-runner in the bidding.</div>
+
+  <h3 class="sub">The positions</h3>
+  <div class="grid2">
+    <div><div class="note"><b>Seth</b>Bid $230 for 20,000 units a year &mdash; full cost plus about 15%. Variable cost $125, allocated overhead $75. Running at 70% capacity, missed bonus last year.</div></div>
+    <div><div class="note"><b>Brenda</b>Outside bids around $170. Offers $200 to preserve the relationship and Seth's engineering support. Values his quality.</div></div>
+  </div>
+
+  <h3 class="sub">The arithmetic, per unit, against buying outside at $170</h3>
+  <table class="simple">
+    <tr><th>Transfer price</th><th>$170</th><th>$200</th><th>$230</th></tr>
+    <tr><td>Change in Seth's profit</td><td>$45</td><td>$75</td><td>$105</td></tr>
+    <tr><td>Change in Brenda's profit</td><td>$0</td><td>&minus;$30</td><td>&minus;$60</td></tr>
+    <tr><td>Change in corporate profit</td><td style="color:var(--go-green)">$45</td><td style="color:var(--go-green)">$45</td><td style="color:var(--go-green)">$45</td></tr>
+  </table>
+  <div class="note go"><b>The only thing that matters to corporate</b>$45 a unit &mdash; $900,000 a year on 20,000 units &mdash; at every transfer price. The value comes from making the part at $125 rather than buying at $170. The price only decides who gets credit.</div>
+  <div class="note stop"><b>And the zone</b>Floor is Seth's variable cost of $125 (he has spare capacity, so nothing is displaced). Ceiling is Brenda's $170. His $230 bid is outside any range she would rationally accept.</div>
+
+  <h3 class="sub">Should corporate intervene?</h3>
+  <div class="grid2">
+    <div><div class="note go"><b>For</b>Resolves the conflict quickly. Ensures the value-creating transfer actually happens.</div></div>
+    <div><div class="note stop"><b>Against</b>Undermines decentralisation. Time-consuming, and HQ lacks the local information. Sets a precedent that every future dispute gets escalated.</div></div>
+  </div>
+
+  <h3 class="sub">The holdup problem</h3>
+  <p class="lead">Seth's real grievance is not the price. He sank $240,000 into an asset with value only in this relationship, on a vague promise, and Brenda now holds the bargaining power. <b>Relationship-specific investment + incomplete commitment = holdup.</b></p>
+  <div class="note violet"><b>Apple and GT Advanced, 2014</b>GT invested hundreds of millions in sapphire capacity for Apple. Apple pulled back. GT went bankrupt.</div>
+  <div class="note"><b>The remedies are all ex ante</b>A long-term purchase commitment or take-or-pay clause; cost sharing so the buyer co-funds the investment; pre-agreed formula pricing or arbitration; vertical integration or an internal sourcing mandate. Nothing works after the money is sunk.</div>
+
+</section>
+<section class="tab-panel" id="tab-international">
+  <div class="eyebrow">Station 03</div>
+
+  <h2 class="head">International Transfer <span style="color:var(--blue-line)">Pricing</span></h2>
+  <div class="dek">Once divisions sit in different tax jurisdictions the price stops being zero-sum for the group, because subsidiaries are taxed where they earn income.</div>
+
+  <h3 class="sub">The two levers</h3>
+  <ul class="tidy">
+    <li>Shift profits to low-tax countries by setting <b>low</b> transfer prices on goods sold <b>to</b> those subsidiaries</li>
+    <li>Load costs into high-tax countries by purchasing <b>from</b> low-tax affiliates at inflated prices</li>
+  </ul>
+
+  <h3 class="sub">Drag it</h3>
+
+<div class="grid2">
+  <div>
+    <div class="ctrl-block">
+      <label>Transfer price <span class="live" id="s10tpL">$60</span></label>
+      <input type="range" min="40" max="80" step="1" value="60" id="s10tp">
+    </div>
+    <div class="ctrl-block">
+      <label>Assembly jurisdiction tax rate <span class="live" id="s10rateL">12.5%</span></label>
+      <input type="range" min="0" max="350" step="25" value="125" id="s10rate">
+    </div>
+    <div class="ctrl-block">
+      <label>Apply the 15% global minimum top-up <span class="live" id="s10p2L">off</span></label>
+      <input type="range" min="0" max="1" step="1" value="0" id="s10p2">
+    </div>
+    <p style="font-size:13.5px; color:var(--ink-soft);">Parts cost $40 in the US at 21%; assembly costs $20; the product sells for $100. The transfer price is the price at which the US entity sells the part to the assembly subsidiary.</p>
+  </div>
+  <div>
+    <table class="simple">
+      <tr><th></th><th>United States</th><th>Assembly country</th></tr>
+      <tr><td>Taxable income</td><td id="s10usInc"></td><td id="s10ieInc"></td></tr>
+      <tr><td>Tax</td><td id="s10usTax"></td><td id="s10ieTax"></td></tr>
+    </table>
+    <div class="readout-row" style="margin-top:14px;">
+      <div class="readout-card"><div class="val" id="s10tot"></div><div class="lbl">total tax</div></div>
+      <div class="readout-card violet"><div class="val" id="s10eff"></div><div class="lbl">effective rate</div></div>
+    </div>
+    <div class="note" id="s10note"><b>Reading</b></div>
+  </div>
+</div>
+
+
+  <h3 class="sub">What stops it</h3>
+  <div class="note"><b>Arm's-length pricing</b>Most jurisdictions &mdash; the US, India, the OECD countries &mdash; require the transfer price to reflect what unrelated parties would charge. Acceptable methods: comparable uncontrolled price, cost-plus, profit-split, and advance pricing agreements negotiated with the authority in advance.</div>
+  <div class="note go"><b>OECD Pillar Two</b>A 15% global minimum corporate tax from 2024 for groups above &euro;750 million of revenue. If a subsidiary's effective rate falls below 15%, the parent's jurisdiction imposes a top-up. It caps the gain from profit shifting without ending transfer pricing disputes.</div>
+  <div class="note violet"><b>Why intangibles</b>A factory cannot be moved to a tax haven; a patent portfolio or a brand can be transferred with a signature. The royalty then runs from the operating country, which takes the deduction, to the haven, which books the income &mdash; and there is rarely a comparable market price to benchmark against.</div>
+
+  <h3 class="sub">Apple and the Double Irish</h3>
+  <ul class="tidy">
+    <li>IP licensing income routed through two Irish entities with different tax residencies</li>
+    <li>Non-US profits flowed to entities with minimal taxable presence; effective rates on some Irish profits reached 0.005%</li>
+    <li>2016: the European Commission ruled Ireland had granted illegal state aid, ordering &euro;13 billion in back taxes</li>
+    <li>2024: the Court of Justice upheld it. Ireland closed the structure to new entrants in 2015</li>
+  </ul>
+  <p style="font-size:13.5px; color:var(--ink-soft);">Google's Bermuda arrangement, Starbucks' Dutch royalty structure, Amazon's Luxembourg operations, and the IRS disputes with Coca-Cola and Medtronic are all versions of the same argument. All involve intangibles.</p>
+
+</section>
+<section class="tab-panel" id="tab-close">
+  <div class="eyebrow">Station 04</div>
+
+  <h2 class="head">Closing the <span style="color:var(--amber)">Course</span></h2>
+  <div class="dek">What the transfer pricing module adds up to, and the four things he asked the class to remember from the whole of his half.</div>
+
+  <h3 class="sub">Transfer pricing summary</h3>
+  <ul class="tidy">
+    <li><b>Transfer prices drive behaviour.</b> They set divisional profit, which drives bonuses, capital allocation and survival.</li>
+    <li><b>The right price depends on context</b>, and opportunity cost is what context means. Full capacity points to market price; excess capacity points to variable cost.</li>
+    <li><b>No policy is perfect.</b> Match the policy to the situation &mdash; mandated sourcing tolerates cost-based prices, delegated sourcing needs negotiation or market prices.</li>
+    <li><b>Relationship-specific investment creates holdup risk</b>, and the remedy is contractual and comes first.</li>
+    <li><b>International transfer pricing is a tax question</b> bounded by arm's-length rules and the global minimum tax.</li>
+  </ul>
+
+  <h3 class="sub">The four parting thoughts</h3>
+  <div class="cheat-grid">
+    <div class="cheat-card"><h4>01</h4><ul><li>There is no such thing as <b>the</b> cost of something.</li></ul></div>
+    <div class="cheat-card"><h4>02</h4><ul><li>Numbers make people do things.</li></ul></div>
+    <div class="cheat-card"><h4>03</h4><ul><li>Opportunity cost is real.</li></ul></div>
+    <div class="cheat-card"><h4>04</h4><ul><li>Never stop at the headline number.</li></ul></div>
+  </div>
+
+  <h3 class="sub">Where each one showed up</h3>
+  <table class="errtable">
+    <tr><th>Thought</th><th>Session 6-7</th><th>Session 8</th><th>Session 9-10</th></tr>
+    <tr><td>No single cost</td><td>Two cents or four cents, depending on the decision</td><td>Static cost or flexible cost</td><td>Variable cost or market price, depending on capacity</td></tr>
+    <tr><td>Numbers make people do things</td><td>Buckeye's account-growth bonus</td><td>Deferred maintenance in December</td><td>Divisions outsourcing under full-cost-plus</td></tr>
+    <tr><td>Opportunity cost is real</td><td>Capacity cost in the outsourcing decision</td><td>What a favourable price variance really bought</td><td>The entire minimum transfer price</td></tr>
+    <tr><td>Never stop at the headline</td><td>The $5,000 loss hid A's profitability</td><td>The $10,600 "saving" was $4,400 of overspend</td><td>$45 a unit created, whatever the price says</td></tr>
+  </table>
+
+</section>
+<section class="tab-panel" id="tab-quiz">
+  <div class="eyebrow">Exam simulation</div>
+  <h2 class="head">Timed-Style MCQ Set</h2>
+  <div class="dek">12 questions in the format the end-term uses. Pick an answer to see whether it is right and why, then move on.</div>
+  <div class="quiz-top">
+    <div class="score-pill" id="scorePill">Score: 0 / 0</div>
+    <div class="score-pill" id="progPill">Question 1 of 12</div>
+  </div>
+  <div id="quizHost"></div>
+  <div class="quiz-summary" id="quizSummary">
+    <div style="font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-soft);">Final score</div>
+    <div class="big" id="finalScore">0 / 12</div>
+    <p id="finalMsg" class="lead" style="max-width:480px; margin:8px auto 18px;"></p>
+    <button class="btn" id="retakeQuiz">Retake the set</button>
+  </div>
+</section>
+<section class="tab-panel" id="tab-cheat">
+  <div class="eyebrow">Quick reference</div>
+  <h2 class="head">Cheat Sheet</h2>
+  <div class="dek">Everything this session can be examined on, compressed to what fits on one screen.</div>
+  <div class="cheat-grid"><div class="cheat-card"><h4>Three policies</h4><ul><li><b>Market</b> &mdash; needs a competitive market (~30%)</li><li><b>Negotiated</b> &mdash; autonomy, conflict (~24%)</li><li><b>Cost-based</b> &mdash; simple, distorting (~46%)</li></ul></div><div class="cheat-card"><h4>When cost-based is safe</h4><ul><li>Sourcing mandated internally &rarr; price cannot change the decision</li><li>Sourcing delegated &rarr; negotiate instead</li></ul></div><div class="cheat-card"><h4>The $3 million example</h4><ul><li>Full cost $350, TP $385</li><li>External $300, true incremental $150</li><li>B outsources; firm loses $150 &times; 20,000</li></ul></div><div class="cheat-card"><h4>Seth &amp;amp; Brenda</h4><ul><li>Corporate gains $45/unit at every TP</li><li>Zone $125 to $170</li><li>$900,000 a year on 20,000 units</li></ul></div><div class="cheat-card"><h4>Holdup</h4><div class='f'>Specific investment + weak commitment</div><ul><li>Take-or-pay, cost sharing, formula pricing, arbitration, integration</li><li>All ex ante. Apple / GT Advanced 2014</li></ul></div><div class="cheat-card"><h4>International levers</h4><ul><li>Low TP <b>to</b> low-tax subsidiaries</li><li>High TP <b>from</b> low-tax affiliates</li></ul><div class='f'>TP $60 &rarr; 16.75%; TP $40 &rarr; 12.5%</div></div><div class="cheat-card"><h4>Constraints</h4><ul><li>Arm's length: comparable price, cost-plus, profit-split, APAs</li><li>Pillar Two: 15% minimum, &euro;750m threshold, 2024, top-up at the parent</li></ul></div><div class="cheat-card"><h4>The four thoughts</h4><ul><li>No such thing as <b>the</b> cost</li><li>Numbers make people do things</li><li>Opportunity cost is real</li><li>Never stop at the headline number</li></ul></div></div>
+</section>
+  </div>
+</main>
+
+<div class="footer-strip">MADM2 // SESSION 10 // FIELD MANUAL · BUILT FOR REVISION, NOT FOR PRINT</div>
+
+<script>
+
+const stns = document.querySelectorAll('.stn');
+const panels = document.querySelectorAll('.tab-panel');
+stns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    stns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    panels.forEach(p=>p.classList.remove('show'));
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('show');
+    document.querySelector('.sheet').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+
+function money(n, dp){
+  if(dp===undefined) dp = 0;
+  const s = Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:dp, maximumFractionDigits:dp});
+  return (n<0?'-$':'$') + s;
+}
+function fu(n){ return n===0 ? '0' : money(Math.abs(n)) + (n<0 ? ' U' : ' F'); }
+
+function initQuiz(questions, ids){
+  let qIdx=0, score=0, answered=[];
+  const quizHost = document.getElementById(ids.host);
+  const scorePill = document.getElementById(ids.scorePill);
+  const progPill = document.getElementById(ids.progPill);
+  const quizSummary = document.getElementById(ids.summary);
+
+  function renderQuiz(){
+    quizHost.innerHTML='';
+    quizSummary.classList.remove('show');
+    questions.forEach((item, idx)=>{
+      const card = document.createElement('div');
+      card.className='qcard'+(idx===qIdx?' show':'');
+      card.dataset.idx = idx;
+      card.innerHTML = `
+        <div class="qnum">Question ${idx+1} of ${questions.length}</div>
+        <div class="qtext">${item.q}</div>
+        <div class="opts"></div>
+        <div class="feedback note"></div>
+        <div class="quiz-nav">
+          <button class="btn secondary prevQ" ${idx===0?'disabled':''}>&larr; Back</button>
+          <button class="btn nextQ">${idx===questions.length-1?'Finish':'Next &rarr;'}</button>
+        </div>
+      `;
+      const optsWrap = card.querySelector('.opts');
+      item.opts.forEach((optText, oIdx)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.textContent = optText;
+        b.addEventListener('click', ()=>selectAnswer(idx,oIdx));
+        optsWrap.appendChild(b);
+      });
+      card.querySelector('.prevQ').addEventListener('click', ()=>goTo(idx-1));
+      card.querySelector('.nextQ').addEventListener('click', ()=>{
+        if(idx===questions.length-1){ showSummary(); } else { goTo(idx+1); }
+      });
+      quizHost.appendChild(card);
+    });
+    updateProgress();
+  }
+  function goTo(i){
+    qIdx=i;
+    quizHost.querySelectorAll('.qcard').forEach(c=>c.classList.toggle('show', parseInt(c.dataset.idx,10)===i));
+    updateProgress();
+  }
+  function updateProgress(){
+    progPill.textContent = `Question ${qIdx+1} of ${questions.length}`;
+    scorePill.textContent = `Score: ${score} / ${answered.filter(Boolean).length}`;
+  }
+  function selectAnswer(idx, oIdx){
+    if(answered[idx]!==undefined) return;
+    answered[idx]=true;
+    const item = questions[idx];
+    const card = quizHost.querySelector(`.qcard[data-idx="${idx}"]`);
+    card.querySelectorAll('.opt').forEach((b,i)=>{
+      b.disabled=true;
+      if(i===item.correct) b.classList.add('correct');
+      if(i===oIdx && oIdx!==item.correct) b.classList.add('wrong');
+    });
+    if(oIdx===item.correct) score++;
+    const fb = card.querySelector('.feedback');
+    fb.classList.add('show', oIdx===item.correct?'go':'stop');
+    fb.innerHTML = `<b>${oIdx===item.correct?'Correct':'Not quite'}</b>${item.exp}`;
+    updateProgress();
+  }
+  function showSummary(){
+    quizHost.querySelectorAll('.qcard').forEach(c=>c.classList.remove('show'));
+    quizSummary.classList.add('show');
+    document.getElementById(ids.finalScore).textContent = `${score} / ${questions.length}`;
+    const pct = score/questions.length;
+    let msg;
+    if(pct===1) msg="Every question. You are done with this session.";
+    else if(pct>=0.75) msg="Solid. Re-read the stations behind the ones you missed and move on.";
+    else if(pct>=0.5) msg="Halfway. Work the interactive stations again before the exam.";
+    else msg="Worth another full pass through the stations before the exam.";
+    document.getElementById(ids.finalMsg).textContent = msg;
+  }
+  document.getElementById(ids.retake).addEventListener('click', ()=>{
+    score=0; answered=[]; qIdx=0; renderQuiz();
+  });
+  renderQuiz();
+}
+
+
+(function(){
+  const ids = ['s10tp','s10rate','s10p2'].map(i=>document.getElementById(i));
+  function render(){
+    const tp=+ids[0].value, rate=+ids[1].value/1000, p2=+ids[2].value===1;
+    document.getElementById('s10tpL').textContent = money(tp);
+    document.getElementById('s10rateL').textContent = (rate*100).toFixed(1)+'%';
+    document.getElementById('s10p2L').textContent = p2 ? 'on' : 'off';
+
+    const usInc = tp - 40, ieInc = 100 - tp - 20;
+    const usTax = usInc*0.21;
+    let ieRate = rate;
+    if(p2 && rate < 0.15) ieRate = 0.15;
+    const ieTax = ieInc*ieRate;
+    const total = usTax + ieTax, profit = 40;
+    const set=(id,v)=>document.getElementById(id).textContent = money(v,2);
+    set('s10usInc', usInc); set('s10ieInc', ieInc);
+    set('s10usTax', usTax); set('s10ieTax', ieTax);
+    document.getElementById('s10tot').textContent = money(total,2);
+    document.getElementById('s10eff').textContent = (total/profit*100).toFixed(2)+'%';
+
+    let msg;
+    if(p2 && rate < 0.15) msg = 'Pillar Two tops the assembly country up to 15%, so pushing the transfer price down stops paying for itself below that floor.';
+    else if(tp <= 40) msg = 'All the profit is booked in the low-tax country. This is the arrangement arm’s-length rules exist to prevent — an unrelated party would not sell at cost.';
+    else if(rate > 0.21) msg = 'The assembly country is the high-tax jurisdiction here, so the incentive reverses: a <b>higher</b> transfer price moves profit back to the US.';
+    else msg = 'Every dollar shifted out of the 21% jurisdiction into the lower-rate one cuts the group’s bill. The constraint is arm’s-length pricing, not arithmetic.';
+    document.getElementById('s10note').innerHTML = '<b>Reading</b>' + msg;
+  }
+  ids.forEach(i=>i.addEventListener('input', render));
+  render();
+})();
+
+const QUESTIONS = [
+  {q:"Roughly what share of firms use some form of cost-based transfer price?",
+   opts:["About 24%", "About 30%", "About 46%", "About 70%"], correct:2,
+   exp:"Variable cost 5%, full cost 24% and cost-plus 17%. Market price is about 30% and negotiated about 24%."},
+  {q:"Division S has excess capacity, corporate policy mandates full cost plus a markup, and both managers choose their own sourcing. What is the fundamental problem?",
+   opts:["S recovers its fixed costs twice", "The transfer price overstates the true incremental cost, so B may rationally outsource when internal supply is cheaper for the firm", "The markup inflates combined income", "B loses any incentive to negotiate"], correct:1,
+   exp:"With excess capacity the true incremental cost is variable cost. Full cost plus a markup adds unitised fixed cost and internal profit, and B outsources on the inflated number."},
+  {q:"Division A's budgeted full cost is $350, the policy is cost plus 10%, and B can buy outside at $300 for 20,000 units. A has idle capacity and a variable cost of $150. What does the policy cost the firm?",
+   opts:["$1.7 million", "$3 million", "Nothing, because the transfer price is internal", "$1.7 million gained"], correct:1,
+   exp:"B buys outside at $300 to avoid a real cost of $150. The loss is $150 a unit on 20,000 units."},
+  {q:"When is a cost-based policy defensible despite its distortions?",
+   opts:["When sourcing is mandated internally, so the price cannot change the make-or-buy decision", "When the seller has excess capacity", "When both divisions are profit centres", "When a competitive external market exists"], correct:0,
+   exp:"A distorted price only does damage when it changes a decision. Excess capacity makes cost-based pricing more dangerous, not less."},
+  {q:"Relative to buying outside at $170, what is the change in corporate profit if Brenda buys from Seth at $230 for 20,000 units, with Seth's variable cost at $125 and spare capacity?",
+   opts:["$2,100,000 increase", "$1,200,000 decrease", "$900,000 increase", "No change"], correct:2,
+   exp:"$45 a unit of real saving, independent of the transfer price. $2.1 million is Seth's division's gain and $1.2 million is Brenda's loss — both distribution."},
+  {q:"What is the transfer zone in the Seth and Brenda dispute?",
+   opts:["$170 to $230", "$125 to $170", "$200 to $230", "$125 to $200"], correct:1,
+   exp:"Floor is Seth's variable cost of $125 with spare capacity; ceiling is Brenda's external alternative of $170. His $230 bid is outside any rational range."},
+  {q:"Seth spent $240,000 on design against a vague promise and now finds Brenda holding the power. This is:",
+   opts:["Goal incongruence", "Holdup, preventable only before the investment", "Adverse selection", "The ratchet effect"], correct:1,
+   exp:"Relationship-specific investment plus incomplete commitment. The remedies — take-or-pay, cost sharing, formula pricing, arbitration, integration — all have to be in place beforehand."},
+  {q:"What is the strongest argument against corporate intervening in a transfer pricing dispute?",
+   opts:["Intervention is prohibited by arm's-length rules", "It sets a precedent that every future dispute gets escalated, and HQ lacks the local information", "The centre cannot compute the transfer zone", "Divisions could not enforce the ruling"], correct:1,
+   exp:"Once escalation works, managers stop negotiating and start lobbying, and the centre acquires a workload it cannot discharge well."},
+  {q:"Parts cost $40 in the US at 21%, assembly costs $20 in Ireland at 12.5%, and the product sells for $100. At a transfer price of $60, what is the effective tax rate?",
+   opts:["21.0%", "16.75%", "12.5%", "18.5%"], correct:1,
+   exp:"US income $20 taxed at 21% is $4.20; Irish income $20 at 12.5% is $2.50. Total $6.70 on $40 of profit."},
+  {q:"Dropping that transfer price to $40 would give an effective rate of 12.5%. Why do firms not simply do it?",
+   opts:["The arm's-length principle requires the price to reflect what unrelated parties would charge", "Transfer prices below cost are illegal in every jurisdiction", "It would raise the US tax bill", "Consolidation would eliminate the benefit"], correct:0,
+   exp:"An unrelated party would not sell at cost. Acceptable methods include comparable price, cost-plus, profit-split and advance pricing agreements."},
+  {q:"Under OECD Pillar Two, what happens when a large group's subsidiary pays below 15%?",
+   opts:["The transfer price is restated to an arm's-length benchmark", "The home jurisdiction imposes a top-up tax", "The subsidiary loses its royalty deductions", "The group cannot consolidate that subsidiary"], correct:1,
+   exp:"A top-up in the parent's jurisdiction, for groups above €750 million of revenue, from 2024. It caps the gain from profit shifting without touching the price."},
+  {q:"Why are intangibles the focus of most international transfer pricing disputes?",
+   opts:["They are taxed at higher rates", "They can be relocated with a signature and rarely have a comparable market price", "Arm's-length rules do not apply to them", "Royalties are not deductible"], correct:1,
+   exp:"A factory cannot move to a tax haven; a patent portfolio can. And with no comparable transaction between unrelated parties, the arm's-length benchmark has little to anchor on."},
+];
+initQuiz(QUESTIONS, {host:'quizHost', scorePill:'scorePill', progPill:'progPill', summary:'quizSummary', finalScore:'finalScore', finalMsg:'finalMsg', retake:'retakeQuiz'});
+</script>
+</body>
+</html>
