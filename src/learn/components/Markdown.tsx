@@ -111,13 +111,14 @@ interface ListItem {
   children: string[];
 }
 
-/** Consumes a run of "- " (and one level of indented "  - ") lines starting at `start`, returns
-    the parsed items and the index of the first line after the list. */
-function parseList(lines: string[], start: number): [ListItem[], number] {
+/** Consumes a run of marker lines (and one level of indented "  - " children) starting at
+    `start`, returns the parsed items and the index of the first line after the list. `marker`
+    matches the bullet itself, e.g. `/^-\s+(.*)$/` for "- " or `/^\d+\.\s+(.*)$/` for "1. ". */
+function parseList(lines: string[], start: number, marker: RegExp): [ListItem[], number] {
   const items: ListItem[] = [];
   let i = start;
   while (i < lines.length) {
-    const m = lines[i].match(/^-\s+(.*)$/);
+    const m = lines[i].match(marker);
     if (!m) break;
     const children: string[] = [];
     i++;
@@ -132,9 +133,10 @@ function parseList(lines: string[], start: number): [ListItem[], number] {
   return [items, i];
 }
 
-function renderList(items: ListItem[], keyPrefix: string): ReactNode {
+function renderList(items: ListItem[], keyPrefix: string, ordered: boolean): ReactNode {
+  const Tag = ordered ? "ol" : "ul";
   return (
-    <ul className="list-disc pl-5 space-y-2 marker:text-accent/50 leading-[1.65]">
+    <Tag className={`${ordered ? "list-decimal" : "list-disc"} pl-5 space-y-2 marker:text-accent/50 leading-[1.65]`}>
       {items.map((item, i) => (
         <li key={`${keyPrefix}-${i}`} className="pl-1">
           {renderInline(item.text, `${keyPrefix}-${i}`)}
@@ -147,7 +149,7 @@ function renderList(items: ListItem[], keyPrefix: string): ReactNode {
           )}
         </li>
       ))}
-    </ul>
+    </Tag>
   );
 }
 
@@ -205,8 +207,9 @@ interface Props {
 }
 
 /** Renders the small Markdown subset session summaries / concept notes are authored in: `## `/
-    `### ` headers (also what `extractHeadings` reads for the "Jump to" rail), bullet lists with
-    one level of nesting, `**bold**`, blank-line-separated paragraphs, and `> Label: ...`
+    `### ` headers (also what `extractHeadings` reads for the "Jump to" rail), bullet lists and
+    `1. ` numbered lists (each with one level of nested `  - ` children), `**bold**`,
+    blank-line-separated paragraphs, and `> Label: ...`
     blockquotes rendered as colored callout boxes (Trap / Worked example / Prof, falling back to
     a neutral quote for an unlabeled `>`), pipe tables, and `:::viz <name> key=value` directives
     that embed an interactive widget from `./viz`. Deliberately not a general Markdown parser — no
@@ -274,10 +277,22 @@ export function Markdown({ text, className }: Props) {
 
     if (/^-\s+/.test(trimmed)) {
       flushParagraph(`p-${i}`);
-      const [items, next] = parseList(lines.slice(i).map((l) => l.trimEnd()), 0);
+      const [items, next] = parseList(lines.slice(i).map((l) => l.trimEnd()), 0, /^-\s+(.*)$/);
       blocks.push(
         <div key={`l-${i}`} className="mb-4">
-          {renderList(items, `l-${i}`)}
+          {renderList(items, `l-${i}`, false)}
+        </div>,
+      );
+      i += next;
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(trimmed)) {
+      flushParagraph(`p-${i}`);
+      const [items, next] = parseList(lines.slice(i).map((l) => l.trimEnd()), 0, /^\d+\.\s+(.*)$/);
+      blocks.push(
+        <div key={`l-${i}`} className="mb-4">
+          {renderList(items, `l-${i}`, true)}
         </div>,
       );
       i += next;
