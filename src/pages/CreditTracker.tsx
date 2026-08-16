@@ -9,7 +9,7 @@
  * a blank picker — reusing what the student already told the Planner rather
  * than asking them to re-enter it.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X, ChevronDown, Brain } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
@@ -30,7 +30,6 @@ const TERM_ORDER = TERM_SEQUENCE.filter(isBiddableTerm);
 const EARLIER_TERMS = ["Term 1", "Term 2", "Term 3"];
 const GRADE_OPTIONS = ["A", "A-", "B", "B-", "C", "C-", "D", "F", "Pass", "Fail"];
 const GRADE_GROUPS: DropdownGroup[] = [{ label: "Grade", options: GRADE_OPTIONS.map((g) => ({ value: g, label: g })) }];
-const LEARN_PROMO_DISMISSED_KEY = "isb-learn-promo-dismissed";
 
 // ISB's actual scale, confirmed against a real elearn.isb.edu letter grade
 // report (Eshan's own Term 1: C=2, B=3, A-=3.5, credit-weighted average
@@ -68,16 +67,7 @@ export default function CreditTracker() {
   const { profile } = useAcademicProfile(user.id);
   const { entries: bidEntries, resolveEntry } = useBidPlan(user.id);
   const { entries, addEntry, updateEntry, removeEntry, upsertGrade, pointsPaid } = useActualEnrollments(user.id);
-  const [showLearnPromo, setShowLearnPromo] = useState(false);
-
-  useEffect(() => {
-    if (localStorage.getItem(LEARN_PROMO_DISMISSED_KEY) !== "1") setShowLearnPromo(true);
-  }, []);
-
-  function dismissLearnPromo() {
-    localStorage.setItem(LEARN_PROMO_DISMISSED_KEY, "1");
-    setShowLearnPromo(false);
-  }
+  const [showLearnPromo, setShowLearnPromo] = useState(true);
 
   if (coursesLoading || !profile) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
@@ -108,7 +98,7 @@ export default function CreditTracker() {
 
   return (
     <div className="min-h-screen pb-24" style={{ background: COLOR.bg }}>
-      {showLearnPromo && <LearnPromoPopup onDismiss={dismissLearnPromo} />}
+      {showLearnPromo && <LearnPromoPopup onDismiss={() => setShowLearnPromo(false)} />}
       <header className="px-6 md:px-12 pt-10 pb-6">
         <h1 style={{ fontFamily: FONT.serif, fontSize: 26, fontWeight: 500, color: COLOR.ink }}>
           Credit <em>Tracker</em>
