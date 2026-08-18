@@ -99,7 +99,7 @@ SESSIONS = {
 
 This is the start of Prof. Bodapati's half, and it deliberately changes altitude. Sessions 1-6 sat with the analyst: build a model, check whether it can be trusted. Sessions 7-10 sit with the manager who has to decide something. His opening illustration was a Fire Stick team proposing exclusive behind-the-scenes football interviews as a differentiator: the product manager supplies the idea, the analyst estimates what it would do to profit, the data engineer scales whatever gets chosen.
 
-Two decks are stapled together here. A short overview deck maps the whole of marketing analytics, then a long product-price optimisation deck works one example end to end.
+Two decks are stapled together here, and they are meant to be taken in that order. A short overview deck maps the whole of marketing analytics and says what makes it a discipline of its own. A long product-price optimisation deck then takes one region of that map — the value creation pod — and works it end to end on a single example. The concepts below follow the same sequence.
 
 ## The one-sentence version
 
@@ -107,54 +107,32 @@ Marketing analytics is disciplined decision-making. You are given a set of possi
 
 ## The through-line of the session
 
-- Marketing splits into four pods; this half of the course lives in the first two.
-- A marketing decision is $R = f(A)$: pick the action A with the best outcome R.
+**Deck 1, the overview — what kind of discipline this is.**
+
+- Marketing analytics splits into four pods; this half of the course lives in the first two.
+- A marketing decision is $R = f(A)$: pick the action A with the best outcome R. Estimating R accurately for every A is not the goal.
+- Firms answer that question three ways — evolved best practice, theory, empirical analytics — and this course does the third.
 - The f should be **structural**, built from how customers actually choose, not a flexible curve fitted to history.
-- Applied to product design, that gives an algorithm: enumerate candidates, forecast each one's share customer by customer, cost it, and rank under a stated objective.
+- The inference has to be **causal**, which is what Sessions 9 and 10 go on to do.
+
+**Deck 2, product-price optimisation — the value creation pod, worked end to end.**
+
+- The decision becomes an algorithm: enumerate every candidate product, forecast each one's share customer by customer, cost it, and rank under a stated objective.
 - Individual choice can be modelled compensatorily (utility as a weighted sum) or non-compensatorily (cutoffs and eliminations).
 - The deterministic "highest utility wins" prediction is then softened into logit probabilities, and the average probability across customers is the predicted share.
 - Share times margin is expected profit per prospect, and the whole 27-candidate table can be ranked on it.
 - Which candidate wins depends entirely on which objective the firm names.
-
-## Formulas from this session
-
-Each one is followed by what it says in words. If you read nothing else in this section, read the italic lines.
-
-**Compensatory utility** — scores how much one customer likes one product.
-
-$$U(P) = \\sum_{a \\in \\text{Attributes}} \\text{Importance}_a \\times \\text{Rating}(\\text{Level}_a(P))$$
-
-*For each attribute in turn — price, capacity, cleanability, brand — multiply how much this customer cares about that attribute by how well this product scores on it. Add the four answers together. That total is the customer's utility for that product. It is a weighted marks-total: the attribute weights are the importances, the marks are the 1-to-7 ratings.*
-
-**Logit choice probability** — turns those utility scores into a chance of buying.
-
-$$\\Pr(\\text{buy } P) = \\frac{\\exp(c\\,u_P)}{\\exp(c\\,u_P) + \\sum_j \\exp(c\\,u_{I_j})}$$
-
-*Take our product's utility and every competitor's utility, multiply each by c, and exponentiate each one so they all become positive. Our product's share of that total is its probability of being bought. It is "our score divided by everybody's scores", with the exponential applied first so that a modest lead in utility becomes a large lead in probability. c controls how aggressively that happens.*
-
-**Practical value for c**, based on past studies:
-
-$$c = \\frac{100}{12 \\times \\text{range of utilities over the product space}}$$
-
-*A rule of thumb for how confident to be. Work out the best utility any product could score and the worst, subtract to get the range, multiply by 12, and divide 100 by it. Wider possible spread of utilities means a smaller c, which keeps the predicted probabilities from collapsing onto one product.*
-
-**Rescaling ratings** into a common 1 to 7 band:
-
-$$\\text{Rescaled} = \\text{TargetMin} + (\\text{TargetMax} - \\text{TargetMin}) \\times \\frac{r - r_{\\min}}{r_{\\max} - r_{\\min}}$$
-
-*Standard "convert one scale to another" arithmetic. The fraction asks how far along its own range this rating sits, as a number from 0 to 1. Multiply that by the width of the new scale and add the new scale's floor. It is exactly how you would convert a mark out of 30 into a mark out of 7.*
-
-**Profit**, with market size constant across candidates:
-
-$$\\text{Profit}(P) = \\text{MarketSize} \\times s(P) \\times [\\text{Price}(P) - \\text{Cost}(P)]$$
-
-*How many people are in the market, times the fraction of them who buy this product, times the money made per unit sold. The first two multiply to units sold; the bracket is the margin. Because market size is the same number for all 27 candidates, it cannot change which one wins, so it gets divided out and the ranking is done on share times margin alone.*
+- The algorithm settles the core attributes and nothing more; QFD and the market-driven / market-driving contrast are what sits past it.
 
 ## The mug market, once, so the numbers stay straight
+
+Every number in Deck 2 comes out of one example, set up here so the concepts below can simply use it.
 
 Attributes and levels: Price 30 / 10 / 5 dollars. Capacity 12 / 20 / 32 oz. Cleanability Difficult (7 min) / Fair (5 min) / Easy (2 min). Brand A / B / C.
 
 Two incumbents are fixed. Incumbent 1 is priced at 30 dollars, 20 oz, Easy to clean, Brand A. Incumbent 2 is priced at 10 dollars, 20 oz, Fair, Brand B. Our brand is fixed at C, so we have 3 x 3 x 3 = 27 candidates.
+
+> Trap: The deck reuses the label "Product 3" for two different candidates. Early on, "Product 3" is the 5-dollar, 12 oz, Easy candidate, which is candidate 21 in the full table. From the affinity work onward, "Product 3" is the profit-optimal candidate 6: 30 dollars, 20 oz, Easy. Their purchase probabilities are completely different, so never carry numbers between the two.
 
 ## The full market research data
 
@@ -179,7 +157,39 @@ Two features of the table are worth noticing before any arithmetic. Every custom
 
 > Note: In the real study this is 400 respondents. Ten is a teaching simplification, which is why the shares come out as round-ish numbers.
 
-> Trap: The deck reuses the label "Product 3" for two different candidates. Early on, "Product 3" is the 5-dollar, 12 oz, Easy candidate, which is candidate 21 in the full table. From the affinity work onward, "Product 3" is the profit-optimal candidate 6: 30 dollars, 20 oz, Easy. Their purchase probabilities are completely different, so never carry numbers between the two.""",
+## Formulas from this session
+
+All five belong to Deck 2, and they are listed in the order the algorithm uses them: build the ratings, score a product, turn scores into probabilities, calibrate the one free parameter, then price the result. Each is followed by what it says in words. If you read nothing else in this section, read the italic lines.
+
+**Rescaling ratings** into a common 1 to 7 band — the step that turns raw research output into the table above.
+
+$$\\text{Rescaled} = \\text{TargetMin} + (\\text{TargetMax} - \\text{TargetMin}) \\times \\frac{r - r_{\\min}}{r_{\\max} - r_{\\min}}$$
+
+*Standard "convert one scale to another" arithmetic. The fraction asks how far along its own range this rating sits, as a number from 0 to 1. Multiply that by the width of the new scale and add the new scale's floor. It is exactly how you would convert a mark out of 30 into a mark out of 7.*
+
+**Compensatory utility** — scores how much one customer likes one product.
+
+$$U(P) = \\sum_{a \\in \\text{Attributes}} \\text{Importance}_a \\times \\text{Rating}(\\text{Level}_a(P))$$
+
+*For each attribute in turn — price, capacity, cleanability, brand — multiply how much this customer cares about that attribute by how well this product scores on it. Add the four answers together. That total is the customer's utility for that product. It is a weighted marks-total: the attribute weights are the importances, the marks are the 1-to-7 ratings.*
+
+**Logit choice probability** — turns those utility scores into a chance of buying.
+
+$$\\Pr(\\text{buy } P) = \\frac{\\exp(c\\,u_P)}{\\exp(c\\,u_P) + \\sum_j \\exp(c\\,u_{I_j})}$$
+
+*Take our product's utility and every competitor's utility, multiply each by c, and exponentiate each one so they all become positive. Our product's share of that total is its probability of being bought. It is "our score divided by everybody's scores", with the exponential applied first so that a modest lead in utility becomes a large lead in probability. c controls how aggressively that happens.*
+
+**Practical value for c**, based on past studies:
+
+$$c = \\frac{100}{12 \\times \\text{range of utilities over the product space}}$$
+
+*A rule of thumb for how confident to be. Work out the best utility any product could score and the worst, subtract to get the range, multiply by 12, and divide 100 by it. Wider possible spread of utilities means a smaller c, which keeps the predicted probabilities from collapsing onto one product.*
+
+**Profit**, with market size constant across candidates:
+
+$$\\text{Profit}(P) = \\text{MarketSize} \\times s(P) \\times [\\text{Price}(P) - \\text{Cost}(P)]$$
+
+*How many people are in the market, times the fraction of them who buy this product, times the money made per unit sold. The first two multiply to units sold; the bracket is the margin. Because market size is the same number for all 27 candidates, it cannot change which one wins, so it gets divided out and the ranking is done on share times margin alone.*""",
     ),
     8: (
         "Affinity Segmentation, Personas and Positioning",
@@ -508,9 +518,23 @@ The likelihood of buying P rises with U(P).
 
 It is called compensatory because weakness on one attribute can be paid for by strength on another. No single bad attribute automatically kills the product.
 
+## Where the ratings and importances come from
+
+That sum needs its inputs in a particular shape, so this is the step before any arithmetic.
+
+Conjoint analysis produces part-worths, not ratings and importances. The range of the part-worths within an attribute becomes that attribute's importance, and the part-worths themselves are rescaled into a common 1-to-7 band:
+
+$$\\text{Rescaled} = \\text{TargetMin} + (\\text{TargetMax} - \\text{TargetMin}) \\times \\frac{r - r_{\\min}}{r_{\\max} - r_{\\min}}$$
+
+For customer 1 the part-worth ranges are 4.5 on price, 27.5 on capacity, 6.0 on cleanability and 12.0 on brand, which give importances of 9, 55, 12 and 24 — the four numbers the worked example below runs on.
+
+The anchoring matters: if the ratings within each attribute are not pinned to the same minimum and maximum, the importances are not comparable across attributes and the weighted sum is meaningless.
+
+> Prof: How conjoint elicits part-worths is a market-research topic and he explicitly puts it outside this course. The manager consumes the preference parameters.
+
 ## Worked: customer 1 across the three products
 
-Customer 1 has importances of 9 for price, 55 for capacity, 12 for cleanability and 24 for brand.
+The candidate here is the 5-dollar, 12 oz, Easy, Brand C mug, up against the two incumbents. Customer 1 has importances of 9 for price, 55 for capacity, 12 for cleanability and 24 for brand.
 
 $$u_1 = 9(1) + 55(7) + 12(7) + 24(7) = 646$$
 $$u_2 = 9(3) + 55(7) + 12(2) + 24(5) = 556$$
@@ -518,40 +542,11 @@ $$u_3 = 9(7) + 55(1) + 12(7) + 24(1) = 226$$
 
 Highest utility is product 1, so the deterministic forecast for this customer is product 1.
 
-## All ten customers
-
-Here the candidate is the 5-dollar, 12 oz, Easy, Brand C mug. Repeat the same four-term sum for every customer and every product:
-
-| Cust | U(P1) | U(P2) | U(P3) | Max choice |
-|---|---|---|---|---|
-| 1 | 646 | 556 | 226 | 1 |
-| 2 | 621 | 598 | 297 | 1 |
-| 3 | 177 | 516 | 693 | 3 |
-| 4 | 574 | 409 | 654 | 3 |
-| 5 | 298 | 415 | 580 | 3 |
-| 6 | 558 | 354 | 700 | 3 |
-| 7 | 290 | 660 | 502 | 2 |
-| 8 | 423 | 621 | 531 | 2 |
-| 9 | 480 | 492 | 358 | 2 |
-| 10 | 295 | 667 | 560 | 2 |
-
-Counting the max-choice column gives 2, 4 and 4, so the deterministic shares are 20%, 40% and 40%.
-
-Two rows are worth marking now because the next concept turns on them. Customer 1 has a 90-point gap between first and second place, so a small measurement error could not change their predicted choice. Customer 9 has a 12-point gap, and customer 2 a 23-point gap — either could flip. That is the whole motivation for switching from this table to probabilities.
-
 > Trap: An importance of 55 on capacity does **not** mean the customer wants a big mug. It means capacity moves their decision a lot. Their level ratings say which capacity they want — here 20 oz rated 7, not 32 oz.
 
-## Where the ratings come from
+## What happens to this next
 
-Conjoint analysis produces part-worths, which have to be transformed first. The range of the part-worths within an attribute becomes that attribute's importance, and the part-worths are rescaled into a common 1-to-7 band:
-
-$$\\text{Rescaled} = \\text{TargetMin} + (\\text{TargetMax} - \\text{TargetMin}) \\times \\frac{r - r_{\\min}}{r_{\\max} - r_{\\min}}$$
-
-For customer 1 the part-worth ranges are 4.5 on price, 27.5 on capacity, 6.0 on cleanability and 12.0 on brand, which give importances of 9, 55, 12 and 24.
-
-The anchoring matters: if the ratings within each attribute are not pinned to the same minimum and maximum, the importances are not comparable across attributes and the weighted sum is meaningless.
-
-> Prof: How conjoint elicits part-worths is a market-research topic and he explicitly puts it outside this course. The manager consumes the preference parameters.""",
+Two things, and they are the next two concepts in order. First the psychologist's objection to the whole weighted-sum idea, which produces a different family of choice rules. Then the same four-term sum repeated for all ten customers and aggregated into a market share — at which point the near-ties in the utility table force the switch from a single predicted choice to probabilities.""",
     ),
     (
         "bamg_noncompensatory_rules",
@@ -584,7 +579,9 @@ Of the two non-compensatory rules, he says elimination by aspects is overwhelmin
         "bamg_logit_choice",
         7,
         "Logit Choice Probabilities and c",
-        """The deterministic rule assumes the preference parameters are exact. They are not. Compare customer 1, whose top utility of 646 sits well clear of 556, with customer 9, at 480 and 492. A small measurement error would flip customer 9 and would not flip customer 1. The fix is to predict probabilities rather than a single choice.
+        """Run the compensatory sum for all ten customers and the utilities can simply be counted into a forecast: 2 customers rank product 1 top, 4 rank product 2 top, 4 rank product 3 top, so the deterministic shares are 20%, 40% and 40%. Both the utilities and those max choices are in the table further down.
+
+That count assumes the preference parameters are exact. They are not. Compare customer 1, whose top utility of 646 sits well clear of 556, with customer 9, at 480 and 492. A small measurement error would flip customer 9 and would not flip customer 1, yet the count treats the two as equally settled. The fix is to predict probabilities rather than a single choice.
 
 $$\\Pr(\\text{buy } P) = \\frac{\\exp(c\\,u_P)}{\\exp(c\\,u_P) + \\exp(c\\,u_{I_1}) + \\exp(c\\,u_{I_2}) + \\ldots}$$
 
@@ -611,7 +608,7 @@ Here the best possible utility is 7 x 100 = 700 and the worst is 1 x 100 = 100, 
 
 ## Share is the average probability
 
-Run every customer at c = 0.0139 and average each product's probability column:
+Run every customer at c = 0.0139 and average each product's probability column. The first four columns are the compensatory utilities and the deterministic count this concept opened with; the last three are what replaces them:
 
 | Cust | U(P1) | U(P2) | U(P3) | Max choice | Pr(P1) | Pr(P2) | Pr(P3) |
 |---|---|---|---|---|---|---|---|
