@@ -47,7 +47,35 @@ The four sessions are one connected argument, so they are worth reading in order
 
 Each session opens with a walkthrough of that session's deck. Under it, every concept carries the short-answer questions the exam could ask on it, with a model answer behind each one. Read the concept, try the question in your head, then open the answer.
 
-There are no practice quizzes here on purpose. The professor said the exam is written short answers, so the questions are written to be answered in bullets, the way he asked for."""
+Everything on the slides is reproduced here — every data table, every worked number, every formula. You should not need the handouts open alongside this. The handouts are still what you carry into the exam, because it is open-handouts; this guide is what you use to understand them.
+
+There are no practice quizzes here on purpose. The professor said the exam is written short answers, so the questions are written to be answered in bullets, the way he asked for.
+
+## How deep to actually go
+
+This is an MBA marketing course, not a statistics course. The exam is written short answers in bullet points. What gets tested is whether you can explain *what a method is for, what it assumes, and what would go wrong* — not whether you can compute.
+
+So treat the material in three tiers:
+
+- **Know cold.** The reasoning. Why share cannot be regressed on features. Why the model is called compensatory. Why a control group works. Why price elasticity sits in the denominator. Why pulsing beats even scheduling. This is where nearly all the marks are.
+- **Be able to do slowly, with the handout open.** One customer's utility as a weighted sum. One logit probability from given utilities. Share times margin. A difference in differences. Dorfman-Steiner with the numbers handed to you. Each is a few lines of arithmetic and he demonstrated each in class as an example of a quantitative short answer.
+- **Reference only — do not memorise.** The full ten-customer dataset, the 27-candidate table, the affinity output table, the Robyn adstock equation. They are printed here in full so you can follow any worked example without hunting through the deck, and so you can see the patterns they contain. Nobody is going to ask you to reproduce a 27-row table.
+
+> Prof: His own words on the last session — "I'm not expecting that you will take away all the formulas and calculations. You'll forget it one hour after the exam, I forecast. But I hope that these other larger ideas is what will stay with you." He also said the exam needs no separate study if you were mentally present and took notes. Read this guide for the ideas; let the tables be tables.
+
+## If the maths notation is unfamiliar
+
+This half of the course has about a dozen formulas. None of them need maths beyond multiplication, division and averaging — but they are written in a notation that assumes you have seen it before. If you have not, this is the whole of it. Every formula in this guide also carries a plain-English reading directly underneath it, so you never have to decode one on your own.
+
+- **Σ (capital sigma)** means "add up". $\\sum_i X_i$ is "add up X for every customer i". It is a loop instruction, not an operation — it says *go down the column and total it*.
+- **Subscripts** are labels, not multiplication. $u_P$ is "the utility of product P". $Ad_{A,t}$ is "spend on campaign A in week t". The small letter just says *which one*.
+- **exp(x)**, sometimes written $e^x$, means "take the number 2.718 and raise it to the power x". Its only job in this course is to turn any number, including a negative one, into a positive one, and to stretch gaps: a slightly bigger x becomes a much bigger exp(x). That is what makes the logit formula turn "somewhat preferred" into "much more likely to be bought".
+- **log** is the reverse of raising to a power, and in this course it is always **base 10**. log(10) = 1, log(100) = 2, log(1) = 0. Its job is to make ratios symmetric: twice the average and half the average come out as +0.30 and −0.30, equal-sized deviations in opposite directions, instead of 2 and 0.5, which look nothing alike.
+- **A probability** is a number between 0 and 1 that reads as a share of chances. 0.40 means a 40% chance. When you average probabilities across people you get a market share, which is the single most-used step in this half of the course.
+- **An elasticity** is a percentage-for-a-percentage. "Advertising elasticity is 0.1" means a 1% increase in advertising spend produces a 0.1% increase in sales. It is a unit-free sensitivity, which is why it can be compared across campaigns of very different sizes.
+- **∝ (proportional to)** means "moves in step with, up to some common multiplier". $Ad_A \\propto \\text{Elasticity}_{Ad_A}$ says split the money in the same ratio as the elasticities, without saying what the total is.
+
+> Prof: He said explicitly that he does not expect the formulas to be what you take away — "you'll forget it one hour after the exam". What he wants is the reasoning each formula encodes. So if you are short of time, learn what each formula is *for* and what would change if its assumption broke; the arithmetic is the easy part to reconstruct."""
 
 # ---------------------------------------------------------------------------
 # Sessions
@@ -90,31 +118,66 @@ Marketing analytics is disciplined decision-making. You are given a set of possi
 
 ## Formulas from this session
 
-Compensatory utility:
+Each one is followed by what it says in words. If you read nothing else in this section, read the italic lines.
+
+**Compensatory utility** — scores how much one customer likes one product.
 
 $$U(P) = \\sum_{a \\in \\text{Attributes}} \\text{Importance}_a \\times \\text{Rating}(\\text{Level}_a(P))$$
 
-Logit choice probability, with c a confidence parameter:
+*For each attribute in turn — price, capacity, cleanability, brand — multiply how much this customer cares about that attribute by how well this product scores on it. Add the four answers together. That total is the customer's utility for that product. It is a weighted marks-total: the attribute weights are the importances, the marks are the 1-to-7 ratings.*
+
+**Logit choice probability** — turns those utility scores into a chance of buying.
 
 $$\\Pr(\\text{buy } P) = \\frac{\\exp(c\\,u_P)}{\\exp(c\\,u_P) + \\sum_j \\exp(c\\,u_{I_j})}$$
 
-Practical value for c, based on past studies:
+*Take our product's utility and every competitor's utility, multiply each by c, and exponentiate each one so they all become positive. Our product's share of that total is its probability of being bought. It is "our score divided by everybody's scores", with the exponential applied first so that a modest lead in utility becomes a large lead in probability. c controls how aggressively that happens.*
+
+**Practical value for c**, based on past studies:
 
 $$c = \\frac{100}{12 \\times \\text{range of utilities over the product space}}$$
 
-Rescaling ratings into a common 1 to 7 band:
+*A rule of thumb for how confident to be. Work out the best utility any product could score and the worst, subtract to get the range, multiply by 12, and divide 100 by it. Wider possible spread of utilities means a smaller c, which keeps the predicted probabilities from collapsing onto one product.*
+
+**Rescaling ratings** into a common 1 to 7 band:
 
 $$\\text{Rescaled} = \\text{TargetMin} + (\\text{TargetMax} - \\text{TargetMin}) \\times \\frac{r - r_{\\min}}{r_{\\max} - r_{\\min}}$$
 
-Profit, with market size constant across candidates:
+*Standard "convert one scale to another" arithmetic. The fraction asks how far along its own range this rating sits, as a number from 0 to 1. Multiply that by the width of the new scale and add the new scale's floor. It is exactly how you would convert a mark out of 30 into a mark out of 7.*
+
+**Profit**, with market size constant across candidates:
 
 $$\\text{Profit}(P) = \\text{MarketSize} \\times s(P) \\times [\\text{Price}(P) - \\text{Cost}(P)]$$
+
+*How many people are in the market, times the fraction of them who buy this product, times the money made per unit sold. The first two multiply to units sold; the bracket is the margin. Because market size is the same number for all 27 candidates, it cannot change which one wins, so it gets divided out and the ranking is done on share times margin alone.*
 
 ## The mug market, once, so the numbers stay straight
 
 Attributes and levels: Price 30 / 10 / 5 dollars. Capacity 12 / 20 / 32 oz. Cleanability Difficult (7 min) / Fair (5 min) / Easy (2 min). Brand A / B / C.
 
 Two incumbents are fixed. Incumbent 1 is priced at 30 dollars, 20 oz, Easy to clean, Brand A. Incumbent 2 is priced at 10 dollars, 20 oz, Fair, Brand B. Our brand is fixed at C, so we have 3 x 3 x 3 = 27 candidates.
+
+## The full market research data
+
+Reference table — printed so you can follow any worked example without the deck, not to be memorised. Read the shape of it, not the cells.
+
+Ten customers, the whole dataset the session runs on. Columns 1 to 12 are that customer's 1-to-7 rating of each level; the last four are their importances, which sum to 100 across the row. Everything else in Session 7 is computed from this table.
+
+| Cust | P30 | P10 | P5 | 12oz | 20oz | 32oz | Diff | Fair | Easy | BrA | BrB | BrC | IPr | ICp | ICl | IBr |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 1 | 3 | 7 | 1 | 7 | 6 | 1 | 2 | 7 | 7 | 5 | 1 | 9 | 55 | 12 | 24 |
+| 2 | 1 | 6 | 7 | 1 | 7 | 6 | 1 | 6 | 7 | 7 | 5 | 1 | 12 | 35 | 21 | 31 |
+| 3 | 1 | 6 | 7 | 7 | 4 | 1 | 1 | 3 | 7 | 1 | 3 | 7 | 71 | 6 | 10 | 12 |
+| 4 | 1 | 6 | 7 | 7 | 1 | 3 | 1 | 5 | 7 | 7 | 1 | 5 | 17 | 4 | 56 | 23 |
+| 5 | 1 | 4 | 7 | 1 | 7 | 2 | 1 | 3 | 7 | 3 | 1 | 7 | 59 | 20 | 9 | 12 |
+| 6 | 1 | 5 | 7 | 1 | 7 | 7 | 1 | 4 | 7 | 3 | 1 | 7 | 11 | 0 | 70 | 19 |
+| 7 | 1 | 7 | 7 | 1 | 7 | 7 | 1 | 3 | 7 | 3 | 7 | 1 | 57 | 16 | 10 | 17 |
+| 8 | 1 | 6 | 7 | 1 | 7 | 2 | 1 | 6 | 7 | 5 | 7 | 1 | 41 | 15 | 31 | 12 |
+| 9 | 1 | 5 | 7 | 1 | 5 | 7 | 1 | 6 | 7 | 7 | 4 | 1 | 26 | 32 | 17 | 25 |
+| 10 | 1 | 7 | 7 | 6 | 7 | 1 | 1 | 5 | 7 | 3 | 7 | 1 | 53 | 13 | 13 | 20 |
+
+Two features of the table are worth noticing before any arithmetic. Every customer rates the 5-dollar price at 7 and the 30-dollar price at 1 — nobody prefers paying more. And every customer rates Easy cleaning at 7 and Difficult at 1. So price and cleanability have an agreed direction, and what separates customers is how much they *care*, which lives in the importance columns. Capacity and brand are where customers genuinely disagree about which level they want.
+
+> Note: In the real study this is 400 respondents. Ten is a teaching simplification, which is why the shares come out as round-ish numbers.
 
 > Trap: The deck reuses the label "Product 3" for two different candidates. Early on, "Product 3" is the 5-dollar, 12 oz, Easy candidate, which is candidate 21 in the full table. From the affinity work onward, "Product 3" is the profit-optimal candidate 6: 30 dollars, 20 oz, Easy. Their purchase probabilities are completely different, so never carry numbers between the two.""",
     ),
@@ -141,17 +204,25 @@ Weight every customer descriptor by that customer's probability of buying our pr
 
 ## Formulas from this session
 
-Affinity weighted mean of descriptor X for likely buyers of P:
+**Affinity weighted mean** of descriptor X for likely buyers of P — the average value of some customer characteristic, among the people likely to buy our product.
 
 $$\\bar{X}_P = \\frac{\\sum_i X_i \\Pr_i(P)}{\\sum_i \\Pr_i(P)}$$
 
-Lift and log lift against the whole market:
+*This is an ordinary average with one twist: instead of counting every customer equally, each customer counts in proportion to how likely they are to buy our product. Top line: for each customer, multiply their value of the characteristic (their age, their income, their price-importance) by their probability of buying P, and add those up. Bottom line: add up the probabilities on their own. Divide. Someone with a 0.9 chance of buying pulls the average nine times as hard as someone with a 0.1 chance, which is exactly what "what are our buyers like?" should mean. The bottom line is what keeps it a genuine average rather than a total.*
 
-$$\\text{Lift} = \\frac{\\text{segment mean}}{\\text{overall mean}}, \\qquad \\text{Log lift} = \\log(\\text{Lift})$$
+**Lift and log lift** against the whole market — how unusual that average is.
 
-Utility contribution of one attribute, used to pick the claim:
+$$\\text{Lift} = \\frac{\\text{segment mean}}{\\text{overall mean}}, \\qquad \\text{Log lift} = \\log_{10}(\\text{Lift})$$
+
+*Lift divides our buyers' average by the market's average. Above 1 means our buyers are higher on that characteristic than the market, below 1 means lower, exactly 1 means identical. Log lift then takes the base-10 log of that ratio, purely so the scale is symmetric: twice the market average becomes +0.30 and half the market average becomes −0.30, which are visibly equal-and-opposite. Zero means "same as the market". A log lift of about +0.3 is roughly double, about −0.3 is roughly half.*
+
+> Trap: The logs here are base 10, not natural logs. Using ln would give −0.486 for price importance instead of the −0.211 in the table. The conclusions are identical either way — only the numbers move — but if you are recomputing a value to check it, use log base 10.
+
+**Utility contribution of one attribute**, used to pick the positioning claim:
 
 $$\\text{Importance}_a \\times \\text{Rating}(\\text{Level}_a(P))$$
+
+*One term out of the utility sum from Session 7, pulled out on its own. It measures how much a single attribute contributes to the customer's overall liking of the product: how much they care about it, times how well we score on it. Compute it for us and for the competitor, on the same attribute, and the gap is our advantage on that attribute.*
 
 ## The affinity output table for the mug data
 
@@ -190,25 +261,37 @@ An observed before-and-after change is the true effect plus whatever else moved 
 
 ## Formulas from this session
 
-Before-after, decomposed. B is the total bias, D is contemporaneous drift and MNE is measurement non-equivalence:
+Everything here is subtraction. There is no hard maths in this session at all — the difficulty is entirely in knowing which two numbers to subtract and what assumption makes that subtraction legitimate. R with a number after it just labels a measurement: R1 is the first reading, R2 the second, and so on.
+
+**Before-after, decomposed.** E is the true effect, D is contemporaneous drift, MNE is measurement non-equivalence, and B is the two biases added together:
 
 $$R_2 - R_1 = E + D + \\text{MNE} = E + B$$
 
-Before-after with a control group, which is a difference in differences:
+*The movement you actually observe is not the effect of the advertisement. It is the effect of the advertisement plus everything else that changed in the meantime. D covers real attitude changes caused by something other than the advertisement; MNE covers apparent changes that are artifacts of how you measured. Rearranged, E = (R2 − R1) − B: to recover the true effect you must subtract the bias, so the entire design problem is finding a way to measure B.*
+
+**Before-after with a control group**, which is a difference in differences:
 
 $$E = (R_2 - R_1) - (R_4 - R_3)$$
 
-After-only with a control group, once baseline equivalence gives $R_1 = R_3$:
+*How much the treated group moved, minus how much the untreated group moved. The control group got no advertisement, so its true effect is zero and everything it moved by is bias. If the two groups are alike, that is the same bias the treated group suffered, so subtracting it leaves the advertisement's effect alone. The name says it: a difference (before-to-after in one group) minus a difference (before-to-after in the other).*
+
+**After-only with a control group**, once baseline equivalence gives $R_1 = R_3$:
 
 $$E = R_2 - R_4$$
 
-Time series on one group, alternating treatment and no treatment:
+*Just compare the two groups' final readings. This is A/B testing. It follows from the line above: rearrange it to (R2 − R4) + (R3 − R1), and if the two groups genuinely started level then R3 − R1 is zero and drops out. The pre-measurements were not needed because they would have cancelled — but that is only true when the groups really are equivalent, which needs very large samples.*
+
+**Time series on one group**, alternating treatment and no treatment:
 
 $$E = (R_2 - R_1) - (R_3 - R_2) = 2R_2 - (R_1 + R_3)$$
 
-Many alternating periods, estimated by regression:
+*The same difference-in-differences idea with time playing the role of the second group. Instead of comparing a treated group against an untreated group, compare the interval when the treatment was on against the adjacent interval when it was off, in the same people. The right-hand form is just the left one tidied up: how far R2 sits above the average of the two readings on either side of it.*
+
+**Many alternating periods**, estimated by regression:
 
 $$\\text{Response} = b_0 + b_{ti}\\,\\text{Time index} + b_{tr}\\,\\text{Treatment}$$
+
+*Build a table with one row per period: the period number, a 0 or 1 for whether the advertisement ran, and the response. Fit a straight line. Treatment is a 0/1 switch, so its coefficient b_tr is literally "how much higher the response is in periods when the advertisement ran", which is the estimate of E. The time-index term is there to soak up any steady upward or downward trend, so the trend does not get mistaken for the advertisement.*
 
 ## The Toyota study the whole session hangs on
 
@@ -238,23 +321,37 @@ Once advertising is in the field you rarely know who saw what, so you model aggr
 
 ## Formulas from this session
 
-Advertising volume:
+**Advertising volume:**
 
 $$\\text{GRP} = \\text{Reach percent} \\times \\text{Frequency}$$
 
-The general MMM problem, unconstrained:
+*How much advertising pressure a plan delivers. Reach is the percentage of the target population who see it at all; frequency is how many times the average person among them sees it. Multiply for total exposure pressure. 20% of the population seeing it 5 times and 50% seeing it twice are both 100 GRPs, which is precisely why reach and frequency stay separate decisions — the same GRP number can describe two very different plans.*
+
+**The general MMM problem, unconstrained:**
 
 $$\\text{Profit} = \\text{Sales}(Ad_{A,t}, Ad_{B,t}, \\ldots) \\times \\text{Margin} - \\text{Cost}(Ad_{A,t}, Ad_{B,t}, \\ldots)$$
 
-The Robyn-style channel response, saturation on top of carryover:
+*Choose how much to spend on each campaign in each week so that profit is as large as possible. Sales are written as a function of all the campaign spends because that is the thing you have to estimate; multiply the resulting sales by margin to get gross profit, then subtract what the advertising cost. Nothing subtle in the statement — the difficulty is entirely in knowing the sales function.*
+
+**The Robyn-style channel response**, saturation on top of carryover:
 
 $$\\text{Sales}_A(Ad_{A,t}) = \\beta_{0,A} + \\beta_{1,A}\\,\\frac{(\\text{Adstock}_A)^{\\gamma}}{\\alpha^{\\gamma} + (\\text{Adstock}_A)^{\\gamma}}$$
 
 $$\\text{Adstock}_{A,t} = Ad_{A,t} + \\delta Ad_{A,t-1} + \\delta^2 Ad_{A,t-2} + \\delta^3 Ad_{A,t-3} + \\ldots$$
 
-Dorfman-Steiner, for the total, then for each campaign:
+*Read the second line first. Adstock is advertising memory: this week's spend, plus a fraction δ of last week's, plus δ² of the week before, and so on. δ sits between 0 and 1, so each older week counts for less — with δ = 0.5, last week counts half, the week before a quarter. That is carryover: advertising you paid for weeks ago is still working.*
+
+*The first line then converts accumulated memory into sales. The fraction is a saturation curve: when adstock is small it sits near 0, when adstock is very large it approaches 1, and it can never exceed 1. So the first rupees of advertising buy a lot of response and later ones buy progressively less. α sets where the curve bends, γ sets how sharply. The beta-zero term is the sales you would get with no advertising and the beta-one term is the most that this channel could ever add.*
+
+> Prof: You are not expected to derive, estimate or reproduce this. He put it up to make a managerial point — that it looks complicated, has five or more parameters per channel, and would be fitted on roughly 156 weekly observations. That mismatch is the argument for the much simpler rule below.
+
+**Dorfman-Steiner**, for the total, then for each campaign:
 
 $$\\text{Advertising} = \\frac{\\text{Advertising elasticity}}{-\\text{Price elasticity}} \\times \\text{Sales}, \\qquad Ad_A \\propto \\text{Elasticity}_{Ad_A}$$
+
+*Advertising spend should be a fraction of your sales, and that fraction is the ratio of the two elasticities. Read it one piece at a time. Bigger sales means a bigger company and a bigger advertising budget. A higher advertising elasticity means advertising works well here — it is effectively the return on advertising — so spend more. The price elasticity in the denominator is the piece that surprises people; the two separate reasons it belongs there are worked through in the Dorfman-Steiner concept below. The minus sign is bookkeeping: price elasticity is a negative number by convention, and the minus turns it positive so the whole fraction is positive.*
+
+*The second half says the split between campaigns follows the ratio of their individual elasticities — the campaign that converts spend into sales twice as efficiently gets twice the money.*
 
 ## Where the classic frameworks live inside the algorithm
 
@@ -269,7 +366,23 @@ $$\\text{Advertising} = \\frac{\\text{Advertising elasticity}}{-\\text{Price ela
 | Company (C) | Capabilities and core competence, showing up concretely in the cost structure |
 | S and T of STP | Deliberately not done. The algorithm searches the whole customer and product space instead of pre-selecting a target |
 
-> Prof: He pushed back hard when students said the Customer C was demographics or the Competition C was white space. His point is that the value of analytics is precisely that every term in a framework gets an operational location in the data.""",
+## Why no segmentation — the Tata Nano point
+
+A student in Session 9 asked why the log lift benchmarks against the overall market rather than against the segment we want to target. The answer is that in this framework **there is no segment we decided to target**, and that is the entire departure from STP.
+
+- The product is not chosen by first picking a tier — premium, value, economy — and then designing for it. It is chosen by evaluating every candidate product against every customer and ranking on the stated objective.
+- Segmentation enters only afterwards, and only for **advertising**: once a product wins, affinity segmentation asks who is actually likely to buy it.
+- So the two uses of "segment" are cleanly separated. In STP they are the same exercise doing two jobs, which he says is where a great deal of confusion comes from.
+
+He called this the reason the framework avoids the **Tata Nano problem** — committing to a target segment up front, designing to that commitment, and discovering the intended buyers were not the eventual market. It is the same failure the Innova, Yulu and OYO examples above illustrate: the algorithm does not need to guess the target correctly because it never guesses.
+
+> Note: He promised a fuller treatment of the Nano case in the last session and never got to it — the session ran out on media mix modelling. The argument above is what he actually gave, in Session 9. Do not expect or invent case detail about the Nano itself.
+
+> Prof: A related framing he repeated — analytics is **not** "numerical marketing". Pitch it that way to a McKinsey client or an internal stakeholder and you lose, because marketers are largely not numerate. Analytics is *more carefully thought-out* marketing. Every claim gets an operational definition and every assumption gets exposed.
+
+> Prof: He pushed back hard when students said the Customer C was demographics or the Competition C was white space. His point is that the value of analytics is precisely that every term in a framework gets an operational location in the data.
+
+> Prof: On the Customer C specifically, his line was that most people who apply the 3Cs and STP "have not read Kotler" — because in Kotler's own formulation the customer C **is** customer needs, not age and demographics. The framework was never wrong; it is applied loosely because case discussion does not force anyone to be precise about it. Building the algorithm does force it.""",
     ),
 }
 
@@ -403,7 +516,28 @@ $$u_1 = 9(1) + 55(7) + 12(7) + 24(7) = 646$$
 $$u_2 = 9(3) + 55(7) + 12(2) + 24(5) = 556$$
 $$u_3 = 9(7) + 55(1) + 12(7) + 24(1) = 226$$
 
-Highest utility is product 1, so the deterministic forecast for this customer is product 1. Repeat for all ten customers and the max-choice counts are 2, 4 and 4, giving shares of 20%, 40% and 40%.
+Highest utility is product 1, so the deterministic forecast for this customer is product 1.
+
+## All ten customers
+
+Here the candidate is the 5-dollar, 12 oz, Easy, Brand C mug. Repeat the same four-term sum for every customer and every product:
+
+| Cust | U(P1) | U(P2) | U(P3) | Max choice |
+|---|---|---|---|---|
+| 1 | 646 | 556 | 226 | 1 |
+| 2 | 621 | 598 | 297 | 1 |
+| 3 | 177 | 516 | 693 | 3 |
+| 4 | 574 | 409 | 654 | 3 |
+| 5 | 298 | 415 | 580 | 3 |
+| 6 | 558 | 354 | 700 | 3 |
+| 7 | 290 | 660 | 502 | 2 |
+| 8 | 423 | 621 | 531 | 2 |
+| 9 | 480 | 492 | 358 | 2 |
+| 10 | 295 | 667 | 560 | 2 |
+
+Counting the max-choice column gives 2, 4 and 4, so the deterministic shares are 20%, 40% and 40%.
+
+Two rows are worth marking now because the next concept turns on them. Customer 1 has a 90-point gap between first and second place, so a small measurement error could not change their predicted choice. Customer 9 has a 12-point gap, and customer 2 a 23-point gap — either could flip. That is the whole motivation for switching from this table to probabilities.
 
 > Trap: An importance of 55 on capacity does **not** mean the customer wants a big mug. It means capacity moves their decision a lot. Their level ratings say which capacity they want — here 20 oz rated 7, not 32 oz.
 
@@ -423,7 +557,14 @@ The anchoring matters: if the ratings within each attribute are not pinned to th
         "bamg_noncompensatory_rules",
         7,
         "Non-Compensatory Choice Rules",
-        """The compensatory model is the economist's. The psychologist's alternatives say that a bad score on something that matters cannot always be bought back.
+        """Using a customer's preference parameters to work out whether they will buy is a discipline in its own right, called **choice modelling**. It has two approaches, and he pointed out that both have won Nobel prizes — the economist's utility-and-logit approach, and the psychologist's heuristics approach, whose intellectual home is Kahneman's *Thinking, Fast and Slow*. Neither is the "wrong" one.
+
+The compensatory model is the economist's. The psychologist's alternatives say that a bad score on something that matters cannot always be bought back.
+
+The psychologist's two objections to the economist's model are worth stating, because they explain where the heuristics come from:
+
+- People do not actually know their own preference numbers. They know the *ordering* of what matters to them, not that capacity is worth 55 and brand 24.
+- Even if they did know, computing a four-term weighted sum for every product on the shelf is not what a human brain does in a shop.
 
 **Lexicographic.** Take the most important attribute. Pick whichever product is best on it. If there is a tie, go to the next most important attribute, and so on. For customer 1 in the deck this selects product 1.
 
@@ -470,7 +611,25 @@ Here the best possible utility is 7 x 100 = 700 and the worst is 1 x 100 = 100, 
 
 ## Share is the average probability
 
-Run every customer at c = 0.0139 and average each product's probability column: 0.22, 0.38, 0.40. Those are the predicted shares.
+Run every customer at c = 0.0139 and average each product's probability column:
+
+| Cust | U(P1) | U(P2) | U(P3) | Max choice | Pr(P1) | Pr(P2) | Pr(P3) |
+|---|---|---|---|---|---|---|---|
+| 1 | 646 | 556 | 226 | 1 | 0.78 | 0.22 | 0.00 |
+| 2 | 621 | 598 | 297 | 1 | 0.58 | 0.42 | 0.01 |
+| 3 | 177 | 516 | 693 | 3 | 0.00 | 0.08 | 0.92 |
+| 4 | 574 | 409 | 654 | 3 | 0.24 | 0.02 | 0.73 |
+| 5 | 298 | 415 | 580 | 3 | 0.02 | 0.09 | 0.89 |
+| 6 | 558 | 354 | 700 | 3 | 0.12 | 0.01 | 0.87 |
+| 7 | 290 | 660 | 502 | 2 | 0.01 | 0.90 | 0.10 |
+| 8 | 423 | 621 | 531 | 2 | 0.05 | 0.74 | 0.21 |
+| 9 | 480 | 492 | 358 | 2 | 0.42 | 0.50 | 0.08 |
+| 10 | 295 | 667 | 560 | 2 | 0.00 | 0.81 | 0.18 |
+| | | | | **Average** | **0.22** | **0.38** | **0.40** |
+
+Those averages are the predicted shares: 22%, 38% and 40%.
+
+Read across a row and the hedging is visible. Customer 1, with a wide utility gap, comes out 0.78 / 0.22 / 0.00 — the model is fairly sure. Customer 9, with utilities 12 points apart, comes out 0.42 / 0.50 / 0.08 — the model is nearly undecided, which is the honest answer. Each row sums to 1 because in this simplified market the customer buys exactly one of the three.
 
 > Trap: Average the **probabilities**, not the max-choice indicators. The deterministic counts gave 0.20 / 0.40 / 0.40 for the same data, which is close here and will not be in general.
 
@@ -486,15 +645,52 @@ Run every customer at c = 0.0139 and average each product's probability column: 
 
 Predicted share is 0.400. Cost is 1.00 for 12 oz plus 3.00 for Easy, so 4.00. Margin is 5.00 minus 4.00, so 1.00. Expected profit per prospect is 0.40 x 1.00 = 0.400.
 
-Repeat that across all 27 and rank. The three candidates worth remembering:
+## The full candidate table
 
-| Candidate | Spec | Share | Cost | Margin | Profit per prospect |
-|---|---|---|---|---|---|
-| 6 | 30 dollars, 20 oz, Easy | 0.155 | 5.60 | 24.40 | **3.780** |
-| 21 | 5 dollars, 12 oz, Easy | 0.400 | 4.00 | 1.00 | 0.400 |
-| 24 | 5 dollars, 20 oz, Easy | **0.503** | 5.60 | minus 0.60 | minus 0.302 |
+Reference table. Nobody will ask you to reproduce or recompute it — what matters is the four patterns listed underneath, which are the examinable part.
 
-Candidate 6 is the profit winner. Candidate 24 is the share winner and loses money on every unit, because its price of 5 dollars sits below its cost of 5.60.
+Repeat that across all 27 and rank. Brand is C throughout, so it is left out of the table. Share is the average logit probability from the previous step, cost is capacity cost plus cleanability cost, margin is price minus cost, and the last column is share times margin.
+
+| Cand | Price | Cap | Clean | Share | Cost | Margin | Profit per prospect |
+|---|---|---|---|---|---|---|---|
+| 1 | 30 | 12 | Diff | 0.006 | 2.0 | 28.0 | 0.169 |
+| 2 | 30 | 12 | Fair | 0.032 | 3.2 | 26.8 | 0.865 |
+| 3 | 30 | 12 | Easy | 0.124 | 4.0 | 26.0 | 3.235 |
+| 4 | 30 | 20 | Diff | 0.022 | 3.6 | 26.4 | 0.575 |
+| 5 | 30 | 20 | Fair | 0.054 | 4.8 | 25.2 | 1.358 |
+| **6** | **30** | **20** | **Easy** | 0.155 | 5.6 | 24.4 | **3.780** |
+| 7 | 30 | 32 | Diff | 0.012 | 3.8 | 26.2 | 0.302 |
+| 8 | 30 | 32 | Fair | 0.044 | 5.0 | 25.0 | 1.090 |
+| 9 | 30 | 32 | Easy | 0.138 | 5.8 | 24.2 | 3.346 |
+| 10 | 10 | 12 | Diff | 0.108 | 2.0 | 8.0 | 0.861 |
+| 11 | 10 | 12 | Fair | 0.186 | 3.2 | 6.8 | 1.266 |
+| 12 | 10 | 12 | Easy | 0.321 | 4.0 | 6.0 | 1.924 |
+| 13 | 10 | 20 | Diff | 0.166 | 3.6 | 6.4 | 1.061 |
+| 14 | 10 | 20 | Fair | 0.271 | 4.8 | 5.2 | 1.409 |
+| 15 | 10 | 20 | Easy | 0.426 | 5.6 | 4.4 | 1.876 |
+| 16 | 10 | 32 | Diff | 0.123 | 3.8 | 6.2 | 0.760 |
+| 17 | 10 | 32 | Fair | 0.220 | 5.0 | 5.0 | 1.098 |
+| 18 | 10 | 32 | Easy | 0.370 | 5.8 | 4.2 | 1.554 |
+| 19 | 5 | 12 | Diff | 0.183 | 2.0 | 3.0 | 0.550 |
+| 20 | 5 | 12 | Fair | 0.275 | 3.2 | 1.8 | 0.495 |
+| 21 | 5 | 12 | Easy | 0.400 | 4.0 | 1.0 | 0.400 |
+| 22 | 5 | 20 | Diff | 0.230 | 3.6 | 1.4 | 0.321 |
+| 23 | 5 | 20 | Fair | 0.355 | 4.8 | 0.2 | 0.071 |
+| **24** | **5** | **20** | **Easy** | **0.503** | 5.6 | −0.6 | −0.302 |
+| 25 | 5 | 32 | Diff | 0.212 | 3.8 | 1.2 | 0.254 |
+| 26 | 5 | 32 | Fair | 0.327 | 5.0 | 0.0 | 0.000 |
+| 27 | 5 | 32 | Easy | 0.469 | 5.8 | −0.8 | −0.375 |
+
+Candidate 6 is the profit winner at 3.780. Candidate 24 is the share winner at 0.503 and loses money on every unit, because its price of 5 dollars sits below its cost of 5.60.
+
+## What the table shows at a glance
+
+- **Share falls as price rises; profit per prospect does the opposite.** The 30-dollar block at the top has the worst shares and, apart from the Difficult variants, the best profits. That opposition is the reason the objective function has to be named before the winner can be.
+- **Easy cleaning wins inside every price-capacity block.** Compare 4, 5, 6 or 19, 20, 21 — Easy always beats Fair, which always beats Difficult, even though Easy costs the most to make. The demand effect outweighs the 2-dollar cost difference everywhere.
+- **20 oz beats 32 oz on share throughout**, which is why the top candidate is 20 oz rather than the largest available size.
+- **Three candidates make no money or lose it** — 26 breaks exactly even, 24 and 27 are negative. All three are 5-dollar mugs with expensive specifications.
+
+If these 27 points are plotted with share across and profit per prospect up the side, they form an arc: the cloud rises to candidate 6 near the left and falls away to 24 and 27 at the bottom right. The efficient frontier — the candidates not beaten on both measures at once — runs 6, 9, 3, 12, 15 and so on down to 24.
 
 > Trap: Notice the conceptual order. Preference parameters, then utilities, then choice probabilities, then share, then economics. The black-box regression jumps straight from features to share and skips everything in the middle.""",
     ),
@@ -530,9 +726,21 @@ In the mug data that conflict is stark. Candidate 6 maximises profit at 3.780 pe
 
 ## Quality function deployment / house of quality
 
-QFD is the disciplined translation between user needs and engineering specifications. User needs run down the rows, technical specifications across the columns, and each cell records the relationship: ++ strong positive, + positive, − negative, −− strong negative.
+QFD is the disciplined translation between user needs and engineering specifications. User needs run down the rows, technical specifications across the columns, and each cell records the relationship: ++ strong positive, + positive, − negative, −− strong negative. Blank means no meaningful relationship.
 
-For the mug: "should not cause dribble down the front of the shirt" relates ++ to the size and shape of the mouth opening; "should keep liquid hot for at least an hour" relates ++ to the insulating material and − to a large mouth opening; "should be low cost" relates −− to both insulating and outside material. The value is that the trade-offs become visible, rather than being discovered late in engineering.
+The mug matrix from the handout:
+
+| User need | Mouth opening size/shape | Insulating material | Handle shape | Outside material | Capacity |
+|---|---|---|---|---|---|
+| Shouldn't cause dribble down front of shirt | ++ | | + | + | |
+| Should keep liquid hot for at least an hour | − | ++ | | − | |
+| Should have comfortable feel | | + | ++ | + | |
+| Should be low cost | | −− | | −− | − |
+| Should not spill if knocked on its side | −− | | | | − |
+
+Read it for the conflicts rather than the confirmations, because that is what it is for. A wide mouth opening stops dribbling but loses heat and makes spills worse. Good insulating material keeps liquid hot and feels comfortable but pushes cost up. There is no specification that satisfies everything, and the matrix makes that visible on one page at design time rather than late in engineering.
+
+> Note: The relationship signs are about *effect*, not desirability. A "−−" in the low-cost row means that specification drives cost up, which is bad for that need.
 
 ## Market-driven versus market-driving
 
@@ -564,11 +772,54 @@ $$\\bar{X}_P = \\frac{\\sum_i X_i \\Pr_i(P)}{\\sum_i \\Pr_i(P)}$$
 
 ## Worked: brand importance among likely buyers of product 3
 
-Customer 1 has brand importance 24 and P3 probability .095, giving 2.28. Customer 2 has 31 and .042, giving 1.30. Run that down all ten customers.
+One column of the calculation, in full, so the mechanics are visible once. Our candidate here is the profit winner — 30 dollars, 20 oz, Easy, Brand C — so these purchase probabilities are **not** the ones from Session 7.
 
-$$\\sum_i \\text{IBr}_i \\Pr_i(P_3) = 29.95, \\qquad \\sum_i \\Pr_i(P_3) = 1.55$$
+| Cust | IBr | Pr(P1) | Pr(P2) | Pr(P3) | IBr × Pr(P3) |
+|---|---|---|---|---|---|
+| 1 | 24 | 0.703 | 0.202 | 0.095 | 2.28 |
+| 2 | 31 | 0.555 | 0.403 | 0.042 | 1.30 |
+| 3 | 12 | 0.009 | 0.968 | 0.024 | 0.28 |
+| 4 | 23 | 0.614 | 0.062 | 0.324 | 7.45 |
+| 5 | 12 | 0.125 | 0.633 | 0.243 | 2.91 |
+| 6 | 19 | 0.254 | 0.015 | 0.731 | 13.88 |
+| 7 | 17 | 0.006 | 0.991 | 0.004 | 0.06 |
+| 8 | 12 | 0.058 | 0.912 | 0.030 | 0.36 |
+| 9 | 25 | 0.434 | 0.512 | 0.054 | 1.35 |
+| 10 | 20 | 0.006 | 0.991 | 0.003 | 0.06 |
+| **Sum** | | **2.76** | **5.69** | **1.55** | **29.95** |
 
-$$\\bar{X} = 29.95 / 1.55 = 19.3$$
+$$\\bar{X} = \\frac{29.95}{1.55} = 19.3$$
+
+## Why weight at all — the naive version
+
+He made the point by first doing it the obvious way. Look down the Pr(P3) column: only customer 6 is really likely to buy us, at 0.731. So the naive answer to "what is the average brand importance of our buyers?" is customer 6's brand importance, which is **19**.
+
+The actual answer is **19.34**. The gap is the whole idea:
+
+- Customer 6 is *probably* buying us, not certainly. A 0.731 chance means there is a 0.269 chance they do not.
+- Customers 4 and 5, at 0.324 and 0.243, are not the most likely buyers but are far from impossible. They belong in the average, partially.
+- Weighting includes everyone in proportion to how likely they are to be our customer, instead of drawing an arbitrary line and saying "these people are ours, those are not".
+
+Notice what did the work in the table. Customer 6 contributes 13.88 — nearly half the total — while customers 7 and 10, who are almost certainly buying product 2, contribute 0.06 each. The weighting has quietly turned "the average customer" into "the average likely buyer", which is the entire point.
+
+> Note: The affinity segmentation output table has P + 1 rows, where P is the number of products including ours — one row per product, plus the overall market row. On the handout it is broken across three blocks because it is too wide for the page, and in each block only the **top four rows** are the output table. Everything below them is the raw input data being averaged.
+
+Do this for every descriptor and every product, and you have the affinity output table.
+
+## The second block: which levels they actually like
+
+Attribute importances say how much a decision turns on an attribute. A separate block of the table weights the **level ratings** the same way, and says which level each segment prefers. These two blocks answer different questions and are the single most-confused pair in this session.
+
+| Segment | 10 dollars | 5 dollars | 12 oz | 20 oz | 32 oz | Difficult | Fair | Easy |
+|---|---|---|---|---|---|---|---|---|
+| Product 1 buyers | 4.90 | 7.00 | 2.36 | 5.34 | 5.29 | 1.00 | 4.42 | 7.00 |
+| Product 2 buyers | 5.93 | 7.00 | 2.96 | 6.24 | 3.43 | 1.00 | 4.30 | 7.00 |
+| Product 3 buyers (ours) | 5.00 | 7.00 | 2.36 | 5.63 | 5.09 | 1.00 | 4.08 | 7.00 |
+| Overall market | 5.5 | 7.0 | 2.7 | 5.9 | 4.2 | 1.0 | 4.3 | 7.0 |
+
+Our row says 20 oz is the preferred capacity at 5.63, ahead of 32 oz at 5.09 and far ahead of 12 oz at 2.36. So our buyers do want a normal-sized mug — they simply do not care very much, which is the low importance figure of 9.86 in the other block.
+
+> Trap: This is exactly why capacity importance and capacity preference must be read separately. Low importance plus a 20 oz preference means "they want 20 oz but would not walk away over it". Reading the low importance as "they want a small mug" reverses the finding — and it is the specific error he corrected in class.
 
 Do the same for every descriptor available: attribute importances, the preference for a level times the importance of that attribute, and demographic or behavioural variables. Then do it for every other product in the category too — that is what makes it possible to say how our customers **differ** from a competitor's.
 
@@ -586,7 +837,21 @@ $$\\text{Lift} = \\frac{\\text{segment mean}}{\\text{overall market mean}}, \\qq
 
 Log lift near zero means the segment looks like the market on that descriptor. Large positive means over-indexed, large negative means under-indexed.
 
+A rough scale to read them by, since base-10 logs are not most people's daily unit: **+0.30 is about double the market, −0.30 is about half, and anything between −0.05 and +0.05 is effectively the same as the market.**
+
 > Trap: In a log-lift heatmap, strong **negative** values are just as focal as strong positive ones. The question is "are our customers different?", not "are our customers higher?". Near-zero is the uninteresting cell.
+
+## The log lift table
+
+All three segments, so you can see what "focal" looks like by contrast. Segment 3 is ours. In the class heatmap the large values print red and green and the near-zero ones yellow.
+
+| Segment | IPr | ICp | ICl | IBr | Income | Age | Sports | Grad school |
+|---|---|---|---|---|---|---|---|---|
+| Product 1 buyers | −0.307 | +0.159 | +0.080 | +0.091 | +0.052 | +0.038 | −0.046 | −0.301 |
+| Product 2 buyers | +0.131 | −0.036 | −0.194 | −0.051 | −0.043 | −0.022 | −0.125 | −0.071 |
+| **Product 3 buyers (ours)** | **−0.211** | **−0.298** | **+0.293** | −0.004 | +0.047 | +0.009 | **+0.322** | **+0.389** |
+
+Product 2's row is the instructive contrast: almost every cell is small. Those buyers are close to the market average on everything except a mild price focus, so they are hard to write a distinctive persona for. Ours has five cells worth talking about, which is why it produces a usable brief.
 
 ## The persona for our mug, in two steps
 
@@ -594,16 +859,34 @@ Read out what the table says, literally:
 
 - Less price-sensitive than the market (price importance log lift −0.211).
 - Much less concerned with capacity (−0.298) — though 20 oz is still their preferred size.
-- Cleanability is highly important (+0.293).
+- Cleanability is highly important (+0.293, roughly twice the market's concern).
 - Brand importance is about average (−0.004).
 - Income and age are not focal (+0.047 and +0.009).
-- Strongly sports-active (+0.322) and far more graduate-educated than average (+0.387).
+- Strongly sports-active (+0.322, about twice as likely to play sport) and far more graduate-educated than average (+0.389, about 2.5 times).
 
 Then extend, using societal and cultural knowledge, anchored to that readout: educated, health-conscious, gym-going, busy people.
 
+## How the extension is actually reasoned
+
+The extension step is the one students find slipperiest, so it is worth seeing the chains he accepted in class. Each one goes from a focal descriptor to a claim the data does not directly contain.
+
+- **Cleanability matters a lot → they are short on time.** Easy is 2 minutes, Difficult is 7. Caring intensely about that gap is caring about five minutes, which is a statement about time pressure, not about hygiene.
+- **Low price importance → they are short on time.** Getting a good price requires searching and comparing. Busy people cannot search. So low price sensitivity on a cheap everyday item reads as time-poverty.
+- **Plays sport + graduate-educated → health-conscious, plausibly gym-going.** Two focal descriptors pointing the same way.
+
+A student objected that playing sport might *substitute* for the gym rather than predict it, and he accepted that as a fair counter — which is the right model for how confident to be. Another student took the hard line that nothing beyond the data can be claimed at all. His answer: that position is defensible, but it hands the advertising agency less to work with, and the job is to give them something usable.
+
+> Trap: Price sensitivity is not income. People assume the two are the same, and for a Rolls-Royce or a house they largely are. For a mug — cheap to begin with — low price *importance* means only that the buyer is not paying attention to price in the aisle. Our buyers' income log lift is +0.047, essentially the market average, which confirms income is not what is driving it.
+
+> Prof: On sourcing the extrapolations, he was blunt that this used to mean hiring a consumer-psychology expert who knew the culture — fine for India, useless if the market is Nigeria and nobody in the room knows what correlates with what there. Today he uses a large language model for it, on the grounds that an LLM is "a gigantic repository of what is correlated with what", the collective record of human association. Feed it the readout, name the country, and ask what else follows. The judgement about what is reasonable stays yours.
+
+> Trap: A near-zero log lift does **not** mean the descriptor is unimportant to them. Brand importance for our buyers is 19.34 in absolute terms, which is substantial — they do care about brand. The log lift of −0.004 says only that they care about it *the same amount as everyone else*, so it cannot be used to differentiate them. He corrected this misreading in class alongside the capacity one. Near-zero means "not distinctive", never "not important".
+
 ## What the persona is for
 
-It sets who and what situations the advertising should depict, and it helps decide where to sell. For this mug the class generated e-commerce and quick commerce, gyms and sports events, corporate bulk sales and office-park trial booths, and airport retail. He added that the company that supplied the data found airport stores especially important — airport shops have very limited inventory space, and this persona's unusually low concern about capacity makes that a fit rather than a constraint.
+It sets who and what situations the advertising should depict, and it helps decide where to sell.
+
+> Note: The handout slide ends by saying affinity segmentation "has also two other key applications in different contexts". He ran out of time and never said what they are — the session ended mid-sentence on the output table. So there is nothing to learn here beyond the advertising uses, and if a question asks for applications of affinity segmentation, answer with the persona-for-creative and channel-choice uses plus the positioning statement. Do not guess at the missing two. For this mug the class generated e-commerce and quick commerce, gyms and sports events, corporate bulk sales and office-park trial booths, and airport retail. He added that the company that supplied the data found airport stores especially important — airport shops have very limited inventory space, and this persona's unusually low concern about capacity makes that a fit rather than a constraint.
 
 > Trap: Do not invent the extension. It has to be anchored in the focal descriptors, not attached to them afterwards.""",
     ),
@@ -621,9 +904,32 @@ It sets who and what situations the advertising should depict, and it helps deci
 
 The brand manager ignores everything except brand because, on that view, product attributes can be changed over time while the brand is the more persistent identity. He is explicit that this is a perspective you may or may not agree with — keep it labelled as the brand manager's view, not universal truth.
 
+## How "most similar personas" is actually measured
+
+The consumer psychologist's view says compare our row of the affinity output table against every other product's row and take the closest. Asked how closeness is measured, he named three standard options and treated the choice as unimportant:
+
+- **Euclidean distance** — the ordinary straight-line distance between two rows treated as points.
+- **Sum of absolute differences** — go cell by cell, take each gap ignoring its sign, and add them up. The simplest to do by hand.
+- **Cosine similarity** — compares the direction of the two rows rather than their magnitude.
+
+The one requirement is that the descriptors are on comparable scales first, otherwise a column measured in thousands of rupees swamps a column measured 0 to 1.
+
+> Trap: Do not over-invest here. He raised these only to answer "how would you measure that?" and moved on. Naming one measure and saying why scaling matters is a complete answer.
+
 ## Competition can be asymmetric
 
-Our buyers like brand C most and brand A second. But brand A's own buyers rate A 6.374, B 3.450 and C 2.730 — we barely register. A student called brand A "well protected", which he liked: a small brand may have to worry about the leader far more than the leader worries about it.""",
+The brand-preference block of the affinity table, which is the evidence for the brand manager's view:
+
+| Whose buyers | Rate brand A | Rate brand B | Rate brand C |
+|---|---|---|---|
+| Product 1 buyers | **6.374** | 3.450 | 2.730 |
+| Product 2 buyers | 3.810 | **5.088** | 2.748 |
+| Product 3 buyers (ours) | 4.338 | 1.632 | **5.699** |
+| Overall market | 4.6 | 4.1 | 3.2 |
+
+Read our row across: we like C most (5.699) and A second (4.338), so brand A is our competitor on this view. Now read brand A's row: their buyers rate A at 6.374, B at 3.450 and us at 2.730 — last, and well behind. We barely register to them.
+
+So competition is **asymmetric**. We are worried about A; A is not worried about us. A student called brand A "well protected", which he liked: a small brand may have to worry about the leader far more than the leader worries about it. Notice also that A's buyers give A a 6.374 — the strongest own-brand loyalty of the three — which is what being the leader looks like in this data.""",
     ),
     (
         "bamg_positioning_statement",
@@ -727,6 +1033,17 @@ $$R_2 - R_1 = E + D + \\text{MNE} = E + B, \\qquad E = (R_2 - R_1) - B$$
 
 If B is small then R2 − R1 is a fair measure of the true effect. The design problem is that you have no reason to believe it is.
 
+## With numbers on it
+
+He put figures on this in the final session, and they are worth carrying because they make the argument concrete. On the 7-point attitude scale, the pre-measure R1 came out at 5.0 and the post-measure R2 at 5.3, so the observed change is a delta of 0.3.
+
+The two questions that follow are the whole session:
+
+- **Is the 0.3 caused by the advertisement, or is there another explanation?** Every alternative explanation is an internal validity threat — the holiday mood, the friend's remark, the gift card, the 40 people who did not reply. That is the question the control group answers.
+- **Supposing the 0.3 is real, does it hold outside Wisconsin?** That is external validity, and it cannot be fixed by a bigger sample — only by a representative one. Hence the microcosm cities.
+
+> Prof: His intuition pump for why causality needs change, not comparison — a four-year-old already understands it. The child falls, the mother asks why, and the child says "that guy pushed me". The child was standing, then on the ground, and a push happened in between. Initial state, final state, treatment in the middle. That is the before-after design, and it is why comparing two different groups at one moment feels like a weaker kind of evidence.
+
 > Prof: He frames validity as a falsification question. What counter-argument could falsify my causal claim? If an alternative story explains the movement just as well, the design has a threat.""",
     ),
     (
@@ -772,9 +1089,18 @@ This is the A/B testing logic. It is an across-person comparison — people are 
 
 ## 1. The groups are equivalent except for the treatment
 
-With **large samples**, random assignment to treatment or control. With **small samples**, match on profiles instead — actively construct comparable groups rather than trusting random balance. The large-sample requirement is heavier for the after-only design, because there are no pre-measures to reveal or absorb an imbalance.
+With **large samples**, random assignment to treatment or control. With **small samples**, match on profiles instead — actively construct comparable groups rather than trusting random balance.
 
 If two groups are not equivalent, the variables on which they differ are called **confounds** or confounding variables.
+
+## Why after-only needs a much bigger sample
+
+Both control-group designs need sample size, but for different numbers of reasons, and he was explicit about the comparison.
+
+- **Before-after with control** needs *moderately* large samples. The one thing it assumes is that the bias is the same in both groups — D′ = D and MNE′ = MNE. With tiny groups, one group's holiday mood or attrition pattern will simply differ from the other's by chance, and then B′ ≠ B and the subtraction stops working.
+- **After-only with control (A/B testing)** needs *much* larger samples, because it assumes all of that **and** additionally that R1 = R3 — that the two groups started at exactly the same level, on a measurement nobody took. That extra assumption is carried entirely by the law of large numbers, so it needs the numbers to be large.
+
+> Prof: His summary of the trade-off — A/B testing "does not work as causal assessment because you're not doing the pre-measurement, unless the sample sizes are large, where even if you did the pre-measurement, they would cancel out anyway." Before-after with control is what he calls the gold standard, because it measures the bias rather than assuming it away.
 
 > Trap: Randomisation with large samples reduces internal validity threats. It does nothing for external validity. A perfectly randomised Wisconsin Kmart sample is still a Wisconsin Kmart sample.
 
@@ -939,11 +1265,22 @@ Price elasticity −2.50. Overall advertising elasticity 0.15. Campaign A elasti
 
 Total optimal advertising = (0.15 / 2.50) x 10M = 0.6M. The A-to-B elasticity ratio is .10 to .05, which is 2 to 1, so campaign A gets 0.4M and campaign B gets 0.2M.
 
-## Reading the formula
+## Reading the formula, one term at a time
 
-Advertising elasticity is the percentage change in sales for a 1% change in advertising. Price elasticity is negative under the usual convention, and the formula uses its magnitude through the minus sign in the denominator.
+He walked the formula through in three pieces, and said explicitly that only the third is puzzling.
 
-The denominator has an intuition worth being able to state two ways. When demand is less price-elastic in magnitude, price promotion is a weaker lever, so advertising becomes relatively more attractive. Equivalently, the firm has more pricing power — price can rise without losing much volume — which creates the economic room to fund advertising.
+**Sales, the multiplier.** Bigger sales means a bigger company and therefore a bigger advertising budget. Obvious, and it makes the rule a *ratio* — advertising should be some percentage of sales, not a fixed sum.
+
+**Advertising elasticity, the numerator.** This is the percentage change in sales for a 1% change in advertising — effectively the return on advertising. Higher return, spend more. Also obvious.
+
+**Price elasticity, the denominator.** This is the counterintuitive one: *lower* price sensitivity means you should advertise *more*. He gave two separate reasons, and the exam answer is better if it has both.
+
+- **The lever argument.** Under the model's assumptions there are only two ways to raise sales — cut price or advertise. If demand is not very price-sensitive, cutting price barely moves volume, so price promotion is a weak lever and advertising is the one that is left. You shift effort to the tool that works.
+- **The funding argument**, which he called the more clever one. If demand is not very price-sensitive, you should not merely stop cutting price — you should *raise* it, because volume will hardly fall. The higher price brings in more revenue, and that revenue is what pays for the advertising.
+
+So low price elasticity pushes in the same direction twice: it makes advertising the better lever, and it generates the money to fund it.
+
+> Trap: "Advertise more when price elasticity is low" sounds backwards on first hearing, and it is the most likely thing to be asked about this formula. Do not just assert it — give at least one of the two pathways.
 
 > Prof: Ask an advertising agency how much to spend and the natural answer is "as much as you can". Diminishing returns are the reason the economically optimal spend is finite.""",
     ),
@@ -1339,6 +1676,18 @@ Extension, using societal and cultural knowledge: educated, health-conscious and
 - For our mug, cleanability comes first because it has the highest importance among these buyers, and the candidate is Easy to clean.""",
         "Trap: Do not simply pick the attribute our buyers care most about. Importance without relative superiority is not differentiation — the claim has to beat the competitive frame you named.",
     ),
+    # Appended rather than slotted next to its sibling: question ids are assigned by position
+    # within a session, and learn_attempts references them, so new questions go at the end of
+    # their session block to keep every existing id pointing at the same question.
+    (
+        "bamg_log_lift_persona",
+        "The readout says our buyers care a lot about cleanability and little about price. Justify extending that to \"busy people, short on time\".",
+        """- **Cleanability**: Easy is 2 minutes and Difficult is 7, so caring intensely about that attribute is caring about a five-minute saving. That is a statement about time pressure.
+- **Low price importance**: getting a good price requires searching and comparing offers. Busy people cannot search. So low price sensitivity on a cheap everyday item points at time-poverty.
+- Both focal descriptors point the same way, which is what makes the extension reasonable rather than invented.
+- The extension must be anchored in focal descriptors. Anything not supported by a red or green cell is not available to you.""",
+        "Trap: Low price importance is not low income. For a Rolls-Royce or a house, price sensitivity does track income; for a mug it does not. Our buyers' income log lift is +0.047 — essentially the market average — so income is not what is driving it.\n\nProf: He accepted a student's counter that playing sport might substitute for going to the gym rather than predict it. Reasonable extrapolations can be argued against, and saying so is better than overclaiming. He also noted the alternative — refusing to extrapolate at all — is defensible but hands the agency less to work with.",
+    ),
     # ---- S9 ----
     (
         "bamg_ad_brief_hierarchy",
@@ -1456,6 +1805,17 @@ Advantages:
 - It can be run on natural field data, provided the treatment varies over time.""",
         "The S10 outline mentions autoregressive time-series models with covariates, but the handouts and class give no AR equation beyond this regression and the later adstock formulation. Do not invent one.",
     ),
+    # Appended to the end of the S9 block to keep existing question ids stable — see the note
+    # above the equivalent S8 addition.
+    (
+        "bamg_control_requirements",
+        "Both control-group designs need large samples. Why does after-only need a much larger sample than before-after with control?",
+        """- **Before-after with control** assumes only that the bias is the same in both groups, D′ = D and MNE′ = MNE. That needs moderately large samples: with very small groups the two groups' drift and attrition patterns will differ by chance, so B′ ≠ B and the subtraction fails.
+- **After-only with control** assumes all of that, **and in addition** that R1 = R3 — that the groups started level on a measurement nobody actually took.
+- That extra assumption is carried entirely by randomisation and the law of large numbers, so it needs much bigger samples to be safe.
+- Hence before-after with control is the gold standard: it *measures* the bias rather than assuming it away.""",
+        "His phrasing: A/B testing does not work as causal assessment because there is no pre-measurement — unless the samples are so large that the pre-measurements would have cancelled anyway.",
+    ),
     # ---- S10 ----
     (
         "bamg_analytics_synthesis",
@@ -1560,10 +1920,13 @@ Under optimal pricing and advertising decisions:
     (
         "bamg_dorfman_steiner",
         "Explain the intuition for price elasticity sitting in the denominator of the Dorfman-Steiner rule.",
-        """- Advertising elasticity is the percentage change in sales for a 1% change in advertising; price elasticity is negative under the usual convention, and the formula uses its magnitude.
-- When demand is less price-elastic in magnitude, price promotion is a weaker lever, so advertising becomes relatively more attractive.
-- Equivalently, the firm has more pricing power — price can be raised without losing much volume — which creates the economic room to fund advertising.""",
-        "His aside: ask an advertising agency how much to spend and the natural answer is \"as much as you can\". Diminishing returns are why the economically optimal spend is finite.",
+        """The rule says lower price elasticity means *more* advertising, which is counterintuitive. There are two separate pathways, and a full answer gives both.
+
+- **The lever argument.** Under the model's assumptions sales can be raised only two ways: cut price, or advertise. If demand is not very price-sensitive, cutting price barely moves volume, so price promotion is a weak lever and advertising is the effective one that remains.
+- **The funding argument.** If demand is not very price-sensitive, you should not merely stop cutting price — you should raise it, since volume will hardly fall. The higher price generates more revenue, and that revenue is what funds the advertising.
+
+Supporting definitions: advertising elasticity is the percentage change in sales for a 1% change in advertising, and acts as the return on advertising in the numerator; price elasticity is negative by convention, so the minus sign in the denominator takes its magnitude.""",
+        "He called the numerator terms \"relatively obvious\" and the denominator \"the puzzling thing\", then gave both pathways explicitly — so both are fair game.\n\nHis aside: ask an advertising agency how much to spend and the natural answer is \"as much as you can\". Diminishing returns are why the economically optimal spend is finite.",
     ),
     (
         "bamg_scheduling_patterns",
@@ -1616,6 +1979,18 @@ Under optimal pricing and advertising decisions:
 - Optimal spending is the level that achieves 3 to 4 exposures, which connects to wear-in before wearout.
 - Ad effect is greater when the advertising tries to change attitude rather than merely reinforce it, and greater when the copy strategy has recently changed. The benefits of constant change in TV advertising outweigh the risks.""",
         "Also on the slide: the claim that TV share of voice must exceed market share is a myth, so do not use it as a universal spending rule.",
+    ),
+    # Appended to the end of the S10 block to keep existing question ids stable — see the note
+    # above the equivalent S8 addition.
+    (
+        "bamg_analytics_synthesis",
+        "Why does the log lift benchmark against the overall market rather than against the segment we want to target?",
+        """- Because in this framework there is **no segment we decided to target**. That is the deliberate departure from STP.
+- The product is chosen by evaluating every candidate against every customer and ranking on the stated objective, not by picking a tier first and designing to it.
+- Segmentation enters only afterwards, and only for advertising: once a product has won, affinity segmentation asks who is actually likely to buy it.
+- So "segment" is doing one job here, not two. In STP the same segmentation drives both product design and communication, which is where the confusion comes from.
+- He called this the reason the framework avoids the **Tata Nano problem** — committing to an intended target up front and finding the eventual market is somebody else.""",
+        "The Innova, Yulu and OYO examples are the same failure: the intended target was not the eventual market. The algorithm does not need to guess the target correctly because it never guesses.\n\nProf: He promised a fuller Tata Nano treatment in the last session and never reached it. The argument above is what he actually gave, in Session 9 — do not invent case detail about the Nano itself.",
     ),
 ]
 
