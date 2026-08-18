@@ -6,12 +6,37 @@
     <meta name="theme-color" content="#F4F2EC" />
     <title>ISB Academics</title>
 
+    <!-- Nothing renders until auth resolves, and auth is the first request the app makes, so the
+         DNS + TCP + TLS handshake to Supabase is squarely on the critical path. Starting it here
+         means it is already warm by the time the JS is parsed. Vite substitutes the env var at
+         build time. -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Loaded without blocking first paint: `media="print"` keeps the stylesheet out of the
+         render-blocking set, and the onload flip applies it as soon as it arrives. The families
+         already ship `display=swap`, so text was going to render in the fallback and swap
+         regardless — this just stops that text from waiting on a third-party round trip first.
+         Dropped from the request: Playfair italic and Plus Jakarta 300, neither of which is used
+         anywhere in the app. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      />
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

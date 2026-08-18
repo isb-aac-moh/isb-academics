@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, Suspense, memo, type ReactNode } from "react";
 import { Math } from "./Math";
 import { parseVizProps, VIZ } from "./viz";
 
@@ -215,8 +215,12 @@ interface Props {
     that embed an interactive widget from `./viz`. Deliberately not a general Markdown parser — no
     links or code fences, since none of the content uses them. Plain prose with no
     markup at all (the shape most concept notes are in today) still renders as a single
-    paragraph, so this is a drop-in replacement everywhere raw text was rendered before. */
-export function Markdown({ text, className }: Props) {
+    paragraph, so this is a drop-in replacement everywhere raw text was rendered before.
+
+    Memoised because the parse runs inline on every render and both props are strings. A question
+    card re-renders on each answer click, which re-parsed the prompt — and re-mounted any widget
+    embedded in it — every time. */
+export const Markdown = memo(function Markdown({ text, className }: Props) {
   const lines = text.split("\n");
   const blocks: ReactNode[] = [];
   let paragraphBuf: string[] = [];
@@ -305,7 +309,16 @@ export function Markdown({ text, className }: Props) {
     if (viz) {
       flushParagraph(`p-${i}`);
       const Component = VIZ[viz[1]];
-      if (Component) blocks.push(<Component key={`v-${i}`} {...parseVizProps(viz[2])} />);
+      if (Component) {
+        // Widgets are lazy (see ./viz). The note around one must not be held back while its chunk
+        // loads, so each gets its own boundary and reserves roughly its own height meanwhile —
+        // filling in without shoving the rest of the note down the page.
+        blocks.push(
+          <Suspense key={`v-${i}`} fallback={<div style={{ minHeight: 220 }} />}>
+            <Component {...parseVizProps(viz[2])} />
+          </Suspense>,
+        );
+      }
       i++;
       continue;
     }
@@ -384,4 +397,4 @@ export function Markdown({ text, className }: Props) {
   flushParagraph("p-end");
 
   return <div className={className}>{blocks}</div>;
-}
+});

@@ -18,9 +18,10 @@ jobs:
 
       - run: npm ci
 
-      # `npm run lint` is intentionally not run here: eslint 9 is installed but
-      # the repo has no eslint.config.js, so the command always fails. Add a
-      # config, then add `- run: npm run lint` above the build step.
+      # eslint.config.js now exists, so this runs. It fails the build on errors and
+      # prints warnings without failing — the React Compiler rules in react-hooks v7
+      # are warnings here on purpose; see the comment in eslint.config.js.
+      - run: npm run lint
 
       # `build` runs `tsc -b` first, so this also typechecks.
       - run: npm run build
