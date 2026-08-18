@@ -1,7 +1,7 @@
 /** Split-screen login, matching ISB's Tutor Portal (tutor.isb.edu) visual language. */
 import { useState } from "react";
 import { COLOR, FONT } from "../lib/theme";
-import { useAuth } from "../hooks/useAuth";
+import { signInWithAzure, sendMagicLink } from "../hooks/useAuth";
 
 interface Props {
   notProvisioned?: boolean;
@@ -9,7 +9,6 @@ interface Props {
 }
 
 export default function Login({ notProvisioned, onSignOut }: Props) {
-  const { signInWithAzure, sendMagicLink } = useAuth();
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [sending, setSending] = useState(false);

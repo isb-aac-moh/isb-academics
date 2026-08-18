@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import Sidebar from "./Sidebar";
@@ -14,7 +15,12 @@ export default function Layout({ user, onSignOut }: { user: User; onSignOut: () 
       <Sidebar user={user} onSignOut={onSignOut} />
       <div style={{ flex: 1, minWidth: 0 }}>
         {showPreviewBanner && <PreviewBanner />}
-        <Outlet context={{ user }} />
+        {/* Holds the shell steady while a lazily-fetched page chunk arrives. The fallback is a
+            blank block of the page background rather than a spinner: chunks are small and usually
+            land within a frame or two, and a spinner that flashes for 30ms reads as jank. */}
+        <Suspense fallback={<div style={{ minHeight: "100vh", background: COLOR.bg }} />}>
+          <Outlet context={{ user }} />
+        </Suspense>
       </div>
     </div>
   );

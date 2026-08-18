@@ -1,35 +1,28 @@
+import { lazy } from "react";
 import type { ComponentType } from "react";
-import { BreakEven } from "./BreakEven";
-import { Capability } from "./Capability";
-import { Clv } from "./Clv";
-import { ControlLimitWidth } from "./ControlLimitWidth";
-import { Eoq } from "./Eoq";
-import { Evc } from "./Evc";
-import { KanbanLoop } from "./KanbanLoop";
-import { LittlesLaw } from "./LittlesLaw";
-import { Newsvendor } from "./Newsvendor";
-import { ProcessFlow } from "./ProcessFlow";
-import { Queuing } from "./Queuing";
-import { SafetyStock } from "./SafetyStock";
-import { SixSigmaDrift } from "./SixSigmaDrift";
+
+/* Each widget is its own chunk. A note embeds at most one or two of these, and most notes embed
+   none, so pulling all thirteen (plus their SVG/plot helpers) into the Learn bundle made every
+   reader pay for widgets they never scroll past. Markdown renders them inside a Suspense
+   boundary, so the surrounding note paints immediately and the widget fills in. */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const VIZ: Record<string, ComponentType<any>> = {
   // Operations
-  "littles-law": LittlesLaw,
-  capability: Capability,
-  queuing: Queuing,
-  newsvendor: Newsvendor,
-  eoq: Eoq,
-  "process-flow": ProcessFlow,
-  "control-limit-width": ControlLimitWidth,
-  "six-sigma-drift": SixSigmaDrift,
-  "kanban-loop": KanbanLoop,
-  "safety-stock": SafetyStock,
+  "littles-law": lazy(() => import("./LittlesLaw").then((m) => ({ default: m.LittlesLaw }))),
+  capability: lazy(() => import("./Capability").then((m) => ({ default: m.Capability }))),
+  queuing: lazy(() => import("./Queuing").then((m) => ({ default: m.Queuing }))),
+  newsvendor: lazy(() => import("./Newsvendor").then((m) => ({ default: m.Newsvendor }))),
+  eoq: lazy(() => import("./Eoq").then((m) => ({ default: m.Eoq }))),
+  "process-flow": lazy(() => import("./ProcessFlow").then((m) => ({ default: m.ProcessFlow }))),
+  "control-limit-width": lazy(() => import("./ControlLimitWidth").then((m) => ({ default: m.ControlLimitWidth }))),
+  "six-sigma-drift": lazy(() => import("./SixSigmaDrift").then((m) => ({ default: m.SixSigmaDrift }))),
+  "kanban-loop": lazy(() => import("./KanbanLoop").then((m) => ({ default: m.KanbanLoop }))),
+  "safety-stock": lazy(() => import("./SafetyStock").then((m) => ({ default: m.SafetyStock }))),
   // Marketing
-  clv: Clv,
-  evc: Evc,
-  "break-even": BreakEven,
+  clv: lazy(() => import("./Clv").then((m) => ({ default: m.Clv }))),
+  evc: lazy(() => import("./Evc").then((m) => ({ default: m.Evc }))),
+  "break-even": lazy(() => import("./BreakEven").then((m) => ({ default: m.BreakEven }))),
 };
 
 export const VIZ_NAMES = Object.keys(VIZ);

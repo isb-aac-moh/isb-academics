@@ -97,7 +97,7 @@ export function HomePage({ profile, onGoHome }: Props) {
       {/* Same ISB campus photo as Login, shown full-strength — icons are white with a drop
           shadow so they stay legible against the photo's own light/dark regions, rather than
           washing the photo out to suit dark icons. */}
-      <div className="absolute inset-0 bg-[url('/login-bg.jpg')] bg-cover bg-center" />
+      <div className="absolute inset-0 bg-[url('/login-bg.webp')] bg-cover bg-center" />
 
       <header className="relative z-20 flex items-center justify-between mx-3 mt-3 md:mx-4 md:mt-4 px-3.5 py-2.5 rounded-2xl bg-base/85 backdrop-blur-sm shadow-[0_4px_20px_-6px_rgba(46,59,66,0.35)]">
         <button onClick={onGoHome} className="flex items-center">

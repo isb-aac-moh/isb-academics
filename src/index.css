@@ -122,9 +122,14 @@ body {
 
 /* Combine as className="btn btn-primary" etc. — Tailwind v4's @apply can't chain custom component classes. */
 @layer components {
+  /* Transitions name their properties instead of using `transition-all`: with `all`, every state
+     change makes the browser diff the full animatable property set, and any layout-affecting
+     property that happens to change (width from a label swap, padding from a variant) animates by
+     accident. These lists cover exactly what the modifiers below actually touch. */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold
-      transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none;
+      transition-[color,background-color,border-color,box-shadow,transform,filter,opacity] duration-200
+      active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-primary {
     @apply bg-accent text-accent-ink hover:brightness-110 shadow-[0_1px_2px_rgba(0,0,0,0.08)];
@@ -137,7 +142,7 @@ body {
   }
 
   .card {
-    @apply bg-surface border border-line rounded-2xl transition-all duration-200;
+    @apply bg-surface border border-line rounded-2xl transition-[border-color,box-shadow,transform] duration-200;
   }
   .card-hover {
     @apply hover:border-accent/50 hover:shadow-[0_8px_24px_-12px_rgba(46,59,66,0.16)] hover:-translate-y-0.5;
@@ -145,7 +150,8 @@ body {
 
   .input {
     @apply bg-surface border border-line rounded-xl px-3.5 py-2.5 text-ink placeholder:text-ink-soft/70
-      focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 transition-all duration-200;
+      focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15
+      transition-[border-color,box-shadow] duration-200;
   }
 
   /* Range input for the embedded widgets. Styled explicitly because the native control ignores
@@ -200,7 +206,7 @@ textarea:focus-visible,
   to { opacity: 1; transform: translateY(0); }
 }
 .row-enter {
-  animation: row-in 200ms ease-out;
+  animation: row-in 150ms ease-out;
 }
 
 @keyframes streak-pulse {
@@ -214,11 +220,15 @@ textarea:focus-visible,
 }
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+/* 180ms, not 400ms. This sits on whole page containers (every Learn page, the floating window,
+   every question card), and with fill-mode `both` the content is fully transparent until it
+   finishes — so the duration is a floor on how fast a navigation can possibly feel, on top of
+   whatever the data fetch costs. 180ms still reads as a deliberate entrance rather than a jump. */
 .rise-in {
-  animation: rise-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: rise-in 0.18s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @keyframes slide-in-right {
@@ -226,7 +236,7 @@ textarea:focus-visible,
   to { transform: translateX(0); }
 }
 .slide-in-right {
-  animation: slide-in-right 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: slide-in-right 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 /* Respect the OS-level motion preference — near-zero duration (not animation:none) keeps
