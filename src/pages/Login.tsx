@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { COLOR, FONT } from "../lib/theme";
 import { signInWithAzure, sendMagicLink } from "../hooks/useAuth";
+import { usePostHog } from "@posthog/react";
 
 interface Props {
   notProvisioned?: boolean;
@@ -12,14 +13,17 @@ export default function Login({ notProvisioned, onSignOut }: Props) {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const posthog = usePostHog();
 
   async function handleAzure() {
+    posthog?.capture("magic_link_requested", { method: "azure_sso" });
     const err = await signInWithAzure();
     if (err) setMsg(err);
   }
 
   async function handleMagicLink() {
     setSending(true);
+    posthog?.capture("magic_link_requested", { method: "email_magic_link" });
     const err = await sendMagicLink(email);
     setSending(false);
     setMsg(err ?? "Check your @isb.edu inbox for a login link.");

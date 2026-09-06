@@ -14,6 +14,7 @@
  */
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
+import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useAppSettings } from "../hooks/useAppSettings";
@@ -29,6 +30,7 @@ export default function PulseCheck() {
   const { courses, loading: coursesLoading } = useCourses();
   const { liveBiddingTerms, loading: settingsLoading } = useAppSettings();
   const { ownSubmissions, results, histograms, loading: pulseLoading, submitError, submit, edit, remove } = usePulseCheck(user.id, liveBiddingTerms);
+  const posthog = usePostHog();
 
   if (coursesLoading || settingsLoading || pulseLoading) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
@@ -72,9 +74,18 @@ export default function PulseCheck() {
                 ownSubmissions={ownSubmissions.filter((s) => s.term === term)}
                 results={displayResults}
                 histograms={displayHistograms}
-                onSubmit={(courseId, points) => submit({ course_id: courseId, term, bid_points_estimate: points })}
-                onEdit={(original, courseId, points) => edit(original, { course_id: courseId, bid_points_estimate: points })}
-                onRemove={(submissionId) => remove(submissionId)}
+                onSubmit={(courseId, points) => {
+                  posthog?.capture("pulse_check_submitted", { term, bid_points_estimate: points });
+                  submit({ course_id: courseId, term, bid_points_estimate: points });
+                }}
+                onEdit={(original, courseId, points) => {
+                  posthog?.capture("pulse_check_edited", { term, bid_points_estimate: points, edit_count: original.edit_count + 1 });
+                  edit(original, { course_id: courseId, bid_points_estimate: points });
+                }}
+                onRemove={(submissionId) => {
+                  posthog?.capture("pulse_check_removed", { term });
+                  remove(submissionId);
+                }}
               />
             );
           })

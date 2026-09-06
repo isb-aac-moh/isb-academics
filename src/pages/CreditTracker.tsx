@@ -11,6 +11,7 @@
  */
 import { useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { usePostHog } from "@posthog/react";
 import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X, ChevronDown, Brain } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
@@ -68,6 +69,7 @@ export default function CreditTracker() {
   const { entries: bidEntries, resolveEntry } = useBidPlan(user.id);
   const { entries, addEntry, updateEntry, removeEntry, upsertGrade, pointsPaid } = useActualEnrollments(user.id);
   const [showLearnPromo, setShowLearnPromo] = useState(true);
+  const posthog = usePostHog();
 
   if (coursesLoading || !profile) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
@@ -88,6 +90,7 @@ export default function CreditTracker() {
   ];
 
   async function handleResolve(entry: BidPlanEntry, gotIt: boolean, points: number) {
+    posthog?.capture("bid_reconciled", { got_it: gotIt, term: entry.term, points_paid: gotIt ? points : 0 });
     if (gotIt) {
       await resolveEntry(entry.id, points);
       if (entry.course_id) await addEntry({ course_id: entry.course_id, term: entry.term, points_paid: points, grade: null });
@@ -170,17 +173,41 @@ export default function CreditTracker() {
           <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 10, maxWidth: 560 }}>
             Core courses and the Flexi Core you told the Bidding Planner you completed — not bid on, but still worth logging a grade for your own GPA tracking.
           </p>
-          <EarlierTermsGrades courses={courses} profile={profile} entries={entries} onSetGrade={upsertGrade} />
+          <EarlierTermsGrades
+            courses={courses}
+            profile={profile}
+            entries={entries}
+            onSetGrade={async (courseId, term, grade) => {
+              posthog?.capture("grade_logged", { term, grade: grade ?? "cleared" });
+              await upsertGrade(courseId, term, grade);
+            }}
+          />
         </div>
 
         <div>
           <SectionLabel>Log a confirmed course</SectionLabel>
-          <AddEntryForm courses={courses} entries={entries} onAdd={addEntry} />
+          <AddEntryForm
+            courses={courses}
+            entries={entries}
+            onAdd={async (entry) => {
+              const course = courses.find((c) => c.id === entry.course_id);
+              posthog?.capture("enrollment_added", { term: entry.term, credits: course ? Number(course.credits) : undefined, points_paid: entry.points_paid });
+              await addEntry(entry);
+            }}
+          />
         </div>
 
         <div>
           <SectionLabel>Your confirmed courses</SectionLabel>
-          <TermLedger entries={entries} courses={courses} onUpdate={updateEntry} onRemove={removeEntry} />
+          <TermLedger
+            entries={entries}
+            courses={courses}
+            onUpdate={updateEntry}
+            onRemove={async (id) => {
+              posthog?.capture("enrollment_removed", {});
+              await removeEntry(id);
+            }}
+          />
         </div>
       </main>
     </div>

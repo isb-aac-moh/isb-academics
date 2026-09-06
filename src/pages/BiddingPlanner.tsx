@@ -4,6 +4,7 @@
  * own stated goals and what's currently live to bid on, so the decision stays theirs.
  */
 import { useParams, useNavigate, Navigate, useOutletContext } from "react-router-dom";
+import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useResources } from "../hooks/useResources";
@@ -39,6 +40,8 @@ export default function BiddingPlanner() {
   const { liveBiddingTerms, termCreditLimits } = useAppSettings();
   const { profiles: gradingProfiles } = useCourseGradingProfiles();
 
+  const posthog = usePostHog();
+
   const step = STEPS.findIndex((s) => s.key === stepKey);
   if (step === -1) return <Navigate to="/planner/background" replace />;
 
@@ -52,7 +55,18 @@ export default function BiddingPlanner() {
   const dippingIntoReserve = !overFullBudget && remainingPoints < 0;
 
   function goToStep(i: number) {
+    posthog?.capture("planner_step_navigated", { step_key: STEPS[i].key, step_index: i });
     navigate(`/planner/${STEPS[i].key}`);
+  }
+
+  async function handleAddEntry(courseId: string, term: string, points: number): Promise<void> {
+    posthog?.capture("bid_entry_added", { term, planned_points: points });
+    await addEntry({ course_id: courseId, term, planned_points: points });
+  }
+
+  function handleRemoveEntry(id: string) {
+    posthog?.capture("bid_entry_removed", {});
+    removeEntry(id);
   }
 
   return (
@@ -127,8 +141,8 @@ export default function BiddingPlanner() {
             pointsAvailable={pointsAvailable}
             liveBiddingTerms={liveBiddingTerms}
             termCreditLimits={termCreditLimits}
-            onAdd={(courseId, term, points) => addEntry({ course_id: courseId, term, planned_points: points })}
-            onRemove={removeEntry}
+            onAdd={handleAddEntry}
+            onRemove={handleRemoveEntry}
           />
         )}
         {step === 3 && <StepGlance courses={courses} bidEntries={entries} gradingProfiles={gradingProfiles} />}
