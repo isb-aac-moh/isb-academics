@@ -1,5 +1,6 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
 import { Window } from "./components/Window";
 import { MobileNav } from "./components/MobileNav";
@@ -48,11 +49,22 @@ export default function LearnSection({ user }: { user: User }) {
   const navigate = useNavigate();
   const [homeGuideOpen, setHomeGuideOpen] = useState(true);
   const { profile, error, setProfile } = useLearnProfile(user);
+  const posthog = usePostHog();
+  const lastSection = useRef<string | null>(null);
+
+  const section = location.pathname.split("/")[2] ?? "";
+
+  // Capture once each time the user enters the practice section (not on every re-render).
+  useEffect(() => {
+    if (section === "practice" && lastSection.current !== "practice") {
+      posthog?.capture("learn_quiz_started", {});
+    }
+    lastSection.current = section;
+  }, [section, posthog]);
 
   if (error) return <LearnMessage title="Practice is unavailable" detail={error} />;
   if (!profile) return <div className="learn-root" />;
 
-  const section = location.pathname.split("/")[2] ?? "";
   const atHome = section === "";
   const title = atHome ? (homeGuideOpen ? WINDOW_TITLES[""] : null) : WINDOW_TITLES[section];
   const closeWindow = atHome ? () => setHomeGuideOpen(false) : () => navigate("/learn");

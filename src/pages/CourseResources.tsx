@@ -6,6 +6,7 @@
  * (An NLP/AI-assisted version is a planned follow-up, not built yet.)
  */
 import { useEffect, useMemo, useState } from "react";
+import { usePostHog } from "@posthog/react";
 import { useSearchParams } from "react-router-dom";
 import { Search, X, ExternalLink, FileText, Maximize2, Minimize2, Pin, ChevronRight } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
@@ -417,11 +418,13 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 }
 
 function ResourceRow({ resource }: { resource: Resource }) {
+  const posthog = usePostHog();
   return (
     <a
       href={resource.url}
       target="_blank"
       rel="noreferrer"
+      onClick={() => posthog?.capture("resource_opened", { resource_type: resource.resource_type, pinned: resource.pinned })}
       className="flex items-start justify-between"
       style={{ padding: "11px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none", gap: 8 }}
     >

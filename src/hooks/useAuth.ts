@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import posthog from "posthog-js";
 import type { User } from "../types";
 
 /**
@@ -86,9 +87,15 @@ export function useAuth() {
     setUser(data ?? null);
     setNotProvisioned(!data);
     setLoading(false);
+    if (data) {
+      // Identify the user so all future events are linked to their profile.
+      posthog.identify(data.id, { role: data.role });
+      posthog.capture("user_signed_in", { method: "sso_or_magic_link" });
+    }
   }
 
   async function signOut() {
+    posthog.reset();
     await supabase.auth.signOut();
     loadedUid.current = null;
     setUser(null);
