@@ -38,7 +38,8 @@ There is no test suite yet — verification has been manual (build passing + dir
 - **React Router v7** — real URL routing for every page (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the route map).
 - **Supabase** — Postgres + Auth + RLS. **Shared with `isb-explorer`**, not a separate project. One login covers both apps (`storageKey: "pulse-isb-auth"` in `src/lib/supabase.ts` is intentionally the same key isb-explorer uses).
 - **Microsoft SSO** via Supabase Auth's Azure provider, gated to `@isb.edu` emails, with an email magic-link fallback.
-- **Vercel** — **not connected to GitHub for auto-deploy** (confirmed 2026-08-03; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)) — every ship needs an explicit `vercel --prod` after pushing. `vercel.json` has a catch-all SPA rewrite — without it, every route except `/` would 404 on refresh or direct load.
+- **Vercel** — **connected to GitHub for auto-deploy** (re-confirmed 2026-09-10 — this reverses the 2026-08-03 finding below; the connection was made sometime in between). Merging a PR to `main` triggers an automatic Production deployment via the `vercel[bot]` GitHub App — no manual `vercel --prod` needed on the normal path. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for two gotchas when you do need to deploy manually from a worktree. `vercel.json` has a catch-all SPA rewrite — without it, every route except `/` would 404 on refresh or direct load.
+- **Installable as a PWA** — `vite-plugin-pwa` generates a manifest + service worker, so iOS/Android users can Add to Home Screen and get the ISB icon with no browser chrome. The service worker precaches the app shell (JS/CSS/HTML); Supabase API calls are never cached, so auth and live data are unaffected.
 
 ## Who can do what
 
