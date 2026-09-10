@@ -1,7 +1,8 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
+import { lazyWithReload } from "../lib/lazyWithReload";
 import { Window } from "./components/Window";
 import { MobileNav } from "./components/MobileNav";
 import { RequireAdmin } from "./components/RequireAdmin";
@@ -15,7 +16,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { useLearnProfile } from "./useLearnProfile";
 import type { User } from "../types";
 
-const AdminPage = lazy(() => import("./pages/AdminPage").then((m) => ({ default: m.AdminPage })));
+const AdminPage = lazyWithReload(() => import("./pages/AdminPage").then((m) => ({ default: m.AdminPage })));
 
 const WINDOW_TITLES: Record<string, string> = {
   "": "Home",

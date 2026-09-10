@@ -1,7 +1,7 @@
-import { lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { COLOR } from "./lib/theme";
 import { useAuth } from "./hooks/useAuth";
+import { lazyWithReload } from "./lib/lazyWithReload";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import RequireAdmin from "./components/RequireAdmin";
@@ -11,15 +11,15 @@ import RequireAdmin from "./components/RequireAdmin";
    auth/profile query is still in flight, so the extra request costs no wall-clock time on a cold
    load but keeps ~2/3 of the JS out of it. Layout renders the Suspense boundary, so the sidebar
    stays on screen while a page chunk arrives. */
-const BiddingPlanner = lazy(() => import("./pages/BiddingPlanner"));
-const CreditTracker = lazy(() => import("./pages/CreditTracker"));
-const AdminPage = lazy(() => import("./pages/AdminPage"));
-const CourseResources = lazy(() => import("./pages/CourseResources"));
-const TermFourDossier = lazy(() => import("./pages/TermFourDossier"));
-const TermFourBiddingQA = lazy(() => import("./pages/TermFourBiddingQA"));
-const NoticeBoard = lazy(() => import("./pages/NoticeBoard"));
-const PulseCheck = lazy(() => import("./pages/PulseCheck"));
-const LearnSection = lazy(() => import("./learn/LearnSection"));
+const BiddingPlanner = lazyWithReload(() => import("./pages/BiddingPlanner"));
+const CreditTracker = lazyWithReload(() => import("./pages/CreditTracker"));
+const AdminPage = lazyWithReload(() => import("./pages/AdminPage"));
+const CourseResources = lazyWithReload(() => import("./pages/CourseResources"));
+const TermFourDossier = lazyWithReload(() => import("./pages/TermFourDossier"));
+const TermFourBiddingQA = lazyWithReload(() => import("./pages/TermFourBiddingQA"));
+const NoticeBoard = lazyWithReload(() => import("./pages/NoticeBoard"));
+const PulseCheck = lazyWithReload(() => import("./pages/PulseCheck"));
+const LearnSection = lazyWithReload(() => import("./learn/LearnSection"));
 
 export default function App() {
   const { user, loading, notProvisioned, signOut } = useAuth();
