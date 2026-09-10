@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import Sidebar from "./Sidebar";
+import BottomNav from "./BottomNav";
 import PopupManager from "./PopupManager";
 import type { User } from "../types";
 
@@ -10,12 +11,15 @@ const ADMIN_PREVIEW_PREFIXES = ["/notices"];
 export default function Layout({ user, onSignOut }: { user: User; onSignOut: () => void }) {
   const location = useLocation();
   const showPreviewBanner = ADMIN_PREVIEW_PREFIXES.some((p) => location.pathname.startsWith(p));
+  // /learn renders its own bottom nav and already reserves space for it; everywhere else needs
+  // room at the bottom on mobile so the new app-wide bar doesn't cover the page's last content.
+  const inLearn = location.pathname.startsWith("/learn");
 
   return (
     <div className="flex flex-col md:flex-row">
       <PopupManager />
       <Sidebar user={user} onSignOut={onSignOut} />
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0 }} className={inLearn ? "" : "pb-[calc(3.25rem+env(safe-area-inset-bottom))] md:pb-0"}>
         {showPreviewBanner && <PreviewBanner />}
         {/* Holds the shell steady while a lazily-fetched page chunk arrives. The fallback is a
             blank block of the page background rather than a spinner: chunks are small and usually
@@ -24,6 +28,7 @@ export default function Layout({ user, onSignOut }: { user: User; onSignOut: () 
           <Outlet context={{ user }} />
         </Suspense>
       </div>
+      <BottomNav />
     </div>
   );
 }
