@@ -6,6 +6,14 @@
     <meta name="theme-color" content="#F4F2EC" />
     <title>ISB Academics</title>
 
+    <!-- iOS reads none of the web app manifest for home-screen installs, so its icon, title,
+         and standalone (no-Safari-chrome) behavior are set here instead. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ISB Academics" />
+
     <!-- Nothing renders until auth resolves, and auth is the first request the app makes, so the
          DNS + TCP + TLS handshake to Supabase is squarely on the critical path. Starting it here
          means it is already warm by the time the JS is parsed. Vite substitutes the env var at
