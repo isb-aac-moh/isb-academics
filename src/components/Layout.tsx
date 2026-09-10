@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import Sidebar from "./Sidebar";
+import PopupManager from "./PopupManager";
 import type { User } from "../types";
 
 const ADMIN_PREVIEW_PREFIXES = ["/notices"];
@@ -12,6 +13,7 @@ export default function Layout({ user, onSignOut }: { user: User; onSignOut: () 
 
   return (
     <div className="flex flex-col md:flex-row">
+      <PopupManager />
       <Sidebar user={user} onSignOut={onSignOut} />
       <div style={{ flex: 1, minWidth: 0 }}>
         {showPreviewBanner && <PreviewBanner />}

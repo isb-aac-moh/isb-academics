@@ -156,6 +156,27 @@ export interface NavLink {
   created_at: string;
 }
 
+export type PopupFrequency = "always" | "session" | "once";
+export type PopupPrimaryAction = "dismiss" | "internal" | "external";
+
+// Admin-authored dashboard popup — see supabase/migrations/20260910084958_dashboard_popups_generic.sql.
+// slug is the primary key; admin-created popups get a random slug (never referenced by code),
+// while a handful of legacy slugs (e.g. "bidding_reconciliation") predate this generic system.
+export interface DashboardPopup {
+  slug: string;
+  enabled: boolean;
+  title: string;
+  body: string;
+  icon: string | null; // key into POPUP_ICONS (src/lib/popupIcons.ts), or null for no icon
+  page: string; // route pathname prefix to show on; "" = every page
+  frequency: PopupFrequency;
+  primary_label: string;
+  primary_action: PopupPrimaryAction;
+  primary_target: string | null; // internal path or external URL, required unless action is "dismiss"
+  secondary_label: string | null; // null/blank hides the secondary (dismiss-only) button
+  updated_at: string;
+}
+
 // Singleton settings row — see supabase/migrations/20260728090000_app_settings.sql.
 export interface AppSettings {
   id: true;

@@ -93,3 +93,18 @@ export function tabForResourceType(type: string) {
 }
 
 export const NOTIFICATION_TAGS = ["Urgent", "Important", "Info", "General"] as const;
+
+// Top-level routes a dashboard popup can be scoped to (see App.tsx) — a dropdown instead of
+// free text so a typo in an admin-entered path can't silently make a popup never trigger.
+// "" (All pages) matches every route since dashboard_popups.page is checked with startsWith.
+export const POPUP_PAGES = [
+  { value: "", label: "All pages" },
+  { value: "/tracker", label: "Credit Tracker" },
+  { value: "/planner", label: "Bidding Planner" },
+  { value: "/resources", label: "Course Resources" },
+  { value: "/pulse-check", label: "Pulse Check" },
+  { value: "/term4", label: "Term 4 Dossier" },
+  { value: "/term4-bidding-qa", label: "Term 4 Bidding Q&A" },
+  { value: "/learn", label: "Learn (any page)" },
+  { value: "/notices", label: "Notice Board" },
+] as const;
