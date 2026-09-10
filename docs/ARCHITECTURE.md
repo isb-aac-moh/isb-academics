@@ -18,7 +18,12 @@ So: one Supabase project, one `users` table, one Microsoft SSO configuration, tw
 | Live URL | isb-academics.vercel.app | pulse-isb.vercel.app |
 | Supabase project | **same one** | **same one** |
 
-**isb-academics is *not* connected to GitHub for auto-deploy** — `vercel project inspect isb-academics` shows no git integration, and confirmed directly (2026-08-03): pushing to `main` alone never produced a new deployment; every ship required an explicit `vercel --prod`. (isb-explorer's own deploy wiring wasn't re-verified — don't assume it matches.) There is no staging/preview gate in front of production either way — once `vercel --prod` runs, it's live. Treat both `main` and that command accordingly.
+**isb-academics *is* connected to GitHub for auto-deploy** (re-confirmed 2026-09-10 — this reverses the 2026-08-03 finding above; the connection was made sometime in between, not on this date). Merging a PR to `main` triggers an automatic Vercel deployment via the `vercel[bot]` GitHub App: open PRs get a `Vercel` status check (a preview deploy) and merging creates a new Production deployment. (isb-explorer's own deploy wiring wasn't re-verified — don't assume it matches.) There is still no staging/preview gate in front of production — once a PR merges to `main`, the auto-deploy is live within about a minute. Treat `main` accordingly.
+
+Two gotchas worth knowing before manually running `vercel` from a fresh git worktree (both hit during the PWA ship on 2026-09-10):
+
+- **Hobby-plan concurrent-build limit.** If another deploy is already building — likely with several Claude sessions/worktrees active on this repo at once — the new one can come back `"Deployment was blocked"` (check via `gh api repos/isb-aac-moh/isb-academics/deployments/<id>/statuses`), and `vercel redeploy <url>` refuses to retry it ("This deployment can not be redeployed. Please try again from a fresh commit."). Fix: run `vercel --prod --yes --scope isb-aac` from a worktree whose files match `origin/main` exactly (verify with `git diff HEAD origin/main --stat` — no output means safe to deploy).
+- **A fresh worktree has no `.vercel/project.json`.** Running `vercel --prod` there with no existing link auto-creates and links a **new, separate Vercel project** named after the worktree's folder — not the real `isb-academics` project. Before deploying from a worktree, first link it to the correct project: copy `.vercel/project.json` from the main checkout (project `isb-academics`, id `prj_1CEHXg86TM1vFpNnS6v8emTsPJDR`, org `team_ZDdSkByf3msgL94G2uleKOOY`) into the worktree's `.vercel/` directory.
 
 ## Auth flow
 
