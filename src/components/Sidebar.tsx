@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, FileStack, CircleHelp, PanelLeftClose, PanelLeftOpen, Brain } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, PanelLeftClose, PanelLeftOpen, Brain, LayoutGrid } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
@@ -45,8 +45,6 @@ export default function Sidebar({ user, onSignOut }: Props) {
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<BookOpen size={16} />} label="Course Resources" active={isActive("/resources")} onClick={() => go("/resources")} collapsed={collapsed} onLight={onLight} />
-      <NavItem icon={<FileStack size={16} />} label="Term 4 Dossier" active={isActive("/term4")} onClick={() => go("/term4")} collapsed={collapsed} onLight={onLight} />
-      <NavItem icon={<CircleHelp size={16} />} label="Term 4 Bidding Q&A" active={isActive("/term4-bidding-qa")} onClick={() => go("/term4-bidding-qa")} collapsed={collapsed} onLight={onLight} />
       <NavItem
         icon={<Megaphone size={16} />}
         label="Notice Board"
@@ -62,9 +60,15 @@ export default function Sidebar({ user, onSignOut }: Props) {
   );
 
   const visibleLinks = navLinks.filter((link) => link.visibility === "everyone" || user.is_admin);
+  // Term after term, admins add more of these — cap what shows in the rail so
+  // it doesn't grow unbounded, and point the rest at Course Resources, where
+  // every link added here is already mirrored (see AdminPage's NavLinksAdmin).
+  const visibleCap = 4;
+  const shownLinks = visibleLinks.slice(0, visibleCap);
+  const overflowCount = visibleLinks.length - shownLinks.length;
   const extraNav = (collapsed: boolean, onLight: boolean) => visibleLinks.length > 0 ? (
     <nav className="space-y-1" style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${onLight ? COLOR.border : "rgba(255,255,255,0.15)"}` }}>
-      {visibleLinks.map((link) => {
+      {shownLinks.map((link) => {
         const Icon = NAV_LINK_ICONS[link.icon as NavLinkIconKey];
         return link.link_type === "external" ? (
           <ExternalNavItem key={link.id} icon={<Icon size={16} />} label={link.label} href={link.href} collapsed={collapsed} onLight={onLight} />
@@ -72,6 +76,16 @@ export default function Sidebar({ user, onSignOut }: Props) {
           <NavItem key={link.id} icon={<Icon size={16} />} label={link.label} active={isActive(link.href)} onClick={() => go(link.href)} collapsed={collapsed} onLight={onLight} />
         );
       })}
+      {overflowCount > 0 && (
+        <NavItem
+          icon={<LayoutGrid size={16} />}
+          label={`${overflowCount} more in Resources`}
+          active={false}
+          onClick={() => go("/resources")}
+          collapsed={collapsed}
+          onLight={onLight}
+        />
+      )}
     </nav>
   ) : null;
 
