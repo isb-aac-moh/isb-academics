@@ -127,7 +127,7 @@ export default function BiddingPlanner() {
         )}
       </header>
 
-      <main className="px-6 md:px-12" style={{ maxWidth: 1600 }}>
+      <main className="px-6 md:px-12 pb-32 md:pb-0" style={{ maxWidth: 1600 }}>
         {step === 0 && <StepBackground profile={profile} save={save} gatingCourses={gatingCourses} />}
         {step === 1 && <StepGoals profile={profile} save={save} />}
         {step === 2 && (
@@ -160,8 +160,39 @@ export default function BiddingPlanner() {
           />
         )}
 
-        {/* Nav buttons */}
-        <div className="flex justify-between mt-12 pb-8">
+        {/* Nav buttons — desktop keeps the original in-flow row at the end of the step content */}
+        <div className="hidden md:flex justify-between mt-12 pb-8">
+          <button
+            onClick={() => goToStep(Math.max(0, step - 1))}
+            disabled={step === 0}
+            style={{
+              padding: "10px 20px", borderRadius: 9, border: `1px solid ${COLOR.border}`, background: COLOR.surface,
+              color: COLOR.ink2, fontFamily: FONT.sans, fontSize: 13, fontWeight: 600, cursor: step === 0 ? "default" : "pointer",
+              opacity: step === 0 ? 0.4 : 1,
+            }}
+          >
+            Back
+          </button>
+          {step < STEPS.length - 1 && (
+            <button
+              onClick={() => goToStep(Math.min(STEPS.length - 1, step + 1))}
+              style={{ padding: "10px 22px", borderRadius: 9, border: "none", background: COLOR.navyHero, color: "#fff", fontFamily: FONT.sans, fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+            >
+              Continue
+            </button>
+          )}
+        </div>
+
+        {/* Mobile: pinned above the app's bottom nav, so Back/Continue never need a scroll to reach */}
+        <div
+          className="md:hidden fixed inset-x-0 z-30 flex justify-between items-center px-6 py-3"
+          style={{
+            bottom: "calc(3.25rem + env(safe-area-inset-bottom))",
+            background: COLOR.surface,
+            borderTop: `1px solid ${COLOR.border}`,
+            boxShadow: "0 -4px 14px -8px rgba(30,46,122,0.15)",
+          }}
+        >
           <button
             onClick={() => goToStep(Math.max(0, step - 1))}
             disabled={step === 0}
