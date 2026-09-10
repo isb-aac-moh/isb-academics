@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
-import { LayoutGrid, GraduationCap, BookOpen, Megaphone, Pin, Link2, ArrowUp, ArrowDown } from "lucide-react";
+import { LayoutGrid, GraduationCap, BookOpen, Megaphone, Pin, Link2, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useCourseGradingProfiles } from "../hooks/useCourseGradingProfiles";
@@ -12,11 +12,13 @@ import { useResources } from "../hooks/useResources";
 import { useNotifications } from "../hooks/useNotifications";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { useAppSettings } from "../hooks/useAppSettings";
+import { useDashboardPopups } from "../hooks/useDashboardPopups";
 import { supabase } from "../lib/supabase";
-import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS } from "../lib/options";
+import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS, POPUP_PAGES } from "../lib/options";
 import { BIDDABLE_TERM_ORDER } from "../lib/creditProgress";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
-import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility, CourseGradingProfile } from "../types";
+import { POPUP_ICONS, type PopupIconKey } from "../lib/popupIcons";
+import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility, CourseGradingProfile, PopupFrequency, PopupPrimaryAction } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
 
 // Admins often paste a bare domain ("example.com") into link fields — without
@@ -32,13 +34,14 @@ const CONCENTRATIONS: ConcentrationArea[] = [
 ];
 const SPECIALIZATIONS: IndustrySpecialization[] = ["Healthcare", "Manufacturing", "Public Policy", "Infrastructure"];
 
-type Tab = "overview" | "courses" | "resources" | "notifications" | "nav-links";
+type Tab = "overview" | "courses" | "resources" | "notifications" | "nav-links" | "popups";
 const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: "overview", label: "Overview", icon: <LayoutGrid size={14} /> },
   { key: "courses", label: "Courses", icon: <GraduationCap size={14} /> },
   { key: "resources", label: "Resources", icon: <BookOpen size={14} /> },
   { key: "notifications", label: "Notice Board", icon: <Megaphone size={14} /> },
   { key: "nav-links", label: "Nav Links", icon: <Link2 size={14} /> },
+  { key: "popups", label: "Popups", icon: <Sparkles size={14} /> },
 ];
 
 export default function AdminPage() {
@@ -77,6 +80,7 @@ export default function AdminPage() {
         {activeTab === "resources" && <ResourcesAdmin />}
         {activeTab === "notifications" && <NotificationsAdmin />}
         {activeTab === "nav-links" && <NavLinksAdmin />}
+        {activeTab === "popups" && <PopupsAdmin />}
       </main>
     </div>
   );
@@ -930,6 +934,200 @@ function NavLinksAdmin() {
           );
         })}
         {navLinks.length === 0 && <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>No extra links yet.</p>}
+      </div>
+    </div>
+  );
+}
+
+const EMPTY_POPUP = {
+  title: "", body: "", icon: "" as PopupIconKey | "", page: "",
+  frequency: "always" as PopupFrequency,
+  primary_label: "Got it", primary_action: "dismiss" as PopupPrimaryAction, primary_target: "",
+  secondary_label: "Maybe later",
+};
+
+const FREQUENCY_OPTIONS: { value: PopupFrequency; label: string }[] = [
+  { value: "always", label: "Every visit to the page" },
+  { value: "session", label: "Once per browser session" },
+  { value: "once", label: "Once, ever" },
+];
+
+const PRIMARY_ACTION_OPTIONS: { value: PopupPrimaryAction; label: string }[] = [
+  { value: "dismiss", label: "Just dismiss" },
+  { value: "internal", label: "Go to a page in the app" },
+  { value: "external", label: "Open a link" },
+];
+
+function PopupsAdmin() {
+  const { popups, reload } = useDashboardPopups();
+  const [form, setForm] = useState({ ...EMPTY_POPUP });
+  const [editSlug, setEditSlug] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  function startEdit(slug: string) {
+    const p = popups.find((p) => p.slug === slug);
+    if (!p) return;
+    setEditSlug(slug);
+    setForm({
+      title: p.title, body: p.body, icon: (p.icon as PopupIconKey) ?? "", page: p.page,
+      frequency: p.frequency, primary_label: p.primary_label, primary_action: p.primary_action,
+      primary_target: p.primary_target ?? "", secondary_label: p.secondary_label ?? "",
+    });
+  }
+
+  function cancelEdit() {
+    setEditSlug(null);
+    setForm({ ...EMPTY_POPUP });
+  }
+
+  async function handleSave() {
+    if (!form.title.trim() || !form.body.trim()) return;
+    if (form.primary_action !== "dismiss" && !form.primary_target.trim()) return;
+    setSaving(true);
+    // Internal targets are app paths, not URLs — only external links get the https:// fallback.
+    const primaryTarget =
+      form.primary_action === "dismiss" ? null
+      : form.primary_action === "internal" ? form.primary_target.trim()
+      : withScheme(form.primary_target.trim());
+    const payload = {
+      title: form.title.trim(),
+      body: form.body.trim(),
+      icon: form.icon || null,
+      page: form.page,
+      frequency: form.frequency,
+      primary_label: form.primary_label.trim() || "Got it",
+      primary_action: form.primary_action,
+      primary_target: primaryTarget,
+      secondary_label: form.secondary_label.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = editSlug
+      ? await supabase.from("dashboard_popups").update(payload).eq("slug", editSlug)
+      : await supabase.from("dashboard_popups").insert({ slug: crypto.randomUUID(), enabled: true, ...payload });
+    setSaving(false);
+    if (!error) {
+      setForm({ ...EMPTY_POPUP });
+      setEditSlug(null);
+      reload();
+    } else {
+      console.error("[AdminPage] save popup failed:", error);
+    }
+  }
+
+  async function toggleEnabled(slug: string, enabled: boolean) {
+    const { error } = await supabase.from("dashboard_popups").update({ enabled: !enabled }).eq("slug", slug);
+    if (error) {
+      console.error("[AdminPage] toggle popup enabled failed:", error);
+      alert("Couldn't update that popup — check your connection and try again.");
+      return;
+    }
+    reload();
+  }
+
+  async function handleDelete(slug: string) {
+    const { error } = await supabase.from("dashboard_popups").delete().eq("slug", slug);
+    if (error) {
+      console.error("[AdminPage] delete popup failed:", error);
+      alert("Couldn't delete that popup — check your connection and try again.");
+      return;
+    }
+    reload();
+  }
+
+  return (
+    <div>
+      <div style={{ padding: 16, borderRadius: 10, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, marginBottom: 20 }}>
+        <div className="flex items-center justify-between mb-2">
+          <p style={{ fontSize: 13, fontWeight: 700, fontFamily: FONT.sans }}>{editSlug ? "Edit popup" : "Create a popup"}</p>
+          {editSlug && <button onClick={cancelEdit} style={{ fontSize: 12, color: COLOR.ink3, background: "none", border: "none", cursor: "pointer" }}>Cancel edit</button>}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+          <LabeledField label="Title">
+            <input style={inputStyle} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+          </LabeledField>
+          <LabeledField label="Icon (optional)">
+            <select style={inputStyle} value={form.icon} onChange={(e) => setForm((f) => ({ ...f, icon: e.target.value as PopupIconKey | "" }))}>
+              <option value="">No icon</option>
+              {(Object.keys(POPUP_ICONS) as PopupIconKey[]).map((key) => <option key={key} value={key}>{key}</option>)}
+            </select>
+          </LabeledField>
+        </div>
+        <LabeledField label="Body" className="mb-2">
+          <textarea
+            style={{ ...inputStyle, resize: "none" }} rows={2}
+            value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
+            placeholder="What the student sees below the title"
+          />
+        </LabeledField>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+          <LabeledField label="Show on">
+            <select style={inputStyle} value={form.page} onChange={(e) => setForm((f) => ({ ...f, page: e.target.value }))}>
+              {POPUP_PAGES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+            </select>
+          </LabeledField>
+          <LabeledField label="How often">
+            <select style={inputStyle} value={form.frequency} onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value as PopupFrequency }))}>
+              {FREQUENCY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </LabeledField>
+        </div>
+
+        <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, margin: "4px 0" }}>Primary button</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+          <LabeledField label="Label">
+            <input style={inputStyle} value={form.primary_label} onChange={(e) => setForm((f) => ({ ...f, primary_label: e.target.value }))} />
+          </LabeledField>
+          <LabeledField label="Action">
+            <select style={inputStyle} value={form.primary_action} onChange={(e) => setForm((f) => ({ ...f, primary_action: e.target.value as PopupPrimaryAction }))}>
+              {PRIMARY_ACTION_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </LabeledField>
+        </div>
+        {form.primary_action !== "dismiss" && (
+          <LabeledField label={form.primary_action === "internal" ? "App path (e.g. /learn/practice)" : "URL"} className="mb-2">
+            <input
+              style={inputStyle} value={form.primary_target}
+              onChange={(e) => setForm((f) => ({ ...f, primary_target: e.target.value }))}
+              placeholder={form.primary_action === "internal" ? "/learn/practice" : "https://…"}
+            />
+          </LabeledField>
+        )}
+        <LabeledField label="Secondary button label (leave blank to hide it)" className="mb-3">
+          <input style={inputStyle} value={form.secondary_label} onChange={(e) => setForm((f) => ({ ...f, secondary_label: e.target.value }))} />
+        </LabeledField>
+
+        <button onClick={handleSave} disabled={saving} style={buttonStyle}>
+          {saving ? "Saving…" : editSlug ? "Save changes" : "Create popup"}
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {popups.map((p) => {
+          const pageLabel = POPUP_PAGES.find((pg) => pg.value === p.page)?.label ?? p.page;
+          return (
+            <div key={p.slug} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: p.enabled ? COLOR.surface : COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, opacity: p.enabled ? 1 : 0.6 }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, fontFamily: FONT.sans }}>
+                  {p.title}
+                  {!p.enabled && <span style={{ fontSize: 10, fontWeight: 700, color: COLOR.red, marginLeft: 6 }}>DISABLED</span>}
+                </p>
+                <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans }}>
+                  {pageLabel} · {FREQUENCY_OPTIONS.find((o) => o.value === p.frequency)?.label}
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
+                <button onClick={() => startEdit(p.slug)} style={{ fontSize: 12, color: COLOR.ink2, background: "none", border: "none", cursor: "pointer" }}>Edit</button>
+                <button onClick={() => toggleEnabled(p.slug, p.enabled)} style={{ fontSize: 12, color: p.enabled ? COLOR.red : COLOR.green, background: "none", border: "none", cursor: "pointer" }}>
+                  {p.enabled ? "Disable" : "Enable"}
+                </button>
+                <button onClick={() => handleDelete(p.slug)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer" }}>Delete</button>
+              </div>
+            </div>
+          );
+        })}
+        {popups.length === 0 && <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans }}>No popups yet.</p>}
       </div>
     </div>
   );

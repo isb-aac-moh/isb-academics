@@ -10,9 +10,9 @@
  * than asking them to re-enter it.
  */
 import { useMemo, useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
-import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X, ChevronDown, Brain } from "lucide-react";
+import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X, ChevronDown } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
@@ -68,7 +68,6 @@ export default function CreditTracker() {
   const { profile } = useAcademicProfile(user.id);
   const { entries: bidEntries, resolveEntry } = useBidPlan(user.id);
   const { entries, addEntry, updateEntry, removeEntry, upsertGrade, pointsPaid } = useActualEnrollments(user.id);
-  const [showLearnPromo, setShowLearnPromo] = useState(true);
   const posthog = usePostHog();
 
   if (coursesLoading || !profile) {
@@ -101,7 +100,6 @@ export default function CreditTracker() {
 
   return (
     <div className="min-h-screen pb-24" style={{ background: COLOR.bg }}>
-      {showLearnPromo && <LearnPromoPopup onDismiss={() => setShowLearnPromo(false)} />}
       <header className="px-6 md:px-12 pt-10 pb-6">
         <h1 style={{ fontFamily: FONT.serif, fontSize: 26, fontWeight: 500, color: COLOR.ink }}>
           Credit <em>Tracker</em>
@@ -210,56 +208,6 @@ export default function CreditTracker() {
           />
         </div>
       </main>
-    </div>
-  );
-}
-
-function LearnPromoPopup({ onDismiss }: { onDismiss: () => void }) {
-  const navigate = useNavigate();
-
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={onDismiss} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
-      <div style={{ position: "relative", background: COLOR.surface, borderRadius: 14, padding: 24, maxWidth: 380, width: "100%" }}>
-        <button
-          onClick={onDismiss}
-          aria-label="Dismiss"
-          style={{ position: "absolute", top: 14, right: 14, background: "none", border: "none", cursor: "pointer", color: COLOR.ink3 }}
-        >
-          <X size={16} />
-        </button>
-        <div
-          style={{
-            width: 40, height: 40, borderRadius: 10, background: COLOR.navyTint,
-            color: COLOR.navyHero, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14,
-          }}
-        >
-          <Brain size={20} />
-        </div>
-        <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 8 }}>
-          Check out the Learn tab
-        </p>
-        <p style={{ fontSize: 13.5, color: COLOR.ink2, fontFamily: FONT.sans, lineHeight: 1.5, marginBottom: 20 }}>
-          Adaptive practice quizzes pulled straight from your course material — a quick way to prep before bidding.
-        </p>
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onDismiss}
-            style={{ padding: "8px 14px", borderRadius: 7, border: `1px solid ${COLOR.border}`, background: COLOR.surface, color: COLOR.ink2, fontSize: 13, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer" }}
-          >
-            Maybe later
-          </button>
-          <button
-            onClick={() => {
-              onDismiss();
-              navigate("/learn/practice");
-            }}
-            style={{ padding: "8px 14px", borderRadius: 7, border: "none", background: COLOR.navyHero, color: "#fff", fontSize: 13, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer" }}
-          >
-            Attempt a quiz
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
