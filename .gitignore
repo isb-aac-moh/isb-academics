@@ -7,3 +7,4 @@ dist
 .vercel
 supabase/.temp
 __pycache__/
+.gstack/

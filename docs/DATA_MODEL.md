@@ -13,6 +13,8 @@ To apply migrations: `supabase db push` (requires the Supabase CLI linked to the
 - [Course Details](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/Mohali-2026-27/Pages/default.aspx)
 - [Mandatory courses](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/StudentManual/Pages/Programme%20Administration/Core_Courses_2026-27.aspx)
 - [Flexi Core courses](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/StudentManual/Pages/Programme%20Administration/Flexi-Core-Courses.aspx)
+- [Course lineup, Mohali 2026-27](https://isbhydmoh.sharepoint.com/sites/atrium/Programmes/PGP/ASA-PGP-2026-27/Mohali-2026-27/Pages/Lineup_Mohalil_2026-27_Core_and_Elective.aspx): faculty, academic area, associates, outline and overview video per course.
+- Atrium Faculty list (`/sites/atrium/Lists/Faculty`) and ASA's FacultyRatings pages (`/teams/Atrium2/ASA/FacultyRatings`): professor profiles and ratings.
 
 ## `users` (owned by isb-explorer, not this app)
 
@@ -33,7 +35,7 @@ The full catalog: 132 rows as of writing — 121 electives/Flexi Core + 11 manda
 | `id` | uuid PK | |
 | `code` | text, **unique** | e.g. `FSAN`, `FCRV`. Unique constraint added specifically to support `on conflict (code) do update` upserts when re-loading catalog data. |
 | `name` | text | |
-| `professor` | text | Many electives still show `"TBD"` — ISB hadn't assigned faculty yet at data-entry time. Not a bug. |
+| `professor` | text | Display string, e.g. `"Ashwini Chhatre / Pankaj Kumar"`. The structured version (per-person sessions, affiliation, ratings) lives in `course_faculty` and `faculty` below. `"TBD"` means ASA hasn't named anyone yet: 16 active electives as of 2026-09-11. |
 | `term` | text | One of `Term 1`–`Term 7`, `Block Week 1`–`Block Week 4`. Not a Postgres enum — validated only in the TypeScript `TermCode` type. |
 | `credits` | **numeric**, not integer | Widened from `integer` because two core courses have fractional credits: Written Analysis and Communication (0.6) and Mastering Verbal Communication (0.4). If you ever see credits behaving oddly, check whether something upstream coerced this back to an int. |
 | `concentration_areas` | text[] | Zero or more of the 6 ISB concentrations. A cross-listed elective can belong to more than one. **Empty for all core courses** — that's what keeps core courses invisible to Bidding Planner's area-matching logic; no special "exclude core" filter was needed. |
@@ -42,6 +44,9 @@ The full catalog: 132 rows as of writing — 121 electives/Flexi Core + 11 manda
 | `prerequisite_course_ids` | uuid[] | **Present in schema, essentially unused in data.** A pass through Block Week 1 & 2 course outlines found real prerequisites on almost none of them — mostly "None" or informal text like "an open mind." Not populated because there was nothing real to populate. |
 | `is_active` | boolean, default `true` | Soft-disable flag. `false` = dropped/hidden from students, but the row and all its history stays. Toggled from Admin, never hard-deleted. |
 | `is_core` | boolean, default `false` | Mandatory course vs. elective/Flexi Core. Exposed in the Admin form, not just a DB-only flag. |
+| `academic_area` | text, nullable | ASA's academic-area code (`FINC`, `ORBH`, …), straight from the lineup. |
+| `academic_associates` | text[] | Names from the lineup's Academic Associate(s) column. A core course lists the associates of every section. |
+| `overview_video_url` | text, nullable | ASA's course overview video, where the lineup has one (11 courses as of 2026-09-11). |
 
 **`useCourses(showAll = false)`** is the only place `is_active` filtering happens — students only ever see `is_active = true`; Admin passes `showAll = true` to see everything including disabled rows.
 
@@ -213,6 +218,20 @@ What a student actually ended up enrolled in — separate from `bid_plan_entries
 
 **RLS:** `auth.uid() = user_id`, same pattern as `bid_plan_entries`.
 
+## `faculty`, `course_faculty`, `faculty_ratings`
+
+Professor profiles and ASA's faculty ratings, taken from two ISB SharePoint sources (login required): the Atrium Faculty list and ASA's FacultyRatings pages. They were loaded once from the 2026-27 Mohali lineup. Nothing in the app refreshes them.
+
+`faculty` has one row per professor in the lineup (106 as of 2026-09-11): `name` (unique, spelled as in the lineup), `designation`, `faculty_type`, `academic_area`, `affiliation`, `profile_url` (the Atrium list item), `bio_url`, `photo_url`, `ratings_url` (the AY 2025-26 onwards page), `ratings_legacy_url` (the older page) and `sharepoint_id`. Five visiting faculty have no Atrium record yet, so only `name` and `affiliation` are set for them.
+
+`course_faculty` says who teaches what. The primary key is `(course_id, faculty_id)`. `sessions` holds "Sessions 1-5" for split courses, and the sections a core-course instructor takes (e.g. "Sections G,K,L · Sessions 1-10"). `affiliation` is what the lineup lists for that course.
+
+`faculty_ratings` has one row per past offering, from AY 2021-22 on. `scale` is 7 before AY 2025-26 and 5 after, so **never average across scales**. The 1-7 rows also carry `difficulty`, `workload`, `pace`, `feedback`, `enrollments` and `respondents`. The 1-5 rows only have course and instructor scores. `course_code` is parsed from the offering label and is null when the label doesn't name one. `sort_key` orders offerings newest first. `campus` is `Mohali`, `Hyderabad` or null. The 2025-26 pages give each campus its own column, so those rows carry it. Older pages almost never say, and null means "not stated", not a guess. `term_label` is `T4`, `BW2` and so on.
+
+**Display rule: nothing is ever averaged.** The badge on a course shows one real offering, always labelled with campus and year: this course at Mohali first, then Hyderabad, then campus not stated, then the professor's other courses (labelled "other course"). Ratings with fewer than 5 responses are flagged "few" wherever they appear.
+
+**RLS:** unlike `courses`, all three are readable only by signed-in users (`to authenticated`), because the ratings are ISB-internal. Admins can write. Checked on the live API: a logged-out request gets an empty list.
+
 ## Migration history (chronological, for context on *why*)
 
 1. `academics_schema` — initial tables.
@@ -237,5 +256,10 @@ What a student actually ended up enrolled in — separate from `bid_plan_entries
 20. `split_seed_study_trek_sections` — the "SEED" course (Sustainable Empowerment through Emerging Digitization, Study Trek, Block Week 2) was seeded as one row with three faculty jammed into a single `professor` string. `resources` already independently held three separately-numbered outline PDFs for it (SEED1/2/3_BW2.pdf) — a clean signal these are three separately-bid faculty-course combinations (per ISB's own rule), not one co-taught course. Split into three course rows (SEED1/SEED2/SEED3), one per professor, each keeping its own outline PDF. **The professor-to-PDF-number mapping is an inferred assumption** (matched by stated order — Chhatre/Ramachandran/Dutta to SEED1/2/3), not verified against the PDFs themselves; worth a spot-check. Checked the rest of the catalog for the same pattern (`professor` containing `/`): the other Block Week 1 hits (`HCEN`, `PFCA`, `TISE`) each have exactly one, non-numbered outline PDF — genuinely co-taught single courses, correctly left as-is, not split.
 21. `seed_study_trek_locations` — appends each SEED section's real trip location (Sikkim/Tamil Nadu/Madhya Pradesh, per Eshan directly) to `courses.name` so the three read as obviously distinct wherever the name is shown, not just via `professor`.
 22. `actual_enrollments` — new table for the Credit Tracker (`CreditTracker.tsx`), separate from `bid_plan_entries` since a bid plan is intent and this is result. Purely additive (new table + RLS policy, no changes to existing tables) — see the `actual_enrollments` section above for the full shape.
+
+Later migrations aren't all listed here yet. One that changes the course model:
+
+- `20260911124637_faculty_profiles_and_ratings` adds the three faculty tables above and three `courses` columns, and refreshes the catalog from ASA's 2026-27 Mohali lineup. That covers named professors on 52 courses, term moves (BLAW to Term 7, CMGT and CTFI to Term 6), BPEX re-enabled in Term 6, DMKT tagged IT Management, three new courses (BBMK, REMA, VIVC), and outline links for FRNT4, GEBU and SUET. ELP was left out because ASA lists no faculty, credits or concentration for it. Thirteen courses missing from the new lineup were left active on purpose (Eshan's call).
+- `faculty_ratings_campus` adds `campus` and `term_label` to `faculty_ratings`, both parsed from ASA's offering labels. It also fills course codes the first load missed: labels ending in a bare code ("Term 4 2024-25 ENVC"), plus labels naming a course by title when exactly one course matches.
 
 If you're debugging something that references an older shape (e.g. `resources.category`), check this list — it was real, then removed.
