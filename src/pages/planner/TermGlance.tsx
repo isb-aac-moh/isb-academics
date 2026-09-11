@@ -56,19 +56,16 @@ interface Props {
   entries: BidPlanEntry[];
   courses: Course[];
   profiles: Map<string, CourseGradingProfile>;
-  // Live bidding term: list every course offered in it, not just planned ones.
-  live?: boolean;
 }
 
-export default function TermGlance({ term, entries, courses, profiles, live = false }: Props) {
+export default function TermGlance({ term, entries, courses, profiles }: Props) {
   const termCourses = entries
     .filter((e) => e.term === term && e.course_id)
     .map((e) => courses.find((c) => c.id === e.course_id))
     .filter((c): c is Course => !!c);
   const plannedIds = new Set(termCourses.map((c) => c.id));
-  const rows = live
-    ? [...termCourses, ...courses.filter((c) => c.term === term && !plannedIds.has(c.id))]
-    : termCourses;
+  // Every course offered this term, planned ones first, so students can compare before adding.
+  const rows = [...termCourses, ...courses.filter((c) => c.term === term && !plannedIds.has(c.id))];
 
   if (rows.length === 0) return null;
 
@@ -90,16 +87,14 @@ export default function TermGlance({ term, entries, courses, profiles, live = fa
       <div className="mb-4">
         <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink }}>
           {term} at a Glance
-          {live && (
-            <span style={{ marginLeft: 8, padding: "2px 8px", borderRadius: 10, fontSize: 10.5, fontWeight: 700, background: COLOR.greenTint, color: COLOR.green, verticalAlign: "middle" }}>
-              Bidding live
-            </span>
-          )}
+          <span style={{ marginLeft: 8, padding: "2px 8px", borderRadius: 10, fontSize: 10.5, fontWeight: 700, background: COLOR.greenTint, color: COLOR.green, verticalAlign: "middle" }}>
+            Bidding live
+          </span>
         </p>
         <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>
           {termCourses.length === 0
             ? `You haven't planned any ${term} courses yet. Here's how every ${term} course is graded.`
-            : `What this term actually looks like, based on the ${termCourses.length} course${termCourses.length > 1 ? "s" : ""} in your plan${live ? `. Every other ${term} course is listed below to compare.` : "."}`}
+            : `What this term actually looks like, based on the ${termCourses.length} course${termCourses.length > 1 ? "s" : ""} in your plan. Every other ${term} course is listed below to compare.`}
           {missing > 0 && ` (${missing} course${missing > 1 ? "s" : ""} without a grading profile yet excluded from the numbers below.)`}
         </p>
       </div>
@@ -142,7 +137,7 @@ export default function TermGlance({ term, entries, courses, profiles, live = fa
 
       <div className="space-y-2">
         {rows.map((course) => (
-          <CourseGlanceRow key={course.id} course={course} profile={profiles.get(course.id)} inPlan={live && plannedIds.has(course.id)} />
+          <CourseGlanceRow key={course.id} course={course} profile={profiles.get(course.id)} inPlan={plannedIds.has(course.id)} />
         ))}
       </div>
     </div>
