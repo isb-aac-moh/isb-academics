@@ -145,7 +145,7 @@ export default function BiddingPlanner() {
             onRemove={handleRemoveEntry}
           />
         )}
-        {step === 3 && <StepGlance courses={courses} bidEntries={entries} gradingProfiles={gradingProfiles} />}
+        {step === 3 && <StepGlance courses={courses} bidEntries={entries} gradingProfiles={gradingProfiles} liveBiddingTerms={liveBiddingTerms} />}
         {step === 4 && (
           <StepBudget
             profile={profile}
