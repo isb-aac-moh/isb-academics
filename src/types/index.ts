@@ -36,6 +36,54 @@ export interface Course {
   prerequisite_course_ids?: string[];
   is_active: boolean; // soft-disable instead of delete — false means dropped/hidden from students
   is_core: boolean; // mandatory core course — not bid on, doesn't count toward elective/concentration credits
+  academic_area: string | null; // ASA's academic-area code, e.g. "FINC", "ORBH"
+  academic_associates: string[];
+  overview_video_url: string | null;
+}
+
+// From ISB's Atrium Faculty list. Only visible to signed-in users (RLS).
+export interface Faculty {
+  id: string;
+  name: string;
+  designation: string | null;
+  faculty_type: string | null;
+  academic_area: string | null;
+  affiliation: string | null;
+  profile_url: string | null;
+  bio_url: string | null;
+  photo_url: string | null;
+  ratings_url: string | null;
+  ratings_legacy_url: string | null;
+}
+
+export interface CourseFaculty {
+  course_id: string;
+  faculty_id: string;
+  sessions: string | null; // "Sessions 1-5", or the sections a core-course instructor teaches
+  affiliation: string | null; // as ASA's lineup lists it for this course
+  sort_order: number;
+}
+
+// One past offering from ASA's FacultyRatings pages. Scales differ by year
+// (1-7 before AY 2025-26, 1-5 after), so never average across them.
+export interface FacultyRating {
+  id: string;
+  faculty_id: string;
+  course_code: string | null;
+  offering: string;
+  academic_year: string | null;
+  campus: "Mohali" | "Hyderabad" | null; // null = ASA's page doesn't say (every pre-2025-26 row)
+  term_label: string | null; // "T4", "BW2"
+  sort_key: number;
+  scale: 5 | 7;
+  instructor_rating: number | null;
+  course_rating: number | null;
+  difficulty: number | null;
+  workload: number | null;
+  pace: number | null;
+  feedback: number | null;
+  enrollments: number | null;
+  respondents: number | null;
 }
 
 // Per-course grading DNA — extracted from official course outlines, admin-editable

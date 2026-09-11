@@ -6,37 +6,24 @@
  * (An NLP/AI-assisted version is a planned follow-up, not built yet.)
  */
 import { useEffect, useMemo, useState } from "react";
-import { usePostHog } from "@posthog/react";
 import { useSearchParams } from "react-router-dom";
-import { Search, X, ExternalLink, FileText, Maximize2, Minimize2, Pin, ChevronRight } from "lucide-react";
+import { Search, X, ExternalLink, FileText, Pin, ChevronRight } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useResources } from "../hooks/useResources";
 import { useCourses } from "../hooks/useCourses";
-import { ALL_TERMS, RESOURCE_TABS } from "../lib/options";
+import { useFaculty, type CourseFacultyEntry } from "../hooks/useFaculty";
+import { RatingBadge } from "../components/FacultySection";
+import { CourseDetailModal, ResourceRow } from "../components/CourseDetailModal";
+import { ALL_TERMS, RESOURCE_TABS, buildPopulatedTabs, sortPinned } from "../lib/options";
 import { getCurrentTermCode } from "../lib/termCalendar";
 import type { Resource, Course } from "../types";
 
 const CARD_TINTS = [COLOR.navyTint, COLOR.amberTint, COLOR.greenTint, COLOR.bgSoft];
 
-// Pinned resources sort first within whichever list they appear in — sort is
-// stable, so relative (created_at-desc) order within each pin group holds.
-function sortPinned(list: Resource[]): Resource[] {
-  return [...list].sort((a, b) => Number(b.pinned) - Number(a.pinned));
-}
-
-// Shared by the course detail panel and the General Resources panel: groups
-// resources into the same 4 course tabs + a General tab, only keeping tabs
-// that actually have something in them.
-function buildPopulatedTabs(resources: Resource[]) {
-  const tabs = [...RESOURCE_TABS, { key: "general", label: "General", types: ["General"] as const }];
-  return tabs
-    .map((tab) => ({ ...tab, items: sortPinned(resources.filter((r) => (tab.types as readonly string[]).includes(r.resource_type))) }))
-    .filter((tab) => tab.items.length > 0);
-}
-
 export default function CourseResources() {
   const { resources, loading: resourcesLoading } = useResources();
   const { courses, loading: coursesLoading } = useCourses();
+  const { byCourse: facultyByCourse } = useFaculty();
   const [params, setParams] = useSearchParams();
 
   const q = params.get("q") ?? "";
@@ -233,6 +220,7 @@ export default function CourseResources() {
                   key={c.id}
                   course={c}
                   resourceCount={(resourcesByCourse.get(c.id) ?? []).length}
+                  facultyByCourse={facultyByCourse}
                   tint={CARD_TINTS[i % CARD_TINTS.length]}
                   onClick={() => setParam("course", c.code)}
                 />
@@ -246,6 +234,7 @@ export default function CourseResources() {
         <CourseDetailModal
           course={activeCourse}
           resources={resourcesByCourse.get(activeCourse.id) ?? []}
+          facultyByCourse={facultyByCourse}
           fullScreen={isFullScreen}
           onToggleFullScreen={() => setParam("view", isFullScreen ? null : "full")}
           onClose={() => {
@@ -264,7 +253,10 @@ export default function CourseResources() {
   );
 }
 
-function CourseCard({ course, resourceCount, tint, onClick }: { course: Course; resourceCount: number; tint: string; onClick: () => void }) {
+// The per-course lookup lives in the child: doing Map.get() inside the parent's
+// JSX makes the React Compiler assume the course objects may be mutated.
+function CourseCard({ course, resourceCount, facultyByCourse, tint, onClick }: { course: Course; resourceCount: number; facultyByCourse: Map<string, CourseFacultyEntry[]>; tint: string; onClick: () => void }) {
+  const faculty = facultyByCourse.get(course.id) ?? [];
   const badgeLabel = course.is_core ? "Core" : (course.concentration_areas[0] ?? course.industry_specializations[0] ?? "Elective");
   return (
     <button
@@ -280,78 +272,11 @@ function CourseCard({ course, resourceCount, tint, onClick }: { course: Course; 
       </div>
       <p style={{ fontSize: 15, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, lineHeight: 1.3, flex: 1 }}>{course.name}</p>
       <p style={{ fontSize: 11.5, color: COLOR.ink2, fontFamily: FONT.sans }}>{course.code} · {course.professor}</p>
-      <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: COLOR.ink2, fontFamily: FONT.sans, fontWeight: 600 }}>
-        <FileText size={13} /> {resourceCount} resource{resourceCount === 1 ? "" : "s"}
+      <div className="flex items-center justify-between gap-2" style={{ fontSize: 12, color: COLOR.ink2, fontFamily: FONT.sans, fontWeight: 600 }}>
+        <span className="flex items-center gap-1.5"><FileText size={13} /> {resourceCount} resource{resourceCount === 1 ? "" : "s"}</span>
+        <RatingBadge entries={faculty} courseCode={course.code} />
       </div>
     </button>
-  );
-}
-
-function CourseDetailModal({
-  course, resources, fullScreen, onToggleFullScreen, onClose,
-}: { course: Course; resources: Resource[]; fullScreen: boolean; onToggleFullScreen: () => void; onClose: () => void }) {
-  // Only show a tab if this course actually has a resource in it — never an empty tab.
-  const populatedTabs = buildPopulatedTabs(resources);
-
-  const [activeTabKey, setActiveTabKey] = useState(populatedTabs[0]?.key);
-  const activeTab = populatedTabs.find((t) => t.key === activeTabKey) ?? populatedTabs[0];
-
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60 }}>
-      {!fullScreen && <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />}
-      <div
-        className="flex flex-col"
-        style={fullScreen
-          ? { position: "absolute", inset: 0, background: COLOR.bg }
-          : { position: "absolute", top: 0, right: 0, bottom: 0, width: "min(480px, 100%)", background: COLOR.bg, boxShadow: "-8px 0 32px rgba(0,0,0,0.12)" }
-        }
-      >
-        <div className="flex items-start justify-between" style={{ padding: "20px 22px", borderBottom: `1px solid ${COLOR.borderLight}`, flexShrink: 0 }}>
-          <div style={{ maxWidth: fullScreen ? 700 : undefined, margin: fullScreen ? "0 auto" : undefined, width: fullScreen ? "100%" : undefined }}>
-            {course.is_core && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: COLOR.navyHero, color: "#fff", fontFamily: FONT.sans, textTransform: "uppercase" }}>Core</span>}
-            <h2 style={{ fontFamily: FONT.serif, fontSize: fullScreen ? 26 : 19, fontWeight: 600, color: COLOR.ink, marginTop: 6 }}>{course.name}</h2>
-            <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>{course.code} · {course.professor} · {course.term}</p>
-          </div>
-          <div className="flex items-center gap-3" style={{ flexShrink: 0 }}>
-            <button onClick={onToggleFullScreen} aria-label={fullScreen ? "Exit full screen" : "Open full screen"} style={{ background: "none", border: "none", cursor: "pointer" }}>
-              {fullScreen ? <Minimize2 size={18} color={COLOR.ink2} /> : <Maximize2 size={18} color={COLOR.ink2} />}
-            </button>
-            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} color={COLOR.ink2} /></button>
-          </div>
-        </div>
-
-        {populatedTabs.length > 0 && (
-          <div className="flex gap-1 flex-wrap" style={{ padding: "12px 22px 0", flexShrink: 0, maxWidth: fullScreen ? 700 : undefined, margin: fullScreen ? "0 auto" : undefined, width: fullScreen ? "100%" : undefined }}>
-            {populatedTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTabKey(tab.key)}
-                style={{
-                  padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer", border: "none",
-                  background: activeTab?.key === tab.key ? COLOR.navyHero : COLOR.bgSoft, color: activeTab?.key === tab.key ? "#fff" : COLOR.ink2,
-                }}
-              >
-                {tab.label} <span style={{ opacity: 0.7 }}>({tab.items.length})</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="flex-1" style={{ overflowY: "auto", padding: "20px 22px" }}>
-          <div style={{ maxWidth: fullScreen ? 700 : undefined, margin: fullScreen ? "0 auto" : undefined }}>
-            {resources.length === 0 ? (
-              <div style={{ padding: "24px 16px", textAlign: "center", background: COLOR.surface, borderRadius: 10, border: `1px dashed ${COLOR.border}` }}>
-                <FileText size={22} color={COLOR.ink3} style={{ margin: "0 auto 8px" }} />
-                <p style={{ fontSize: 13, fontWeight: 600, color: COLOR.ink2, fontFamily: FONT.sans }}>No resources yet for this course</p>
-                <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Check back later, or add one from the Admin panel.</p>
-              </div>
-            ) : (
-              <div className="space-y-2">{activeTab?.items.map((r) => <ResourceRow key={r.id} resource={r} />)}</div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -414,30 +339,6 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
       </p>
       {hasFilters && <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Try a broader search or clear a filter.</p>}
     </div>
-  );
-}
-
-function ResourceRow({ resource }: { resource: Resource }) {
-  const posthog = usePostHog();
-  return (
-    <a
-      href={resource.url}
-      target="_blank"
-      rel="noreferrer"
-      onClick={() => posthog?.capture("resource_opened", { resource_type: resource.resource_type, pinned: resource.pinned })}
-      className="flex items-start justify-between"
-      style={{ padding: "11px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}`, textDecoration: "none", gap: 8 }}
-    >
-      <div style={{ minWidth: 0 }}>
-        <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink, display: "flex", alignItems: "center", gap: 5 }}>
-          {resource.pinned && <Pin size={11} color={COLOR.navyHero} fill={COLOR.navyHero} />} {resource.title}
-        </span>
-        {resource.description && (
-          <span style={{ fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink3, display: "block", marginTop: 2, lineHeight: 1.4 }}>{resource.description}</span>
-        )}
-      </div>
-      <ExternalLink size={14} color={COLOR.ink3} style={{ flexShrink: 0, marginTop: 2 }} />
-    </a>
   );
 }
 

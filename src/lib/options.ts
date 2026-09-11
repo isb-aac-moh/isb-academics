@@ -1,5 +1,6 @@
 // Fixed option lists — dropdowns instead of free text, so profile data stays
 // clean and comparable across the cohort instead of one-off phrasing per student.
+import type { Resource } from "../types";
 
 export const UNDERGRAD_FIELDS = [
   "Engineering — Computer Science / IT",
@@ -90,6 +91,22 @@ export const RESOURCE_TYPES = [...COURSE_RESOURCE_TYPES, "Platform Directory", "
 
 export function tabForResourceType(type: string) {
   return RESOURCE_TABS.find((t) => (t.types as readonly string[]).includes(type));
+}
+
+// Pinned resources sort first within whichever list they appear in — sort is
+// stable, so relative (created_at-desc) order within each pin group holds.
+export function sortPinned(list: Resource[]): Resource[] {
+  return [...list].sort((a, b) => Number(b.pinned) - Number(a.pinned));
+}
+
+// Shared by the course detail panel and the General Resources panel: groups
+// resources into the same 4 course tabs + a General tab, only keeping tabs
+// that actually have something in them.
+export function buildPopulatedTabs(resources: Resource[]) {
+  const tabs = [...RESOURCE_TABS, { key: "general", label: "General", types: ["General"] as const }];
+  return tabs
+    .map((tab) => ({ ...tab, items: sortPinned(resources.filter((r) => (tab.types as readonly string[]).includes(r.resource_type))) }))
+    .filter((tab) => tab.items.length > 0);
 }
 
 export const NOTIFICATION_TAGS = ["Urgent", "Important", "Info", "General"] as const;
