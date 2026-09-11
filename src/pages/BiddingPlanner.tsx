@@ -37,7 +37,7 @@ export default function BiddingPlanner() {
   const { resources } = useResources();
   const { profile, saveError, save } = useAcademicProfile(user.id);
   const { entries, addEntry, removeEntry, pointsPlanned } = useBidPlan(user.id);
-  const { liveBiddingTerms, termCreditLimits } = useAppSettings();
+  const { liveBiddingTerms, termCreditLimits, loading: settingsLoading } = useAppSettings();
   const { profiles: gradingProfiles } = useCourseGradingProfiles();
 
   const posthog = usePostHog();
@@ -45,7 +45,7 @@ export default function BiddingPlanner() {
   const step = STEPS.findIndex((s) => s.key === stepKey);
   if (step === -1) return <Navigate to="/planner/background" replace />;
 
-  if (coursesLoading || !profile) {
+  if (coursesLoading || settingsLoading || !profile) {
     return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
   }
 
@@ -145,7 +145,7 @@ export default function BiddingPlanner() {
             onRemove={handleRemoveEntry}
           />
         )}
-        {step === 3 && <StepGlance courses={courses} bidEntries={entries} gradingProfiles={gradingProfiles} />}
+        {step === 3 && <StepGlance courses={courses} bidEntries={entries} gradingProfiles={gradingProfiles} liveBiddingTerms={liveBiddingTerms} />}
         {step === 4 && (
           <StepBudget
             profile={profile}
