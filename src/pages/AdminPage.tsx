@@ -963,11 +963,13 @@ function PopupsAdmin() {
   const [form, setForm] = useState({ ...EMPTY_POPUP });
   const [editSlug, setEditSlug] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function startEdit(slug: string) {
     const p = popups.find((p) => p.slug === slug);
     if (!p) return;
     setEditSlug(slug);
+    setError(null);
     setForm({
       title: p.title, body: p.body, icon: (p.icon as PopupIconKey) ?? "", page: p.page,
       frequency: p.frequency, primary_label: p.primary_label, primary_action: p.primary_action,
@@ -977,12 +979,22 @@ function PopupsAdmin() {
 
   function cancelEdit() {
     setEditSlug(null);
+    setError(null);
     setForm({ ...EMPTY_POPUP });
   }
 
   async function handleSave() {
-    if (!form.title.trim() || !form.body.trim()) return;
-    if (form.primary_action !== "dismiss" && !form.primary_target.trim()) return;
+    if (!form.title.trim() || !form.body.trim()) {
+      setError("Add a title and a body before you save.");
+      return;
+    }
+    if (form.primary_action !== "dismiss" && !form.primary_target.trim()) {
+      setError(form.primary_action === "internal"
+        ? "Add the app path for the primary button, or set its action to \"Just dismiss\"."
+        : "Add the link for the primary button, or set its action to \"Just dismiss\".");
+      return;
+    }
+    setError(null);
     setSaving(true);
     // Internal targets are app paths, not URLs — only external links get the https:// fallback.
     const primaryTarget =
@@ -1001,16 +1013,17 @@ function PopupsAdmin() {
       secondary_label: form.secondary_label.trim() || null,
       updated_at: new Date().toISOString(),
     };
-    const { error } = editSlug
+    const { error: saveError } = editSlug
       ? await supabase.from("dashboard_popups").update(payload).eq("slug", editSlug)
       : await supabase.from("dashboard_popups").insert({ slug: crypto.randomUUID(), enabled: true, ...payload });
     setSaving(false);
-    if (!error) {
+    if (!saveError) {
       setForm({ ...EMPTY_POPUP });
       setEditSlug(null);
       reload();
     } else {
-      console.error("[AdminPage] save popup failed:", error);
+      console.error("[AdminPage] save popup failed:", saveError);
+      setError("Couldn't save that popup — check your connection and try again.");
     }
   }
 
@@ -1098,9 +1111,12 @@ function PopupsAdmin() {
           <input style={inputStyle} value={form.secondary_label} onChange={(e) => setForm((f) => ({ ...f, secondary_label: e.target.value }))} />
         </LabeledField>
 
-        <button onClick={handleSave} disabled={saving} style={buttonStyle}>
-          {saving ? "Saving…" : editSlug ? "Save changes" : "Create popup"}
-        </button>
+        <div className="flex items-center gap-3" style={{ flexWrap: "wrap" }}>
+          <button onClick={handleSave} disabled={saving} style={buttonStyle}>
+            {saving ? "Saving…" : editSlug ? "Save changes" : "Create popup"}
+          </button>
+          {error && <span style={{ fontSize: 12, color: COLOR.red, fontWeight: 600, fontFamily: FONT.sans }}>{error}</span>}
+        </div>
       </div>
 
       <div className="space-y-2">
