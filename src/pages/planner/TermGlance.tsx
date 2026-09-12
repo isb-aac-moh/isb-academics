@@ -7,49 +7,9 @@
  */
 import { useState } from "react";
 import { COLOR, FONT } from "../../lib/theme";
+import { avg, buildRadar } from "../../lib/workloadRadar";
 import type { Course, CourseGradingProfile } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
-
-const LOAD_AXES: { key: keyof Pick<CourseGradingProfile, "load_quant" | "load_assignments" | "load_participation" | "load_exam_pressure" | "load_group" | "load_reading">; label: string }[] = [
-  { key: "load_quant", label: "Quant" },
-  { key: "load_assignments", label: "Assignments" },
-  { key: "load_participation", label: "Participation" },
-  { key: "load_exam_pressure", label: "Exam pressure" },
-  { key: "load_group", label: "Group work" },
-  { key: "load_reading", label: "Reading" },
-];
-
-function avg(nums: number[]): number {
-  return nums.length ? nums.reduce((s, n) => s + n, 0) / nums.length : 0;
-}
-
-function buildRadar(profiles: CourseGradingProfile[]): string {
-  const size = 260, cx = size / 2, cy = size / 2 + 4, R = 88, n = LOAD_AXES.length;
-  const angle = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
-  const pt = (i: number, v: number): [number, number] => [cx + Math.cos(angle(i)) * R * (v / 5), cy + Math.sin(angle(i)) * R * (v / 5)];
-
-  let g = "";
-  for (let r = 1; r <= 5; r++) {
-    const pts = LOAD_AXES.map((_, i) => pt(i, r).join(",")).join(" ");
-    g += `<polygon points="${pts}" fill="none" stroke="${r === 5 ? COLOR.ink : COLOR.borderLight}" stroke-width="${r === 5 ? 1.5 : 1}"/>`;
-  }
-  LOAD_AXES.forEach((ax, i) => {
-    const [x, y] = pt(i, 5);
-    g += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${COLOR.borderLight}" stroke-width="1"/>`;
-    const [lx, ly] = pt(i, 5.85);
-    g += `<text x="${lx}" y="${ly}" font-size="9.5" font-weight="700" fill="${COLOR.ink3}" text-anchor="middle" dominant-baseline="middle" font-family="Plus Jakarta Sans">${ax.label}</text>`;
-  });
-
-  const values = LOAD_AXES.map((ax) => avg(profiles.map((p) => p[ax.key])));
-  const pts = LOAD_AXES.map((ax, i) => pt(i, avg(profiles.map((p) => p[ax.key]))).join(",")).join(" ");
-  g += `<polygon points="${pts}" fill="${COLOR.navyHero}22" stroke="${COLOR.navyHero}" stroke-width="2.5"/>`;
-  values.forEach((v, i) => {
-    const [x, y] = pt(i, v);
-    g += `<circle cx="${x}" cy="${y}" r="3" fill="${COLOR.navyHero}"/>`;
-  });
-
-  return `<svg viewBox="0 0 ${size} ${size + 12}" width="100%" style="max-width:280px">${g}</svg>`;
-}
 
 interface Props {
   term: string;

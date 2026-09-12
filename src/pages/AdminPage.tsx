@@ -18,7 +18,7 @@ import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS, POPUP_PAGES } from "../lib
 import { BIDDABLE_TERM_ORDER } from "../lib/creditProgress";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
 import { POPUP_ICONS, type PopupIconKey } from "../lib/popupIcons";
-import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility, CourseGradingProfile, PopupFrequency, PopupPrimaryAction } from "../types";
+import type { ConcentrationArea, IndustrySpecialization, TermCode, ResourceType, NotificationTag, Course, NavLinkType, NavLinkVisibility, CourseGradingProfile, GroupFormation, AttendancePolicy, PopupFrequency, PopupPrimaryAction } from "../types";
 import { COURSE_SCOPED_RESOURCE_TYPES } from "../types";
 
 // Admins often paste a bare domain ("example.com") into link fields — without
@@ -418,11 +418,26 @@ const EMPTY_GRADING = {
   exam_midterm_count: 0, exam_endterm_count: 0, exam_quiz_count: 0,
   load_quant: 0, load_assignments: 0, load_participation: 0, load_exam_pressure: 0, load_group: 0, load_reading: 0,
   brief: [] as { label: string; text: string }[],
+  group_size: "",
+  cross_section: null as boolean | null,
+  group_formation: "" as GroupFormation | "",
+  peer_eval: null as boolean | null,
+  attendance: "" as AttendancePolicy | "",
   source_url: "",
 };
 
 function GradingProfileEditor({ course, profile, onSaved }: { course: Course; profile?: CourseGradingProfile; onSaved: () => void }) {
-  const [form, setForm] = useState(() => (profile ? { ...profile, source_url: profile.source_url ?? "" } : { ...EMPTY_GRADING }));
+  const [form, setForm] = useState(() =>
+    profile
+      ? {
+          ...profile,
+          source_url: profile.source_url ?? "",
+          group_size: profile.group_size ?? "",
+          group_formation: profile.group_formation ?? ("" as const),
+          attendance: profile.attendance ?? ("" as const),
+        }
+      : { ...EMPTY_GRADING },
+  );
   const [saving, setSaving] = useState(false);
   const gradeTotal = form.grade_participation_pct + form.grade_individual_pct + form.grade_group_pct + form.grade_exam_pct;
 
@@ -448,6 +463,9 @@ function GradingProfileEditor({ course, profile, onSaved }: { course: Course; pr
       course_id: course.id,
       ...form,
       source_url: form.source_url.trim() || null,
+      group_size: form.group_size.trim() || null,
+      group_formation: form.group_formation || null,
+      attendance: form.attendance || null,
       extracted_at: profile?.extracted_at ?? null,
     });
     setSaving(false);
@@ -499,6 +517,46 @@ function GradingProfileEditor({ course, profile, onSaved }: { course: Course; pr
         <button onClick={addBrief} style={{ fontSize: 12, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer" }}>+ Add bullet</button>
       </div>
 
+      <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 4 }}>
+        Groups & attendance (leave blank / "Not stated" when the outline doesn't say)
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
+        <LabeledField label="Group size">
+          <input style={inputStyle} placeholder="e.g. 4-6" value={form.group_size} onChange={(e) => setForm((f) => ({ ...f, group_size: e.target.value }))} />
+        </LabeledField>
+        <LabeledField label="Cross-section">
+          <select style={inputStyle} value={triState(form.cross_section)} onChange={(e) => setForm((f) => ({ ...f, cross_section: parseTriState(e.target.value) }))}>
+            <option value="">Not stated</option>
+            <option value="yes">Allowed</option>
+            <option value="no">Same section only</option>
+          </select>
+        </LabeledField>
+        <LabeledField label="Formation">
+          <select style={inputStyle} value={form.group_formation} onChange={(e) => setForm((f) => ({ ...f, group_formation: e.target.value as GroupFormation | "" }))}>
+            <option value="">Not stated</option>
+            <option value="Self-select">Self-select</option>
+            <option value="Instructor-assigned">Instructor-assigned</option>
+            <option value="ASA-assigned">ASA-assigned</option>
+          </select>
+        </LabeledField>
+        <LabeledField label="Peer evaluation">
+          <select style={inputStyle} value={triState(form.peer_eval)} onChange={(e) => setForm((f) => ({ ...f, peer_eval: parseTriState(e.target.value) }))}>
+            <option value="">Not stated</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </LabeledField>
+        <LabeledField label="Attendance">
+          <select style={inputStyle} value={form.attendance} onChange={(e) => setForm((f) => ({ ...f, attendance: e.target.value as AttendancePolicy | "" }))}>
+            <option value="">Not stated</option>
+            <option value="Not mandatory">Not mandatory</option>
+            <option value="ISB policy">ISB policy</option>
+            <option value="Participation-linked">Participation-linked</option>
+            <option value="Stricter than ISB policy">Stricter than ISB policy</option>
+          </select>
+        </LabeledField>
+      </div>
+
       <LabeledField label="Source URL (course outline)" className="mb-3">
         <input style={inputStyle} value={form.source_url} onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))} />
       </LabeledField>
@@ -506,6 +564,16 @@ function GradingProfileEditor({ course, profile, onSaved }: { course: Course; pr
       <button onClick={handleSave} disabled={saving} style={buttonStyle}>{saving ? "Saving…" : "Save grading profile"}</button>
     </div>
   );
+}
+
+// The three-way selects above round-trip null ("not stated") through a <select>,
+// which can only hold strings.
+function triState(v: boolean | null): string {
+  return v === null ? "" : v ? "yes" : "no";
+}
+
+function parseTriState(v: string): boolean | null {
+  return v === "" ? null : v === "yes";
 }
 
 function LabeledField({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {

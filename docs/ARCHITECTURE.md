@@ -43,12 +43,14 @@ Every page and every meaningful sub-state has a real URL — this was a delibera
 /resources                 → Course Resources (live to everyone, not admin-gated)
 /notices                   → Notice Board (admin-only preview)
 /admin/:tab                → Admin panel, tab ∈ {overview, courses, resources, notifications}
+/dossier/:term             → Term Dossier, term as a slug ("term-5"); /term5 redirects here
 *                          → redirects to /
 ```
 
 Two different state-encoding strategies were used deliberately, not interchangeably:
 
 - **Bidding Planner and Admin use path segments** (`/planner/goals`, `/admin/courses`) — these are genuinely distinct sequential steps/screens, and a path segment is the right level of URL "weight" for that.
+- **The Term Dossier uses a path segment for the term** (`/dossier/term-5`) — the opposite of Course Resources below, and on purpose: a dossier is one artefact per term that gets shared as a link, not a filtered view of one page. It also means a new term needs a `course_grading_profiles` seed rather than a code change. `/term4` stays where it is — it predates this and is a standalone static file, not a React page.
 - **Course Resources uses query params** (`/resources?term=Term+4&kind=core&q=finance&course=FSAN&view=full`) — this was an explicit product decision (see git log for the commit "Rebuild Course Resources as a single-page searchable gallery"). It replaced an earlier version that used path segments per term/course; that was reverted because Eshan asked for filters instead of "different pages for each term." Query params keep the single-page filtering UX while staying shareable and refresh-safe.
 
 **Route guards:** `RequireAdmin` (`src/components/RequireAdmin.tsx`) wraps `/notices` and `/admin/*` (`/resources` moved out of this group once Course Resources went live to everyone). It's a real redirect-based guard (`<Navigate>` to `/tracker` for non-admins), not just a hidden sidebar button — `App.tsx` enforces this independent of whatever the Sidebar shows, so a non-admin typing the URL directly still gets redirected.
