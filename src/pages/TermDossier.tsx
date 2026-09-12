@@ -12,6 +12,8 @@ import { useParams } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useCourseGradingProfiles } from "../hooks/useCourseGradingProfiles";
+import { useFaculty, type CourseFacultyEntry } from "../hooks/useFaculty";
+import { FacultySection, RatingBadge } from "../components/FacultySection";
 import { LOAD_AXES, avg, buildRadar, pressureScore, pressureTier, TIER_COLOR } from "../lib/workloadRadar";
 import type { AttendancePolicy, ConcentrationArea, Course, CourseGradingProfile } from "../types";
 
@@ -84,7 +86,8 @@ export default function TermDossier() {
 
   const { courses, loading: coursesLoading } = useCourses();
   const { profiles, loading: profilesLoading } = useCourseGradingProfiles();
-  const loading = coursesLoading || profilesLoading;
+  const { byCourse: facultyByCourse, loading: facultyLoading } = useFaculty();
+  const loading = coursesLoading || profilesLoading || facultyLoading;
 
   const [tab, setTab] = useState<Tab>("browse");
   const [sort, setSort] = useState("pressure-desc");
@@ -194,6 +197,7 @@ export default function TermDossier() {
                       <CourseCard
                         key={e.course.id}
                         entry={e}
+                        facultyEntries={facultyByCourse.get(e.course.id) ?? []}
                         pinned={pinned.includes(e.course.id)}
                         pinFull={pinned.length >= MAX_COMPARE}
                         onOpen={() => setOpenId(e.course.id)}
@@ -217,7 +221,13 @@ export default function TermDossier() {
         </p>
       </div>
 
-      {open && <CourseModal entry={open} onClose={() => setOpenId(null)} />}
+      {open && (
+        <CourseModal
+          entry={open}
+          facultyEntries={facultyByCourse.get(open.course.id) ?? []}
+          onClose={() => setOpenId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -320,7 +330,7 @@ function PressurePill({ score }: { score: number }) {
   );
 }
 
-function CourseCard({ entry, pinned, pinFull, onOpen, onPin }: { entry: Entry; pinned: boolean; pinFull: boolean; onOpen: () => void; onPin: () => void }) {
+function CourseCard({ entry, facultyEntries, pinned, pinFull, onOpen, onPin }: { entry: Entry; facultyEntries: CourseFacultyEntry[]; pinned: boolean; pinFull: boolean; onOpen: () => void; onPin: () => void }) {
   const { course, profile } = entry;
   const score = pressureScore(profile);
 
@@ -332,6 +342,9 @@ function CourseCard({ entry, pinned, pinFull, onOpen, onPin }: { entry: Entry; p
             <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.navyHero, letterSpacing: "0.06em" }}>{course.code}</p>
             <p style={{ fontSize: 14.5, fontWeight: 700, color: COLOR.ink, lineHeight: 1.3, marginTop: 2, fontFamily: FONT.sans }}>{course.name}</p>
             <p style={{ fontSize: 11.5, color: COLOR.ink3, marginTop: 3 }}>{course.professor}</p>
+            <div style={{ marginTop: 4 }}>
+              <RatingBadge entries={facultyEntries} courseCode={course.code} />
+            </div>
           </div>
           <PressurePill score={score} />
         </div>
@@ -394,7 +407,7 @@ function factsFor(p: CourseGradingProfile): { label: string; value: string }[] {
   ];
 }
 
-function CourseModal({ entry, onClose }: { entry: Entry; onClose: () => void }) {
+function CourseModal({ entry, facultyEntries, onClose }: { entry: Entry; facultyEntries: CourseFacultyEntry[]; onClose: () => void }) {
   const { course, profile } = entry;
   const score = pressureScore(profile);
 
@@ -422,6 +435,8 @@ function CourseModal({ entry, onClose }: { entry: Entry; onClose: () => void }) 
           <PressurePill score={score} />
           <span style={{ fontSize: 11, color: COLOR.ink3 }}>average of the six workload scores below, on a 10-point scale</span>
         </div>
+
+        <FacultySection course={course} entries={facultyEntries} />
 
         <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>How the grade splits</p>
         <GradeBar p={profile} height={22} />
