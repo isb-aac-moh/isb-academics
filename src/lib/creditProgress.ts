@@ -60,17 +60,22 @@ function convertedFlexiCourses(profile: StudentAcademicProfile, courses: Course[
 }
 
 /**
- * Which single target concentration a cross-listed course counts toward
+ * Which single concentration a cross-listed course counts toward
  * (Elective Bidding FAQ Q45: only one, student's choice — DATA_MODEL.md).
- * Courses matching 0-1 target concentrations are unambiguous. Courses matching
- * 2 (the max, since MAX_CONCENTRATIONS = 2) fall back to whichever the student
- * listed first until they explicitly choose via cross_listed_concentration_choices.
+ *
+ * An explicit choice wins, and may name any area the course is listed under —
+ * not only the student's two targets — so a student weighing a switch can see
+ * where a course would land. Picking a non-target area does mean the course
+ * stops counting toward either target; ConcentrationChoice says so on screen.
+ *
+ * With no explicit choice, the fallback is unchanged: whichever target
+ * concentration the course overlaps, in the order the student listed them.
  */
 export function chosenConcentrationFor(course: Course, profile: StudentAcademicProfile): ConcentrationArea | null {
-  const overlapping = profile.target_concentrations.filter((a) => course.concentration_areas.includes(a));
-  if (overlapping.length <= 1) return overlapping[0] ?? null;
   const chosen = profile.cross_listed_concentration_choices[course.code];
-  return chosen && overlapping.includes(chosen) ? chosen : overlapping[0];
+  if (chosen && course.concentration_areas.includes(chosen)) return chosen;
+  const overlapping = profile.target_concentrations.filter((a) => course.concentration_areas.includes(a));
+  return overlapping[0] ?? course.concentration_areas[0] ?? null;
 }
 
 /** Courses a student already has "in hand" toward an area: a converted Flexi elective + planned bid entries. */

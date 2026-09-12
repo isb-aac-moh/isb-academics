@@ -25,6 +25,7 @@ import {
   totalElectiveCreditsSecured, computeBidBudget, creditsCountingToward,
 } from "../lib/creditProgress";
 import Dropdown, { type DropdownGroup } from "../components/Dropdown";
+import ConcentrationChoice from "../components/ConcentrationChoice";
 import type { Course, StudentAcademicProfile, User } from "../types";
 
 const TERM_ORDER = TERM_SEQUENCE.filter(isBiddableTerm);
@@ -65,7 +66,7 @@ function computeGPA(entries: ActualEnrollment[], courses: Course[]): number | nu
 export default function CreditTracker() {
   const { user } = useOutletContext<{ user: User }>();
   const { courses, loading: coursesLoading } = useCourses();
-  const { profile } = useAcademicProfile(user.id);
+  const { profile, save } = useAcademicProfile(user.id);
   const { entries: bidEntries, resolveEntry } = useBidPlan(user.id);
   const { entries, addEntry, updateEntry, removeEntry, upsertGrade, pointsPaid } = useActualEnrollments(user.id);
   const posthog = usePostHog();
@@ -200,6 +201,8 @@ export default function CreditTracker() {
           <TermLedger
             entries={entries}
             courses={courses}
+            profile={profile}
+            save={save}
             onUpdate={updateEntry}
             onRemove={async (id) => {
               posthog?.capture("enrollment_removed", {});
@@ -485,9 +488,10 @@ function AddEntryForm({
 }
 
 function TermLedger({
-  entries, courses, onUpdate, onRemove,
+  entries, courses, profile, save, onUpdate, onRemove,
 }: {
   entries: ActualEnrollment[]; courses: Course[];
+  profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   onUpdate: (id: string, updates: Partial<Pick<ActualEnrollment, "points_paid" | "grade">>) => Promise<void>;
   onRemove: (id: string) => Promise<void>;
 }) {
@@ -506,7 +510,7 @@ function TermLedger({
         return (
           <TermGroup key={term} term={term} summary={summary}>
             {termEntries.map((e) => (
-              <LedgerRow key={e.id} entry={e} course={courses.find((c) => c.id === e.course_id)} onUpdate={onUpdate} onRemove={onRemove} />
+              <LedgerRow key={e.id} entry={e} course={courses.find((c) => c.id === e.course_id)} profile={profile} save={save} onUpdate={onUpdate} onRemove={onRemove} />
             ))}
           </TermGroup>
         );
@@ -516,14 +520,16 @@ function TermLedger({
 }
 
 function LedgerRow({
-  entry, course, onUpdate, onRemove,
+  entry, course, profile, save, onUpdate, onRemove,
 }: {
   entry: ActualEnrollment; course: Course | undefined;
+  profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   onUpdate: (id: string, updates: Partial<Pick<ActualEnrollment, "points_paid" | "grade">>) => Promise<void>;
   onRemove: (id: string) => Promise<void>;
 }) {
   return (
-    <div className="row-enter flex flex-col sm:flex-row sm:items-center gap-2" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+    <div className="row-enter" style={{ padding: "10px 14px", borderRadius: 9, background: COLOR.surface, border: `1px solid ${COLOR.borderLight}` }}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
       <span style={{ fontSize: 13, fontFamily: FONT.sans, color: COLOR.ink, flex: 1, minWidth: 0 }}>
         {course?.name ?? "Unknown course"} <span style={{ color: COLOR.ink3 }}>· {course?.credits ?? 0}cr</span>
       </span>
@@ -539,7 +545,9 @@ function LedgerRow({
         <button onClick={() => onRemove(entry.id)} aria-label="Remove" style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", padding: "6px 4px" }}>
           Remove
         </button>
+        </div>
       </div>
+      {course && <ConcentrationChoice course={course} profile={profile} save={save} />}
     </div>
   );
 }

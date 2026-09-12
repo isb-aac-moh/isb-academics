@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { Info } from "lucide-react";
 import { COLOR, FONT } from "../../lib/theme";
-import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, allCoursesForArea, isLiveNow, isBiddableTerm, chosenConcentrationFor, BIDDABLE_TERM_ORDER } from "../../lib/creditProgress";
+import { REQUIRED_CREDITS_PER_AREA, creditsCountingToward, allCoursesForArea, isLiveNow, isBiddableTerm, BIDDABLE_TERM_ORDER } from "../../lib/creditProgress";
+import ConcentrationChoice from "../../components/ConcentrationChoice";
 import { relevanceTags } from "../../lib/relevance";
 import type { StudentAcademicProfile, Course, GatingCoreCourse, Resource } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
@@ -324,11 +325,12 @@ function CourseRow({
       setSubmitting(false);
     }
   }
-  // Cross-listed across both target concentrations — FAQ Q45: only one counts, student's choice.
-  // Only matters once the course is actually in the plan; browsing shows both areas plainly.
-  const overlappingConcentrations = profile.target_concentrations.filter((a) => course.concentration_areas.includes(a));
-  const showCrossListedPicker = alreadyAdded && overlappingConcentrations.length > 1;
-  const areaTags = showCrossListedPicker
+  // Cross-listed across several concentrations — FAQ Q45: only one counts, student's
+  // choice. ConcentrationChoice owns the concentration side of the tag row (it shows
+  // the areas as pickable chips), so the static tags drop to specializations only
+  // rather than listing the same areas twice.
+  const isCrossListed = course.concentration_areas.length > 1;
+  const areaTags = isCrossListed
     ? course.industry_specializations
     : [...course.concentration_areas, ...course.industry_specializations];
   const softTags = relevanceTags(course, profile, allCourses);
@@ -426,31 +428,7 @@ function CourseRow({
           ))}
         </div>
       )}
-      {showCrossListedPicker && (
-        <div className="mt-2" style={{ padding: "8px 10px", borderRadius: 8, background: COLOR.amberTint }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#8B5E00", fontFamily: FONT.sans, marginBottom: 6 }}>
-            Cross-listed — ISB only lets this count toward one concentration. Which?
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {overlappingConcentrations.map((a) => {
-              const active = chosenConcentrationFor(course, profile) === a;
-              return (
-                <button
-                  key={a}
-                  onClick={() => save({ cross_listed_concentration_choices: { ...profile.cross_listed_concentration_choices, [course.code]: a } })}
-                  style={{
-                    padding: "4px 10px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer",
-                    border: `1px solid ${active ? COLOR.navyHero : COLOR.border}`, background: active ? COLOR.navyHero : COLOR.surface,
-                    color: active ? "#fff" : COLOR.ink2,
-                  }}
-                >
-                  {a}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <ConcentrationChoice course={course} profile={profile} save={save} />
     </div>
   );
 }
