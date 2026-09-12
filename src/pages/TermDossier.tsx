@@ -140,10 +140,7 @@ export default function TermDossier() {
     <div style={{ background: COLOR.bg, minHeight: "100vh", fontFamily: FONT.sans }}>
       <div className="px-5 md:px-8 py-7" style={{ maxWidth: 1200, margin: "0 auto" }}>
         <header className="mb-6">
-          <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.amber, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Academic Affairs Council · AI Native SIG
-          </p>
-          <h1 style={{ fontFamily: FONT.serif, fontSize: 34, fontWeight: 700, color: COLOR.ink, marginTop: 4, lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: FONT.serif, fontSize: 34, fontWeight: 700, color: COLOR.ink, lineHeight: 1.1 }}>
             The {term} Dossier
           </h1>
           <p style={{ fontSize: 13.5, color: COLOR.ink2, marginTop: 8, maxWidth: 620, lineHeight: 1.55 }}>
