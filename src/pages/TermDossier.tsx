@@ -463,6 +463,30 @@ function CourseModal({ entry, onClose }: { entry: Entry; onClose: () => void }) 
           </>
         )}
 
+        {profile.student_feedback.length > 0 && (
+          <>
+            <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+              Student feedback
+            </p>
+            <p style={{ fontSize: 11, color: COLOR.ink3, marginBottom: 8, lineHeight: 1.5 }}>
+              Word of mouth from students who've taken it before — not from the official outline, and it can disagree with itself between students.
+            </p>
+            <ul className="space-y-2 mb-5" style={{ listStyle: "none" }}>
+              {profile.student_feedback.map((t, i) => (
+                <li
+                  key={i}
+                  style={{
+                    fontSize: 12.5, color: COLOR.ink2, lineHeight: 1.55, padding: "8px 12px",
+                    background: COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, borderRadius: 8,
+                  }}
+                >
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
         {profile.source_url && (
           <a href={profile.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontWeight: 700, color: COLOR.navyHero, textDecoration: "underline" }}>
             Read the official course outline ↗

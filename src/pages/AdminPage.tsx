@@ -418,6 +418,7 @@ const EMPTY_GRADING = {
   exam_midterm_count: 0, exam_endterm_count: 0, exam_quiz_count: 0,
   load_quant: 0, load_assignments: 0, load_participation: 0, load_exam_pressure: 0, load_group: 0, load_reading: 0,
   brief: [] as { label: string; text: string }[],
+  student_feedback: [] as string[],
   group_size: "",
   cross_section: null as boolean | null,
   group_formation: "" as GroupFormation | "",
@@ -455,6 +456,18 @@ function GradingProfileEditor({ course, profile, onSaved }: { course: Course; pr
 
   function removeBrief(i: number) {
     setForm((f) => ({ ...f, brief: f.brief.filter((_, bi) => bi !== i) }));
+  }
+
+  function updateFeedback(i: number, value: string) {
+    setForm((f) => ({ ...f, student_feedback: f.student_feedback.map((t, ti) => (ti === i ? value : t)) }));
+  }
+
+  function addFeedback() {
+    setForm((f) => ({ ...f, student_feedback: [...f.student_feedback, ""] }));
+  }
+
+  function removeFeedback(i: number) {
+    setForm((f) => ({ ...f, student_feedback: f.student_feedback.filter((_, ti) => ti !== i) }));
   }
 
   async function handleSave() {
@@ -515,6 +528,19 @@ function GradingProfileEditor({ course, profile, onSaved }: { course: Course; pr
           </div>
         ))}
         <button onClick={addBrief} style={{ fontSize: 12, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer" }}>+ Add bullet</button>
+      </div>
+
+      <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 4 }}>
+        Student feedback (word of mouth, not from the outline)
+      </p>
+      <div className="space-y-2 mb-3">
+        {form.student_feedback.map((t, i) => (
+          <div key={i} className="flex gap-2 items-start">
+            <textarea style={{ ...inputStyle, flex: 1, minHeight: 44 }} placeholder="What a student said about this course" value={t} onChange={(e) => updateFeedback(i, e.target.value)} />
+            <button onClick={() => removeFeedback(i)} style={{ fontSize: 12, color: COLOR.red, background: "none", border: "none", cursor: "pointer", padding: "6px 4px" }}>✕</button>
+          </div>
+        ))}
+        <button onClick={addFeedback} style={{ fontSize: 12, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer" }}>+ Add feedback</button>
       </div>
 
       <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, marginBottom: 4 }}>

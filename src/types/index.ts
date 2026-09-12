@@ -105,6 +105,9 @@ export interface CourseGradingProfile {
   load_group: number;
   load_reading: number;
   brief: { label: string; text: string }[];
+  // Anecdotal word of mouth from students who took the course -- not from the
+  // outline, can be wrong, can contradict itself between students.
+  student_feedback: string[];
   // Read off the outline's standard Group Information / Peer Evaluation /
   // Attendance blocks. null means the outline doesn't say -- render as
   // "not stated", never as a claim.
