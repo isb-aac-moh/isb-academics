@@ -232,6 +232,37 @@ Professor profiles and ASA's faculty ratings, taken from two ISB SharePoint sour
 
 **RLS:** unlike `courses`, all three are readable only by signed-in users (`to authenticated`), because the ratings are ISB-internal. Admins can write. Checked on the live API: a logged-out request gets an empty list.
 
+## `course_grading_profiles`
+
+One row per course, extracted from that course's official outline PDF: how the grade splits
+(`grade_participation_pct` / `grade_individual_pct` / `grade_group_pct` / `grade_exam_pct`), the exam
+structure (`exam_midterm_count` / `exam_endterm_count` / `exam_quiz_count`), six 0-5 workload scores
+(`load_quant`, `load_assignments`, `load_participation`, `load_exam_pressure`, `load_group`,
+`load_reading`), and a `brief` jsonb of labelled bullets (About / Exams / Groups / Work / Notes).
+The table is deliberately per-course, not per-term: Term 4 was seeded first, Term 5 in September 2026,
+and any later term drops in the same way.
+
+`20260912090000` added five more, read off the standard blocks every ISB outline carries -- the
+"Group Information" table, the "Peer Evaluation Component" line, and "Attendance & Punctuality":
+
+- `group_size` -- free text, because outlines phrase it every possible way ("4-6", "Up to 3",
+  "Announced after bidding").
+- `cross_section` -- can groups span sections?
+- `group_formation` -- `Self-select`, `Instructor-assigned` or `ASA-assigned`, check-constrained so
+  the dossier's filters stay stable as later terms are seeded.
+- `peer_eval` -- is there a peer evaluation that moves individual grades?
+- `attendance` -- `Not mandatory`, `ISB policy`, `Participation-linked` or `Stricter than ISB policy`,
+  also check-constrained. Note `ISB policy` is not the lenient option: under it one missed session
+  already costs a letter grade. The other three are course-specific departures from that default.
+
+**All five are nullable and null means "the outline doesn't say", never a guess.** For Term 5 that's
+real: `group_formation` is stated in only 6 of 17 outlines, `cross_section` in 12, and MSTC and NSDL
+carry no Group Information table at all. The UI renders null as "Not stated in the outline" and the
+filters exclude those rows rather than assuming a default.
+
+Consumers: the Term Dossier (`/dossier/:term`) and the Bidding Planner's "Your Term at a Glance".
+Admin-editable from the Courses tab after extraction. Readable by everyone; admins write.
+
 ## Migration history (chronological, for context on *why*)
 
 1. `academics_schema` — initial tables.
@@ -261,5 +292,10 @@ Later migrations aren't all listed here yet. One that changes the course model:
 
 - `20260911124637_faculty_profiles_and_ratings` adds the three faculty tables above and three `courses` columns, and refreshes the catalog from ASA's 2026-27 Mohali lineup. That covers named professors on 52 courses, term moves (BLAW to Term 7, CMGT and CTFI to Term 6), BPEX re-enabled in Term 6, DMKT tagged IT Management, three new courses (BBMK, REMA, VIVC), and outline links for FRNT4, GEBU and SUET. ELP was left out because ASA lists no faculty, credits or concentration for it. Thirteen courses missing from the new lineup were left active on purpose (Eshan's call).
 - `faculty_ratings_campus` adds `campus` and `term_label` to `faculty_ratings`, both parsed from ASA's offering labels. It also fills course codes the first load missed: labels ending in a bare code ("Term 4 2024-25 ENVC"), plus labels naming a course by title when exactly one course matches.
+
+- `20260912090000_grading_profile_group_and_attendance` + `20260912090100_seed_term5_group_and_attendance`
+  add the five group/peer-eval/attendance columns above and fill them for all 17 Term 5 electives.
+  `20260912090200_term5_dossier_resource_link` puts the Term 5 Dossier in Platform Directory on Course
+  Resources, the same place the Term 4 tools moved to.
 
 If you're debugging something that references an older shape (e.g. `resources.category`), check this list — it was real, then removed.

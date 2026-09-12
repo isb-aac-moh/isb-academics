@@ -17,6 +17,7 @@ const AdminPage = lazyWithReload(() => import("./pages/AdminPage"));
 const CourseResources = lazyWithReload(() => import("./pages/CourseResources"));
 const TermFourDossier = lazyWithReload(() => import("./pages/TermFourDossier"));
 const TermFourBiddingQA = lazyWithReload(() => import("./pages/TermFourBiddingQA"));
+const TermDossier = lazyWithReload(() => import("./pages/TermDossier"));
 const NoticeBoard = lazyWithReload(() => import("./pages/NoticeBoard"));
 const PulseCheck = lazyWithReload(() => import("./pages/PulseCheck"));
 const LearnSection = lazyWithReload(() => import("./learn/LearnSection"));
@@ -43,6 +44,11 @@ export default function App() {
         <Route path="/resources" element={<CourseResources />} />
         <Route path="/term4" element={<TermFourDossier />} />
         <Route path="/term4-bidding-qa" element={<TermFourBiddingQA />} />
+
+        {/* One page per term, driven by course_grading_profiles — a new term needs a
+            seed, not a route. /term5 is the guessable URL students will type. */}
+        <Route path="/dossier/:term" element={<TermDossier />} />
+        <Route path="/term5" element={<Navigate to="/dossier/term-5" replace />} />
 
         {/* Trailing splat: the Learn section renders its own descendant routes (its window
             content) rather than being a single page. */}

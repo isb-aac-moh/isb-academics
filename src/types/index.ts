@@ -105,9 +105,27 @@ export interface CourseGradingProfile {
   load_group: number;
   load_reading: number;
   brief: { label: string; text: string }[];
+  // Read off the outline's standard Group Information / Peer Evaluation /
+  // Attendance blocks. null means the outline doesn't say -- render as
+  // "not stated", never as a claim.
+  group_size: string | null;
+  cross_section: boolean | null;
+  group_formation: GroupFormation | null;
+  peer_eval: boolean | null;
+  attendance: AttendancePolicy | null;
   source_url: string | null;
   extracted_at: string | null;
 }
+
+export type GroupFormation = "Self-select" | "Instructor-assigned" | "ASA-assigned";
+
+// 'ISB policy' is not lenient: under it a single missed session already costs a
+// letter grade. The other three are course-specific departures from it.
+export type AttendancePolicy =
+  | "Not mandatory"
+  | "ISB policy"
+  | "Participation-linked"
+  | "Stricter than ISB policy";
 
 // The five core courses whose F grade blocks a specific concentration.
 export interface GatingCoreCourse {
