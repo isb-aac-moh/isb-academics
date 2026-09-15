@@ -90,7 +90,8 @@ export default function CreditTracker() {
   ];
 
   async function handleResolve(entry: BidPlanEntry, gotIt: boolean, points: number) {
-    posthog?.capture("bid_reconciled", { got_it: gotIt, term: entry.term, points_paid: gotIt ? points : 0 });
+    const course = courses.find((c) => c.id === entry.course_id);
+    posthog?.capture("bid_reconciled", { got_it: gotIt, term: entry.term, points_paid: gotIt ? points : 0, course_code: course?.code });
     if (gotIt) {
       await resolveEntry(entry.id, points);
       if (entry.course_id) await addEntry({ course_id: entry.course_id, term: entry.term, points_paid: points, grade: null });
@@ -177,7 +178,8 @@ export default function CreditTracker() {
             profile={profile}
             entries={entries}
             onSetGrade={async (courseId, term, grade) => {
-              posthog?.capture("grade_logged", { term, grade: grade ?? "cleared" });
+              const course = courses.find((c) => c.id === courseId);
+              posthog?.capture("grade_logged", { term, grade: grade ?? "cleared", course_code: course?.code });
               await upsertGrade(courseId, term, grade);
             }}
           />
@@ -190,7 +192,7 @@ export default function CreditTracker() {
             entries={entries}
             onAdd={async (entry) => {
               const course = courses.find((c) => c.id === entry.course_id);
-              posthog?.capture("enrollment_added", { term: entry.term, credits: course ? Number(course.credits) : undefined, points_paid: entry.points_paid });
+              posthog?.capture("enrollment_added", { term: entry.term, credits: course ? Number(course.credits) : undefined, points_paid: entry.points_paid, course_code: course?.code });
               await addEntry(entry);
             }}
           />

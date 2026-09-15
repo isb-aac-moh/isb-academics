@@ -7,6 +7,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { usePostHog } from "@posthog/react";
 import { Search, X, ExternalLink, FileText, Pin, ChevronRight } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { useResources } from "../hooks/useResources";
@@ -25,6 +26,7 @@ export default function CourseResources() {
   const { courses, loading: coursesLoading } = useCourses();
   const { byCourse: facultyByCourse } = useFaculty();
   const [params, setParams] = useSearchParams();
+  const posthog = usePostHog();
 
   const q = params.get("q") ?? "";
   const termFilter = params.get("term") ?? "all";
@@ -222,7 +224,10 @@ export default function CourseResources() {
                   resourceCount={(resourcesByCourse.get(c.id) ?? []).length}
                   facultyByCourse={facultyByCourse}
                   tint={CARD_TINTS[i % CARD_TINTS.length]}
-                  onClick={() => setParam("course", c.code)}
+                  onClick={() => {
+                    setParam("course", c.code);
+                    posthog?.capture("course_profile_opened", { course_code: c.code, source: "resources" });
+                  }}
                 />
               ))}
             </div>

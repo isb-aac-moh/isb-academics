@@ -60,7 +60,8 @@ export default function BiddingPlanner() {
   }
 
   async function handleAddEntry(courseId: string, term: string, points: number): Promise<void> {
-    posthog?.capture("bid_entry_added", { term, planned_points: points });
+    const course = courses.find((c) => c.id === courseId);
+    posthog?.capture("bid_entry_added", { term, planned_points: points, course_code: course?.code });
     await addEntry({ course_id: courseId, term, planned_points: points });
   }
 
