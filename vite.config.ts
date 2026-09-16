@@ -9,6 +9,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // We register the service worker ourselves in src/main.tsx so we can catch a
+      // registration rejection. The plugin's generated registerSW.js has no error
+      // handler, so a browser that refuses the worker throws an unhandled rejection.
+      injectRegister: false,
       includeAssets: ['favicon.png'],
       manifest: {
         name: 'ISB Academics',
