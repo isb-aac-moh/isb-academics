@@ -8,6 +8,7 @@ import App from "./App.tsx";
 
 import posthog from "posthog-js";
 import { PostHogProvider, PostHogErrorBoundary } from "@posthog/react";
+import { registerSW } from "virtual:pwa-register";
 
 const phToken = import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN as string | undefined;
 const phHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST as string | undefined;
@@ -25,6 +26,15 @@ if (!phToken) {
     defaults: "2026-01-30",
   });
 }
+
+// Some browsers refuse to install a service worker (for example when the user
+// blocks site data). That refusal is expected and only disables offline caching,
+// so we log it instead of letting it surface as an unhandled rejection.
+registerSW({
+  onRegisterError(error) {
+    console.warn("Service worker registration failed:", error);
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
