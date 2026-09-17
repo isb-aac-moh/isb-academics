@@ -8,6 +8,7 @@ import App from "./App.tsx";
 
 import posthog from "posthog-js";
 import { PostHogProvider, PostHogErrorBoundary } from "@posthog/react";
+import { dropKnownNoiseExceptions } from "./lib/errorFilters";
 
 const phToken = import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN as string | undefined;
 const phHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST as string | undefined;
@@ -23,6 +24,7 @@ if (!phToken) {
   posthog.init(phToken, {
     api_host: phHost ?? "https://us.i.posthog.com",
     defaults: "2026-01-30",
+    before_send: dropKnownNoiseExceptions,
   });
 }
 
