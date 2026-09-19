@@ -44,7 +44,7 @@ Fill in `.env.local`. Ask Eshan for the values, or copy them from the Vercel pro
 |---|---|
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | The Supabase project. It is shared with `isb-explorer`, so the values are identical to that app's. |
 | `VITE_PUBLIC_POSTHOG_PROJECT_TOKEN` | Product analytics. Required: the dev server throws an error at startup if it is missing. Any placeholder string works locally if you don't need events. |
-| `VITE_PUBLIC_POSTHOG_HOST` | Optional. Defaults to `https://us.i.posthog.com`. |
+| `VITE_PUBLIC_POSTHOG_HOST` | Optional. Defaults to `/ingest`, a first-party proxy path (a Vercel rewrite) that keeps ad blockers from dropping events. Set it to `https://us.i.posthog.com` for local development, where the proxy path does not resolve. |
 
 Other commands:
 

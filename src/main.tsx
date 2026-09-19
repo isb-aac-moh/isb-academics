@@ -21,7 +21,11 @@ if (!phToken) {
   }
 } else {
   posthog.init(phToken, {
-    api_host: phHost ?? "https://us.i.posthog.com",
+    // Send capture through the first-party /ingest path (a Vercel rewrite, see
+    // vercel.json) so ad blockers that match the public PostHog host do not
+    // silently drop events. ui_host still points at the app for toolbar links.
+    api_host: phHost ?? "/ingest",
+    ui_host: "https://us.posthog.com",
     defaults: "2026-01-30",
   });
 }
