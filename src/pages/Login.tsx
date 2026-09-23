@@ -7,9 +7,13 @@ import { usePostHog } from "@posthog/react";
 interface Props {
   notProvisioned?: boolean;
   onSignOut?: () => void;
+  // Set only when this load is already flagged as the demo (visiting /demo) — see lib/demoMode.ts.
+  // Its presence is what tells this page to show the demo CTA instead of the "view a live demo" link.
+  onDemoLogin?: () => void;
+  demoSigningIn?: boolean;
 }
 
-export default function Login({ notProvisioned, onSignOut }: Props) {
+export default function Login({ notProvisioned, onSignOut, onDemoLogin, demoSigningIn }: Props) {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -132,6 +136,31 @@ export default function Login({ notProvisioned, onSignOut }: Props) {
           <p style={{ marginTop: 28, fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, textAlign: "center", lineHeight: 1.6 }}>
             Authorized access only. By continuing, you agree to ISB's Acceptable Use Policies.
           </p>
+
+          {!notProvisioned && (onDemoLogin ? (
+            <div style={{ marginTop: 20, paddingTop: 20, borderTop: `1px dashed ${COLOR.border}`, textAlign: "center" }}>
+              <p style={{ fontSize: 12, color: COLOR.ink2, fontFamily: FONT.sans, marginBottom: 10 }}>
+                No ISB account? Explore the whole product as a demo student instead.
+              </p>
+              <button
+                onClick={onDemoLogin}
+                disabled={demoSigningIn}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: 10, background: COLOR.mint, color: COLOR.navyHero,
+                  border: "none", fontSize: 14, fontWeight: 800, fontFamily: FONT.sans, cursor: demoSigningIn ? "default" : "pointer",
+                  opacity: demoSigningIn ? 0.7 : 1,
+                }}
+              >
+                {demoSigningIn ? "Signing you in…" : "Login to see demo →"}
+              </button>
+            </div>
+          ) : (
+            <p style={{ marginTop: 10, fontSize: 12, fontFamily: FONT.sans, textAlign: "center" }}>
+              <a href="/demo" style={{ color: COLOR.ink2, textDecoration: "underline" }}>
+                Not an ISB account? View a live demo →
+              </a>
+            </p>
+          ))}
         </div>
       </div>
     </div>

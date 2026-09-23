@@ -23,14 +23,14 @@ const PulseCheck = lazyWithReload(() => import("./pages/PulseCheck"));
 const LearnSection = lazyWithReload(() => import("./learn/LearnSection"));
 
 export default function App() {
-  const { user, loading, notProvisioned, signOut } = useAuth();
+  const { user, loading, notProvisioned, signOut, enterDemo, demoSigningIn } = useAuth();
 
   if (loading) {
     return <div style={{ minHeight: "100vh", background: COLOR.bg }} />;
   }
 
   if (!user) {
-    return <Login notProvisioned={notProvisioned} onSignOut={signOut} />;
+    return <Login notProvisioned={notProvisioned} onSignOut={signOut} onDemoLogin={enterDemo} demoSigningIn={demoSigningIn} />;
   }
 
   return (

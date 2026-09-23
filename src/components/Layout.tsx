@@ -4,6 +4,8 @@ import { COLOR, FONT } from "../lib/theme";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import PopupManager from "./PopupManager";
+import DemoSectionExplainer from "./DemoSectionExplainer";
+import DemoExternalLinkModal from "./DemoExternalLinkModal";
 import type { User } from "../types";
 
 const ADMIN_PREVIEW_PREFIXES = ["/notices"];
@@ -18,8 +20,10 @@ export default function Layout({ user, onSignOut }: { user: User; onSignOut: () 
   return (
     <div className="flex flex-col md:flex-row">
       <PopupManager />
+      <DemoExternalLinkModal />
       <Sidebar user={user} onSignOut={onSignOut} />
       <div style={{ flex: 1, minWidth: 0 }} className={inLearn ? "" : "pb-[calc(3.25rem+env(safe-area-inset-bottom))] md:pb-0"}>
+        <DemoSectionExplainer />
         {showPreviewBanner && <PreviewBanner />}
         {/* Holds the shell steady while a lazily-fetched page chunk arrives. The fallback is a
             blank block of the page background rather than a spinner: chunks are small and usually

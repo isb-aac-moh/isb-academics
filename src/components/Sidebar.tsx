@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, PanelLeftClose, PanelLeftOpen, Brain, LayoutGrid } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { isDemoMode } from "../lib/demoMode";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
 import type { User } from "../types";
@@ -18,6 +19,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const { navLinks } = useNavLinks();
+  const signOutLabel = isDemoMode() ? "Exit demo" : "Sign out";
 
   function go(path: string) {
     navigate(path);
@@ -100,16 +102,16 @@ export default function Sidebar({ user, onSignOut }: Props) {
             {user.name || user.email}
           </p>
         )}
-        <WithRailLabel label="Sign out" enabled={collapsed}>
+        <WithRailLabel label={signOutLabel} enabled={collapsed}>
           <button
             onClick={onSignOut}
-            aria-label={collapsed ? "Sign out" : undefined}
+            aria-label={collapsed ? signOutLabel : undefined}
             style={{
               display: "flex", alignItems: "center", gap: 6, marginTop: collapsed ? 0 : 8, justifyContent: collapsed ? "center" : "flex-start",
               width: "100%", background: "none", border: "none", color: onLight ? COLOR.ink3 : "rgba(255,255,255,0.6)", fontFamily: FONT.sans, fontSize: 12, cursor: "pointer", padding: 0,
             }}
           >
-            <LogOut size={13} /> {!collapsed && "Sign out"}
+            <LogOut size={13} /> {!collapsed && signOutLabel}
           </button>
         </WithRailLabel>
       </div>
@@ -148,7 +150,9 @@ export default function Sidebar({ user, onSignOut }: Props) {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <p style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 14, color: "#fff" }}>ISB</p>
-                  <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>Academics</p>
+                  <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>
+                    Academics {isDemoMode() && <DemoBadge />}
+                  </p>
                 </div>
                 <button onClick={() => setMobileOpen(false)} aria-label="Close menu" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}>
                   <X size={20} />
@@ -182,7 +186,9 @@ export default function Sidebar({ user, onSignOut }: Props) {
             {!collapsed && (
               <div>
                 <p style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 14, color: "#fff" }}>ISB</p>
-                <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>Academics</p>
+                <p style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 12, color: COLOR.mint, marginTop: 1 }}>
+                  Academics {isDemoMode() && <DemoBadge />}
+                </p>
               </div>
             )}
             <WithRailLabel label="Expand sidebar" enabled={collapsed}>
@@ -325,5 +331,18 @@ function ExternalNavItem({ icon, label, href, collapsed, onLight }: { icon: Reac
         )}
       </a>
     </WithRailLabel>
+  );
+}
+
+function DemoBadge() {
+  return (
+    <span
+      style={{
+        display: "inline-block", marginLeft: 4, fontSize: 9, fontWeight: 800, letterSpacing: "0.06em",
+        color: COLOR.navyHero, background: COLOR.mint, borderRadius: 4, padding: "1px 5px", verticalAlign: "middle",
+      }}
+    >
+      DEMO
+    </span>
   );
 }

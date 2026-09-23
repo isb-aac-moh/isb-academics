@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import posthog from "posthog-js";
+import { isDemoMode, exitDemoMode } from "../lib/demoMode";
+import { DEMO_USER } from "../lib/demoData";
 import type { User } from "../types";
+
+// Brief pause after clicking "Login to see demo" before landing on the dashboard — long enough to
+// register as a real action, short enough not to feel like a stall.
+const DEMO_SIGN_IN_DELAY_MS = 700;
 
 /**
  * Sign-in entry points. Module-level functions rather than part of the hook, because the login
@@ -34,6 +40,10 @@ export async function sendMagicLink(email: string): Promise<string | null> {
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  // Distinct from `loading` (which gates the whole app on the initial auth check): this only
+  // drives the demo login button's own inline spinner, so Login stays mounted and interactive
+  // instead of the top-level loading branch swapping the whole screen out from under it.
+  const [demoSigningIn, setDemoSigningIn] = useState(false);
   // True when a valid @isb.edu SSO session exists but the `users` table (owned
   // by isb-explorer) has no matching row yet — distinct from "not signed in",
   // so the UI can explain it instead of silently bouncing back to the login form.
@@ -44,6 +54,14 @@ export function useAuth() {
   const loadedUid = useRef<string | null>(null);
 
   useEffect(() => {
+    // Demo mode never touches real Supabase Auth — there's no session to check, so skip straight
+    // to the (unauthenticated) Login screen and wait for enterDemo() below, fired by its own
+    // "Login to see demo" button rather than automatically. See lib/demoMode.ts.
+    if (isDemoMode()) {
+      setLoading(false);
+      return;
+    }
+
     // No separate getSession() call: subscribing emits INITIAL_SESSION with the stored session
     // immediately, so having both meant every single page load ran the gate and the `users` query
     // twice over — two identical round trips on the one request the first paint waits for.
@@ -95,6 +113,10 @@ export function useAuth() {
   }
 
   async function signOut() {
+    if (isDemoMode()) {
+      exitDemoMode(); // clears the flag and hard-reloads to "/", back on the real client
+      return;
+    }
     posthog.reset();
     await supabase.auth.signOut();
     loadedUid.current = null;
@@ -102,5 +124,19 @@ export function useAuth() {
     setNotProvisioned(false);
   }
 
-  return { user, loading, notProvisioned, sendMagicLink, signInWithAzure, signOut };
+  // Fired by Login's "Login to see demo" button — the explicit action that actually enters the
+  // demo, as opposed to just landing on /demo, which only puts up the gate. See DemoMode.
+  async function enterDemo() {
+    setDemoSigningIn(true);
+    await new Promise((resolve) => setTimeout(resolve, DEMO_SIGN_IN_DELAY_MS));
+    loadedUid.current = DEMO_USER.id;
+    setUser(DEMO_USER);
+    setDemoSigningIn(false);
+  }
+
+  return {
+    user, loading, notProvisioned, sendMagicLink, signInWithAzure, signOut,
+    demoSigningIn,
+    enterDemo: isDemoMode() ? enterDemo : undefined,
+  };
 }
