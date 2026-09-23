@@ -5,9 +5,12 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import "./index.css";
 import App from "./App.tsx";
+import { installDemoLinkGuard } from "./lib/demoLinkGuard";
 
 import posthog from "posthog-js";
 import { PostHogProvider, PostHogErrorBoundary } from "@posthog/react";
+
+installDemoLinkGuard();
 
 const phToken = import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN as string | undefined;
 const phHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST as string | undefined;
