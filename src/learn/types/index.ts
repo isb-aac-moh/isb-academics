@@ -33,6 +33,8 @@ export interface Course {
   id: string;
   name: string;
   code: string | null;
+  /** From the bidding catalogue, e.g. "Term 3". Groups the desktop rail into term folders. */
+  term: string | null;
   total_sessions: number;
   enabled: boolean;
   sort_order: number;

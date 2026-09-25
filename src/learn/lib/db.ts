@@ -61,7 +61,7 @@ export async function fetchCourses(): Promise<Course[]> {
   const [courses, playable] = await Promise.all([
     supabase
       .from("learn_courses")
-      .select("course_code, total_sessions, enabled, sort_order, courses!inner(name, code)")
+      .select("course_code, total_sessions, enabled, sort_order, courses!inner(name, code, term)")
       .order("sort_order"),
     supabase.from("learn_questions").select("course_code").neq("type", "short_answer"),
   ]);
@@ -70,11 +70,12 @@ export async function fetchCourses(): Promise<Course[]> {
 
   const withPractice = new Set((playable.data ?? []).map((row) => row.course_code as string));
   return (courses.data ?? []).map((row) => {
-    const course = row.courses as unknown as { name: string; code: string | null };
+    const course = row.courses as unknown as { name: string; code: string | null; term: string };
     return {
       id: row.course_code as string,
       name: course.name,
       code: course.code,
+      term: course.term,
       total_sessions: row.total_sessions as number,
       enabled: row.enabled as boolean,
       sort_order: row.sort_order as number,
