@@ -253,9 +253,6 @@ export function createDemoClient(seed: Record<string, unknown[]>, rpcHandlers: R
           // intercepts in demo mode and explains instead of opening — so the URL itself is never
           // actually loaded and only needs to be a plausible-looking string.
           createSignedUrl: async (path: string) => ({ data: { signedUrl: `https://storage.isb.edu/course-materials/${path}` }, error: null }),
-          // Used by the custom-pages upload button (NavLinksAdmin/ResourcesAdmin) — same
-          // plausible-looking-string contract as createSignedUrl above.
-          getPublicUrl: (path: string) => ({ data: { publicUrl: `https://storage.isb.edu/custom-pages/${path}` } }),
         };
       },
     },
