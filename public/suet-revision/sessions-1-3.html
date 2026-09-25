@@ -210,12 +210,16 @@ details.ans .body{padding:0 0 14px 28px;font-size:.95rem}
 .chip{display:inline-block;font-size:.76rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface);border:1px solid var(--line);margin:2px 3px 2px 0}
 
 /* ---------- mobile ---------- */
+.nav-close{display:none}
+.nav-backdrop{display:none}
 @media (max-width:980px){
   .wrap{grid-template-columns:1fr;gap:0}
-  nav.side{position:fixed;top:56px;left:0;bottom:0;width:280px;background:var(--surface);z-index:60;padding:16px;transform:translateX(-105%);transition:transform .25s;box-shadow:var(--shadow);max-height:none}
+  nav.side{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--surface);z-index:70;padding:16px;transform:translateX(-105%);transition:transform .25s;box-shadow:var(--shadow);max-height:none;overflow:auto}
   body.nav-open nav.side{transform:none}
   .menu-btn{display:inline-flex}
   .proglabel{display:none}
+  .nav-close{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:0 0 12px auto;border-radius:8px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);font-size:1.1rem;cursor:pointer}
+  body.nav-open .nav-backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:65}
 }
 @media (max-width:560px){.brand small{display:none}.brand{font-size:.95rem;overflow:hidden;text-overflow:ellipsis;min-width:0}.prog{min-width:30px}.topbar .in{gap:8px}}
 @media print{nav.side,.topbar,.tape,.widget .ctrl{display:none}.wrap{display:block}section.mod{break-inside:avoid-page;box-shadow:none}}
@@ -231,7 +235,9 @@ details.ans .body{padding:0 0 14px 28px;font-size:.95rem}
 </div></header>
 
 <div class="wrap">
+<div class="nav-backdrop" id="navBackdrop"></div>
 <nav class="side" id="side">
+  <button class="nav-close" id="navCloseBtn" aria-label="Close contents">&#10005;</button>
   <div class="grp">Start</div>
   <a href="#start"><span class="dot"></span>How to use this guide</a>
   <a href="#map"><span class="dot"></span>The one-page story</a>
@@ -1853,6 +1859,8 @@ $('#themeBtn').addEventListener('click',function(){
 
 /* ---------- mobile menu ---------- */
 $('#menuBtn').addEventListener('click',function(){document.body.classList.toggle('nav-open')});
+$('#navCloseBtn').addEventListener('click',function(){document.body.classList.remove('nav-open')});
+$('#navBackdrop').addEventListener('click',function(){document.body.classList.remove('nav-open')});
 $$('nav.side a').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('nav-open')})});
 
 /* ---------- progress ---------- */
