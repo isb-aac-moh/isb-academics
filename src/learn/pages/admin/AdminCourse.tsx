@@ -98,6 +98,7 @@ export function AdminCourse({ courses, courseId, onCoursesChange }: Props) {
         id,
         name,
         code: null,
+        term: null,
         total_sessions: 0,
         enabled: false,
         sort_order: courses.length,

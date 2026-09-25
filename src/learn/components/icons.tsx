@@ -35,6 +35,15 @@ export function BookIcon({ className }: IconProps) {
   );
 }
 
+/** A term on the desktop rail, which opens to show that term's subjects. */
+export function FolderIcon({ className }: IconProps) {
+  return (
+    <svg {...filled} className={className}>
+      <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h4l2 2.5h7A2.5 2.5 0 0 1 21 9v9.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5z" />
+    </svg>
+  );
+}
+
 /** Revision guides. A compass rather than another book — the guides sit next to the course books on
     the desktop, and two book silhouettes side by side would read as the same thing twice. */
 export function CompassIcon({ className }: IconProps) {
