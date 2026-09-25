@@ -14,6 +14,7 @@ import { useNavLinks } from "../hooks/useNavLinks";
 import { useAppSettings } from "../hooks/useAppSettings";
 import { useDashboardPopups } from "../hooks/useDashboardPopups";
 import { supabase } from "../lib/supabase";
+import { uploadCustomPage } from "../lib/customPages";
 import { RESOURCE_TABS, NOTIFICATION_TAGS, ALL_TERMS, POPUP_PAGES } from "../lib/options";
 import { BIDDABLE_TERM_ORDER } from "../lib/creditProgress";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
@@ -611,6 +612,38 @@ function LabeledField({ label, children, className }: { label: string; children:
   );
 }
 
+/** Lets an admin pick an HTML file from their computer instead of pasting a URL — uploads it to
+    the public custom-pages storage bucket and hands the resulting URL back to the caller's form. */
+function UploadHtmlButton({ onUploaded }: { onUploaded: (url: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow picking the same file again after an error
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    try {
+      onUploaded(await uploadCustomPage(file));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed — check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2" style={{ marginTop: 4 }}>
+      <label style={{ fontSize: 11.5, color: COLOR.ink3, fontFamily: FONT.sans, cursor: busy ? "default" : "pointer", textDecoration: "underline" }}>
+        {busy ? "Uploading…" : "…or upload an HTML file from your computer"}
+        <input type="file" accept=".html,text/html" onChange={handleFile} disabled={busy} style={{ display: "none" }} />
+      </label>
+      {error && <span style={{ fontSize: 11, color: COLOR.red, fontFamily: FONT.sans }}>{error}</span>}
+    </div>
+  );
+}
+
 const EMPTY_RESOURCE = { title: "", url: "", description: "", resource_type: "General" as ResourceType, term: "", course_id: "", pinned: false, pinned_global: false };
 
 function ResourcesAdmin() {
@@ -709,6 +742,7 @@ function ResourcesAdmin() {
           </LabeledField>
           <LabeledField label="URL">
             <input style={inputStyle} value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} placeholder="https://…" />
+            <UploadHtmlButton onUploaded={(url) => setForm((f) => ({ ...f, url }))} />
           </LabeledField>
         </div>
         <LabeledField label="Description (shown to students so they know what's inside before clicking)" className="mb-2">
@@ -983,6 +1017,7 @@ function NavLinksAdmin() {
 
         <LabeledField label={form.link_type === "external" ? "URL" : "App path (e.g. /resources)"} className="mb-2">
           <input style={inputStyle} value={form.href} onChange={(e) => setForm((f) => ({ ...f, href: e.target.value }))} placeholder={form.link_type === "external" ? "https://…" : "/resources"} />
+          {form.link_type === "external" && <UploadHtmlButton onUploaded={(url) => setForm((f) => ({ ...f, href: url }))} />}
         </LabeledField>
 
         <p style={{ fontSize: 11, color: COLOR.ink3, fontFamily: FONT.sans, margin: "4px 0" }}>Visible to</p>
