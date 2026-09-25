@@ -116,6 +116,22 @@ export const REVISION_GUIDES: Record<string, RevisionGuide> = {
       },
     ],
   },
+  SUET: {
+    course: "SUET",
+    title: "SUET Midterm Prep",
+    subtitle:
+      "Sessions 1 to 3 plus the pre-Ant Forest coursepack readings, taught end to end with diagrams, calculators, teaching tapes, flashcards and practice questions.",
+    sessions: [
+      {
+        slug: "1-3",
+        label: "Sessions 1–3",
+        title: "Discounting, Markets, and Why Instruments Fail",
+        blurb:
+          "The full storyline: how much we should do for the future (discounting, Ramsey, Stern vs Nordhaus), how markets fail and the three routes out (property rights, Pigouvian tax, cap and trade), and why good instruments break once real people respond to them (endogenous baselines, additionality, enforcement).",
+        file: "/suet-revision/sessions-1-3.html",
+      },
+    ],
+  },
 };
 
 export function getRevisionGuide(course: string | undefined): RevisionGuide | null {
