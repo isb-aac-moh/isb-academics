@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { getRevisionGuide } from "../lib/revisionGuides";
 import { ChevronRightIcon, CompassIcon } from "../components/icons";
@@ -9,13 +11,19 @@ import { ChevronRightIcon, CompassIcon } from "../components/icons";
  * document is a finished standalone HTML page (see lib/revisionGuides.ts), so it is shown in an
  * iframe exactly as written rather than being re-styled into the app's design system — the same
  * treatment the Term 4 Dossier gets. The tab rail above it stays put so switching sessions never
- * means going back first, and "Open full screen" is there for the phone, where the guide's own
- * layout wants the whole viewport.
+ * means going back first. "Open full screen" is there for the phone, where the guide's own layout
+ * wants the whole viewport — it expands the iframe in place (rather than a new tab, which some
+ * embedded/mobile contexts can't navigate back out of) and leaves a pinned exit button over the
+ * iframe so shrinking back down never depends on the guide's own UI. It's portalled to
+ * document.body because this page is always mounted inside Window (components/Window.tsx), whose
+ * entrance animation leaves a permanent `transform` on that floating frame — a `position: fixed`
+ * child of it is contained and clipped to that frame's box, not the real viewport.
  */
 export function RevisionGuidePage() {
   const navigate = useNavigate();
   const params = useParams<{ course: string; session?: string }>();
   const guide = getRevisionGuide(params.course);
+  const [fullscreen, setFullscreen] = useState(false);
 
   if (!guide) {
     return (
@@ -60,6 +68,26 @@ export function RevisionGuidePage() {
     );
   }
 
+  if (fullscreen) {
+    return createPortal(
+      <div className="fixed inset-0 z-[200] bg-surface flex flex-col">
+        <button
+          onClick={() => setFullscreen(false)}
+          className="fixed top-3 right-3 z-[210] text-xs font-semibold text-white bg-ink/80 backdrop-blur px-3 py-1.5 rounded-full shadow-lg hover:bg-ink"
+        >
+          ✕ Exit full screen
+        </button>
+        <iframe
+          key={active.slug}
+          src={active.file}
+          title={`${active.label} — ${active.title}`}
+          className="flex-1 min-h-0 w-full border-0 block"
+        />
+      </div>,
+      document.body,
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="shrink-0 border-b border-line bg-surface px-3 py-2 flex items-center gap-2 overflow-x-auto">
@@ -85,14 +113,12 @@ export function RevisionGuidePage() {
             {s.label}
           </button>
         ))}
-        <a
-          href={active.file}
-          target="_blank"
-          rel="noreferrer"
+        <button
+          onClick={() => setFullscreen(true)}
           className="shrink-0 ml-auto text-xs font-semibold text-accent hover:underline px-2 py-1.5"
         >
           Open full screen ↗
-        </a>
+        </button>
       </div>
       <iframe
         key={active.slug}
