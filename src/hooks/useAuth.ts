@@ -40,10 +40,6 @@ export async function sendMagicLink(email: string): Promise<string | null> {
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  // Distinct from `loading` (which gates the whole app on the initial auth check): this only
-  // drives the demo login button's own inline spinner, so Login stays mounted and interactive
-  // instead of the top-level loading branch swapping the whole screen out from under it.
-  const [demoSigningIn, setDemoSigningIn] = useState(false);
   // True when a valid @isb.edu SSO session exists but the `users` table (owned
   // by isb-explorer) has no matching row yet — distinct from "not signed in",
   // so the UI can explain it instead of silently bouncing back to the login form.
@@ -54,11 +50,13 @@ export function useAuth() {
   const loadedUid = useRef<string | null>(null);
 
   useEffect(() => {
-    // Demo mode never touches real Supabase Auth — there's no session to check, so skip straight
-    // to the (unauthenticated) Login screen and wait for enterDemo() below, fired by its own
-    // "Login to see demo" button rather than automatically. See lib/demoMode.ts.
+    // Demo mode never touches real Supabase Auth — there's no session to check, so sign straight
+    // into the demo user. The flag is only ever set by enterDemoMode()'s reload (see
+    // lib/demoMode.ts), which already represents the user's one click on "Login to see demo" —
+    // landing back on the (unauthenticated) Login screen here and waiting for a second click
+    // would just be the redundant page this flow used to have.
     if (isDemoMode()) {
-      setLoading(false);
+      enterDemo();
       return;
     }
 
@@ -124,19 +122,14 @@ export function useAuth() {
     setNotProvisioned(false);
   }
 
-  // Fired by Login's "Login to see demo" button — the explicit action that actually enters the
-  // demo, as opposed to just landing on /demo, which only puts up the gate. See DemoMode.
+  // Auto-fired once the demoMode flag is detected on load (see the effect above). The delay keeps
+  // `loading` true for a beat so it reads as a real sign-in rather than an instant screen swap.
   async function enterDemo() {
-    setDemoSigningIn(true);
     await new Promise((resolve) => setTimeout(resolve, DEMO_SIGN_IN_DELAY_MS));
     loadedUid.current = DEMO_USER.id;
     setUser(DEMO_USER);
-    setDemoSigningIn(false);
+    setLoading(false);
   }
 
-  return {
-    user, loading, notProvisioned, sendMagicLink, signInWithAzure, signOut,
-    demoSigningIn,
-    enterDemo: isDemoMode() ? enterDemo : undefined,
-  };
+  return { user, loading, notProvisioned, sendMagicLink, signInWithAzure, signOut };
 }
