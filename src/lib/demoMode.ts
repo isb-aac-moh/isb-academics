@@ -27,6 +27,22 @@ export function isDemoMode(): boolean {
   }
 }
 
+/** Fired by the homepage's "Login to see demo" button. Sets the flag then reloads to "/" — a
+    reload is unavoidable because supabase.ts picks the real vs. fake client once, at module-eval
+    time, so there's no way to swap it under the already-running app. useAuth signs the user in
+    automatically once the reload lands back here with the flag set, so this is one click.
+    Returns false (and skips the reload) if storage is blocked (e.g. private browsing) — reloading
+    anyway would just land back on this same button with no explanation. */
+export function enterDemoMode(): boolean {
+  try {
+    sessionStorage.setItem(KEY, "1");
+  } catch {
+    return false;
+  }
+  window.location.href = "/";
+  return true;
+}
+
 /** Full reload back to the real app — clearing mid-session and only routing away would leave
     the already-created fake Supabase client in place for the rest of the tab's life. */
 export function exitDemoMode(): void {
