@@ -86,8 +86,7 @@ export function SessionsPage({ profile }: Props) {
   const currentTopicMeta = currentGroup?.topics.find((t) => t.topic === activeTopic) ?? null;
   const questionsForTopic = activeTopic ? questions.filter((q) => q.topic === activeTopic) : [];
 
-  // A course can be live before any session content exists (SUET only backs its revision guide), so
-  // the session pickers would be empty and the overview prompt would point at nothing.
+  // A course can be live before any session content exists (SUET only backs its revision guide).
   const hasSessions = groups.length > 0;
   const guide = getRevisionGuide(courseId);
 
@@ -102,72 +101,72 @@ export function SessionsPage({ profile }: Props) {
     <div className="flex flex-col md:flex-row h-full">
       {/* Session/concept sub-nav. Desktop only — on a phone nine stacked sessions pushed the actual
           content below the fold, so mobile gets dropdowns at the top of the content instead. */}
-      <aside
-        className={
-          hasSessions ? "hidden md:block md:w-64 shrink-0 border-r border-line px-3 py-4 md:overflow-y-auto" : "hidden"
-        }
-      >
-        <div className="flex items-center gap-2 bg-base border border-line rounded-lg px-2.5 py-2 mb-4">
-          <SearchIcon className="w-3.5 h-3.5 text-ink-soft shrink-0" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search sessions..."
-            className="bg-transparent text-xs outline-none placeholder:text-ink-soft w-full"
-          />
-        </div>
+      {hasSessions && (
+        <aside
+          className="hidden md:block md:w-64 shrink-0 border-r border-line px-3 py-4 md:overflow-y-auto"
+        >
+          <div className="flex items-center gap-2 bg-base border border-line rounded-lg px-2.5 py-2 mb-4">
+            <SearchIcon className="w-3.5 h-3.5 text-ink-soft shrink-0" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search sessions..."
+              className="bg-transparent text-xs outline-none placeholder:text-ink-soft w-full"
+            />
+          </div>
 
-        <div className="flex flex-col gap-1">
-          {visibleGroups.map((g) => {
-            const isOpen = g.session === activeSession;
-            return (
-              <div key={g.session}>
-                <button
-                  onClick={() => navigate(`/learn/sessions/${courseId}/${g.session}`)}
-                  className={[
-                    "w-full text-left flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm transition-colors",
-                    isOpen ? "bg-surface-2 text-ink font-medium" : "text-ink-soft hover:bg-surface-2/60 hover:text-ink",
-                  ].join(" ")}
-                >
-                  <span>
-                    Session {g.session}
-                    <span className="hidden sm:inline"> — {g.title}</span>
-                  </span>
-                  <ChevronRightIcon className={`shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`} />
-                </button>
-                {isOpen && (
-                  <div className="ml-2 pl-3 border-l border-line flex flex-col gap-0.5 py-1">
-                    {g.topics.length === 0 ? (
-                      <p className="text-xs text-ink-soft px-3 py-2">No practice content here yet.</p>
-                    ) : (
-                      g.topics.map((t) => {
-                        const isActive = t.topic === activeTopic;
-                        return (
-                          <button
-                            key={t.topic}
-                            onClick={() => navigate(`/learn/sessions/${courseId}/${g.session}/${t.topic}`)}
-                            className={[
-                              "flex items-center justify-between gap-2 text-left px-3 py-1.5 rounded-lg text-sm transition-colors",
-                              isActive ? "bg-accent/10 text-accent font-medium" : "text-ink-soft hover:text-ink",
-                            ].join(" ")}
-                          >
-                            <span>{t.title}</span>
-                            {t.level === 4 ? (
-                              <CheckIcon className="w-3.5 h-3.5 text-good shrink-0" />
-                            ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-                            )}
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </aside>
+          <div className="flex flex-col gap-1">
+            {visibleGroups.map((g) => {
+              const isOpen = g.session === activeSession;
+              return (
+                <div key={g.session}>
+                  <button
+                    onClick={() => navigate(`/learn/sessions/${courseId}/${g.session}`)}
+                    className={[
+                      "w-full text-left flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm transition-colors",
+                      isOpen ? "bg-surface-2 text-ink font-medium" : "text-ink-soft hover:bg-surface-2/60 hover:text-ink",
+                    ].join(" ")}
+                  >
+                    <span>
+                      Session {g.session}
+                      <span className="hidden sm:inline"> — {g.title}</span>
+                    </span>
+                    <ChevronRightIcon className={`shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="ml-2 pl-3 border-l border-line flex flex-col gap-0.5 py-1">
+                      {g.topics.length === 0 ? (
+                        <p className="text-xs text-ink-soft px-3 py-2">No practice content here yet.</p>
+                      ) : (
+                        g.topics.map((t) => {
+                          const isActive = t.topic === activeTopic;
+                          return (
+                            <button
+                              key={t.topic}
+                              onClick={() => navigate(`/learn/sessions/${courseId}/${g.session}/${t.topic}`)}
+                              className={[
+                                "flex items-center justify-between gap-2 text-left px-3 py-1.5 rounded-lg text-sm transition-colors",
+                                isActive ? "bg-accent/10 text-accent font-medium" : "text-ink-soft hover:text-ink",
+                              ].join(" ")}
+                            >
+                              <span>{t.title}</span>
+                              {t.level === 4 ? (
+                                <CheckIcon className="w-3.5 h-3.5 text-good shrink-0" />
+                              ) : (
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </aside>
+      )}
 
       {/* Detail pane — fills whatever width the window gives it; only flowing paragraph text
           gets its own reading-width cap, everything else (headings, cards, CTAs) uses the space. */}
@@ -182,27 +181,29 @@ export function SessionsPage({ profile }: Props) {
             {course.total_sessions} sessions
           </p>
 
-          <label className={hasSessions ? "block" : "hidden"}>
-            <span className="text-xs font-semibold text-ink-soft mb-1.5 block">Session</span>
-            <select
-              value={activeSession ?? ""}
-              onChange={(e) =>
-                navigate(
-                  e.target.value
-                    ? `/learn/sessions/${courseId}/${e.target.value}`
-                    : `/learn/sessions/${courseId}`,
-                )
-              }
-              className="input w-full"
-            >
-              <option value="">Choose a session…</option>
-              {groups.map((g) => (
-                <option key={g.session} value={g.session}>
-                  Session {g.session} — {g.title}
-                </option>
-              ))}
-            </select>
-          </label>
+          {hasSessions && (
+            <label className="block">
+              <span className="text-xs font-semibold text-ink-soft mb-1.5 block">Session</span>
+              <select
+                value={activeSession ?? ""}
+                onChange={(e) =>
+                  navigate(
+                    e.target.value
+                      ? `/learn/sessions/${courseId}/${e.target.value}`
+                      : `/learn/sessions/${courseId}`,
+                  )
+                }
+                className="input w-full"
+              >
+                <option value="">Choose a session…</option>
+                {groups.map((g) => (
+                  <option key={g.session} value={g.session}>
+                    Session {g.session} — {g.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {currentGroup && currentGroup.topics.length > 0 && (
             <label className="block mt-3">
