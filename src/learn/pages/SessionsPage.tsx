@@ -12,6 +12,7 @@ import {
   topicKey,
 } from "../lib/db";
 import { groupBySession, type SessionGroup } from "../lib/sessions";
+import { getRevisionGuide } from "../lib/revisionGuides";
 import { MaterialsList } from "../components/MaterialsList";
 import { MasteryBar } from "../components/MasteryBar";
 import { QuestionBank } from "../components/QuestionBank";
@@ -85,6 +86,11 @@ export function SessionsPage({ profile }: Props) {
   const currentTopicMeta = currentGroup?.topics.find((t) => t.topic === activeTopic) ?? null;
   const questionsForTopic = activeTopic ? questions.filter((q) => q.topic === activeTopic) : [];
 
+  // A course can be live before any session content exists (SUET only backs its revision guide), so
+  // the session pickers would be empty and the overview prompt would point at nothing.
+  const hasSessions = groups.length > 0;
+  const guide = getRevisionGuide(courseId);
+
   const q = query.trim().toLowerCase();
   const visibleGroups = q
     ? groups
@@ -97,7 +103,9 @@ export function SessionsPage({ profile }: Props) {
       {/* Session/concept sub-nav. Desktop only — on a phone nine stacked sessions pushed the actual
           content below the fold, so mobile gets dropdowns at the top of the content instead. */}
       <aside
-        className="hidden md:block md:w-64 shrink-0 border-r border-line px-3 py-4 md:overflow-y-auto"
+        className={
+          hasSessions ? "hidden md:block md:w-64 shrink-0 border-r border-line px-3 py-4 md:overflow-y-auto" : "hidden"
+        }
       >
         <div className="flex items-center gap-2 bg-base border border-line rounded-lg px-2.5 py-2 mb-4">
           <SearchIcon className="w-3.5 h-3.5 text-ink-soft shrink-0" />
@@ -174,7 +182,7 @@ export function SessionsPage({ profile }: Props) {
             {course.total_sessions} sessions
           </p>
 
-          <label className="block">
+          <label className={hasSessions ? "block" : "hidden"}>
             <span className="text-xs font-semibold text-ink-soft mb-1.5 block">Session</span>
             <select
               value={activeSession ?? ""}
@@ -380,9 +388,19 @@ export function SessionsPage({ profile }: Props) {
               </div>
             )}
             <Markdown
-              text={courseContent?.outline || "Choose a session on the left to read what it covers, then practice it."}
+              text={
+                courseContent?.outline ||
+                (hasSessions
+                  ? "Choose a session on the left to read what it covers, then practice it."
+                  : "Session notes for this subject are not ready yet.")
+              }
               className="text-ink-soft leading-relaxed mb-6 max-w-3xl"
             />
+            {!hasSessions && guide && (
+              <button onClick={() => navigate(`/learn/revision/${guide.course}`)} className="btn btn-primary mb-6">
+                Open the revision guide
+              </button>
+            )}
             <MaterialsList
               materials={materials.filter((m) => m.session === null)}
               heading="Course documents"
