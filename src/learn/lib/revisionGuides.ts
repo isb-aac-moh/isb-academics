@@ -118,17 +118,17 @@ export const REVISION_GUIDES: Record<string, RevisionGuide> = {
   },
   SUET: {
     course: "SUET",
-    title: "SUET Midterm Prep",
+    title: "SUET End-Term Exam Tutor",
     subtitle:
-      "Sessions 1 to 3 plus the pre-Ant Forest coursepack readings, taught end to end with diagrams, calculators, teaching tapes, flashcards and practice questions.",
+      "Sessions 4 to 10 plus the Ant Forest and Coca-Cola cases, taught topic by topic with teaching tapes, flashcards, a question bank, case frameworks and a 90-minute mock exam.",
     sessions: [
       {
-        slug: "1-3",
-        label: "Sessions 1–3",
-        title: "Discounting, Markets, and Why Instruments Fail",
+        slug: "end-term",
+        label: "Exam Tutor",
+        title: "Strategy, Supply Chains, Climate Finance, ESG and Ethics",
         blurb:
-          "The full storyline: how much we should do for the future (discounting, Ramsey, Stern vs Nordhaus), how markets fail and the three routes out (property rights, Pigouvian tax, cap and trade), and why good instruments break once real people respond to them (endogenous baselines, additionality, enforcement).",
-        file: "/suet-revision/sessions-1-3.html",
+          "The whole end-term in one interactive tutor: business models and Ant Forest (S4), the plastics recycling chain (S5), climate finance and the greenium (S6), ESG measurement and disclosure (S7), the commons, stakeholders and Coca-Cola Kaladera (S9) and ethical breakdowns (S10).",
+        file: "/suet-revision/end-term-exam-tutor.html",
       },
     ],
   },
