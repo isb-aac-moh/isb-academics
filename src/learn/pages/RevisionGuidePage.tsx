@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { getRevisionGuide } from "../lib/revisionGuides";
 import { ChevronRightIcon, CompassIcon } from "../components/icons";
 
@@ -36,6 +36,12 @@ export function RevisionGuidePage() {
 
   const active = params.session ? guide.sessions.find((s) => s.slug === params.session) : undefined;
   const base = `/learn/revision/${guide.course}`;
+  // A guide with one document has nothing to pick between, so skip the list and open it directly.
+  const single = guide.sessions.length === 1;
+
+  if (!active && single) {
+    return <Navigate to={`${base}/${guide.sessions[0].slug}`} replace />;
+  }
 
   if (!active) {
     return (
@@ -91,28 +97,32 @@ export function RevisionGuidePage() {
   return (
     <div className="flex flex-col h-full">
       <div className="shrink-0 border-b border-line bg-surface px-3 py-2 flex items-center gap-2 overflow-x-auto">
-        <button
-          onClick={() => navigate(base)}
-          className="shrink-0 text-xs font-semibold text-ink-soft hover:text-ink px-2 py-1.5 rounded-lg hover:bg-surface-2 transition-colors"
-        >
-          ← All sessions
-        </button>
-        <span className="shrink-0 w-px h-4 bg-line" aria-hidden="true" />
-        {guide.sessions.map((s) => (
-          <button
-            key={s.slug}
-            onClick={() => navigate(`${base}/${s.slug}`)}
-            aria-current={s.slug === active.slug ? "page" : undefined}
-            className={[
-              "shrink-0 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors",
-              s.slug === active.slug
-                ? "bg-accent text-accent-ink"
-                : "text-ink-soft hover:text-ink hover:bg-surface-2",
-            ].join(" ")}
-          >
-            {s.label}
-          </button>
-        ))}
+        {!single && (
+          <>
+            <button
+              onClick={() => navigate(base)}
+              className="shrink-0 text-xs font-semibold text-ink-soft hover:text-ink px-2 py-1.5 rounded-lg hover:bg-surface-2 transition-colors"
+            >
+              ← All sessions
+            </button>
+            <span className="shrink-0 w-px h-4 bg-line" aria-hidden="true" />
+            {guide.sessions.map((s) => (
+              <button
+                key={s.slug}
+                onClick={() => navigate(`${base}/${s.slug}`)}
+                aria-current={s.slug === active.slug ? "page" : undefined}
+                className={[
+                  "shrink-0 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors",
+                  s.slug === active.slug
+                    ? "bg-accent text-accent-ink"
+                    : "text-ink-soft hover:text-ink hover:bg-surface-2",
+                ].join(" ")}
+              >
+                {s.label}
+              </button>
+            ))}
+          </>
+        )}
         <button
           onClick={() => setFullscreen(true)}
           className="shrink-0 ml-auto text-xs font-semibold text-accent hover:underline px-2 py-1.5"
