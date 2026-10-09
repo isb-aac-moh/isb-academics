@@ -194,6 +194,48 @@ svg .s{fill:var(--soft)}
 .flip .front{font-size:1.35rem}
 @media (max-width:620px){.pager .tbtn{max-width:100%;flex:1 1 100%}.flip .front{font-size:1.15rem}}
 .grid4[style*="repeat(5"]{grid-template-columns:repeat(5,minmax(0,1fr))}
+/* worked calculations */
+.work{background:#18191F;border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.work>h3{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.work ul{color:var(--soft)}
+.work svg{display:block;width:100%;height:auto}
+math{font-family:"STIX Two Math","Cambria Math","Latin Modern Math","Times New Roman",serif;font-size:1.12em;color:var(--ink);max-width:100%;overflow-x:auto}
+math mtext{font-family:var(--body);font-size:.88em;color:var(--soft)}
+.work math[display="block"]{margin:0;display:inline math;math-style:normal}
+.appr math{align-self:flex-start}
+ol.steps .lab math{margin:0 4px 0 8px;vertical-align:middle}
+.eqrow.big math{margin:0 auto}
+.eqrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:#1E2027;border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.eqrow math{flex:0 1 auto}
+.eqrow.big{justify-content:center;padding:18px}
+.eqrow.big math{font-size:1.3em}
+.eqlab{flex-basis:100%;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.res{font-family:var(--mono);font-weight:700;color:var(--c);background:var(--ct);border:1px solid var(--c);border-radius:10px;padding:3px 10px;white-space:nowrap;font-size:.9rem;align-self:center}
+.res.big{font-size:1.15rem;align-self:flex-start}
+.res.bad{color:var(--bad);border-color:var(--bad);background:#3A1E1C}
+table.num-t tr.hl td{background:var(--ct);color:var(--ink)}
+table.num-t tr.tot td{border-top:2px solid var(--line-2);color:var(--ink)}
+.chip.hlchip{border-color:var(--c);color:var(--ink);background:var(--ct);font-weight:600}
+.appr{background:#1E2027;border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.appr .k{color:var(--c);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.appr p{color:var(--soft);font-size:.92rem}
+.appr .muted{font-size:.84rem}
+.appr table td{padding:6px 10px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpis div{background:#1E2027;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.kpis span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpis b{font-family:var(--mono);font-size:1.3rem;color:var(--ink)}
+.kpis em{font-style:normal;font-size:.8rem;color:var(--soft)}
+.kpis .act{border-color:var(--c);background:var(--ct)}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:st}
+ol.steps li{margin:0;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:6px 12px;align-items:center;background:#1E2027;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+ol.steps li::before{counter-increment:st;content:counter(st);width:26px;height:26px;border-radius:50%;background:var(--ct);color:var(--c);font-weight:700;font-size:.82rem;display:grid;place-items:center}
+ol.steps .lab{color:var(--soft);min-width:0}
+ol.steps .lab b{color:var(--ink)}
+ol.steps .lab math{margin-top:6px}
+@media (max-width:620px){ol.steps li{grid-template-columns:28px minmax(0,1fr)}ol.steps li .res{grid-column:2;justify-self:start}}
+
 @media (max-width:900px){.grid4[style*="repeat(5"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
 
@@ -460,9 +502,12 @@ svg .s{fill:var(--soft)}
       <tr><td>Eco-friendly parcels</td><td>Cainiao</td><td class="n">40</td></tr>
       <tr><td>Second-hand recycling</td><td>Aihuishou</td><td class="n">up to 9,764</td></tr>
     </tbody></table></div>
-  <div class="calc">Tree costs (Exhibit 6, grams of points): Deqin reserve trees 2,700 · caragana 16,930 · <span class="hl">saxaul 17,900</span> · hedysarum 18,880
-sea buckthorn 21,310 · salt cedar 22,400 · Mongolian Scots pine 146,210 · Armand pine 185,000 · spruce 198,000 · desert poplar 215,680
-Walking only (296 g/day max): 17,900 / 296 ≈ <span class="hl">61 days</span> for a saxaul.  Taopiaopiao ticket = 180 points = 1% of a saxaul.</div>
+  <div class="work">
+  <h3>Tree costs (Exhibit 6, grams of points)</h3>
+  <div class="chips"><span class="chip">Deqin reserve 2,700</span><span class="chip">Caragana 16,930</span><span class="chip hlchip">Saxaul 17,900</span><span class="chip">Hedysarum 18,880</span><span class="chip">Sea buckthorn 21,310</span><span class="chip">Salt cedar 22,400</span><span class="chip">Mongolian Scots pine 146,210</span><span class="chip">Armand pine 185,000</span><span class="chip">Spruce 198,000</span><span class="chip">Desert poplar 215,680</span></div>
+  <div class="eqrow"><span class="eqlab">Walking only, 296 g/day max</span><math display="block"><mrow><mtext>Days</mtext><mo>=</mo><mfrac><mrow><mn>17,900</mn></mrow><mrow><mn>296</mn></mrow></mfrac><mo>&#8776;</mo><mn>60.5</mn></mrow></math><span class="res">≈ 61 days</span></div>
+  <div class="eqrow"><span class="eqlab">One Taopiaopiao ticket</span><math display="block"><mrow><mfrac><mrow><mn>180</mn></mrow><mrow><mn>17,900</mn></mrow></mfrac><mo>&#8776;</mo><mn>1.0</mn><mo>%</mo></mrow></math><span class="res">1% of a saxaul</span></div>
+</div>
   <div class="slides"><b>Covers S4 slides:</b> 34 (case title), 35 (closed-loop mechanism), 37 (Exhibit 5, points for actions). Case exhibits 1 to 7.</div>
 </section>
 
@@ -670,16 +715,20 @@ Walking only (296 g/day max): 17,900 / 296 ≈ <span class="hl">61 days</span> f
     <div class="line"><h3>System boundary (slide 12)</h3><p><b>Cradle-to-cradle:</b> collection → sorting (MRF) → reprocessing → compounding/converting, closing the loop back into a new product, which re-enters use and returns to collection.</p><p style="margin-top:8px"><b>Excluded:</b> virgin resin production; use phase of the original product; capital equipment manufacturing.</p></div>
     <div class="line"><h3>Definitions</h3><p><b>SUP</b> here = mono-material single-use plastic (e.g. PET, PP) that can be mechanically recycled once collected and sorted.</p><p style="margin-top:8px"><b>Value added at a stage</b> = (price out − price in) − processing cost. <b>LCA burden</b> = stage's % of the chain's footprint. A <b>negative</b> value-capture share means value destroyed.</p></div>
   </div>
-  <div class="calc">Price waterfall for 1 kg of PET (slide 14)       ($/kg)
-Stage                      Price in  Price out  Proc. cost  Value added  Share
-Collection                   0.00      0.20       0.05        0.15        13%
-Sorting (MRF)                0.20      0.45       0.05        0.20        17%
-Reprocessing                 0.45      1.05       0.10        <span class="hl">0.50        43%</span>
-Compounding &amp; converting     1.05      1.45       0.10        0.30        26%
-Total                                             0.30        1.15       100%
-
-Check: chain price 0.00 → 1.45 = 1.45; minus total processing 0.30 = 1.15 value added.
-Reprocessing share = 0.50 / 1.15 = 43.5%  (rounded 43%)</div>
+  <div class="work">
+  <h3>Price waterfall for 1 kg of PET, $/kg (slide 14)</h3>
+  <div class="tw"><table class="num-t"><thead><tr><th>Stage</th><th>Price in</th><th>Price out</th><th>Processing cost</th><th>Value added</th><th>Share</th></tr></thead><tbody>
+    <tr><td>Collection</td><td class="n">0.00</td><td class="n">0.20</td><td class="n">0.05</td><td class="n">0.15</td><td class="n">13%</td></tr>
+    <tr><td>Sorting (MRF)</td><td class="n">0.20</td><td class="n">0.45</td><td class="n">0.05</td><td class="n">0.20</td><td class="n">17%</td></tr>
+    <tr class="hl"><td><b>Reprocessing</b></td><td class="n">0.45</td><td class="n">1.05</td><td class="n">0.10</td><td class="n"><b>0.50</b></td><td class="n"><b>43%</b></td></tr>
+    <tr><td>Compounding &amp; converting</td><td class="n">1.05</td><td class="n">1.45</td><td class="n">0.10</td><td class="n">0.30</td><td class="n">26%</td></tr>
+    <tr class="tot"><td><b>Total</b></td><td class="n">0.00</td><td class="n">1.45</td><td class="n">0.30</td><td class="n"><b>1.15</b></td><td class="n">100%</td></tr>
+  </tbody></table></div>
+  <div class="eqrow"><span class="eqlab">Value added at a stage</span><math display="block"><mrow><mtext>VA</mtext><mo>=</mo><mo>(</mo><mtext>price out</mtext><mo>&#8722;</mo><mtext>price in</mtext><mo>)</mo><mo>&#8722;</mo><mtext>processing cost</mtext></mrow></math></div>
+  <div class="eqrow"><span class="eqlab">Reprocessing</span><math display="block"><mrow><mo>(</mo><mn>1.05</mn><mo>&#8722;</mo><mn>0.45</mn><mo>)</mo><mo>&#8722;</mo><mn>0.10</mn><mo>=</mo><mn>0.50</mn></mrow></math><span class="res">$0.50/kg</span></div>
+  <div class="eqrow"><span class="eqlab">Its share of chain value</span><math display="block"><mrow><mfrac><mrow><mn>0.50</mn></mrow><mrow><mn>1.15</mn></mrow></mfrac><mo>=</mo><mn>43.5</mn><mo>%</mo></mrow></math><span class="res">≈ 43%</span></div>
+  <div class="eqrow"><span class="eqlab">Check the chain total</span><math display="block"><mrow><mn>1.45</mn><mo>&#8722;</mo><mn>0.30</mn><mo>=</mo><mn>1.15</mn></mrow></math><span class="res">$1.15/kg</span></div>
+</div>
   <div class="fig">
     <svg viewBox="0 0 640 250" role="img" aria-label="PET value capture vs LCA burden: collection 13 vs 15, sorting 17 vs 20, reprocessing 43 vs 50, converting 27 vs 15">
       <text x="10" y="20" font-size="13" font-weight="700">SUP / PET: value capture vs LCA burden (%)</text>
@@ -759,10 +808,15 @@ Reprocessing share = 0.50 / 1.15 = 43.5%  (rounded 43%)</div>
       <p class="cap">Left of the crossing the reusable is still worse per trip; right of it reuse has paid off. Cotton tote crosses at 100.</p>
     </div>
   </div>
-  <div class="calc">Reuse threshold  N* = upfront (cradle-to-grave) impact of the reusable
-                      ÷ cradle-to-grave impact of ONE single-use item
-Example: a PP bag with 15x the footprint of one SUP bag → N* = 15 uses
-Cotton tote: far heavier and fibre is resource-intensive (grow, spin, weave) → N* ≈ 100</div>
+  <div class="work">
+  <h3>Reuse threshold</h3>
+  <div class="eqrow big"><math display="block"><mrow><msup><mi>N</mi><mo>*</mo></msup><mo>=</mo><mfrac><mrow><mtext>cradle-to-grave impact of the reusable</mtext></mrow><mrow><mtext>cradle-to-grave impact of one single-use item</mtext></mrow></mfrac></mrow></math></div>
+  <div class="grid2">
+    <div class="eqrow"><span class="eqlab">Durable PP bag (footprint = 15 single-use bags)</span><math display="block"><mrow><msup><mi>N</mi><mo>*</mo></msup><mo>=</mo><mfrac><mrow><mn>15</mn></mrow><mrow><mn>1</mn></mrow></mfrac><mo>=</mo><mn>15</mn></mrow></math><span class="res">15 uses</span></div>
+    <div class="eqrow"><span class="eqlab">Cotton tote (heavy fibre, grow-spin-weave)</span><math display="block"><mrow><msup><mi>N</mi><mo>*</mo></msup><mo>&#8776;</mo><mn>100</mn></mrow></math><span class="res">100 uses</span></div>
+  </div>
+  <p class="muted" style="font-size:.9rem">Below N*, the reusable's amortised per-trip impact is still higher than a fresh single-use bag; above it, reuse has paid off. Functional unit = one shopping trip.</p>
+</div>
   <div class="grid2">
     <div class="line" style="--c:var(--yellow)"><h3>What a threshold does NOT capture (slide 20)</h3><ol><li>Measured for <b>climate change (GWP)</b> only: crossover differs for acidification, eutrophication, etc.</li><li>Assumes <b>reuse adds no extra impact</b>: true for a dry-goods bag, false for tableware or containers where washing adds impact each cycle.</li><li>Says nothing about whether the bag <b>survives</b> 15 trips or the consumer keeps using it.</li></ol><p style="margin-top:8px">Functional unit = <b>one shopping trip</b>, not the product lifetime.</p></div>
     <div class="line"><h3>Consistent pattern across categories (slide 22)</h3><div class="tw"><table style="min-width:0"><thead><tr><th>Category</th><th>Single-use: dominant stage</th><th>Reusable: breakeven</th></tr></thead><tbody>
@@ -969,18 +1023,19 @@ Cotton tote: far heavier and fibre is resource-intensive (grow, spin, weave) →
   <div class="tape"></div>
   <div class="grid2">
     <div class="line"><h3>Why firms issue, why it is small</h3><p><b>Two reasons to issue (S6.2 slide 32):</b> green activities get highlighted; investors with environmental concerns accept a lower yield.</p><p style="margin-top:8px"><b>Measured by:</b> twin bonds (same issuer, maturity, coupon); matched same-issuer pairs; spread against issuer curve; dynamic maturity-matched interpolation (Germany, India).</p><p style="margin-top:8px"><b>Why small:</b> if green yielded more than its twin, ordinary investors would buy it; eligible projects are plentiful so supply meets ESG demand. A 10bp subsidy is under 1% of principal, which "few will argue" changes an investment decision.</p></div>
-    <div class="calc">Value of a greenium on a 3.00% 10-year bond
-Greenium  Yield   Price   Gain vs par
- 0 bp     3.00%  100.00     -
- 2 bp     2.98%  100.17   +0.17%
- 4 bp     2.96%  100.34   +0.34%
- 6 bp     2.94%  100.52   +0.52%
- 8 bp     2.92%  100.69   +0.69%
-<span class="hl">10 bp     2.90%  100.86   +0.86%</span>
-
-Rule: price gain ≈ duration × Δyield
-     ≈ 8.6 × 0.10% ≈ 0.86% of face
-EM example (S6.2): 7.40% − 7.34% = 6 bp</div>
+    <div class="work">
+  <h3>Value of a greenium on a 3.00% 10-year bond</h3>
+  <div class="tw"><table class="num-t" style="min-width:0"><thead><tr><th>Greenium</th><th>Yield</th><th>Price (par 100)</th><th>Gain vs par</th></tr></thead><tbody>
+    <tr><td class="n">0 bp</td><td class="n">3.00%</td><td class="n">100.00</td><td class="n">-</td></tr>
+    <tr><td class="n">2 bp</td><td class="n">2.98%</td><td class="n">100.17</td><td class="n">+0.17%</td></tr>
+    <tr><td class="n">4 bp</td><td class="n">2.96%</td><td class="n">100.34</td><td class="n">+0.34%</td></tr>
+    <tr><td class="n">6 bp</td><td class="n">2.94%</td><td class="n">100.52</td><td class="n">+0.52%</td></tr>
+    <tr><td class="n">8 bp</td><td class="n">2.92%</td><td class="n">100.69</td><td class="n">+0.69%</td></tr>
+    <tr class="hl"><td class="n"><b>10 bp</b></td><td class="n">2.90%</td><td class="n">100.86</td><td class="n"><b>+0.86%</b></td></tr>
+  </tbody></table></div>
+  <div class="eqrow"><span class="eqlab">Rule of thumb</span><math display="block"><mrow><mtext>price gain</mtext><mo>&#8776;</mo><mtext>duration</mtext><mo>&#215;</mo><mo>&#916;</mo><mtext>yield</mtext><mo>&#8776;</mo><mn>8.6</mn><mo>&#215;</mo><mn>0.10</mn><mo>%</mo></mrow></math><span class="res">≈ 0.86% of face</span></div>
+  <div class="eqrow"><span class="eqlab">EM example (S6.2)</span><math display="block"><mrow><mn>7.40</mn><mo>%</mo><mo>&#8722;</mo><mn>7.34</mn><mo>%</mo></mrow></math><span class="res">6 bp</span></div>
+</div>
   </div>
   <div class="tw"><table><thead><tr><th>Source</th><th>Greenium</th><th>Note</th></tr></thead><tbody>
     <tr><td>Flammer (JFE 2021)</td><td class="n">1.9 bp</td><td>Same-issuer pairs, <b>not significant</b></td></tr>
@@ -1035,34 +1090,36 @@ EM example (S6.2): 7.40% − 7.34% = 6 bp</div>
     </div>
     <div class="plain"><h3>Debt ratios vs peers (TN7, TN8)</h3><p>Debt/(debt + book equity): <b>0.00, 0.12, 0.24, 0.35, 0.40, 0.42</b> (2012 → H1 2017); debt $0 → $98.5bn.</p><div class="tw" style="margin-top:8px"><table style="min-width:0"><thead><tr><th>Benchmark</th><th>EBITDA/int.</th><th>Debt/EBITDA</th><th>D/(D+E)</th></tr></thead><tbody><tr><td>Industrial AAA / AA</td><td class="n">19x / 23x</td><td class="n">1.9x / 1.4x</td><td class="n">0.44 / 0.24</td></tr><tr><td>IT AAA / AA</td><td class="n">18.9x / 27.7x</td><td class="n">2.8x / 1.9x</td><td class="n">0.52 / 0.40</td></tr><tr><td>Microsoft AAA</td><td class="n">43x</td><td class="n">1.05</td><td class="n">0.31</td></tr><tr><td>Alphabet AA+</td><td class="n">240x</td><td class="n">0.13</td><td class="n">0.03</td></tr><tr><td>Exxon AA+</td><td class="n">51x</td><td class="n">1.84</td><td class="n">0.20</td></tr><tr><td>Amazon AA−</td><td class="n">25x</td><td class="n">1.66</td><td class="n">0.51</td></tr></tbody></table></div><p style="margin-top:6px">Apple's ratios still fit an AA/AA+ profile.</p></div>
   </div>
-  <div class="calc">Framework: YTM = risk-free rate + credit spread;  green yield = conventional estimate − greenium (4 bp assumed)
-
-<span class="hl">Approach 1: bond rating</span> (Exhibit 4, US IT corporates, 10Y, 6 Jun 2017)
-  Treasury 2.21% | AAA 3.11% | AA 3.20% | A 3.29% | BBB 3.43%
-  Apple AA+ sits between AAA and AA → interpolate ≈ 3.15%
-  3.15% − 0.04% = <span class="hl">3.11%</span>
-
-<span class="hl">Approach 2: comparable bonds of comparable firms</span> (Exhibit 5; double-match maturity, rating, industry)
-  Microsoft AAA 10y 2.857% | Alphabet AA+ 9y 2.751% | Exxon AA+ 9y 2.867%
-  Oracle AA− 9y 2.997% | IBM A+ 10y 3.118% | Intel A+ 10y 3.036% | average 2.938%
-  Alphabet 2.75% + maturity premium 9→10y (10 to 23 bp) ≈ 2.98%
-  2.98% − 0.04% ≈ <span class="hl">2.94%</span>
-
-<span class="hl">Approach 3: Apple's own yield curve</span> (Exhibit 3)
-  3.35% coupon bond due Feb 2027, 9.7 years left, yields 2.956% (issued 9 Feb 2016)
-  2.956% − 0.04% ≈ <span class="hl">2.92%</span>
-
-<span class="hl">Actual:</span> issued 13 Jun 2017, coupon 3.00%, first-day yield 3.001% (≈ no greenium)</div>
+  <div class="work">
+  <h3>Estimate the yield three ways, then subtract a 4bp greenium</h3>
+  <div class="eqrow"><math display="block"><mrow><mtext>YTM</mtext><mo>=</mo><mtext>risk-free rate</mtext><mo>+</mo><mtext>credit spread</mtext></mrow></math><math display="block"><mrow><mtext>green yield</mtext><mo>=</mo><mtext>conventional estimate</mtext><mo>&#8722;</mo><mtext>greenium</mtext></mrow></math></div>
+  <div class="grid3">
+    <div class="appr"><span class="k">Approach 1 · bond rating</span><p class="muted">Exhibit 4: US IT corporates, 10Y, 6 Jun 2017</p>
+      <div class="tw"><table class="num-t" style="min-width:0"><tbody><tr><td>Treasury</td><td class="n">2.21%</td></tr><tr class="hl"><td>AAA</td><td class="n">3.11%</td></tr><tr class="hl"><td>AA</td><td class="n">3.20%</td></tr><tr><td>A</td><td class="n">3.29%</td></tr><tr><td>BBB</td><td class="n">3.43%</td></tr></tbody></table></div>
+      <p>Apple is <b>AA+</b>: interpolate between AAA and AA ≈ 3.15%.</p>
+      <math display="block"><mrow><mn>3.15</mn><mo>%</mo><mo>&#8722;</mo><mn>0.04</mn><mo>%</mo></mrow></math><span class="res big">3.11%</span></div>
+    <div class="appr"><span class="k">Approach 2 · comparable firms</span><p class="muted">Exhibit 5: double-match maturity, rating, industry</p>
+      <div class="tw"><table class="num-t" style="min-width:0"><tbody><tr><td>Microsoft AAA, 10y</td><td class="n">2.857%</td></tr><tr class="hl"><td>Alphabet AA+, 9y</td><td class="n">2.751%</td></tr><tr><td>Exxon AA+, 9y</td><td class="n">2.867%</td></tr><tr><td>Oracle AA−, 9y</td><td class="n">2.997%</td></tr><tr><td>IBM A+, 10y</td><td class="n">3.118%</td></tr><tr><td>Intel A+, 10y</td><td class="n">3.036%</td></tr><tr><td><i>Average</i></td><td class="n">2.938%</td></tr></tbody></table></div>
+      <p>Alphabet + maturity premium 9→10y (10 to 23bp) ≈ 2.98%.</p>
+      <math display="block"><mrow><mn>2.98</mn><mo>%</mo><mo>&#8722;</mo><mn>0.04</mn><mo>%</mo></mrow></math><span class="res big">2.94%</span></div>
+    <div class="appr"><span class="k">Approach 3 · Apple's own curve</span><p class="muted">Exhibit 3: Apple bonds by years to maturity</p>
+      <p>Closest comparable: <b>3.35% coupon, due Feb 2027</b>, 9.7 years left (issued 9 Feb 2016), yielding <b>2.956%</b>.</p>
+      <math display="block"><mrow><mn>2.956</mn><mo>%</mo><mo>&#8722;</mo><mn>0.04</mn><mo>%</mo></mrow></math><span class="res big">2.92%</span></div>
+  </div>
+  <div class="kpis">
+    <div><span>Approach 1</span><b>3.11%</b></div><div><span>Approach 2</span><b>2.94%</b></div><div><span>Approach 3</span><b>2.92%</b></div><div class="act"><span>Actual, 13 Jun 2017</span><b>3.00%</b><em>coupon; first-day yield 3.001% ≈ no greenium</em></div>
+  </div>
+</div>
   <div class="grid2">
-    <div class="calc">Greenium on bond 1 (S6.2 slide 39)
-Green:  issued 16 Feb 2016, due 23 Feb 2023,
-        $1.5bn, coupon 2.85%, yield 6 Jun 2017 = 2.370%
-Match:  issued 30 Apr 2013, due 3 May 2023,
-        $5.5bn, coupon 2.40%, yield 6 Jun 2017 = 2.398%
-Greenium = 2.398% − 2.370% = <span class="hl">2.8 bp</span>
-Average since Feb 2016 = 3.9 bp
-Average excl. early months = 5.1 bp ; peak ≈ 10 bp
-Positive on ~70% of days</div>
+    <div class="work">
+  <h3>Greenium on bond 1 (S6.2 slide 39)</h3>
+  <div class="tw"><table class="num-t" style="min-width:0"><thead><tr><th></th><th>Green bond</th><th>Matched 2013 bond</th></tr></thead><tbody>
+    <tr><td>Issued</td><td>16 Feb 2016</td><td>30 Apr 2013</td></tr><tr><td>Due</td><td>23 Feb 2023</td><td>3 May 2023</td></tr>
+    <tr><td>Amount</td><td class="n">$1.5bn</td><td class="n">$5.5bn</td></tr><tr><td>Coupon</td><td class="n">2.85%</td><td class="n">2.40%</td></tr>
+    <tr class="hl"><td>Yield, 6 Jun 2017</td><td class="n"><b>2.370%</b></td><td class="n"><b>2.398%</b></td></tr></tbody></table></div>
+  <div class="eqrow"><math display="block"><mrow><mtext>greenium</mtext><mo>=</mo><mn>2.398</mn><mo>%</mo><mo>&#8722;</mo><mn>2.370</mn><mo>%</mo></mrow></math><span class="res">2.8 bp</span></div>
+  <div class="chips"><span class="chip">Average since Feb 2016: 3.9bp</span><span class="chip">Excl. early months: 5.1bp</span><span class="chip">Peak ≈ 10bp</span><span class="chip">Positive on ~70% of days</span></div>
+</div>
     <div class="line" style="--c:var(--yellow)"><h3>What could go wrong? (slides 39, 43)</h3><ul><li><b>Low green premium:</b> a lack of greenium could be read as the market doubting Apple's green initiatives.</li><li>Greenium is strong for <b>industrials and environmentally harmful companies</b>, <b>first-time issuers</b> and <b>certified bonds</b>: Apple is none of the first two on bond 2.</li><li>Teaching note: "even less evidence of a greenium for the second green bond than for the first".</li><li>Bond 2's greenium later spiked to <b>20.56bp</b> (2020, slide 43), then fell back.</li><li><b>Additionality test:</b> would Apple have built Apple Park anyway?</li></ul></div>
   </div>
   <div class="slides"><b>Covers:</b> S6.1 slides 15-17. S6.2 slides 16-20 (Apple renewables, issuances, deployment of 3rd issue, 75% by 2030, image slides), 35-40, 43.</div>
@@ -1426,18 +1483,22 @@ Positive on ~70% of days</div>
   <h1>Gross 2,31,262 tonnes. Net zero.</h1>
   <p class="lede">"HUL ke disclosure ko HULke mein mat lena!" Market-based Scope 2 lets a firm net renewable certificates against the grid it actually draws from. Both numbers are correct and assured.</p>
   <div class="tape"></div>
-  <div class="calc">HUL FY2025-26, BRSR Principle 6, EI-7                      FY2025-26    FY2024-25
-Scope 1                                     tCO2e             7,054        8,944
-Scope 2 (gross, before certificates)        tCO2e          2,31,262     2,23,923
-Scope 2 (net, after IREC)                   tCO2e                 0            0
-Scope 1 + 2 (net)                           tCO2e             7,054        8,944
-Turnover                                    ₹ crore          63,493
-
-<span class="hl">Intensity (net) = 7,054 / 63,493 = 0.11 tCO2e per ₹ crore</span>          (FY24-25: 0.15)
-        per $ crore at PPP                                   2.3          (3.0)
-        per tonne of output                                  0.002        (0.003)
-Gross version = (7,054 + 2,31,262) / 63,493 ≈ 3.75 per ₹ crore  → ~34x higher
-Scope 3 intensity ≈ 188.3 tCO2e per ₹ crore → Scope 3 dwarfs Scope 1+2</div>
+  <div class="work">
+  <h3>HUL, BRSR Principle 6, EI-7 (tCO₂e)</h3>
+  <div class="tw"><table class="num-t" style="min-width:0"><thead><tr><th>tCO₂e</th><th>FY26</th><th>FY25</th></tr></thead><tbody>
+    <tr><td>Scope 1</td><td class="n">7,054</td><td class="n">8,944</td></tr>
+    <tr><td>Scope 2 gross</td><td class="n">2,31,262</td><td class="n">2,23,923</td></tr>
+    <tr class="hl"><td>Scope 2 net (IREC)</td><td class="n"><b>0</b></td><td class="n"><b>0</b></td></tr>
+    <tr><td>Scope 1 + 2 (net)</td><td class="n">7,054</td><td class="n">8,944</td></tr>
+    <tr><td>Turnover, ₹ cr</td><td class="n">63,493</td><td class="n">-</td></tr>
+    <tr><td>Intensity, t per ₹ cr</td><td class="n">0.11</td><td class="n">0.15</td></tr>
+  </tbody></table></div>
+  <div class="grid2">
+    <div class="eqrow"><span class="eqlab">Net intensity (the headline)</span><math display="block"><mrow><mfrac><mrow><mn>7,054</mn></mrow><mrow><mn>63,493</mn></mrow></mfrac><mo>=</mo><mn>0.11</mn></mrow></math><span class="res">0.11 t per ₹ cr</span></div>
+    <div class="eqrow"><span class="eqlab">Gross intensity (same grid)</span><math display="block"><mrow><mfrac><mrow><mn>7,054</mn><mo>+</mo><mn>2,31,262</mn></mrow><mrow><mn>63,493</mn></mrow></mfrac><mo>&#8776;</mo><mn>3.75</mn></mrow></math><span class="res bad">3.75 t per ₹ cr</span></div>
+  </div>
+  <p class="muted" style="font-size:.9rem">Other intensities: 2.3 per $ crore at PPP and 0.002 per tonne of output (FY25: 3.0 and 0.003). Gross is about <b>34x</b> the headline. Scope 3 intensity ≈ 188.3 t per ₹ crore, which dwarfs Scope 1 + 2.</p>
+</div>
   <div class="grid3">
     <div class="box" style="--c:var(--orange);--ct:var(--orange-t)"><span class="k">Quantity</span><p>Gross or net? The <b>headline uses net</b>. A net Scope 2 of zero is a <b>certificate, not a grid change</b>.</p></div>
     <div class="box" style="--c:var(--blue);--ct:var(--blue-t)"><span class="k">Normaliser</span><p>0.11 tCO₂e per ₹ crore; 2.3 per $ crore at PPP; 0.002 per tonne of output. The ratio a rater compares rests on the net figure.</p></div>
@@ -1524,21 +1585,16 @@ Scope 3 intensity ≈ 188.3 tCO2e per ₹ crore → Scope 3 dwarfs Scope 1+2</di
   </div>
   <div class="grid2">
     <div class="line" style="--c:var(--blue)"><h3>Section 135, Companies Act 2013</h3><ul><li><b>Applies</b> if, in the preceding year, <b>any</b> of: net worth ≥ <b>₹500 crore</b>; turnover ≥ <b>₹1,000 crore</b>; net profit ≥ <b>₹5 crore</b> (Corporate Laws (Amendment) Bill 2026 proposes ₹10 crore; JPC reported Aug 2026; not yet passed).</li><li><b>Spend 2%</b> of <b>average net profit of the last three financial years</b>, every year.</li><li><b>Governance:</b> board CSR committee, board-approved policy, annual action plan; implementing agencies must be registered.</li><li><b>What counts:</b> Schedule VII causes (health, education, hunger and poverty, environment, rural development, sports). <b>Not eligible:</b> staff benefits, political gifts, ordinary business.</li><li><b>Unspent:</b> ongoing projects → <b>Unspent CSR Account within 30 days</b> (Bill proposes 90), spend within <b>3 years</b>; other unspent → specified fund within <b>6 months</b>.</li><li><b>Enforcement:</b> penalty up to <b>2x the shortfall</b> (company capped at ₹1 crore); officers up to ₹2 lakh. Board report and Form CSR-2. Independent impact assessment if average obligation ≥ ₹10 crore.</li><li>Hardened from <b>"spend or explain"</b> (2013) to <b>spend, transfer or be penalised</b> (2019, 2021 amendments).</li></ul></div>
-    <div class="calc">Worked CSR calculation
-Net profit, last 3 FYs: ₹300, ₹400, ₹500 crore
-Average     = (300 + 400 + 500) / 3 = ₹400 crore
-<span class="hl">Obligation  = 2% × 400 = ₹8 crore</span>
-
-Spent ₹5 crore on an ongoing project
-Unspent ₹3 crore → Unspent CSR Account
-          within 30 days; spend within 3 years
-
-If not an ongoing project:
-          ₹3 crore → Schedule VII fund
-          (e.g. PM CARES / PMNRF) within 6 months
-
-Penalty if ignored: up to 2 × 3 = ₹6 crore,
-          but capped at ₹1 crore for the company</div>
+    <div class="work">
+  <h3>Worked CSR calculation</h3>
+  <ol class="steps">
+    <li><span class="lab"><b>Average net profit</b>, last 3 FYs: ₹300, ₹400, ₹500 crore<math display="block"><mrow><mfrac><mrow><mn>300</mn><mo>+</mo><mn>400</mn><mo>+</mo><mn>500</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow></math></span><span class="res">₹400 cr</span></li>
+    <li><span class="lab"><b>Obligation</b> = 2% of the average<math display="block"><mrow><mn>2</mn><mo>%</mo><mo>&#215;</mo><mn>400</mn></mrow></math></span><span class="res">₹8 cr</span></li>
+    <li><span class="lab"><b>Spent ₹5 crore</b> on an ongoing project: the unspent ₹3 crore goes to the <b>Unspent CSR Account within 30 days</b>, to be spent within 3 years</span><span class="res">₹3 cr</span></li>
+    <li><span class="lab"><b>If not an ongoing project:</b> the ₹3 crore goes to a Schedule VII fund (e.g. PMNRF, PM CARES) within 6 months</span><span class="res">6 months</span></li>
+    <li><span class="lab"><b>Penalty if ignored:</b> up to 2x the shortfall<math display="block"><mrow><mn>2</mn><mo>&#215;</mo><mn>3</mn><mo>=</mo><mn>6</mn></mrow></math>, but capped at ₹1 crore for the company</span><span class="res bad">₹1 cr cap</span></li>
+  </ol>
+</div>
   </div>
   <div class="tw"><table><thead><tr><th>What it is meant to do</th><th>Where critics push back</th></tr></thead><tbody>
     <tr><td><b>Fills development gaps:</b> corporate money into health, education, livelihoods</td><td><b>A paradox:</b> responsibility enforced like a tax may crowd out intrinsic motivation</td></tr>
@@ -1862,14 +1918,18 @@ Penalty if ignored: up to 2 × 3 = ₹6 crore,
   <h1>Won the battle, lost the war</h1>
   <p class="lede">Most defensible exam ruling: <b>against Coca-Cola</b> on CSR and social-licence grounds, naming the state and farm-power pricing as structural co-authors of the tragedy.</p>
   <div class="tape"></div>
-  <div class="calc">Why "we are a small user" fails (case's own arithmetic)
-Population 620,000 ; farmers 92,000 ; plant employs ~150 (70 to 250)
-Assume domestic use = 4% of water → 96% left to split by livelihoods
-Entitlement = 150 / (92,000 + 150) × 96%
-            = 0.00163 × 96% ≈ <span class="hl">0.15%</span>
-Actual share = 0.2% to 1.0%  → Coca-Cola takes MORE than its fair share
-Plus: Hardin says every user thinks its share is small (that IS the tragedy)
-Plus: policy priority puts industry LAST (drinking, irrigation, power, industry)</div>
+  <div class="work">
+  <h3>Why "we are a small user" fails (the case's own arithmetic)</h3>
+  <div class="chips"><span class="chip">Population 620,000</span><span class="chip">Farmers 92,000</span><span class="chip">Plant jobs ~150 (70 to 250)</span><span class="chip">Domestic use ≈ 4% of water</span></div>
+  <div class="eqrow"><span class="eqlab">Coca-Cola's livelihood share of the remaining 96%</span><math display="block"><mrow><mtext>entitlement</mtext><mo>=</mo><mfrac><mrow><mn>150</mn></mrow><mrow><mn>92,000</mn><mo>+</mo><mn>150</mn></mrow></mfrac><mo>&#215;</mo><mn>96</mn><mo>%</mo><mo>&#8776;</mo><mn>0.15</mn><mo>%</mo></mrow></math><span class="res">≈ 0.15%</span></div>
+  <svg viewBox="0 0 620 120" role="img" aria-label="Entitlement 0.15 percent versus actual share 0.2 to 1.0 percent">
+    <line x1="40" y1="78" x2="600" y2="78" stroke="#363a46"/>
+    <g font-size="12" class="m"><text x="40" y="98" text-anchor="middle">0%</text><text x="173" y="98" text-anchor="middle">0.25%</text><text x="307" y="98" text-anchor="middle">0.5%</text><text x="440" y="98" text-anchor="middle">0.75%</text><text x="573" y="98" text-anchor="middle">1.0%</text></g>
+    <rect x="40" y="22" width="80" height="22" rx="4" fill="#4FD1B5"/><text x="128" y="38" font-size="12.5">Fair share ≈ 0.15%</text>
+    <rect x="147" y="52" width="426" height="22" rx="4" fill="#F47FB6" opacity=".85"/><text x="360" y="68" font-size="12.5" text-anchor="middle" fill="#141519" font-weight="700">Actual share 0.2% to 1.0%</text>
+  </svg>
+  <ul><li>Hardin: every commons user thinks its own share is small. That <b>is</b> the tragedy.</li><li>Policy priority puts industry <b>last</b>, after drinking, irrigation and power.</li></ul>
+</div>
   <div class="grid2">
     <div class="line" style="--c:var(--pink)"><h3>Answer framework: rule for or against?</h3><ol><li><b>Frame:</b> open-access commons, no legal limit, so the legal licence is not in question. Test the <b>social licence</b> and Coke's own CSR standard.</li><li><b>Deciding facts:</b> location after 1998 designation; tax incentive and excess capacity; peak extraction in stress months; rejected all four TERI options; unverified 15x claim and broken metering promise.</li><li><b>Rebut the defence:</b> small-user argument fails (Hardin; 0.15% vs 0.2-1%); agriculture's dominance explains depletion but does not license adding to it.</li><li><b>Shared responsibility:</b> the state (RIICO, incentives, free power, no groundwater law) and farmers co-author the tragedy.</li><li><b>Remedy:</b> metered, audited recharge; seasonal limits; relocate capacity; community water funds (payment for ecosystem services); WELD engagement with farmers and the women who fetch water.</li></ol></div>
     <div class="line" style="--c:var(--blue)"><h3>Background</h3><ul><li><b>Plachimada</b> (Kerala): protests from 2002; state shut the plant 2004. <b>Mehndiganj</b> (UP) protests. India Resource Center (Amit Srivastava) as critic.</li><li><b>University of Michigan</b> student pressure (2006 suspension) led to the TERI assessment.</li><li>Water: India 1,614 m³/person/yr vs US 9,943; Rajasthan ~650 m³ vs a 2,000 norm, near the 500 "absolute scarcity" mark.</li><li>CSR rhetoric: CEO Muhtar Kent: sustainability is "the right thing to do"; Seabright: "water is to Coca-Cola as clean energy is to BP".</li></ul></div>
