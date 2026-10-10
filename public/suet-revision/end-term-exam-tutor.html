@@ -1,21 +1,145 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>SUET End-Term Exam Tutor</title>
+<script>
+(function(){
+var KEY="suet-tutor-theme",root=document.documentElement,mq=window.matchMedia("(prefers-color-scheme: light)");
+function choice(){try{var v=localStorage.getItem(KEY);return v==="light"||v==="dark"?v:"auto";}catch(e){return "auto";}}
+function apply(){
+  var c=choice();
+  root.setAttribute("data-theme",c==="auto"?(mq.matches?"light":"dark"):c);
+  var bs=document.querySelectorAll("#themes button");
+  for(var i=0;i<bs.length;i++)bs[i].setAttribute("aria-pressed",String(bs[i].getAttribute("data-theme-choice")===c));
+}
+apply();
+document.addEventListener("DOMContentLoaded",function(){
+  apply();
+  document.getElementById("themes").addEventListener("click",function(e){
+    var b=e.target.closest("button[data-theme-choice]");if(!b)return;
+    try{localStorage.setItem(KEY,b.getAttribute("data-theme-choice"));}catch(err){}
+    apply();
+  });
+});
+if(mq.addEventListener)mq.addEventListener("change",apply);else if(mq.addListener)mq.addListener(apply);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: sticky top bar with gradient progress, left topic rail grouped by session, one topic page at a time in a large rounded card. Single dark look by design. */
+/* Layout: sticky top bar with gradient progress, left topic rail grouped by session, one topic page at a time in a large rounded card. Dark and light themes share one set of colour variables; <html data-theme> picks the values. */
 :root{
   color-scheme:dark;
-  --bg:#141519; --rail:#131418; --card:#1c1e25; --card-2:#22242c; --line:#2b2e38; --line-2:#363a46;
-  --ink:#ECECF1; --soft:#C9CAD4; --muted:#9A9CAB; --dim:#6E7180;
-  --purple:#A78BFA; --purple-t:#2A2340; --teal:#4FD1B5; --teal-t:#1B3330; --orange:#F5A05B; --orange-t:#3A2A1E;
-  --blue:#6AA8F7; --blue-t:#1C2A40; --pink:#F47FB6; --pink-t:#3A1F2E; --yellow:#E9C84A; --yellow-t:#36301A; --lime:#9BDD5B; --lime-t:#24331B;
-  --good:#5FD38D; --bad:#F2766B; --warn:#E9C84A;
+  --bg:#141519;
+  --rail:#131418;
+  --card:#1C1E25;
+  --card-2:#22242C;
+  --line:#2B2E38;
+  --line-2:#363A46;
+  --ink:#ECECF1;
+  --soft:#C9CAD4;
+  --muted:#9A9CAB;
+  --dim:#6E7180;
+  --purple:#A78BFA;
+  --purple-t:#2A2340;
+  --teal:#4FD1B5;
+  --teal-t:#1B3330;
+  --orange:#F5A05B;
+  --orange-t:#3A2A1E;
+  --blue:#6AA8F7;
+  --blue-t:#1C2A40;
+  --pink:#F47FB6;
+  --pink-t:#3A1F2E;
+  --yellow:#E9C84A;
+  --yellow-t:#36301A;
+  --lime:#9BDD5B;
+  --lime-t:#24331B;
+  --good:#5FD38D;
+  --bad:#F2766B;
+  --top:#17181D;
+  --track:#262833;
+  --btn:#202229;
+  --rail-hover:#1C1D23;
+  --raised:#23252E;
+  --dot-ring:#2F3240;
+  --teal-line:#2D4A45;
+  --on-accent:#10201D;
+  --tape-field:#16201E;
+  --panel:#20222A;
+  --well:#1E2027;
+  --trap-bg:#2C2614;
+  --trap-line:#4A3F1C;
+  --trap-ink:#EADDB1;
+  --flag-bg:#1A2333;
+  --flag-line:#2C3C57;
+  --flag-ink:#C9D7EE;
+  --calc-bg:#15171C;
+  --tag-bg:#2A2C35;
+  --opt-bg:#191B21;
+  --good-t:#173226;
+  --bad-t:#3A1E1C;
+  --expl-bg:#16181D;
+  --work-bg:#18191F;
+  --done-t:#1E3A2A;
+  --warn:var(--yellow);
   --display:"Fraunces", Georgia, "Times New Roman", serif;
   --body:"Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
   --c:var(--teal); --ct:var(--teal-t);
+}
+/* Light theme: same variable names, values tuned for a white page. Accent colours are darker so coloured text still reads. */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#F4F5F8;
+  --rail:#EDEFF4;
+  --card:#FFFFFF;
+  --card-2:#EEF0F5;
+  --line:#DDE0E8;
+  --line-2:#C6CAD6;
+  --ink:#16181F;
+  --soft:#3C4150;
+  --muted:#5E6475;
+  --dim:#8A90A0;
+  --purple:#6B46D8;
+  --purple-t:#EEE9FD;
+  --teal:#0E7F6B;
+  --teal-t:#DFF4EE;
+  --orange:#B85509;
+  --orange-t:#FDECDD;
+  --blue:#1F5FC4;
+  --blue-t:#E2EDFC;
+  --pink:#BE2F78;
+  --pink-t:#FBE5EF;
+  --yellow:#8A6A00;
+  --yellow-t:#F8EFC6;
+  --lime:#4A7A0C;
+  --lime-t:#E8F3D5;
+  --good:#1A8A48;
+  --bad:#C4372D;
+  --top:#FFFFFF;
+  --track:#E3E6EE;
+  --btn:#F3F4F8;
+  --rail-hover:#E3E6EE;
+  --raised:#E8EBF2;
+  --dot-ring:#C6CAD6;
+  --teal-line:#A9D8CD;
+  --on-accent:#FFFFFF;
+  --tape-field:#F1FAF7;
+  --panel:#F8F9FB;
+  --well:#F6F7FA;
+  --trap-bg:#FBF4D6;
+  --trap-line:#E4D28A;
+  --trap-ink:#5B4A0A;
+  --flag-bg:#E8F0FC;
+  --flag-line:#B3C8EA;
+  --flag-ink:#1F3A66;
+  --calc-bg:#F1F3F8;
+  --tag-bg:#E3E6EE;
+  --opt-bg:#FFFFFF;
+  --good-t:#DFF3E7;
+  --bad-t:#FBE4E1;
+  --expl-bg:#EFF1F6;
+  --work-bg:#F7F8FB;
+  --done-t:#DFF3E7;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -34,28 +158,34 @@ button{font:inherit;color:inherit}
 [data-group="prac"]{--c:var(--lime);--ct:var(--lime-t)}
 
 /* top bar */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;align-items:center;gap:16px;padding:12px 16px;background:#17181D;border-bottom:1px solid var(--line)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--top);border-bottom:1px solid var(--line)}
 .top .name{font-family:var(--display);font-weight:700;font-size:1.32rem;white-space:nowrap}
 .top .sub{color:var(--muted);font-size:.92rem;white-space:nowrap}
-.top .prog{flex:1;height:8px;border-radius:99px;background:#262833;overflow:hidden;min-width:60px}
+.top .prog{flex:1;height:8px;border-radius:99px;background:var(--track);overflow:hidden;min-width:60px}
 .top .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--teal),var(--orange));transition:width .4s}
 .top .count{font-family:var(--mono);font-size:.82rem;color:var(--soft);white-space:nowrap}
-.tbtn{border:1px solid var(--line-2);background:#202229;border-radius:99px;padding:6px 14px;font-weight:600;font-size:.86rem;cursor:pointer;white-space:nowrap}
+.tbtn{border:1px solid var(--line-2);background:var(--btn);border-radius:99px;padding:6px 14px;font-weight:600;font-size:.86rem;cursor:pointer;white-space:nowrap}
 .tbtn:hover{border-color:var(--soft)}
 .menu-btn{display:none}
+.themes{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line-2);border-radius:99px;background:var(--btn);flex:none}
+.themes button{border:0;background:transparent;border-radius:99px;padding:4px 10px;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);white-space:nowrap}
+.themes button:hover{color:var(--ink)}
+.themes button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.themes i{display:none;font-style:normal}
+@media (max-width:520px){.top{gap:10px}.top .name{white-space:normal;line-height:1.1;min-width:0}.top .prog{min-width:24px}.themes button{padding:4px 7px;font-size:.9rem}.themes i{display:inline}.themes span{display:none}}
 @media (max-width:980px){.top .sub{display:none}.menu-btn{display:inline-block}}
-@media (max-width:520px){.top .count,#fsBtn{display:none}.top .name{font-size:1.1rem}}
+@media (max-width:520px){.top .count,#fsBtn{display:none}.top .name{font-size:.95rem}}
 
 .shell{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:calc(100% - 58px)}
 .rail{background:var(--rail);border-right:1px solid var(--line);padding:22px 14px 40px 18px;position:sticky;top:calc(58px + env(safe-area-inset-top,0px));height:calc(100vh - 58px);overflow:auto}
 .rail .grp{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:22px 8px 6px}
 .rail .grp:first-child{margin-top:4px}
 .rail a{display:flex;align-items:flex-start;gap:12px;padding:8px 10px;border-radius:10px;color:var(--soft);text-decoration:none;font-size:.97rem;line-height:1.35}
-.rail a:hover{background:#1C1D23;color:var(--ink)}
-.rail a.on{background:#23252E;color:var(--ink)}
+.rail a:hover{background:var(--rail-hover);color:var(--ink)}
+.rail a.on{background:var(--raised);color:var(--ink)}
 .rail a .dot{width:8px;height:8px;border-radius:50%;background:var(--dim);flex:none;margin-top:.48em}
 .rail a.done .dot{background:var(--good)}
-.rail a.on .dot{box-shadow:0 0 0 3px #2F3240}
+.rail a.on .dot{box-shadow:0 0 0 3px var(--dot-ring)}
 .rail .code{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-right:2px}
 @media (max-width:980px){
   .shell{grid-template-columns:minmax(0,1fr)}
@@ -69,7 +199,7 @@ main{min-width:0;padding:24px 28px 60px}
 @media (max-width:760px){.card{padding:26px 20px 28px;border-radius:20px}}
 .page{display:flex;flex-direction:column;gap:22px}
 .page[hidden]{display:none!important}
-.pill{align-self:flex-start;background:#262833;color:var(--soft);border-radius:99px;padding:6px 14px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.pill{align-self:flex-start;background:var(--track);color:var(--soft);border-radius:99px;padding:6px 14px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
 .pill b{color:var(--c);font-weight:700}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,4.2vw,3.1rem);line-height:1.08;margin:0;text-wrap:balance;letter-spacing:-.01em}
 h2{font-family:var(--display);font-weight:700;font-size:1.45rem;margin:6px 0 0;text-wrap:balance}
@@ -83,15 +213,15 @@ li+li{margin-top:.35em}
 strong,b{color:var(--ink)}
 
 /* tape */
-.tape{background:var(--teal-t);border:1px solid #2D4A45;border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.tape{background:var(--teal-t);border:1px solid var(--teal-line);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
 .tape .row1{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .tape .ic{width:44px;height:44px;border-radius:50%;background:var(--teal);display:grid;place-items:center;flex:none;border:0;cursor:pointer}
-.tape .ic svg{width:16px;height:16px;fill:#10201D;margin-left:3px}
+.tape .ic svg{width:16px;height:16px;fill:var(--on-accent);margin-left:3px}
 .tape .tt{flex:1;min-width:180px}
 .tape .tt b{display:block;font-size:1.05rem}
 .tape .tt span{color:var(--muted);font-size:.9rem}
-.tape select{background:#16201E;border:1px solid #2D4A45;border-radius:10px;padding:7px 10px;color:var(--ink)}
-.tbtn.play{background:var(--teal);color:#10201D;border-color:var(--teal)}
+.tape select{background:var(--tape-field);border:1px solid var(--teal-line);border-radius:10px;padding:7px 10px;color:var(--ink)}
+.tbtn.play{background:var(--teal);color:var(--on-accent);border-color:var(--teal)}
 .tape details summary{cursor:pointer;color:var(--teal);font-weight:600;list-style:none}
 .tape details summary::-webkit-details-marker{display:none}
 .tape details summary::before{content:"\25B8  "}
@@ -99,7 +229,7 @@ strong,b{color:var(--ink)}
 .tape details p{color:var(--soft);margin-top:8px;max-width:75ch}
 
 /* blocks */
-.panel{background:#20222A;border:1px solid var(--line);border-radius:18px;padding:22px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
@@ -109,30 +239,30 @@ strong,b{color:var(--ink)}
 .box .k{color:var(--c);font-weight:700;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase}
 .box h3{margin:6px 0 8px;font-size:1.04rem}
 .box p,.box li{color:var(--soft);font-size:.94rem}
-.line{background:#1E2027;border:1px solid var(--line);border-top:4px solid var(--c);border-radius:16px;padding:18px 20px;min-width:0}
+.line{background:var(--well);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:16px;padding:18px 20px;min-width:0}
 .line h3{font-size:1.12rem;margin-bottom:6px}
 .line p,.line li{color:var(--soft)}
-.plain{background:#1E2027;border:1px solid var(--line);border-radius:16px;padding:18px 20px;min-width:0}
+.plain{background:var(--well);border:1px solid var(--line);border-radius:16px;padding:18px 20px;min-width:0}
 .plain h3{margin-bottom:6px}
 .plain p,.plain li{color:var(--soft);font-size:.95rem}
-.trap{background:#2C2614;border:1px solid #4A3F1C;border-radius:14px;padding:14px 16px;color:#EADDB1}
+.trap{background:var(--trap-bg);border:1px solid var(--trap-line);border-radius:14px;padding:14px 16px;color:var(--trap-ink)}
 .trap b{color:var(--warn)}
-.flag{background:#1A2333;border:1px solid #2C3C57;border-radius:14px;padding:14px 16px;color:#C9D7EE;font-size:.95rem}
+.flag{background:var(--flag-bg);border:1px solid var(--flag-line);border-radius:14px;padding:14px 16px;color:var(--flag-ink);font-size:.95rem}
 .flag b{color:var(--blue)}
 .key{background:var(--ct);border-radius:16px;padding:18px 20px}
 .key h3{color:var(--c);font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
 .key li{color:var(--ink)}
-.calc{background:#15171C;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:.86rem;line-height:1.75;white-space:pre;overflow-x:auto;color:var(--soft)}
+.calc{background:var(--calc-bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:.86rem;line-height:1.75;white-space:pre;overflow-x:auto;color:var(--soft)}
 .calc .hl{color:var(--c);font-weight:600}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
 table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:560px}
 th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
-th{background:#23252E;color:var(--soft);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+th{background:var(--raised);color:var(--soft);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
 td{color:var(--soft)}
 td b{color:var(--ink)}
 tr:last-child td{border-bottom:0}
 td.n{font-family:var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
-.fig{background:#1E2027;border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
+.fig{background:var(--well);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
 .fig svg{display:block;width:100%;height:auto}
 .fig .cap{color:var(--muted);font-size:.86rem;margin-top:10px}
 svg text{fill:var(--ink);font-family:var(--body)}
@@ -142,42 +272,42 @@ svg .s{fill:var(--soft)}
 .slides b{color:var(--soft)}
 .pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:18px;border-top:1px solid var(--line)}
 .pager .tbtn{padding:9px 16px}
-.donebtn[aria-pressed="true"]{background:#1E3A2A;border-color:var(--good);color:var(--good)}
+.donebtn[aria-pressed="true"]{background:var(--done-t);border-color:var(--good);color:var(--good)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:#23252E;border:1px solid var(--line-2);border-radius:99px;padding:4px 12px;font-size:.84rem;color:var(--soft)}
+.chip{background:var(--raised);border:1px solid var(--line-2);border-radius:99px;padding:4px 12px;font-size:.84rem;color:var(--soft)}
 .kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px}
 .kv span:nth-child(even){font-family:var(--mono);text-align:right;color:var(--ink)}
 .kv span:nth-child(odd){color:var(--soft)}
 /* practice */
 .filters{display:flex;gap:8px;flex-wrap:wrap}
-.fbtn{border:1px solid var(--line-2);background:#202229;border-radius:99px;padding:5px 12px;font-size:.84rem;cursor:pointer;color:var(--soft)}
+.fbtn{border:1px solid var(--line-2);background:var(--btn);border-radius:99px;padding:5px 12px;font-size:.84rem;cursor:pointer;color:var(--soft)}
 .fbtn[aria-pressed="true"]{background:var(--ct);border-color:var(--c);color:var(--ink)}
-.q{background:#1E2027;border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.q{background:var(--well);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
 .q .qh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
 .q .qn{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
 .q .qt{font-weight:600;flex:1;min-width:220px}
-.tag{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:#2A2C35;color:var(--muted)}
+.tag{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--tag-bg);color:var(--muted)}
 .tag.calc{background:var(--blue-t);color:var(--blue)}
 .tag.prof{background:var(--yellow-t);color:var(--yellow)}
 .opts{display:flex;flex-direction:column;gap:8px}
-.opt{text-align:left;border:1px solid var(--line-2);background:#191B21;padding:10px 12px;border-radius:12px;cursor:pointer;display:flex;gap:10px;color:var(--soft)}
+.opt{text-align:left;border:1px solid var(--line-2);background:var(--opt-bg);padding:10px 12px;border-radius:12px;cursor:pointer;display:flex;gap:10px;color:var(--soft)}
 .opt .l{font-family:var(--mono);color:var(--muted)}
 .opt:hover:not([disabled]){border-color:var(--soft)}
-.opt.right{background:#173226;border-color:var(--good);color:var(--ink)}
-.opt.wrong{background:#3A1E1C;border-color:var(--bad);color:var(--ink)}
+.opt.right{background:var(--good-t);border-color:var(--good);color:var(--ink)}
+.opt.wrong{background:var(--bad-t);border-color:var(--bad);color:var(--ink)}
 .opt.sel{background:var(--blue-t);border-color:var(--blue);color:var(--ink)}
 .opt[disabled]{cursor:default}
-.expl{background:#16181D;border-radius:10px;padding:10px 12px;font-size:.92rem;color:var(--soft)}
+.expl{background:var(--expl-bg);border-radius:10px;padding:10px 12px;font-size:.92rem;color:var(--soft)}
 .flip{min-height:230px;border:1.5px solid var(--c);background:var(--ct);border-radius:20px;padding:26px;cursor:pointer;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:12px;width:100%}
 .flip .side{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .flip .front{font-family:var(--display);font-size:1.5rem;font-weight:700}
 .flip .back{color:var(--soft);font-size:1.02rem;max-width:66ch}
 .rowc{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .rowc .sp{flex:1}
-.timer{font-family:var(--mono);font-size:1.25rem;background:#23252E;border-radius:10px;padding:4px 12px}
-.timer.warn{background:#3A1E1C;color:var(--bad)}
+.timer{font-family:var(--mono);font-size:1.25rem;background:var(--raised);border-radius:10px;padding:4px 12px}
+.timer.warn{background:var(--bad-t);color:var(--bad)}
 .score{font-family:var(--display);font-size:2.4rem;font-weight:800}
-.bar{height:8px;background:#2A2C35;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar{height:8px;background:var(--tag-bg);border-radius:99px;overflow:hidden;margin-top:6px}
 .bar i{display:block;height:100%;background:var(--c)}
 .sa details summary{cursor:pointer;color:var(--c);font-weight:600}
 .sa details p{margin-top:8px;color:var(--soft)}
@@ -195,7 +325,7 @@ svg .s{fill:var(--soft)}
 @media (max-width:620px){.pager .tbtn{max-width:100%;flex:1 1 100%}.flip .front{font-size:1.15rem}}
 .grid4[style*="repeat(5"]{grid-template-columns:repeat(5,minmax(0,1fr))}
 /* worked calculations */
-.work{background:#18191F;border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.work{background:var(--work-bg);border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .work>h3{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
 .work ul{color:var(--soft)}
 .work svg{display:block;width:100%;height:auto}
@@ -205,31 +335,31 @@ math mtext{font-family:var(--body);font-size:.88em;color:var(--soft)}
 .appr math{align-self:flex-start}
 ol.steps .lab math{margin:0 4px 0 8px;vertical-align:middle}
 .eqrow.big math{margin:0 auto}
-.eqrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:#1E2027;border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.eqrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:var(--well);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
 .eqrow math{flex:0 1 auto}
 .eqrow.big{justify-content:center;padding:18px}
 .eqrow.big math{font-size:1.3em}
 .eqlab{flex-basis:100%;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .res{font-family:var(--mono);font-weight:700;color:var(--c);background:var(--ct);border:1px solid var(--c);border-radius:10px;padding:3px 10px;white-space:nowrap;font-size:.9rem;align-self:center}
 .res.big{font-size:1.15rem;align-self:flex-start}
-.res.bad{color:var(--bad);border-color:var(--bad);background:#3A1E1C}
+.res.bad{color:var(--bad);border-color:var(--bad);background:var(--bad-t)}
 table.num-t tr.hl td{background:var(--ct);color:var(--ink)}
 table.num-t tr.tot td{border-top:2px solid var(--line-2);color:var(--ink)}
 .chip.hlchip{border-color:var(--c);color:var(--ink);background:var(--ct);font-weight:600}
-.appr{background:#1E2027;border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.appr{background:var(--well);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .appr .k{color:var(--c);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
 .appr p{color:var(--soft);font-size:.92rem}
 .appr .muted{font-size:.84rem}
 .appr table td{padding:6px 10px}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.kpis div{background:#1E2027;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.kpis div{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
 .kpis span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .kpis b{font-family:var(--mono);font-size:1.3rem;color:var(--ink)}
 .kpis em{font-style:normal;font-size:.8rem;color:var(--soft)}
 .kpis .act{border-color:var(--c);background:var(--ct)}
 @media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:st}
-ol.steps li{margin:0;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:6px 12px;align-items:center;background:#1E2027;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+ol.steps li{margin:0;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:6px 12px;align-items:center;background:var(--well);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 ol.steps li::before{counter-increment:st;content:counter(st);width:26px;height:26px;border-radius:50%;background:var(--ct);color:var(--c);font-weight:700;font-size:.82rem;display:grid;place-items:center}
 ol.steps .lab{color:var(--soft);min-width:0}
 ol.steps .lab b{color:var(--ink)}
@@ -246,6 +376,11 @@ ol.steps .lab math{margin-top:6px}
   <span class="sub">Sessions 4 to 10 + Ant Forest, Coca-Cola</span>
   <div class="prog" aria-hidden="true"><i id="progBar"></i></div>
   <span class="count" id="progCount">0 / 0</span>
+  <div class="themes" id="themes" role="group" aria-label="Colour theme">
+    <button type="button" data-theme-choice="auto" aria-pressed="false" aria-label="Auto: match your device" title="Match your device"><i aria-hidden="true">&#9680;</i><span>Auto</span></button>
+    <button type="button" data-theme-choice="light" aria-pressed="false" aria-label="Light" title="Light"><i aria-hidden="true">&#9728;</i><span>Light</span></button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false" aria-label="Dark" title="Dark"><i aria-hidden="true">&#9790;</i><span>Dark</span></button>
+  </div>
   <button class="tbtn" id="fsBtn" type="button">Full screen</button>
 </header>
 <div class="shell">
@@ -322,17 +457,17 @@ ol.steps .lab math{margin-top:6px}
   <div class="fig">
     <svg viewBox="0 0 760 330" role="img" aria-label="Four overlapping lenses with critical issues at the centre">
       <g fill-opacity=".22" stroke-width="2">
-        <circle cx="300" cy="135" r="105" fill="#A78BFA" stroke="#A78BFA"/>
-        <circle cx="460" cy="135" r="105" fill="#4FD1B5" stroke="#4FD1B5"/>
-        <circle cx="300" cy="205" r="105" fill="#F5A05B" stroke="#F5A05B"/>
-        <circle cx="460" cy="205" r="105" fill="#6AA8F7" stroke="#6AA8F7"/>
+        <circle cx="300" cy="135" r="105" fill="var(--purple)" stroke="var(--purple)"/>
+        <circle cx="460" cy="135" r="105" fill="var(--teal)" stroke="var(--teal)"/>
+        <circle cx="300" cy="205" r="105" fill="var(--orange)" stroke="var(--orange)"/>
+        <circle cx="460" cy="205" r="105" fill="var(--blue)" stroke="var(--blue)"/>
       </g>
       <text x="140" y="70" font-weight="700" font-size="15">Business value</text><text x="140" y="90" class="m" font-size="12.5">What affects our bottom line?</text>
       <text x="520" y="70" font-weight="700" font-size="15">Stakeholder influence</text><text x="520" y="90" class="m" font-size="12.5">What are people trying to tell us?</text>
       <text x="120" y="290" font-weight="700" font-size="15">Science &amp; technology</text><text x="120" y="310" class="m" font-size="12.5">What does the data say?</text>
       <text x="540" y="290" font-weight="700" font-size="15">Purpose</text><text x="540" y="310" class="m" font-size="12.5">What do we stand for?</text>
-      <circle cx="380" cy="170" r="40" fill="#ECECF1"/>
-      <text x="380" y="166" text-anchor="middle" font-size="12" font-weight="700" style="fill:#141519">Critical</text><text x="380" y="181" text-anchor="middle" font-size="12" font-weight="700" style="fill:#141519">issues</text>
+      <circle cx="380" cy="170" r="40" fill="var(--ink)"/>
+      <text x="380" y="166" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--bg)">Critical</text><text x="380" y="181" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--bg)">issues</text>
     </svg>
     <p class="cap">Issues in all four lenses become the firm's critical sustainability issues. The lenses balance outside-in vs inside-out views and perception vs reality.</p>
   </div>
@@ -359,14 +494,14 @@ ol.steps .lab math{margin-top:6px}
   <div class="tape"></div>
   <div class="fig">
     <svg viewBox="0 0 820 300" role="img" aria-label="Sustainable innovation framework: five stages rising from risk management to growth">
-      <line x1="40" y1="260" x2="800" y2="260" stroke="#363A46" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="260" stroke="#363A46" stroke-width="2"/>
+      <line x1="40" y1="260" x2="800" y2="260" stroke="var(--line-2)" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="260" stroke="var(--line-2)" stroke-width="2"/>
       <text x="14" y="150" class="m" font-size="12" transform="rotate(-90 14 150)" text-anchor="middle">Value to business</text>
       <g font-size="13" font-weight="700">
-        <rect x="60" y="200" width="140" height="56" rx="10" fill="#2A2340" stroke="#A78BFA"/><text x="130" y="224" text-anchor="middle">1 Proactive</text><text x="130" y="242" text-anchor="middle">compliance</text>
-        <rect x="215" y="160" width="140" height="56" rx="10" fill="#2A2340" stroke="#A78BFA"/><text x="285" y="184" text-anchor="middle">2 Sustainable</text><text x="285" y="202" text-anchor="middle">value chain</text>
-        <rect x="390" y="120" width="140" height="56" rx="10" fill="#1B3330" stroke="#4FD1B5"/><text x="460" y="144" text-anchor="middle">3 Sustainable</text><text x="460" y="162" text-anchor="middle">products/services</text>
-        <rect x="545" y="80" width="120" height="56" rx="10" fill="#1B3330" stroke="#4FD1B5"/><text x="605" y="104" text-anchor="middle">4 Business</text><text x="605" y="122" text-anchor="middle">models</text>
-        <rect x="680" y="40" width="120" height="56" rx="10" fill="#1B3330" stroke="#4FD1B5"/><text x="740" y="64" text-anchor="middle">5 Next-practice</text><text x="740" y="82" text-anchor="middle">platforms</text>
+        <rect x="60" y="200" width="140" height="56" rx="10" fill="var(--purple-t)" stroke="var(--purple)"/><text x="130" y="224" text-anchor="middle">1 Proactive</text><text x="130" y="242" text-anchor="middle">compliance</text>
+        <rect x="215" y="160" width="140" height="56" rx="10" fill="var(--purple-t)" stroke="var(--purple)"/><text x="285" y="184" text-anchor="middle">2 Sustainable</text><text x="285" y="202" text-anchor="middle">value chain</text>
+        <rect x="390" y="120" width="140" height="56" rx="10" fill="var(--teal-t)" stroke="var(--teal)"/><text x="460" y="144" text-anchor="middle">3 Sustainable</text><text x="460" y="162" text-anchor="middle">products/services</text>
+        <rect x="545" y="80" width="120" height="56" rx="10" fill="var(--teal-t)" stroke="var(--teal)"/><text x="605" y="104" text-anchor="middle">4 Business</text><text x="605" y="122" text-anchor="middle">models</text>
+        <rect x="680" y="40" width="120" height="56" rx="10" fill="var(--teal-t)" stroke="var(--teal)"/><text x="740" y="64" text-anchor="middle">5 Next-practice</text><text x="740" y="82" text-anchor="middle">platforms</text>
       </g>
       <text x="130" y="190" text-anchor="middle" class="m" font-size="12">Risk management</text><text x="285" y="150" text-anchor="middle" class="m" font-size="12">Efficiency</text>
       <text x="595" y="285" text-anchor="middle" class="s" font-size="13">Business growth opportunities</text>
@@ -404,16 +539,16 @@ ol.steps .lab math{margin-top:6px}
     <div class="plain"><h3>Harley-Davidson (slides 15 to 16)</h3><p>"H-D's heritage is its brand image: the freedom to ride." Earlier consultants pitching carbon, water and energy failed with riders. Chairman, President &amp; CEO <b>Keith Wandell</b>: "Our purpose is clear: we fulfill dreams of personal freedom. And from that our sustainability vision is simple: <b>we preserve and renew the freedom to ride</b>." Freedom needs the open outdoors; sustainability preserves the outdoors. That emotional hook made sustainability meaningful.</p></div>
     <div class="fig">
       <svg viewBox="0 0 440 280" role="img" aria-label="Harley-Davidson opportunities for growth matrix">
-        <line x1="90" y1="240" x2="420" y2="240" stroke="#9A9CAB" stroke-width="2"/><line x1="90" y1="240" x2="90" y2="30" stroke="#9A9CAB" stroke-width="2"/>
+        <line x1="90" y1="240" x2="420" y2="240" stroke="var(--muted)" stroke-width="2"/><line x1="90" y1="240" x2="90" y2="30" stroke="var(--muted)" stroke-width="2"/>
         <text x="84" y="70" text-anchor="end" font-size="11.5" class="s">"More good"</text><text x="84" y="85" text-anchor="end" font-size="10.5" class="m">(transformation)</text>
         <text x="84" y="200" text-anchor="end" font-size="11.5" class="s">"Less bad"</text><text x="84" y="215" text-anchor="end" font-size="10.5" class="m">(mitigation)</text>
         <text x="150" y="262" text-anchor="middle" font-size="11" class="s">Developed markets</text><text x="370" y="262" text-anchor="middle" font-size="11" class="s">Emerging markets</text>
-        <text x="255" y="278" text-anchor="middle" font-size="11" style="fill:#A78BFA" font-weight="700">Market inclusion</text>
+        <text x="255" y="278" text-anchor="middle" font-size="11" style="fill:var(--purple)" font-weight="700">Market inclusion</text>
         <g font-size="12" font-weight="600">
-          <text x="255" y="55" text-anchor="middle" style="fill:#A78BFA">Electric bikes, Project XYZ (RENEW)</text>
-          <text x="255" y="115" text-anchor="middle" style="fill:#A78BFA">Bikes for young adults (RENEW)</text>
-          <text x="160" y="185" text-anchor="middle" style="fill:#A78BFA">Make existing bikes</text><text x="160" y="200" text-anchor="middle" style="fill:#A78BFA">more eco-friendly (PRESERVE)</text>
-          <text x="355" y="190" text-anchor="middle" style="fill:#A78BFA">Y-Series, lower-displacement</text><text x="355" y="205" text-anchor="middle" style="fill:#A78BFA">bikes (RENEW)</text>
+          <text x="255" y="55" text-anchor="middle" style="fill:var(--purple)">Electric bikes, Project XYZ (RENEW)</text>
+          <text x="255" y="115" text-anchor="middle" style="fill:var(--purple)">Bikes for young adults (RENEW)</text>
+          <text x="160" y="185" text-anchor="middle" style="fill:var(--purple)">Make existing bikes</text><text x="160" y="200" text-anchor="middle" style="fill:var(--purple)">more eco-friendly (PRESERVE)</text>
+          <text x="355" y="190" text-anchor="middle" style="fill:var(--purple)">Y-Series, lower-displacement</text><text x="355" y="205" text-anchor="middle" style="fill:var(--purple)">bikes (RENEW)</text>
         </g>
       </svg>
       <p class="cap">"Creating shared value." Purpose for the growth pillar: grow revenues profitably by strengthening the brand for core customers in developed markets while renewing it for customers in other markets.</p>
@@ -457,12 +592,12 @@ ol.steps .lab math{margin-top:6px}
   <div class="fig">
     <svg viewBox="0 0 820 260" role="img" aria-label="Ant Forest closed-loop incentive mechanism">
       <g font-size="13">
-        <rect x="10" y="90" width="180" height="80" rx="14" fill="#2A2340" stroke="#A78BFA"/><text x="100" y="118" text-anchor="middle" font-weight="700">Log in to Ant Forest</text><text x="100" y="138" text-anchor="middle" class="m" font-size="12">obtain a virtual tree</text>
-        <rect x="220" y="20" width="200" height="90" rx="14" fill="#2A2340" stroke="#A78BFA"/><text x="320" y="46" text-anchor="middle" font-weight="700">Low-carbon actions</text><text x="320" y="66" text-anchor="middle" class="m" font-size="12">green travel, less paper and</text><text x="320" y="82" text-anchor="middle" class="m" font-size="12">plastic, save energy, recycle</text>
-        <rect x="220" y="150" width="200" height="90" rx="14" fill="#2A2340" stroke="#A78BFA"/><text x="320" y="176" text-anchor="middle" font-weight="700">Points engagement</text><text x="320" y="196" text-anchor="middle" class="m" font-size="12">earned in stages, must be</text><text x="320" y="212" text-anchor="middle" class="m" font-size="12">collected, friends interact</text>
-        <rect x="450" y="90" width="170" height="80" rx="14" fill="#1B3330" stroke="#4FD1B5"/><text x="535" y="118" text-anchor="middle" font-weight="700">Virtual → real</text><text x="535" y="138" text-anchor="middle" class="m" font-size="12">enough points convert</text>
-        <rect x="650" y="90" width="160" height="80" rx="14" fill="#1B3330" stroke="#4FD1B5"/><text x="730" y="118" text-anchor="middle" font-weight="700">Real trees</text><text x="730" y="138" text-anchor="middle" class="m" font-size="12">planted and protected by partners</text>
-        <g stroke="#A78BFA" stroke-width="2" fill="none"><path d="M192 120 L218 70"/><path d="M192 140 L218 190"/><path d="M422 70 L448 115"/><path d="M422 190 L448 145"/><path d="M622 130 H648"/></g>
+        <rect x="10" y="90" width="180" height="80" rx="14" fill="var(--purple-t)" stroke="var(--purple)"/><text x="100" y="118" text-anchor="middle" font-weight="700">Log in to Ant Forest</text><text x="100" y="138" text-anchor="middle" class="m" font-size="12">obtain a virtual tree</text>
+        <rect x="220" y="20" width="200" height="90" rx="14" fill="var(--purple-t)" stroke="var(--purple)"/><text x="320" y="46" text-anchor="middle" font-weight="700">Low-carbon actions</text><text x="320" y="66" text-anchor="middle" class="m" font-size="12">green travel, less paper and</text><text x="320" y="82" text-anchor="middle" class="m" font-size="12">plastic, save energy, recycle</text>
+        <rect x="220" y="150" width="200" height="90" rx="14" fill="var(--purple-t)" stroke="var(--purple)"/><text x="320" y="176" text-anchor="middle" font-weight="700">Points engagement</text><text x="320" y="196" text-anchor="middle" class="m" font-size="12">earned in stages, must be</text><text x="320" y="212" text-anchor="middle" class="m" font-size="12">collected, friends interact</text>
+        <rect x="450" y="90" width="170" height="80" rx="14" fill="var(--teal-t)" stroke="var(--teal)"/><text x="535" y="118" text-anchor="middle" font-weight="700">Virtual → real</text><text x="535" y="138" text-anchor="middle" class="m" font-size="12">enough points convert</text>
+        <rect x="650" y="90" width="160" height="80" rx="14" fill="var(--teal-t)" stroke="var(--teal)"/><text x="730" y="118" text-anchor="middle" font-weight="700">Real trees</text><text x="730" y="138" text-anchor="middle" class="m" font-size="12">planted and protected by partners</text>
+        <g stroke="var(--purple)" stroke-width="2" fill="none"><path d="M192 120 L218 70"/><path d="M192 140 L218 190"/><path d="M422 70 L448 115"/><path d="M422 190 L448 145"/><path d="M622 130 H648"/></g>
       </g>
     </svg>
     <p class="cap">Slide 35, from case Exhibit 3. The emissions algorithm was co-developed with the China Beijing Environmental Exchange; a specialised third party sets points per tree from CO₂ captured when grown.</p>
@@ -519,13 +654,13 @@ ol.steps .lab math{margin-top:6px}
   <div class="grid2">
     <div class="fig">
       <svg viewBox="0 0 420 300" role="img" aria-label="Ant Forest multilateral partnership platform">
-        <circle cx="210" cy="150" r="70" fill="#2A2340" stroke="#A78BFA" stroke-width="2"/><text x="210" y="146" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="700">Ant</text><text x="210" y="170" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="700">Forest</text>
+        <circle cx="210" cy="150" r="70" fill="var(--purple-t)" stroke="var(--purple)" stroke-width="2"/><text x="210" y="146" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="700">Ant</text><text x="210" y="170" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="700">Forest</text>
         <g font-size="12" font-weight="600" text-anchor="middle">
-          <circle cx="210" cy="40" r="38" fill="#1E2027" stroke="#4FD1B5"/><text x="210" y="37">Specialist</text><text x="210" y="52">partners</text>
-          <circle cx="355" cy="120" r="38" fill="#1E2027" stroke="#F5A05B"/><text x="355" y="117">Charitable</text><text x="355" y="132">partners</text>
-          <circle cx="310" cy="255" r="38" fill="#1E2027" stroke="#6AA8F7"/><text x="310" y="259">Users</text>
-          <circle cx="110" cy="255" r="38" fill="#1E2027" stroke="#F47FB6"/><text x="110" y="246">Poverty</text><text x="110" y="261">elimination</text><text x="110" y="276">partners</text>
-          <circle cx="65" cy="120" r="38" fill="#1E2027" stroke="#E9C84A"/><text x="65" y="117">Low-carbon</text><text x="65" y="132">partners</text>
+          <circle cx="210" cy="40" r="38" fill="var(--well)" stroke="var(--teal)"/><text x="210" y="37">Specialist</text><text x="210" y="52">partners</text>
+          <circle cx="355" cy="120" r="38" fill="var(--well)" stroke="var(--orange)"/><text x="355" y="117">Charitable</text><text x="355" y="132">partners</text>
+          <circle cx="310" cy="255" r="38" fill="var(--well)" stroke="var(--blue)"/><text x="310" y="259">Users</text>
+          <circle cx="110" cy="255" r="38" fill="var(--well)" stroke="var(--pink)"/><text x="110" y="246">Poverty</text><text x="110" y="261">elimination</text><text x="110" y="276">partners</text>
+          <circle cx="65" cy="120" r="38" fill="var(--well)" stroke="var(--yellow)"/><text x="65" y="117">Low-carbon</text><text x="65" y="132">partners</text>
         </g>
       </svg>
       <p class="cap">Slide 36. Embryonic stage: users (low-carbon activities) → Ant Forest → specialist partners (environmental protection, carbon calculation, crediting points). Later: a multilateral platform.</p>
@@ -628,15 +763,15 @@ ol.steps .lab math{margin-top:6px}
   <div class="fig">
     <svg viewBox="0 0 1000 170" role="img" aria-label="Six stages of the plastics recycling chain">
       <g font-size="13">
-        <rect x="4" y="30" width="150" height="70" rx="12" fill="#1B3330" stroke="#4FD1B5"/><text x="79" y="58" text-anchor="middle" font-weight="700">Waste generation</text><text x="79" y="80" text-anchor="middle" class="m" font-size="11">households, industry</text>
-        <rect x="170" y="30" width="150" height="70" rx="12" fill="#1B3330" stroke="#4FD1B5"/><text x="245" y="58" text-anchor="middle" font-weight="700">Collection</text><text x="245" y="80" text-anchor="middle" class="m" font-size="11">curbside, drop-off, pickers</text>
-        <rect x="336" y="30" width="150" height="70" rx="12" fill="#1B3330" stroke="#4FD1B5"/><text x="411" y="58" text-anchor="middle" font-weight="700">Sorting (MRF)</text><text x="411" y="80" text-anchor="middle" class="m" font-size="11">by resin / colour</text>
-        <rect x="502" y="30" width="150" height="70" rx="12" fill="#1B3330" stroke="#4FD1B5"/><text x="577" y="58" text-anchor="middle" font-weight="700">Pre-processing</text><text x="577" y="80" text-anchor="middle" class="m" font-size="11">wash, shred, decontaminate</text>
-        <rect x="668" y="30" width="150" height="70" rx="12" fill="#1B3330" stroke="#4FD1B5"/><text x="743" y="58" text-anchor="middle" font-weight="700">Reprocessing</text><text x="743" y="80" text-anchor="middle" class="m" font-size="11">extrude, pelletise: rPET</text>
-        <rect x="834" y="30" width="162" height="70" rx="12" fill="#1B3330" stroke="#4FD1B5"/><text x="915" y="58" text-anchor="middle" font-weight="700">Compound &amp; convert</text><text x="915" y="80" text-anchor="middle" class="m" font-size="11">new products, forward chain</text>
+        <rect x="4" y="30" width="150" height="70" rx="12" fill="var(--teal-t)" stroke="var(--teal)"/><text x="79" y="58" text-anchor="middle" font-weight="700">Waste generation</text><text x="79" y="80" text-anchor="middle" class="m" font-size="11">households, industry</text>
+        <rect x="170" y="30" width="150" height="70" rx="12" fill="var(--teal-t)" stroke="var(--teal)"/><text x="245" y="58" text-anchor="middle" font-weight="700">Collection</text><text x="245" y="80" text-anchor="middle" class="m" font-size="11">curbside, drop-off, pickers</text>
+        <rect x="336" y="30" width="150" height="70" rx="12" fill="var(--teal-t)" stroke="var(--teal)"/><text x="411" y="58" text-anchor="middle" font-weight="700">Sorting (MRF)</text><text x="411" y="80" text-anchor="middle" class="m" font-size="11">by resin / colour</text>
+        <rect x="502" y="30" width="150" height="70" rx="12" fill="var(--teal-t)" stroke="var(--teal)"/><text x="577" y="58" text-anchor="middle" font-weight="700">Pre-processing</text><text x="577" y="80" text-anchor="middle" class="m" font-size="11">wash, shred, decontaminate</text>
+        <rect x="668" y="30" width="150" height="70" rx="12" fill="var(--teal-t)" stroke="var(--teal)"/><text x="743" y="58" text-anchor="middle" font-weight="700">Reprocessing</text><text x="743" y="80" text-anchor="middle" class="m" font-size="11">extrude, pelletise: rPET</text>
+        <rect x="834" y="30" width="162" height="70" rx="12" fill="var(--teal-t)" stroke="var(--teal)"/><text x="915" y="58" text-anchor="middle" font-weight="700">Compound &amp; convert</text><text x="915" y="80" text-anchor="middle" class="m" font-size="11">new products, forward chain</text>
       </g>
-      <g stroke="#9A9CAB" stroke-width="2"><line x1="154" y1="65" x2="170" y2="65"/><line x1="320" y1="65" x2="336" y2="65"/><line x1="486" y1="65" x2="502" y2="65"/><line x1="652" y1="65" x2="668" y2="65"/><line x1="818" y1="65" x2="834" y2="65"/></g>
-      <text x="4" y="140" font-size="13" class="s">Four flows run along every link: <tspan font-weight="700" fill="#4FD1B5">material · information · financial · labour</tspan>. Consumers are the suppliers.</text>
+      <g stroke="var(--muted)" stroke-width="2"><line x1="154" y1="65" x2="170" y2="65"/><line x1="320" y1="65" x2="336" y2="65"/><line x1="486" y1="65" x2="502" y2="65"/><line x1="652" y1="65" x2="668" y2="65"/><line x1="818" y1="65" x2="834" y2="65"/></g>
+      <text x="4" y="140" font-size="13" class="s">Four flows run along every link: <tspan font-weight="700" fill="var(--teal)">material · information · financial · labour</tspan>. Consumers are the suppliers.</text>
     </svg>
   </div>
   <div class="grid2">
@@ -659,12 +794,12 @@ ol.steps .lab math{margin-top:6px}
   <div class="fig">
     <svg viewBox="0 0 1000 200" role="img" aria-label="Scope, scale, scope across the chain, with informal and formal operators">
       <g font-size="12.5">
-        <rect x="4" y="10" width="320" height="40" rx="10" fill="#3A2A1E" stroke="#F5A05B"/><text x="164" y="35" text-anchor="middle" font-weight="700">Economies of SCOPE</text>
-        <rect x="334" y="10" width="330" height="40" rx="10" fill="#1B3330" stroke="#4FD1B5"/><text x="499" y="35" text-anchor="middle" font-weight="700">Economies of SCALE</text>
-        <rect x="674" y="10" width="322" height="40" rx="10" fill="#3A2A1E" stroke="#F5A05B"/><text x="835" y="35" text-anchor="middle" font-weight="700">Economies of SCOPE</text>
+        <rect x="4" y="10" width="320" height="40" rx="10" fill="var(--orange-t)" stroke="var(--orange)"/><text x="164" y="35" text-anchor="middle" font-weight="700">Economies of SCOPE</text>
+        <rect x="334" y="10" width="330" height="40" rx="10" fill="var(--teal-t)" stroke="var(--teal)"/><text x="499" y="35" text-anchor="middle" font-weight="700">Economies of SCALE</text>
+        <rect x="674" y="10" width="322" height="40" rx="10" fill="var(--orange-t)" stroke="var(--orange)"/><text x="835" y="35" text-anchor="middle" font-weight="700">Economies of SCOPE</text>
         <text x="84" y="80" text-anchor="middle" class="s">Generation</text><text x="244" y="80" text-anchor="middle" class="s">Collection</text><text x="414" y="80" text-anchor="middle" class="s">Sorting</text><text x="584" y="80" text-anchor="middle" class="s">Pre-process / Reprocess</text><text x="835" y="80" text-anchor="middle" class="s">Compound &amp; convert</text>
-        <rect x="4" y="100" width="400" height="44" rx="10" fill="#3A1F2E" stroke="#F47FB6"/><text x="204" y="120" text-anchor="middle" font-weight="700">Informal-dominant</text><text x="204" y="137" text-anchor="middle" class="m" font-size="11">waste pickers, itinerant buyers, small scrap traders</text>
-        <rect x="414" y="100" width="582" height="44" rx="10" fill="#1C2A40" stroke="#6AA8F7"/><text x="705" y="120" text-anchor="middle" font-weight="700">Formal-dominant</text><text x="705" y="137" text-anchor="middle" class="m" font-size="11">licensed MRFs, industrial reprocessors, branded converters</text>
+        <rect x="4" y="100" width="400" height="44" rx="10" fill="var(--pink-t)" stroke="var(--pink)"/><text x="204" y="120" text-anchor="middle" font-weight="700">Informal-dominant</text><text x="204" y="137" text-anchor="middle" class="m" font-size="11">waste pickers, itinerant buyers, small scrap traders</text>
+        <rect x="414" y="100" width="582" height="44" rx="10" fill="var(--blue-t)" stroke="var(--blue)"/><text x="705" y="120" text-anchor="middle" font-weight="700">Formal-dominant</text><text x="705" y="137" text-anchor="middle" class="m" font-size="11">licensed MRFs, industrial reprocessors, branded converters</text>
         <text x="4" y="178" class="m" font-size="12">Slide 5 header: "WHAT DO YOU AGGREGATE". Slide 6 header: "WHO OPERATES EACH STAGE".</text>
       </g>
     </svg>
@@ -691,14 +826,14 @@ ol.steps .lab math{margin-top:6px}
   <div class="fig">
     <svg viewBox="0 0 640 250" role="img" aria-label="Informal-sector share of collection: Japan 2, US 5, EU 5, China 35, Vietnam 55, India 65 percent">
       <text x="20" y="20" font-size="13" font-weight="700">Informal-sector share of collection (slide 11)</text>
-      <line x1="20" y1="210" x2="620" y2="210" stroke="#2b2e38"/>
+      <line x1="20" y1="210" x2="620" y2="210" stroke="var(--line)"/>
       <g font-size="12">
-        <rect x="40" y="205.4" width="70" height="4.6" fill="#9A9CAB"/><text x="75" y="198" text-anchor="middle">2%</text><text x="75" y="230" text-anchor="middle" class="s">Japan</text>
-        <rect x="140" y="198.5" width="70" height="11.5" fill="#9A9CAB"/><text x="175" y="191" text-anchor="middle">5%</text><text x="175" y="230" text-anchor="middle" class="s">US</text>
-        <rect x="240" y="198.5" width="70" height="11.5" fill="#9A9CAB"/><text x="275" y="191" text-anchor="middle">5%</text><text x="275" y="230" text-anchor="middle" class="s">EU</text>
-        <rect x="340" y="129.5" width="70" height="80.5" fill="#4FD1B5"/><text x="375" y="122" text-anchor="middle">35%</text><text x="375" y="230" text-anchor="middle" class="s">China</text>
-        <rect x="440" y="83.5" width="70" height="126.5" fill="#4FD1B5"/><text x="475" y="76" text-anchor="middle">55%</text><text x="475" y="230" text-anchor="middle" class="s">Vietnam</text>
-        <rect x="540" y="60.5" width="70" height="149.5" fill="#F47FB6"/><text x="575" y="53" text-anchor="middle" font-weight="700">65%</text><text x="575" y="230" text-anchor="middle" font-weight="700">India</text>
+        <rect x="40" y="205.4" width="70" height="4.6" fill="var(--muted)"/><text x="75" y="198" text-anchor="middle">2%</text><text x="75" y="230" text-anchor="middle" class="s">Japan</text>
+        <rect x="140" y="198.5" width="70" height="11.5" fill="var(--muted)"/><text x="175" y="191" text-anchor="middle">5%</text><text x="175" y="230" text-anchor="middle" class="s">US</text>
+        <rect x="240" y="198.5" width="70" height="11.5" fill="var(--muted)"/><text x="275" y="191" text-anchor="middle">5%</text><text x="275" y="230" text-anchor="middle" class="s">EU</text>
+        <rect x="340" y="129.5" width="70" height="80.5" fill="var(--teal)"/><text x="375" y="122" text-anchor="middle">35%</text><text x="375" y="230" text-anchor="middle" class="s">China</text>
+        <rect x="440" y="83.5" width="70" height="126.5" fill="var(--teal)"/><text x="475" y="76" text-anchor="middle">55%</text><text x="475" y="230" text-anchor="middle" class="s">Vietnam</text>
+        <rect x="540" y="60.5" width="70" height="149.5" fill="var(--pink)"/><text x="575" y="53" text-anchor="middle" font-weight="700">65%</text><text x="575" y="230" text-anchor="middle" font-weight="700">India</text>
       </g>
     </svg>
   </div>
@@ -732,14 +867,14 @@ ol.steps .lab math{margin-top:6px}
   <div class="fig">
     <svg viewBox="0 0 640 250" role="img" aria-label="PET value capture vs LCA burden: collection 13 vs 15, sorting 17 vs 20, reprocessing 43 vs 50, converting 27 vs 15">
       <text x="10" y="20" font-size="13" font-weight="700">SUP / PET: value capture vs LCA burden (%)</text>
-      <line x1="10" y1="210" x2="630" y2="210" stroke="#2b2e38"/>
+      <line x1="10" y1="210" x2="630" y2="210" stroke="var(--line)"/>
       <g font-size="12">
-        <rect x="50" y="171" width="44" height="39" fill="#4FD1B5"/><rect x="98" y="165" width="44" height="45" fill="#F5A05B"/><text x="72" y="164" text-anchor="middle">13</text><text x="120" y="158" text-anchor="middle">15</text><text x="96" y="230" text-anchor="middle" class="s">Collection</text>
-        <rect x="200" y="159" width="44" height="51" fill="#4FD1B5"/><rect x="248" y="150" width="44" height="60" fill="#F5A05B"/><text x="222" y="152" text-anchor="middle">17</text><text x="270" y="143" text-anchor="middle">20</text><text x="246" y="230" text-anchor="middle" class="s">Sorting</text>
-        <rect x="350" y="81" width="44" height="129" fill="#4FD1B5"/><rect x="398" y="60" width="44" height="150" fill="#F5A05B"/><text x="372" y="74" text-anchor="middle" font-weight="700">43</text><text x="420" y="53" text-anchor="middle" font-weight="700">50</text><text x="396" y="230" text-anchor="middle" class="s">Reprocessing</text>
-        <rect x="500" y="129" width="44" height="81" fill="#4FD1B5"/><rect x="548" y="165" width="44" height="45" fill="#F5A05B"/><text x="522" y="122" text-anchor="middle">27</text><text x="570" y="158" text-anchor="middle">15</text><text x="546" y="230" text-anchor="middle" class="s">Compound &amp; convert</text>
+        <rect x="50" y="171" width="44" height="39" fill="var(--teal)"/><rect x="98" y="165" width="44" height="45" fill="var(--orange)"/><text x="72" y="164" text-anchor="middle">13</text><text x="120" y="158" text-anchor="middle">15</text><text x="96" y="230" text-anchor="middle" class="s">Collection</text>
+        <rect x="200" y="159" width="44" height="51" fill="var(--teal)"/><rect x="248" y="150" width="44" height="60" fill="var(--orange)"/><text x="222" y="152" text-anchor="middle">17</text><text x="270" y="143" text-anchor="middle">20</text><text x="246" y="230" text-anchor="middle" class="s">Sorting</text>
+        <rect x="350" y="81" width="44" height="129" fill="var(--teal)"/><rect x="398" y="60" width="44" height="150" fill="var(--orange)"/><text x="372" y="74" text-anchor="middle" font-weight="700">43</text><text x="420" y="53" text-anchor="middle" font-weight="700">50</text><text x="396" y="230" text-anchor="middle" class="s">Reprocessing</text>
+        <rect x="500" y="129" width="44" height="81" fill="var(--teal)"/><rect x="548" y="165" width="44" height="45" fill="var(--orange)"/><text x="522" y="122" text-anchor="middle">27</text><text x="570" y="158" text-anchor="middle">15</text><text x="546" y="230" text-anchor="middle" class="s">Compound &amp; convert</text>
       </g>
-      <rect x="10" y="238" width="10" height="10" fill="#4FD1B5"/><text x="26" y="247" font-size="11">Value capture</text><rect x="120" y="238" width="10" height="10" fill="#F5A05B"/><text x="136" y="247" font-size="11">LCA burden</text>
+      <rect x="10" y="238" width="10" height="10" fill="var(--teal)"/><text x="26" y="247" font-size="11">Value capture</text><rect x="120" y="238" width="10" height="10" fill="var(--orange)"/><text x="136" y="247" font-size="11">LCA burden</text>
     </svg>
     <p class="cap">Slide 13 labels compounding 20% / 15%; slide 15 text says 27% vs 15%. The waterfall gives 26%. Accept 26-27% as "more value than burden".</p>
   </div>
@@ -756,12 +891,12 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 520 270" role="img" aria-label="MLP value capture vs LCA burden: collection -20 vs 10, sorting 20 vs 15, alternative processing 70 vs 65, output 30 vs 10">
         <text x="6" y="18" font-size="13" font-weight="700">MLP: value capture vs LCA burden (%)</text>
-        <line x1="6" y1="190" x2="514" y2="190" stroke="#9A9CAB"/>
+        <line x1="6" y1="190" x2="514" y2="190" stroke="var(--muted)"/>
         <g font-size="12">
-          <rect x="30" y="190" width="38" height="36" fill="#F2766B"/><rect x="72" y="172" width="38" height="18" fill="#F5A05B"/><text x="49" y="242" text-anchor="middle" font-weight="700">-20</text><text x="91" y="166" text-anchor="middle">10</text><text x="70" y="262" text-anchor="middle" class="s" font-size="11">Collection</text>
-          <rect x="150" y="154" width="38" height="36" fill="#4FD1B5"/><rect x="192" y="163" width="38" height="27" fill="#F5A05B"/><text x="169" y="148" text-anchor="middle">20</text><text x="211" y="157" text-anchor="middle">15</text><text x="190" y="262" text-anchor="middle" class="s" font-size="11">Sort &amp; aggregate</text>
-          <rect x="270" y="64" width="38" height="126" fill="#4FD1B5"/><rect x="312" y="73" width="38" height="117" fill="#F5A05B"/><text x="289" y="58" text-anchor="middle" font-weight="700">70</text><text x="331" y="67" text-anchor="middle" font-weight="700">65</text><text x="310" y="262" text-anchor="middle" class="s" font-size="11">Alt. processing</text>
-          <rect x="390" y="136" width="38" height="54" fill="#4FD1B5"/><rect x="432" y="172" width="38" height="18" fill="#F5A05B"/><text x="409" y="130" text-anchor="middle">30</text><text x="451" y="166" text-anchor="middle">10</text><text x="430" y="262" text-anchor="middle" class="s" font-size="11">Output &amp; distrib.</text>
+          <rect x="30" y="190" width="38" height="36" fill="var(--bad)"/><rect x="72" y="172" width="38" height="18" fill="var(--orange)"/><text x="49" y="242" text-anchor="middle" font-weight="700">-20</text><text x="91" y="166" text-anchor="middle">10</text><text x="70" y="262" text-anchor="middle" class="s" font-size="11">Collection</text>
+          <rect x="150" y="154" width="38" height="36" fill="var(--teal)"/><rect x="192" y="163" width="38" height="27" fill="var(--orange)"/><text x="169" y="148" text-anchor="middle">20</text><text x="211" y="157" text-anchor="middle">15</text><text x="190" y="262" text-anchor="middle" class="s" font-size="11">Sort &amp; aggregate</text>
+          <rect x="270" y="64" width="38" height="126" fill="var(--teal)"/><rect x="312" y="73" width="38" height="117" fill="var(--orange)"/><text x="289" y="58" text-anchor="middle" font-weight="700">70</text><text x="331" y="67" text-anchor="middle" font-weight="700">65</text><text x="310" y="262" text-anchor="middle" class="s" font-size="11">Alt. processing</text>
+          <rect x="390" y="136" width="38" height="54" fill="var(--teal)"/><rect x="432" y="172" width="38" height="18" fill="var(--orange)"/><text x="409" y="130" text-anchor="middle">30</text><text x="451" y="166" text-anchor="middle">10</text><text x="430" y="262" text-anchor="middle" class="s" font-size="11">Output &amp; distrib.</text>
         </g>
       </svg>
       <p class="cap">Teal = value capture; orange = LCA burden; red = value destroyed. Value shares sum to 100 (−20+20+70+30).</p>
@@ -796,14 +931,14 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 420 260" role="img" aria-label="Amortised per-trip impact of a durable PP bag falls as 15 divided by uses and crosses the single-use line at 15 uses">
         <text x="6" y="18" font-size="13" font-weight="700">Crossover = reuse threshold (PP bag)</text>
-        <line x1="40" y1="220" x2="410" y2="220" stroke="#2b2e38"/><line x1="40" y1="30" x2="40" y2="220" stroke="#2b2e38"/>
-        <line x1="40" y1="196" x2="410" y2="196" stroke="#F47FB6" stroke-width="2.5"/>
-        <path d="M52 40 C 70 120, 110 170, 220 190 S 360 205, 410 208" fill="none" stroke="#4FD1B5" stroke-width="2.5"/>
-        <circle cx="232" cy="196" r="6" fill="#E9C84A"/>
+        <line x1="40" y1="220" x2="410" y2="220" stroke="var(--line)"/><line x1="40" y1="30" x2="40" y2="220" stroke="var(--line)"/>
+        <line x1="40" y1="196" x2="410" y2="196" stroke="var(--pink)" stroke-width="2.5"/>
+        <path d="M52 40 C 70 120, 110 170, 220 190 S 360 205, 410 208" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+        <circle cx="232" cy="196" r="6" fill="var(--yellow)"/>
         <text x="240" y="186" font-size="12" font-weight="700">15 uses</text>
         <text x="300" y="236" font-size="11" class="m">times reused →</text>
         <text x="46" y="44" font-size="11" class="m">impact per trip</text>
-        <text x="300" y="214" font-size="11" fill="#4FD1B5">PP bag (amortised)</text><text x="56" y="190" font-size="11" fill="#F47FB6">single-use bag = 1</text>
+        <text x="300" y="214" font-size="11" fill="var(--teal)">PP bag (amortised)</text><text x="56" y="190" font-size="11" fill="var(--pink)">single-use bag = 1</text>
       </svg>
       <p class="cap">Left of the crossing the reusable is still worse per trip; right of it reuse has paid off. Cotton tote crosses at 100.</p>
     </div>
@@ -891,15 +1026,15 @@ ol.steps .lab math{margin-top:6px}
       <svg viewBox="0 0 460 250" role="img" aria-label="Per-capita CO2 emissions 2023 in tonnes">
         <text x="6" y="16" font-size="13" font-weight="700">Per-capita CO₂, 2023 (tonnes)</text>
         <g font-size="11.5">
-          <text x="110" y="40" text-anchor="end">UAE</text><rect x="116" y="30" width="300" height="14" fill="#F5A05B"/><text x="420" y="41" class="s">21.55</text>
-          <text x="110" y="62" text-anchor="end">US</text><rect x="116" y="52" width="199" height="14" fill="#F5A05B"/><text x="320" y="63" class="s">14.30</text>
-          <text x="110" y="84" text-anchor="end">High income</text><rect x="116" y="74" width="139" height="14" fill="#9A9CAB"/><text x="260" y="85" class="s">9.96</text>
-          <text x="110" y="106" text-anchor="end">China</text><rect x="116" y="96" width="117" height="14" fill="#F5A05B"/><text x="238" y="107" class="s">8.37</text>
-          <text x="110" y="128" text-anchor="end">EU (27)</text><rect x="116" y="118" width="78" height="14" fill="#F5A05B"/><text x="199" y="129" class="s">5.57</text>
-          <text x="110" y="150" text-anchor="end">UK</text><rect x="116" y="140" width="62" height="14" fill="#F5A05B"/><text x="183" y="151" class="s">4.44</text>
-          <text x="110" y="172" text-anchor="end">Rest of Asia</text><rect x="116" y="162" width="56" height="14" fill="#9A9CAB"/><text x="177" y="173" class="s">3.99</text>
-          <text x="110" y="194" text-anchor="end" font-weight="700">India</text><rect x="116" y="184" width="30" height="14" fill="#4FD1B5"/><text x="151" y="195" font-weight="700">2.13</text>
-          <text x="110" y="216" text-anchor="end">Low income</text><rect x="116" y="206" width="22" height="14" fill="#9A9CAB"/><text x="143" y="217" class="s">1.58</text>
+          <text x="110" y="40" text-anchor="end">UAE</text><rect x="116" y="30" width="300" height="14" fill="var(--orange)"/><text x="420" y="41" class="s">21.55</text>
+          <text x="110" y="62" text-anchor="end">US</text><rect x="116" y="52" width="199" height="14" fill="var(--orange)"/><text x="320" y="63" class="s">14.30</text>
+          <text x="110" y="84" text-anchor="end">High income</text><rect x="116" y="74" width="139" height="14" fill="var(--muted)"/><text x="260" y="85" class="s">9.96</text>
+          <text x="110" y="106" text-anchor="end">China</text><rect x="116" y="96" width="117" height="14" fill="var(--orange)"/><text x="238" y="107" class="s">8.37</text>
+          <text x="110" y="128" text-anchor="end">EU (27)</text><rect x="116" y="118" width="78" height="14" fill="var(--orange)"/><text x="199" y="129" class="s">5.57</text>
+          <text x="110" y="150" text-anchor="end">UK</text><rect x="116" y="140" width="62" height="14" fill="var(--orange)"/><text x="183" y="151" class="s">4.44</text>
+          <text x="110" y="172" text-anchor="end">Rest of Asia</text><rect x="116" y="162" width="56" height="14" fill="var(--muted)"/><text x="177" y="173" class="s">3.99</text>
+          <text x="110" y="194" text-anchor="end" font-weight="700">India</text><rect x="116" y="184" width="30" height="14" fill="var(--teal)"/><text x="151" y="195" font-weight="700">2.13</text>
+          <text x="110" y="216" text-anchor="end">Low income</text><rect x="116" y="206" width="22" height="14" fill="var(--muted)"/><text x="143" y="217" class="s">1.58</text>
         </g>
         <text x="6" y="244" font-size="11" class="m">Income drives emissions, but energy mix matters: UK, France, Portugal (nuclear, renewables) vs Germany (~50% fossil).</text>
       </svg>
@@ -916,21 +1051,21 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 460 236" role="img" aria-label="Average per-capita CO2 growth, India vs China, by period">
 <text x="6" y="16" font-size="13" font-weight="700">Per-capita CO₂ growth %, India vs China (slide 10)</text>
-<line x1="20" y1="190" x2="450" y2="190" stroke="#2b2e38"/>
+<line x1="20" y1="190" x2="450" y2="190" stroke="var(--line)"/>
 <g font-size="11">
-<rect x="40" y="137.4" width="34" height="52.6" fill="#4FD1B5"/><text x="57" y="132.4" text-anchor="middle">2.92</text>
-<rect x="76" y="150.0" width="34" height="40.0" fill="#F5A05B"/><text x="93" y="145.0" text-anchor="middle">2.22</text>
+<rect x="40" y="137.4" width="34" height="52.6" fill="var(--teal)"/><text x="57" y="132.4" text-anchor="middle">2.92</text>
+<rect x="76" y="150.0" width="34" height="40.0" fill="var(--orange)"/><text x="93" y="145.0" text-anchor="middle">2.22</text>
 <text x="75" y="206" text-anchor="middle" class="s">1994-01</text>
-<rect x="145" y="127.2" width="34" height="62.8" fill="#4FD1B5"/><text x="162" y="122.2" text-anchor="middle">3.49</text>
-<rect x="181" y="39.0" width="34" height="151.0" fill="#F5A05B"/><text x="198" y="34.0" text-anchor="middle">8.39</text>
+<rect x="145" y="127.2" width="34" height="62.8" fill="var(--teal)"/><text x="162" y="122.2" text-anchor="middle">3.49</text>
+<rect x="181" y="39.0" width="34" height="151.0" fill="var(--orange)"/><text x="198" y="34.0" text-anchor="middle">8.39</text>
 <text x="180" y="206" text-anchor="middle" class="s">2001-08</text>
-<rect x="250" y="108.3" width="34" height="81.7" fill="#4FD1B5"/><text x="267" y="103.3" text-anchor="middle">4.54</text>
-<rect x="286" y="124.1" width="34" height="65.9" fill="#F5A05B"/><text x="303" y="119.1" text-anchor="middle">3.66</text>
+<rect x="250" y="108.3" width="34" height="81.7" fill="var(--teal)"/><text x="267" y="103.3" text-anchor="middle">4.54</text>
+<rect x="286" y="124.1" width="34" height="65.9" fill="var(--orange)"/><text x="303" y="119.1" text-anchor="middle">3.66</text>
 <text x="285" y="206" text-anchor="middle" class="s">2008-15</text>
-<rect x="355" y="146.6" width="34" height="43.4" fill="#4FD1B5"/><text x="372" y="141.6" text-anchor="middle">2.41</text>
-<rect x="391" y="159.9" width="34" height="30.1" fill="#F5A05B"/><text x="408" y="154.9" text-anchor="middle">1.67</text>
+<rect x="355" y="146.6" width="34" height="43.4" fill="var(--teal)"/><text x="372" y="141.6" text-anchor="middle">2.41</text>
+<rect x="391" y="159.9" width="34" height="30.1" fill="var(--orange)"/><text x="408" y="154.9" text-anchor="middle">1.67</text>
 <text x="390" y="206" text-anchor="middle" class="s">2015-23</text>
-</g><rect x="20" y="218" width="10" height="10" fill="#4FD1B5"/><text x="36" y="227" font-size="11">India</text><rect x="90" y="218" width="10" height="10" fill="#F5A05B"/><text x="106" y="227" font-size="11">China</text></svg>
+</g><rect x="20" y="218" width="10" height="10" fill="var(--teal)"/><text x="36" y="227" font-size="11">India</text><rect x="90" y="218" width="10" height="10" fill="var(--orange)"/><text x="106" y="227" font-size="11">China</text></svg>
     </div>
     <div class="line"><h3>Reading slide 10</h3><p>India / China average per-capita growth: <b>2.92 / 2.22</b> (1994-2001), <b>3.49 / 8.39</b> (2001-08), <b>4.54 / 3.66</b> (2008-15), <b>2.41 / 1.67</b> (2015-23). Both slowed after Paris; China's peak was the 2001-08 boom. India is the 3rd largest emitter in total but far below the norm per head.</p></div>
   </div>
@@ -949,16 +1084,16 @@ ol.steps .lab math{margin-top:6px}
   </div>
   <div class="fig">
     <svg viewBox="0 0 1000 160" role="img" aria-label="India green debt timeline 2017 to 2026">
-      <line x1="20" y1="70" x2="980" y2="70" stroke="#9A9CAB" stroke-width="2"/>
+      <line x1="20" y1="70" x2="980" y2="70" stroke="var(--muted)" stroke-width="2"/>
       <g font-size="12">
-        <circle cx="50" cy="70" r="7" fill="#F5A05B"/><text x="50" y="50" text-anchor="middle" font-weight="700">2017</text><text x="50" y="96" text-anchor="middle" class="s">SEBI green debt</text><text x="50" y="112" text-anchor="middle" class="s">guidelines</text>
-        <circle cx="175" cy="70" r="7" fill="#F5A05B"/><text x="175" y="50" text-anchor="middle" font-weight="700">Nov 2022</text><text x="175" y="96" text-anchor="middle" class="s">Sovereign Green</text><text x="175" y="112" text-anchor="middle" class="s">Bond Framework</text>
-        <circle cx="300" cy="70" r="7" fill="#F5A05B"/><text x="300" y="50" text-anchor="middle" font-weight="700">Jan 2023</text><text x="300" y="96" text-anchor="middle" class="s">1st SGrB auction</text><text x="300" y="112" text-anchor="middle" class="s">(₹80bn)</text>
-        <circle cx="425" cy="70" r="7" fill="#F5A05B"/><text x="425" y="50" text-anchor="middle" font-weight="700">2023</text><text x="425" y="96" text-anchor="middle" class="s">SEBI revision: mandatory</text><text x="425" y="112" text-anchor="middle" class="s">3rd-party review; RBI</text><text x="425" y="128" text-anchor="middle" class="s">Green Deposits</text>
-        <circle cx="565" cy="70" r="7" fill="#F5A05B"/><text x="565" y="50" text-anchor="middle" font-weight="700">Apr 2024</text><text x="565" y="96" text-anchor="middle" class="s">RBI: IFSC investors</text><text x="565" y="112" text-anchor="middle" class="s">may buy SGrBs</text>
-        <circle cx="690" cy="70" r="7" fill="#F5A05B"/><text x="690" y="50" text-anchor="middle" font-weight="700">Aug 2024</text><text x="690" y="96" text-anchor="middle" class="s">SEBI proposes ESG debt:</text><text x="690" y="112" text-anchor="middle" class="s">social, sustainability, SLB</text>
-        <circle cx="820" cy="70" r="7" fill="#F2766B"/><text x="820" y="50" text-anchor="middle" font-weight="700">2025</text><text x="820" y="96" text-anchor="middle" class="s">SGrB issuance pauses</text><text x="820" y="112" text-anchor="middle" class="s">after failed auctions</text>
-        <circle cx="945" cy="70" r="7" fill="#4FD1B5"/><text x="945" y="50" text-anchor="middle" font-weight="700">2026</text><text x="945" y="96" text-anchor="middle" class="s">Restart: new 30Y;</text><text x="945" y="112" text-anchor="middle" class="s">greenium ~7bp</text>
+        <circle cx="50" cy="70" r="7" fill="var(--orange)"/><text x="50" y="50" text-anchor="middle" font-weight="700">2017</text><text x="50" y="96" text-anchor="middle" class="s">SEBI green debt</text><text x="50" y="112" text-anchor="middle" class="s">guidelines</text>
+        <circle cx="175" cy="70" r="7" fill="var(--orange)"/><text x="175" y="50" text-anchor="middle" font-weight="700">Nov 2022</text><text x="175" y="96" text-anchor="middle" class="s">Sovereign Green</text><text x="175" y="112" text-anchor="middle" class="s">Bond Framework</text>
+        <circle cx="300" cy="70" r="7" fill="var(--orange)"/><text x="300" y="50" text-anchor="middle" font-weight="700">Jan 2023</text><text x="300" y="96" text-anchor="middle" class="s">1st SGrB auction</text><text x="300" y="112" text-anchor="middle" class="s">(₹80bn)</text>
+        <circle cx="425" cy="70" r="7" fill="var(--orange)"/><text x="425" y="50" text-anchor="middle" font-weight="700">2023</text><text x="425" y="96" text-anchor="middle" class="s">SEBI revision: mandatory</text><text x="425" y="112" text-anchor="middle" class="s">3rd-party review; RBI</text><text x="425" y="128" text-anchor="middle" class="s">Green Deposits</text>
+        <circle cx="565" cy="70" r="7" fill="var(--orange)"/><text x="565" y="50" text-anchor="middle" font-weight="700">Apr 2024</text><text x="565" y="96" text-anchor="middle" class="s">RBI: IFSC investors</text><text x="565" y="112" text-anchor="middle" class="s">may buy SGrBs</text>
+        <circle cx="690" cy="70" r="7" fill="var(--orange)"/><text x="690" y="50" text-anchor="middle" font-weight="700">Aug 2024</text><text x="690" y="96" text-anchor="middle" class="s">SEBI proposes ESG debt:</text><text x="690" y="112" text-anchor="middle" class="s">social, sustainability, SLB</text>
+        <circle cx="820" cy="70" r="7" fill="var(--bad)"/><text x="820" y="50" text-anchor="middle" font-weight="700">2025</text><text x="820" y="96" text-anchor="middle" class="s">SGrB issuance pauses</text><text x="820" y="112" text-anchor="middle" class="s">after failed auctions</text>
+        <circle cx="945" cy="70" r="7" fill="var(--teal)"/><text x="945" y="50" text-anchor="middle" font-weight="700">2026</text><text x="945" y="96" text-anchor="middle" class="s">Restart: new 30Y;</text><text x="945" y="112" text-anchor="middle" class="s">greenium ~7bp</text>
       </g>
     </svg>
   </div>
@@ -984,15 +1119,15 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 460 250" role="img" aria-label="Global green bond issuance 2019 to 2025 in billions of dollars">
         <text x="6" y="16" font-size="13" font-weight="700">Global green bond issuance, $bn (S6.1 slide 4)</text>
-        <line x1="20" y1="210" x2="450" y2="210" stroke="#2b2e38"/>
+        <line x1="20" y1="210" x2="450" y2="210" stroke="var(--line)"/>
         <g font-size="11.5">
-          <rect x="34" y="161" width="44" height="49" fill="#F5A05B"/><text x="56" y="155" text-anchor="middle">245</text><text x="56" y="228" text-anchor="middle" class="s">2019</text>
-          <rect x="94" y="157" width="44" height="53" fill="#F5A05B"/><text x="116" y="151" text-anchor="middle">266</text><text x="116" y="228" text-anchor="middle" class="s">2020</text>
-          <rect x="154" y="98" width="44" height="112" fill="#F5A05B"/><text x="176" y="92" text-anchor="middle">560</text><text x="176" y="228" text-anchor="middle" class="s">2021</text>
-          <rect x="214" y="100" width="44" height="110" fill="#F5A05B"/><text x="236" y="94" text-anchor="middle">552</text><text x="236" y="228" text-anchor="middle" class="s">2022</text>
-          <rect x="274" y="94" width="44" height="116" fill="#F5A05B"/><text x="296" y="88" text-anchor="middle">581</text><text x="296" y="228" text-anchor="middle" class="s">2023</text>
-          <rect x="334" y="95" width="44" height="115" fill="#F5A05B"/><text x="356" y="89" text-anchor="middle">577</text><text x="356" y="228" text-anchor="middle" class="s">2024</text>
-          <rect x="394" y="96" width="44" height="114" fill="#F5A05B" opacity=".6"/><text x="416" y="90" text-anchor="middle">~575</text><text x="416" y="228" text-anchor="middle" class="s">2025</text>
+          <rect x="34" y="161" width="44" height="49" fill="var(--orange)"/><text x="56" y="155" text-anchor="middle">245</text><text x="56" y="228" text-anchor="middle" class="s">2019</text>
+          <rect x="94" y="157" width="44" height="53" fill="var(--orange)"/><text x="116" y="151" text-anchor="middle">266</text><text x="116" y="228" text-anchor="middle" class="s">2020</text>
+          <rect x="154" y="98" width="44" height="112" fill="var(--orange)"/><text x="176" y="92" text-anchor="middle">560</text><text x="176" y="228" text-anchor="middle" class="s">2021</text>
+          <rect x="214" y="100" width="44" height="110" fill="var(--orange)"/><text x="236" y="94" text-anchor="middle">552</text><text x="236" y="228" text-anchor="middle" class="s">2022</text>
+          <rect x="274" y="94" width="44" height="116" fill="var(--orange)"/><text x="296" y="88" text-anchor="middle">581</text><text x="296" y="228" text-anchor="middle" class="s">2023</text>
+          <rect x="334" y="95" width="44" height="115" fill="var(--orange)"/><text x="356" y="89" text-anchor="middle">577</text><text x="356" y="228" text-anchor="middle" class="s">2024</text>
+          <rect x="394" y="96" width="44" height="114" fill="var(--orange)" opacity=".6"/><text x="416" y="90" text-anchor="middle">~575</text><text x="416" y="228" text-anchor="middle" class="s">2025</text>
         </g>
         <text x="6" y="246" font-size="11" class="m">Plateau of $550-580bn since 2022. 2025 bar approximate (deck shows plateau).</text>
       </svg>
@@ -1076,14 +1211,14 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 440 220" role="img" aria-label="Apple debt to equity rose from 0 in 2012 to 63 percent by April 2017">
         <text x="6" y="16" font-size="13" font-weight="700">Apple debt-to-equity, % (S6.2 slide 35)</text>
-        <line x1="20" y1="180" x2="430" y2="180" stroke="#2b2e38"/>
+        <line x1="20" y1="180" x2="430" y2="180" stroke="var(--line)"/>
         <g font-size="11.5">
-          <rect x="34" y="179" width="46" height="1" fill="#6AA8F7"/><text x="57" y="172" text-anchor="middle">0</text><text x="57" y="198" text-anchor="middle" class="s">2012</text>
-          <rect x="100" y="146" width="46" height="34" fill="#6AA8F7"/><text x="123" y="140" text-anchor="middle">14</text><text x="123" y="198" text-anchor="middle" class="s">2013</text>
-          <rect x="166" y="118" width="46" height="62" fill="#6AA8F7"/><text x="189" y="112" text-anchor="middle">26</text><text x="189" y="198" text-anchor="middle" class="s">2014</text>
-          <rect x="232" y="72" width="46" height="108" fill="#6AA8F7"/><text x="255" y="66" text-anchor="middle">45</text><text x="255" y="198" text-anchor="middle" class="s">2015</text>
-          <rect x="298" y="38" width="46" height="142" fill="#6AA8F7"/><text x="321" y="32" text-anchor="middle">59</text><text x="321" y="198" text-anchor="middle" class="s">2016</text>
-          <rect x="364" y="29" width="46" height="151" fill="#F5A05B"/><text x="387" y="23" text-anchor="middle" font-weight="700">63</text><text x="387" y="198" text-anchor="middle" class="s">Apr 2017</text>
+          <rect x="34" y="179" width="46" height="1" fill="var(--blue)"/><text x="57" y="172" text-anchor="middle">0</text><text x="57" y="198" text-anchor="middle" class="s">2012</text>
+          <rect x="100" y="146" width="46" height="34" fill="var(--blue)"/><text x="123" y="140" text-anchor="middle">14</text><text x="123" y="198" text-anchor="middle" class="s">2013</text>
+          <rect x="166" y="118" width="46" height="62" fill="var(--blue)"/><text x="189" y="112" text-anchor="middle">26</text><text x="189" y="198" text-anchor="middle" class="s">2014</text>
+          <rect x="232" y="72" width="46" height="108" fill="var(--blue)"/><text x="255" y="66" text-anchor="middle">45</text><text x="255" y="198" text-anchor="middle" class="s">2015</text>
+          <rect x="298" y="38" width="46" height="142" fill="var(--blue)"/><text x="321" y="32" text-anchor="middle">59</text><text x="321" y="198" text-anchor="middle" class="s">2016</text>
+          <rect x="364" y="29" width="46" height="151" fill="var(--orange)"/><text x="387" y="23" text-anchor="middle" font-weight="700">63</text><text x="387" y="198" text-anchor="middle" class="s">Apr 2017</text>
         </g>
         <text x="6" y="216" font-size="11" class="m">Rated AA+ (2016). Concern: rising debt, weak 2016 quarters, rising yields.</text>
       </svg>
@@ -1131,20 +1266,20 @@ ol.steps .lab math{margin-top:6px}
   <p class="lede">Judging a green bond only on coupon savings misses where the value shows up: in the <b>equity</b>, through investor base and signalling, not in the bond's own yield.</p>
   <div class="tape"></div>
   <div class="grid2">
-    <div class="box" style="--c:var(--bad);--ct:#3A1E1C"><span class="k">Why NOT</span><ul><li>Why market the bond as "green" at all?</li><li>Proceeds only for specified projects: <b>why tie your own hands?</b></li><li><b>Reputational risk</b> from greenwashing allegations</li><li>Greenium (coupon saving) evidence <b>not encouraging</b></li><li>More reporting: third-party review, KPIs, annual progress reports</li></ul></div>
-    <div class="box" style="--c:var(--good);--ct:#173226"><span class="k">Why YES</span><ul><li>Green projects get highlighted: ahead in the corporate climate race</li><li><b>Signals commitment:</b> tying your hands has advantages</li><li>Cost saving on the bond is a <b>narrow lens</b>: equity valuation matters</li><li>Attracts a <b>durable ESG investor base</b> (long-term holders), lower stock volatility</li></ul></div>
+    <div class="box" style="--c:var(--bad);--ct:var(--bad-t)"><span class="k">Why NOT</span><ul><li>Why market the bond as "green" at all?</li><li>Proceeds only for specified projects: <b>why tie your own hands?</b></li><li><b>Reputational risk</b> from greenwashing allegations</li><li>Greenium (coupon saving) evidence <b>not encouraging</b></li><li>More reporting: third-party review, KPIs, annual progress reports</li></ul></div>
+    <div class="box" style="--c:var(--good);--ct:var(--good-t)"><span class="k">Why YES</span><ul><li>Green projects get highlighted: ahead in the corporate climate race</li><li><b>Signals commitment:</b> tying your hands has advantages</li><li>Cost saving on the bond is a <b>narrow lens</b>: equity valuation matters</li><li>Attracts a <b>durable ESG investor base</b> (long-term holders), lower stock volatility</li></ul></div>
   </div>
   <div class="grid2">
     <div class="fig">
       <svg viewBox="0 0 460 240" role="img" aria-label="Flammer cumulative abnormal returns by bond type">
         <text x="6" y="16" font-size="13" font-weight="700">CAR, days −5 to +10 (Flammer, N = 384)</text>
-        <line x1="20" y1="200" x2="450" y2="200" stroke="#2b2e38"/>
+        <line x1="20" y1="200" x2="450" y2="200" stroke="var(--line)"/>
         <g font-size="11.5">
-          <rect x="34" y="102" width="60" height="98" fill="#F5A05B"/><text x="64" y="96" text-anchor="middle" font-weight="700">0.49%</text><text x="64" y="218" text-anchor="middle" class="s">All bonds</text>
-          <rect x="114" y="58" width="60" height="142" fill="#4FD1B5"/><text x="144" y="52" text-anchor="middle">0.71%</text><text x="144" y="218" text-anchor="middle" class="s">Certified</text>
-          <rect x="194" y="146" width="60" height="54" fill="#9A9CAB"/><text x="224" y="140" text-anchor="middle">0.27%</text><text x="224" y="218" text-anchor="middle" class="s">Not certified</text>
-          <rect x="274" y="40" width="60" height="160" fill="#4FD1B5"/><text x="304" y="34" text-anchor="middle">0.80%</text><text x="304" y="218" text-anchor="middle" class="s">First-time</text>
-          <rect x="354" y="150" width="60" height="50" fill="#9A9CAB"/><text x="384" y="144" text-anchor="middle">0.25%</text><text x="384" y="218" text-anchor="middle" class="s">Seasoned</text>
+          <rect x="34" y="102" width="60" height="98" fill="var(--orange)"/><text x="64" y="96" text-anchor="middle" font-weight="700">0.49%</text><text x="64" y="218" text-anchor="middle" class="s">All bonds</text>
+          <rect x="114" y="58" width="60" height="142" fill="var(--teal)"/><text x="144" y="52" text-anchor="middle">0.71%</text><text x="144" y="218" text-anchor="middle" class="s">Certified</text>
+          <rect x="194" y="146" width="60" height="54" fill="var(--muted)"/><text x="224" y="140" text-anchor="middle">0.27%</text><text x="224" y="218" text-anchor="middle" class="s">Not certified</text>
+          <rect x="274" y="40" width="60" height="160" fill="var(--teal)"/><text x="304" y="34" text-anchor="middle">0.80%</text><text x="304" y="218" text-anchor="middle" class="s">First-time</text>
+          <rect x="354" y="150" width="60" height="50" fill="var(--muted)"/><text x="384" y="144" text-anchor="middle">0.25%</text><text x="384" y="218" text-anchor="middle" class="s">Seasoned</text>
         </g>
       </svg>
     </div>
@@ -1192,7 +1327,7 @@ ol.steps .lab math{margin-top:6px}
   <p class="lede">Three tools for an investor who wants less carbon: <b>exit</b> (sell), <b>voice</b> (engage as an owner), or <b>tilt</b> (underweight high emitters). A constrained portfolio cannot beat an unconstrained one, so each has a cost.</p>
   <div class="tape"></div>
   <div class="grid3">
-    <div class="box" style="--c:var(--bad);--ct:#3A1E1C"><span class="k">1 · Divest</span><h3>Sell fossil holdings</h3><p>Clean and focused but may punish transitioning producers. Energy stocks <b>−75% vs S&amp;P +50%</b> (mid-2014 to 2019). NBIM ethical exclusions cost <b>~10bp a year</b> (~130bp over 14 years); on Harvard's $40.9bn that is <b>$765m</b> present value (~$2.5bn lower by 2040).</p></div>
+    <div class="box" style="--c:var(--bad);--ct:var(--bad-t)"><span class="k">1 · Divest</span><h3>Sell fossil holdings</h3><p>Clean and focused but may punish transitioning producers. Energy stocks <b>−75% vs S&amp;P +50%</b> (mid-2014 to 2019). NBIM ethical exclusions cost <b>~10bp a year</b> (~130bp over 14 years); on Harvard's $40.9bn that is <b>$765m</b> present value (~$2.5bn lower by 2040).</p></div>
     <div class="box" style="--c:var(--teal);--ct:var(--teal-t)"><span class="k">2 · Engage</span><h3>Use voice as an owner</h3><p>NBIM engaged <b>400 companies</b> in 2019 and pushed <b>Shell on Niger Delta oil spills</b>. Hard to make an oil firm go renewable.</p></div>
     <div class="box" style="--c:var(--blue);--ct:var(--blue-t)"><span class="k">3 · Carbon-weight</span><h3>Underweight high emitters</h3><p>Stay invested and back transitions. Measures: <b>total emissions</b>, emissions <b>relative to market cap</b>, <b>intensity</b> (per $ revenue). A 20% cut in carbon intensity moves expected return <b>8.80% → 8.19%</b> (Exhibit 9).</p></div>
   </div>
@@ -1231,13 +1366,13 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 520 250" role="img" aria-label="Catastrophe bond structure: sponsor, SPV, investors, trigger">
         <g font-size="12">
-          <rect x="6" y="40" width="140" height="64" rx="12" fill="#3A2A1E" stroke="#F5A05B"/><text x="76" y="66" text-anchor="middle" font-weight="700">Sponsor</text><text x="76" y="84" text-anchor="middle" class="m" font-size="10.5">insurer / reinsurer / govt</text>
-          <rect x="190" y="40" width="140" height="64" rx="12" fill="#1C2A40" stroke="#6AA8F7"/><text x="260" y="66" text-anchor="middle" font-weight="700">SPV</text><text x="260" y="84" text-anchor="middle" class="m" font-size="10.5">issues notes</text>
-          <rect x="374" y="40" width="140" height="64" rx="12" fill="#1B3330" stroke="#4FD1B5"/><text x="444" y="66" text-anchor="middle" font-weight="700">Investors</text><text x="444" y="84" text-anchor="middle" class="m" font-size="10.5">want uncorrelated return</text>
-          <line x1="146" y1="62" x2="190" y2="62" stroke="#9A9CAB" stroke-width="2"/><text x="168" y="54" text-anchor="middle" font-size="10" class="m">premium</text>
-          <line x1="330" y1="62" x2="374" y2="62" stroke="#9A9CAB" stroke-width="2"/><text x="352" y="54" text-anchor="middle" font-size="10" class="m">principal</text>
-          <rect x="6" y="140" width="250" height="90" rx="12" fill="#173226" stroke="#5FD38D"/><text x="131" y="164" text-anchor="middle" font-weight="700">No trigger</text><text x="131" y="186" text-anchor="middle" class="s" font-size="11">investors keep principal</text><text x="131" y="204" text-anchor="middle" class="s" font-size="11">+ coupon SOFR +400 to 1,200bp</text>
-          <rect x="264" y="140" width="250" height="90" rx="12" fill="#3A1E1C" stroke="#F2766B"/><text x="389" y="164" text-anchor="middle" font-weight="700">Trigger event</text><text x="389" y="186" text-anchor="middle" class="s" font-size="11">e.g. wind &gt;150 mph at a site</text><text x="389" y="204" text-anchor="middle" class="s" font-size="11">principal paid to sponsor</text>
+          <rect x="6" y="40" width="140" height="64" rx="12" fill="var(--orange-t)" stroke="var(--orange)"/><text x="76" y="66" text-anchor="middle" font-weight="700">Sponsor</text><text x="76" y="84" text-anchor="middle" class="m" font-size="10.5">insurer / reinsurer / govt</text>
+          <rect x="190" y="40" width="140" height="64" rx="12" fill="var(--blue-t)" stroke="var(--blue)"/><text x="260" y="66" text-anchor="middle" font-weight="700">SPV</text><text x="260" y="84" text-anchor="middle" class="m" font-size="10.5">issues notes</text>
+          <rect x="374" y="40" width="140" height="64" rx="12" fill="var(--teal-t)" stroke="var(--teal)"/><text x="444" y="66" text-anchor="middle" font-weight="700">Investors</text><text x="444" y="84" text-anchor="middle" class="m" font-size="10.5">want uncorrelated return</text>
+          <line x1="146" y1="62" x2="190" y2="62" stroke="var(--muted)" stroke-width="2"/><text x="168" y="54" text-anchor="middle" font-size="10" class="m">premium</text>
+          <line x1="330" y1="62" x2="374" y2="62" stroke="var(--muted)" stroke-width="2"/><text x="352" y="54" text-anchor="middle" font-size="10" class="m">principal</text>
+          <rect x="6" y="140" width="250" height="90" rx="12" fill="var(--good-t)" stroke="var(--good)"/><text x="131" y="164" text-anchor="middle" font-weight="700">No trigger</text><text x="131" y="186" text-anchor="middle" class="s" font-size="11">investors keep principal</text><text x="131" y="204" text-anchor="middle" class="s" font-size="11">+ coupon SOFR +400 to 1,200bp</text>
+          <rect x="264" y="140" width="250" height="90" rx="12" fill="var(--bad-t)" stroke="var(--bad)"/><text x="389" y="164" text-anchor="middle" font-weight="700">Trigger event</text><text x="389" y="186" text-anchor="middle" class="s" font-size="11">e.g. wind &gt;150 mph at a site</text><text x="389" y="204" text-anchor="middle" class="s" font-size="11">principal paid to sponsor</text>
         </g>
       </svg>
       <p class="cap">Parametric triggers (wind speed, ground motion) pay in days; indemnity triggers use actual insured losses.</p>
@@ -1528,8 +1663,8 @@ ol.steps .lab math{margin-top:6px}
   <p class="lede">Average correlation across raters: <b>E 0.53, S 0.42, G 0.30</b>. The ordering is the measurability ordering.</p>
   <div class="tape"></div>
   <div class="grid2">
-    <div class="box" style="--c:var(--good);--ct:#173226"><span class="k">What counts cleanly</span><ul><li><b>Safety:</b> reportable injuries, lost-time injury rate, fatalities</li><li><b>Wages:</b> share paid above the statutory minimum</li><li><b>Gender diversity</b> in workforce and board</li><li>Median remuneration and pay ratios</li><li>Training hours, attrition, complaints filed and resolved</li><li><b>Inclusive development:</b> sourcing from MSMEs and smaller districts</li></ul></div>
-    <div class="box" style="--c:var(--bad);--ct:#3A1E1C"><span class="k">What resists counting</span><ul><li>Job quality and security, as against headcount</li><li>Anything <b>beyond tier 1</b> of the supply chain</li><li>Whether a community actually <b>consented</b> or was consulted</li><li><b>Outcomes rather than inputs:</b> training hours are not skills</li><li>Harm avoided, which leaves no trace</li><li>Dignity, voice and fairness: contested by definition</li></ul></div>
+    <div class="box" style="--c:var(--good);--ct:var(--good-t)"><span class="k">What counts cleanly</span><ul><li><b>Safety:</b> reportable injuries, lost-time injury rate, fatalities</li><li><b>Wages:</b> share paid above the statutory minimum</li><li><b>Gender diversity</b> in workforce and board</li><li>Median remuneration and pay ratios</li><li>Training hours, attrition, complaints filed and resolved</li><li><b>Inclusive development:</b> sourcing from MSMEs and smaller districts</li></ul></div>
+    <div class="box" style="--c:var(--bad);--ct:var(--bad-t)"><span class="k">What resists counting</span><ul><li>Job quality and security, as against headcount</li><li>Anything <b>beyond tier 1</b> of the supply chain</li><li>Whether a community actually <b>consented</b> or was consulted</li><li><b>Outcomes rather than inputs:</b> training hours are not skills</li><li>Harm avoided, which leaves no trace</li><li>Dignity, voice and fairness: contested by definition</li></ul></div>
   </div>
   <div class="line" style="--c:var(--blue)"><h3>Who counts as the workforce @ Tata Steel (slide 11)</h3><p>Tata Steel BRSR Section A Q20(a), FY2025-26 (consolidated): <b>71,037 permanent employees</b>, of whom <b>41,225 are permanent workers</b>, plus other-than-permanent in each; <b>women 9.5%</b> of permanent employees.</p>
   <div class="tw" style="margin-top:10px"><table><thead><tr><th>Category (slide table)</th><th>Total</th><th>Women</th><th>Note</th></tr></thead><tbody>
@@ -1570,16 +1705,16 @@ ol.steps .lab math{margin-top:6px}
   <div class="tape"></div>
   <div class="fig">
     <svg viewBox="0 0 1000 170" role="img" aria-label="India timeline from voluntary guidelines 2011 to BRSR Core FY2026-27">
-      <line x1="20" y1="80" x2="980" y2="80" stroke="#9A9CAB" stroke-width="2"/>
+      <line x1="20" y1="80" x2="980" y2="80" stroke="var(--muted)" stroke-width="2"/>
       <g font-size="11.5">
-        <circle cx="45" cy="80" r="7" fill="#6AA8F7"/><text x="45" y="58" text-anchor="middle" font-weight="700">2011</text><text x="45" y="104" text-anchor="middle" class="s">NVGs (MCA)</text>
-        <circle cx="160" cy="80" r="7" fill="#6AA8F7"/><text x="160" y="58" text-anchor="middle" font-weight="700">2012</text><text x="160" y="104" text-anchor="middle" class="s">BRR, top 100</text>
-        <circle cx="275" cy="80" r="7" fill="#F5A05B"/><text x="275" y="58" text-anchor="middle" font-weight="700">2014</text><text x="275" y="104" text-anchor="middle" class="s">Sec 135: 2% CSR</text>
-        <circle cx="395" cy="80" r="7" fill="#6AA8F7"/><text x="395" y="58" text-anchor="middle" font-weight="700">2015-19</text><text x="395" y="104" text-anchor="middle" class="s">BRR top 500, 1,000</text><text x="395" y="120" text-anchor="middle" class="s">NGRBC (2019)</text>
-        <circle cx="520" cy="80" r="7" fill="#4FD1B5"/><text x="520" y="58" text-anchor="middle" font-weight="700">FY22-23</text><text x="520" y="104" text-anchor="middle" class="s">BRSR mandatory</text><text x="520" y="120" text-anchor="middle" class="s">top 1,000</text>
-        <circle cx="640" cy="80" r="7" fill="#4FD1B5"/><text x="640" y="58" text-anchor="middle" font-weight="700">2023</text><text x="640" y="104" text-anchor="middle" class="s">BRSR Core;</text><text x="640" y="120" text-anchor="middle" class="s">ESG raters regulated</text>
-        <circle cx="770" cy="80" r="7" fill="#F2766B"/><text x="770" y="58" text-anchor="middle" font-weight="700">2025</text><text x="770" y="104" text-anchor="middle" class="s">Reset: assessment or</text><text x="770" y="120" text-anchor="middle" class="s">assurance; value chain</text><text x="770" y="136" text-anchor="middle" class="s">voluntary</text>
-        <circle cx="915" cy="80" r="7" fill="#4FD1B5"/><text x="915" y="58" text-anchor="middle" font-weight="700">FY26-27</text><text x="915" y="104" text-anchor="middle" class="s">Core verification</text><text x="915" y="120" text-anchor="middle" class="s">all top 1,000</text>
+        <circle cx="45" cy="80" r="7" fill="var(--blue)"/><text x="45" y="58" text-anchor="middle" font-weight="700">2011</text><text x="45" y="104" text-anchor="middle" class="s">NVGs (MCA)</text>
+        <circle cx="160" cy="80" r="7" fill="var(--blue)"/><text x="160" y="58" text-anchor="middle" font-weight="700">2012</text><text x="160" y="104" text-anchor="middle" class="s">BRR, top 100</text>
+        <circle cx="275" cy="80" r="7" fill="var(--orange)"/><text x="275" y="58" text-anchor="middle" font-weight="700">2014</text><text x="275" y="104" text-anchor="middle" class="s">Sec 135: 2% CSR</text>
+        <circle cx="395" cy="80" r="7" fill="var(--blue)"/><text x="395" y="58" text-anchor="middle" font-weight="700">2015-19</text><text x="395" y="104" text-anchor="middle" class="s">BRR top 500, 1,000</text><text x="395" y="120" text-anchor="middle" class="s">NGRBC (2019)</text>
+        <circle cx="520" cy="80" r="7" fill="var(--teal)"/><text x="520" y="58" text-anchor="middle" font-weight="700">FY22-23</text><text x="520" y="104" text-anchor="middle" class="s">BRSR mandatory</text><text x="520" y="120" text-anchor="middle" class="s">top 1,000</text>
+        <circle cx="640" cy="80" r="7" fill="var(--teal)"/><text x="640" y="58" text-anchor="middle" font-weight="700">2023</text><text x="640" y="104" text-anchor="middle" class="s">BRSR Core;</text><text x="640" y="120" text-anchor="middle" class="s">ESG raters regulated</text>
+        <circle cx="770" cy="80" r="7" fill="var(--bad)"/><text x="770" y="58" text-anchor="middle" font-weight="700">2025</text><text x="770" y="104" text-anchor="middle" class="s">Reset: assessment or</text><text x="770" y="120" text-anchor="middle" class="s">assurance; value chain</text><text x="770" y="136" text-anchor="middle" class="s">voluntary</text>
+        <circle cx="915" cy="80" r="7" fill="var(--teal)"/><text x="915" y="58" text-anchor="middle" font-weight="700">FY26-27</text><text x="915" y="104" text-anchor="middle" class="s">Core verification</text><text x="915" y="120" text-anchor="middle" class="s">all top 1,000</text>
       </g>
     </svg>
   </div>
@@ -1630,8 +1765,8 @@ ol.steps .lab math{margin-top:6px}
     </tbody></table></div>
   </div>
   <div class="grid2">
-    <div class="box" style="--c:var(--good);--ct:#173226"><span class="k">Assurance 1 of 2: Tata Steel</span><p><b>Price Waterhouse &amp; Co:</b> <b>reasonable</b> assurance on BRSR Core, <b>limited</b> on other agreed indicators, under <b>SSAE 3000 and SAE 3410</b> (ICAI) and <b>ISAE 3000 and 3410</b>.</p></div>
-    <div class="box" style="--c:var(--bad);--ct:#3A1E1C"><span class="k">Assurance 2 of 2: P&amp;G</span><p>Entire disclosure is one sentence: "P&amp;G obtains third party assurance of our Scope 1, 2 and portions of our Scope 3 inventory, Lloyd's Register Quality Assurance (<b>LRQA</b>)". <b>No standard, level or scope</b> on the page (Data and Metrics Report 2026, p.10).</p></div>
+    <div class="box" style="--c:var(--good);--ct:var(--good-t)"><span class="k">Assurance 1 of 2: Tata Steel</span><p><b>Price Waterhouse &amp; Co:</b> <b>reasonable</b> assurance on BRSR Core, <b>limited</b> on other agreed indicators, under <b>SSAE 3000 and SAE 3410</b> (ICAI) and <b>ISAE 3000 and 3410</b>.</p></div>
+    <div class="box" style="--c:var(--bad);--ct:var(--bad-t)"><span class="k">Assurance 2 of 2: P&amp;G</span><p>Entire disclosure is one sentence: "P&amp;G obtains third party assurance of our Scope 1, 2 and portions of our Scope 3 inventory, Lloyd's Register Quality Assurance (<b>LRQA</b>)". <b>No standard, level or scope</b> on the page (Data and Metrics Report 2026, p.10).</p></div>
   </div>
   <p class="muted">"A reasonable-assurance opinion at one end, a footnote at the other. Two prices of credibility, and the buyer rarely reads the label." Read the standard, the level and the scope of each signature.</p>
   <div class="tw"><table><thead><tr><th>BRSR: what it is meant to do (slide 27)</th><th>Where it falls short</th></tr></thead><tbody>
@@ -1681,11 +1816,11 @@ ol.steps .lab math{margin-top:6px}
       <svg viewBox="0 0 460 230" role="img" aria-label="Average correlation between raters: credit 0.99, ESG overall 0.54, E 0.53, S 0.42, G 0.30">
         <text x="6" y="16" font-size="13" font-weight="700">Average correlation between raters</text>
         <g font-size="12">
-          <text x="130" y="48" text-anchor="end">Credit ratings</text><rect x="138" y="36" width="297" height="18" fill="#9A9CAB"/><text x="430" y="50" text-anchor="end" fill="#141519" font-weight="700">0.99</text>
-          <text x="130" y="84" text-anchor="end" font-weight="700">ESG overall</text><rect x="138" y="72" width="162" height="18" fill="#6AA8F7"/><text x="306" y="86">0.54</text>
-          <text x="130" y="120" text-anchor="end">Environmental</text><rect x="138" y="108" width="159" height="18" fill="#4FD1B5"/><text x="303" y="122">0.53</text>
-          <text x="130" y="156" text-anchor="end">Social</text><rect x="138" y="144" width="126" height="18" fill="#F5A05B"/><text x="270" y="158">0.42</text>
-          <text x="130" y="192" text-anchor="end">Governance</text><rect x="138" y="180" width="90" height="18" fill="#F47FB6"/><text x="234" y="194">0.30</text>
+          <text x="130" y="48" text-anchor="end">Credit ratings</text><rect x="138" y="36" width="297" height="18" fill="var(--muted)"/><text x="430" y="50" text-anchor="end" fill="var(--bg)" font-weight="700">0.99</text>
+          <text x="130" y="84" text-anchor="end" font-weight="700">ESG overall</text><rect x="138" y="72" width="162" height="18" fill="var(--blue)"/><text x="306" y="86">0.54</text>
+          <text x="130" y="120" text-anchor="end">Environmental</text><rect x="138" y="108" width="159" height="18" fill="var(--teal)"/><text x="303" y="122">0.53</text>
+          <text x="130" y="156" text-anchor="end">Social</text><rect x="138" y="144" width="126" height="18" fill="var(--orange)"/><text x="270" y="158">0.42</text>
+          <text x="130" y="192" text-anchor="end">Governance</text><rect x="138" y="180" width="90" height="18" fill="var(--pink)"/><text x="234" y="194">0.30</text>
         </g>
         <text x="6" y="224" font-size="11" class="m">Berg, Kölbel &amp; Rigobon (2022): six raters, ~900 firms.</text>
       </svg>
@@ -1770,11 +1905,11 @@ ol.steps .lab math{margin-top:6px}
   <div class="fig">
     <svg viewBox="0 0 1000 170" role="img" aria-label="How the tragedy happens: self-interest, my share is small, everyone thinks so, commons ruined">
       <g font-size="13">
-        <rect x="6" y="20" width="220" height="100" rx="14" fill="#3A1F2E" stroke="#F47FB6"/><text x="116" y="52" text-anchor="middle" font-weight="700">1. Self-interest</text><text x="116" y="76" text-anchor="middle" class="s" font-size="12">gain from one more</text><text x="116" y="94" text-anchor="middle" class="s" font-size="12">animal is all mine (+1)</text>
-        <rect x="258" y="20" width="220" height="100" rx="14" fill="#3A1F2E" stroke="#F47FB6"/><text x="368" y="52" text-anchor="middle" font-weight="700">2. "My share is small"</text><text x="368" y="76" text-anchor="middle" class="s" font-size="12">cost shared by all,</text><text x="368" y="94" text-anchor="middle" class="s" font-size="12">delayed, invisible</text>
-        <rect x="510" y="20" width="220" height="100" rx="14" fill="#3A1F2E" stroke="#F47FB6"/><text x="620" y="52" text-anchor="middle" font-weight="700">3. No one aggregates</text><text x="620" y="76" text-anchor="middle" class="s" font-size="12">everyone reasons the</text><text x="620" y="94" text-anchor="middle" class="s" font-size="12">same way, all defect</text>
-        <rect x="762" y="20" width="232" height="100" rx="14" fill="#3A1E1C" stroke="#F2766B"/><text x="878" y="52" text-anchor="middle" font-weight="700">Commons ruined</text><text x="878" y="76" text-anchor="middle" class="s" font-size="12">"a single villain in the</text><text x="878" y="94" text-anchor="middle" class="s" font-size="12">commons spoils it for all"</text>
-        <g stroke="#9A9CAB" stroke-width="2"><line x1="226" y1="70" x2="258" y2="70"/><line x1="478" y1="70" x2="510" y2="70"/><line x1="730" y1="70" x2="762" y2="70"/></g>
+        <rect x="6" y="20" width="220" height="100" rx="14" fill="var(--pink-t)" stroke="var(--pink)"/><text x="116" y="52" text-anchor="middle" font-weight="700">1. Self-interest</text><text x="116" y="76" text-anchor="middle" class="s" font-size="12">gain from one more</text><text x="116" y="94" text-anchor="middle" class="s" font-size="12">animal is all mine (+1)</text>
+        <rect x="258" y="20" width="220" height="100" rx="14" fill="var(--pink-t)" stroke="var(--pink)"/><text x="368" y="52" text-anchor="middle" font-weight="700">2. "My share is small"</text><text x="368" y="76" text-anchor="middle" class="s" font-size="12">cost shared by all,</text><text x="368" y="94" text-anchor="middle" class="s" font-size="12">delayed, invisible</text>
+        <rect x="510" y="20" width="220" height="100" rx="14" fill="var(--pink-t)" stroke="var(--pink)"/><text x="620" y="52" text-anchor="middle" font-weight="700">3. No one aggregates</text><text x="620" y="76" text-anchor="middle" class="s" font-size="12">everyone reasons the</text><text x="620" y="94" text-anchor="middle" class="s" font-size="12">same way, all defect</text>
+        <rect x="762" y="20" width="232" height="100" rx="14" fill="var(--bad-t)" stroke="var(--bad)"/><text x="878" y="52" text-anchor="middle" font-weight="700">Commons ruined</text><text x="878" y="76" text-anchor="middle" class="s" font-size="12">"a single villain in the</text><text x="878" y="94" text-anchor="middle" class="s" font-size="12">commons spoils it for all"</text>
+        <g stroke="var(--muted)" stroke-width="2"><line x1="226" y1="70" x2="258" y2="70"/><line x1="478" y1="70" x2="510" y2="70"/><line x1="730" y1="70" x2="762" y2="70"/></g>
         <text x="6" y="152" class="m" font-size="12">Prisoner's-dilemma logic: everyone defects though all would be better off cooperating. Adam Smith's invisible hand fails here.</text>
       </g>
     </svg>
@@ -1797,12 +1932,12 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 460 260" role="img" aria-label="Three eras: industrial steady growth, information rapid growth, sustainable constrained growth">
         <text x="6" y="16" font-size="13" font-weight="700">The business enterprise we need (slide 4)</text>
-        <line x1="20" y1="200" x2="450" y2="200" stroke="#2b2e38"/>
-        <path d="M20 190 L160 160" stroke="#9A9CAB" stroke-width="3" fill="none"/>
-        <path d="M160 160 L300 70" stroke="#6AA8F7" stroke-width="3" fill="none"/>
-        <path d="M300 70 C 340 55, 400 52, 450 50" stroke="#F47FB6" stroke-width="3" fill="none"/>
-        <line x1="300" y1="44" x2="450" y2="44" stroke="#F2766B" stroke-dasharray="5 4"/>
-        <text x="375" y="38" text-anchor="middle" font-size="11" fill="#F2766B">sustainability constraints</text>
+        <line x1="20" y1="200" x2="450" y2="200" stroke="var(--line)"/>
+        <path d="M20 190 L160 160" stroke="var(--muted)" stroke-width="3" fill="none"/>
+        <path d="M160 160 L300 70" stroke="var(--blue)" stroke-width="3" fill="none"/>
+        <path d="M300 70 C 340 55, 400 52, 450 50" stroke="var(--pink)" stroke-width="3" fill="none"/>
+        <line x1="300" y1="44" x2="450" y2="44" stroke="var(--bad)" stroke-dasharray="5 4"/>
+        <text x="375" y="38" text-anchor="middle" font-size="11" fill="var(--bad)">sustainability constraints</text>
         <g font-size="11.5">
           <text x="90" y="220" text-anchor="middle" font-weight="700">Industrial</text><text x="90" y="236" text-anchor="middle" class="m">1940s-70s · steady</text>
           <text x="230" y="220" text-anchor="middle" font-weight="700">Information</text><text x="230" y="236" text-anchor="middle" class="m">1980s-2000 · rapid</text>
@@ -1872,10 +2007,10 @@ ol.steps .lab math{margin-top:6px}
         <text x="30" y="200" text-anchor="middle" font-weight="700" class="s" transform="rotate(-90 30 200)">FOCUS</text>
         <text x="130" y="128" text-anchor="middle" font-weight="700">Outcomes</text>
         <text x="130" y="258" text-anchor="middle" font-weight="700">Operational</text><text x="130" y="276" text-anchor="middle" font-weight="700">processes</text>
-        <rect x="230" y="60" width="310" height="125" rx="14" fill="#1C2A40" stroke="#6AA8F7"/><text x="385" y="90" text-anchor="middle" font-weight="700">Industry benchmarks</text><text x="385" y="114" text-anchor="middle" class="s" font-size="11.5">common metrics for the industry</text><text x="385" y="140" text-anchor="middle" class="m" font-size="11.5">e.g. SAC Higg Index</text>
-        <rect x="550" y="60" width="310" height="125" rx="14" fill="#3A1F2E" stroke="#F47FB6"/><text x="705" y="90" text-anchor="middle" font-weight="700">Payment for ecosystem services</text><text x="705" y="114" text-anchor="middle" class="s" font-size="11.5">firms fund communities for conservation</text><text x="705" y="140" text-anchor="middle" class="m" font-size="11.5">e.g. Latin American Water Funds</text><text x="705" y="158" text-anchor="middle" class="m" font-size="11.5">(Coca-Cola's largest bottler + upstream farmers)</text>
-        <rect x="230" y="195" width="310" height="125" rx="14" fill="#1B3330" stroke="#4FD1B5"/><text x="385" y="225" text-anchor="middle" font-weight="700">Shared operational processes</text><text x="385" y="249" text-anchor="middle" class="s" font-size="11.5">industry-wide processes that cut emissions,</text><text x="385" y="267" text-anchor="middle" class="s" font-size="11.5">resource use and waste</text><text x="385" y="289" text-anchor="middle" class="m" font-size="11.5">e.g. Dairy Management Inc.</text><text x="385" y="306" text-anchor="middle" class="m" font-size="11.5">(milk footprint + renewable energy)</text>
-        <rect x="550" y="195" width="310" height="125" rx="14" fill="#3A2A1E" stroke="#F5A05B"/><text x="705" y="225" text-anchor="middle" font-weight="700">Extended collaborations</text><text x="705" y="249" text-anchor="middle" class="s" font-size="11.5">business and nonbusiness actors</text><text x="705" y="267" text-anchor="middle" class="s" font-size="11.5">redesign processes together</text><text x="705" y="291" text-anchor="middle" class="m" font-size="11.5">e.g. Action to Accelerate Recycling</text>
+        <rect x="230" y="60" width="310" height="125" rx="14" fill="var(--blue-t)" stroke="var(--blue)"/><text x="385" y="90" text-anchor="middle" font-weight="700">Industry benchmarks</text><text x="385" y="114" text-anchor="middle" class="s" font-size="11.5">common metrics for the industry</text><text x="385" y="140" text-anchor="middle" class="m" font-size="11.5">e.g. SAC Higg Index</text>
+        <rect x="550" y="60" width="310" height="125" rx="14" fill="var(--pink-t)" stroke="var(--pink)"/><text x="705" y="90" text-anchor="middle" font-weight="700">Payment for ecosystem services</text><text x="705" y="114" text-anchor="middle" class="s" font-size="11.5">firms fund communities for conservation</text><text x="705" y="140" text-anchor="middle" class="m" font-size="11.5">e.g. Latin American Water Funds</text><text x="705" y="158" text-anchor="middle" class="m" font-size="11.5">(Coca-Cola's largest bottler + upstream farmers)</text>
+        <rect x="230" y="195" width="310" height="125" rx="14" fill="var(--teal-t)" stroke="var(--teal)"/><text x="385" y="225" text-anchor="middle" font-weight="700">Shared operational processes</text><text x="385" y="249" text-anchor="middle" class="s" font-size="11.5">industry-wide processes that cut emissions,</text><text x="385" y="267" text-anchor="middle" class="s" font-size="11.5">resource use and waste</text><text x="385" y="289" text-anchor="middle" class="m" font-size="11.5">e.g. Dairy Management Inc.</text><text x="385" y="306" text-anchor="middle" class="m" font-size="11.5">(milk footprint + renewable energy)</text>
+        <rect x="550" y="195" width="310" height="125" rx="14" fill="var(--orange-t)" stroke="var(--orange)"/><text x="705" y="225" text-anchor="middle" font-weight="700">Extended collaborations</text><text x="705" y="249" text-anchor="middle" class="s" font-size="11.5">business and nonbusiness actors</text><text x="705" y="267" text-anchor="middle" class="s" font-size="11.5">redesign processes together</text><text x="705" y="291" text-anchor="middle" class="m" font-size="11.5">e.g. Action to Accelerate Recycling</text>
       </g>
     </svg>
   </div>
@@ -1893,11 +2028,11 @@ ol.steps .lab math{margin-top:6px}
     <div class="fig">
       <svg viewBox="0 0 440 260" role="img" aria-label="Groundwater depth fell from about 9 metres to about 36 metres below ground">
         <text x="6" y="16" font-size="13" font-weight="700">Depth to groundwater (m below ground)</text>
-        <line x1="60" y1="40" x2="420" y2="40" stroke="#2b2e38"/>
+        <line x1="60" y1="40" x2="420" y2="40" stroke="var(--line)"/>
         <g font-size="11" class="m"><text x="52" y="44" text-anchor="end">0</text><text x="52" y="104" text-anchor="end">10</text><text x="52" y="164" text-anchor="end">20</text><text x="52" y="224" text-anchor="end">30</text></g>
-        <line x1="60" y1="40" x2="60" y2="250" stroke="#2b2e38"/>
-        <path d="M80 94 L230 166 L400 256" stroke="#4FD1B5" stroke-width="3" fill="none"/>
-        <circle cx="80" cy="94" r="5" fill="#4FD1B5"/><circle cx="400" cy="250" r="5" fill="#F2766B"/>
+        <line x1="60" y1="40" x2="60" y2="250" stroke="var(--line)"/>
+        <path d="M80 94 L230 166 L400 256" stroke="var(--teal)" stroke-width="3" fill="none"/>
+        <circle cx="80" cy="94" r="5" fill="var(--teal)"/><circle cx="400" cy="250" r="5" fill="var(--bad)"/>
         <text x="90" y="86" font-size="12" font-weight="700">~9 m (~20 yrs earlier)</text>
         <text x="300" y="236" font-size="12" font-weight="700" text-anchor="end">~36 m (case date)</text>
         <text x="150" y="146" font-size="11" class="s">0.5 m/yr (1984-96)</text>
@@ -1907,8 +2042,8 @@ ol.steps .lab math{margin-top:6px}
     <div class="line" style="--c:var(--pink)"><h3>Who extracts Kaladera's ~50 million m³ a year?</h3><div class="kv"><span>Agriculture (TERI)</span><span>~91%</span><span>Domestic + industrial (TERI)</span><span>~9%</span><span>CGWB 2005: irrigation / domestic / industry</span><span>95.06 / 4.33 / 0.61%</span><span><b>Coca-Cola plant, share of total</b></span><span><b>0.2-1.0%</b></span><span>Plant use: early → later</span><span>200,000 → 100,000 m³/yr</span><span>Within 2 km radius (May 2004)</span><span>up to ~8%</span></div><p style="margin-top:8px">Watershed 309 km², declared <b>overexploited</b> by CGWB in <b>1998</b>. Extraction ≥ <b>1.35x</b> recharge (TERI); <b>2.47x</b> (government, 2004). Coke may still be the <b>single largest user</b>.</p></div>
   </div>
   <div class="grid2">
-    <div class="box" style="--c:var(--bad);--ct:#3A1E1C"><span class="k">Facts against Coca-Cola</span><ul><li>Plant set up <b>1999</b> (production 2000) in a <b>RIICO</b> park, <b>a year after</b> the overexploited designation; four 100 m bore wells (permission for five).</li><li>Claims environmental due diligence but <b>will not share the reports</b>.</li><li>Rajasthan gave a <b>sales-tax incentive</b> equal to the investment, <b>₹39 crore (~$9.1m)</b>, which may explain a plant running at <b>~30% capacity</b>.</li><li><b>Peak production April-June</b>: the most acute water stress.</li><li><b>TERI</b> (the auditor Coke chose) said the plant would remain a contributor to a worsening situation; four options: transport water from an unstressed aquifer, store water from low-stress seasons, <b>relocate</b>, <b>shut down</b>. <b>Coke rejected all four.</b></li><li>Rainwater-harvesting claim of <b>15x recharge</b>: 140 structures, many dilapidated; <b>no meters</b> despite a written promise (Jeff Seabright, Jan 2008); three executives, three excuses; model "internal". Prof. Rathore: "no possibility". Cost ~$70,000 vs ~$1.8bn India revenue.</li><li>Coca-Cola itself wrote that the <b>burden of proof is on it</b>.</li></ul></div>
-    <div class="box" style="--c:var(--good);--ct:#173226"><span class="k">Facts for Coca-Cola (or mitigating)</span><ul><li>Agriculture is <b>~91-95%</b> of extraction; farm use alone exceeds recharge.</li><li>Causes: population growth (~2.6%/yr), urbanisation, water-intensive crops (groundnut, mustard, wheat, millet), <b>free or cheap electricity</b> for farm pumps.</li><li>Rainfall decline is not the cause (avg ~600 mm, sd ~175 mm).</li><li>Water-use ratio fell from ~<b>2.7 to ~2.12</b> litres per litre of product (glass to PET); extraction roughly halved.</li><li>All legal clearances held; Rajasthan has <b>no groundwater law</b>; State Water Policy (1999) priorities (drinking, irrigation, power, industry) never enacted.</li><li>Location decision predates Coke's global water-stewardship push (first environmental report 2002; Seabright appointed 2003).</li></ul></div>
+    <div class="box" style="--c:var(--bad);--ct:var(--bad-t)"><span class="k">Facts against Coca-Cola</span><ul><li>Plant set up <b>1999</b> (production 2000) in a <b>RIICO</b> park, <b>a year after</b> the overexploited designation; four 100 m bore wells (permission for five).</li><li>Claims environmental due diligence but <b>will not share the reports</b>.</li><li>Rajasthan gave a <b>sales-tax incentive</b> equal to the investment, <b>₹39 crore (~$9.1m)</b>, which may explain a plant running at <b>~30% capacity</b>.</li><li><b>Peak production April-June</b>: the most acute water stress.</li><li><b>TERI</b> (the auditor Coke chose) said the plant would remain a contributor to a worsening situation; four options: transport water from an unstressed aquifer, store water from low-stress seasons, <b>relocate</b>, <b>shut down</b>. <b>Coke rejected all four.</b></li><li>Rainwater-harvesting claim of <b>15x recharge</b>: 140 structures, many dilapidated; <b>no meters</b> despite a written promise (Jeff Seabright, Jan 2008); three executives, three excuses; model "internal". Prof. Rathore: "no possibility". Cost ~$70,000 vs ~$1.8bn India revenue.</li><li>Coca-Cola itself wrote that the <b>burden of proof is on it</b>.</li></ul></div>
+    <div class="box" style="--c:var(--good);--ct:var(--good-t)"><span class="k">Facts for Coca-Cola (or mitigating)</span><ul><li>Agriculture is <b>~91-95%</b> of extraction; farm use alone exceeds recharge.</li><li>Causes: population growth (~2.6%/yr), urbanisation, water-intensive crops (groundnut, mustard, wheat, millet), <b>free or cheap electricity</b> for farm pumps.</li><li>Rainfall decline is not the cause (avg ~600 mm, sd ~175 mm).</li><li>Water-use ratio fell from ~<b>2.7 to ~2.12</b> litres per litre of product (glass to PET); extraction roughly halved.</li><li>All legal clearances held; Rajasthan has <b>no groundwater law</b>; State Water Policy (1999) priorities (drinking, irrigation, power, industry) never enacted.</li><li>Location decision predates Coke's global water-stewardship push (first environmental report 2002; Seabright appointed 2003).</li></ul></div>
   </div>
   <div class="slides"><b>Covers S9 slides:</b> 2 (case question), 16 (case title), 17 (facts video), 18 (officials and community meeting). Case: coursepack (Karnani 2014).</div>
 </section>
@@ -1923,10 +2058,10 @@ ol.steps .lab math{margin-top:6px}
   <div class="chips"><span class="chip">Population 620,000</span><span class="chip">Farmers 92,000</span><span class="chip">Plant jobs ~150 (70 to 250)</span><span class="chip">Domestic use ≈ 4% of water</span></div>
   <div class="eqrow"><span class="eqlab">Coca-Cola's livelihood share of the remaining 96%</span><math display="block"><mrow><mtext>entitlement</mtext><mo>=</mo><mfrac><mrow><mn>150</mn></mrow><mrow><mn>92,000</mn><mo>+</mo><mn>150</mn></mrow></mfrac><mo>&#215;</mo><mn>96</mn><mo>%</mo><mo>&#8776;</mo><mn>0.15</mn><mo>%</mo></mrow></math><span class="res">≈ 0.15%</span></div>
   <svg viewBox="0 0 620 120" role="img" aria-label="Entitlement 0.15 percent versus actual share 0.2 to 1.0 percent">
-    <line x1="40" y1="78" x2="600" y2="78" stroke="#363a46"/>
+    <line x1="40" y1="78" x2="600" y2="78" stroke="var(--line-2)"/>
     <g font-size="12" class="m"><text x="40" y="98" text-anchor="middle">0%</text><text x="173" y="98" text-anchor="middle">0.25%</text><text x="307" y="98" text-anchor="middle">0.5%</text><text x="440" y="98" text-anchor="middle">0.75%</text><text x="573" y="98" text-anchor="middle">1.0%</text></g>
-    <rect x="40" y="22" width="80" height="22" rx="4" fill="#4FD1B5"/><text x="128" y="38" font-size="12.5">Fair share ≈ 0.15%</text>
-    <rect x="147" y="52" width="426" height="22" rx="4" fill="#F47FB6" opacity=".85"/><text x="360" y="68" font-size="12.5" text-anchor="middle" fill="#141519" font-weight="700">Actual share 0.2% to 1.0%</text>
+    <rect x="40" y="22" width="80" height="22" rx="4" fill="var(--teal)"/><text x="128" y="38" font-size="12.5">Fair share ≈ 0.15%</text>
+    <rect x="147" y="52" width="426" height="22" rx="4" fill="var(--pink)" opacity=".85"/><text x="360" y="68" font-size="12.5" text-anchor="middle" fill="var(--bg)" font-weight="700">Actual share 0.2% to 1.0%</text>
   </svg>
   <ul><li>Hardin: every commons user thinks its own share is small. That <b>is</b> the tragedy.</li><li>Policy priority puts industry <b>last</b>, after drinking, irrigation and power.</li></ul>
 </div>
