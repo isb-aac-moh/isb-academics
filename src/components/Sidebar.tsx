@@ -43,8 +43,8 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const primaryNav = (collapsed: boolean, onLight: boolean) => (
     <nav className="space-y-1">
       <NavItem icon={<Brain size={16} />} label="Learn" active={isActive("/learn")} onClick={() => go("/learn")} collapsed={collapsed} onLight={onLight} />
-      {/* Preview for admins while testers are invited by link: /compass works for any signed-in user, but the dataset itself is only readable once uploaded to the private bucket. */}
-      <NavItem icon={<CompassIcon size={16} />} label="Compass" active={isActive("/compass")} onClick={() => go("/compass")} disabled={!user.is_admin} soon={!user.is_admin} preview={user.is_admin} collapsed={collapsed} onLight={onLight} />
+      {/* Admin-only pilot. Hidden for students and in the recruiter demo (the demo has no Compass data). */}
+      {user.is_admin && !isDemoMode() && <NavItem icon={<CompassIcon size={16} />} label="Compass" active={isActive("/compass")} onClick={() => go("/compass")} preview collapsed={collapsed} onLight={onLight} />}
       <NavItem icon={<GraduationCap size={16} />} label="Credit Tracker" active={isActive("/tracker")} onClick={() => go("/tracker")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} collapsed={collapsed} onLight={onLight} />

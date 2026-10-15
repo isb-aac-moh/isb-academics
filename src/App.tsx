@@ -53,11 +53,12 @@ export default function App() {
 
         {/* Trailing splat: the Learn section renders its own descendant routes (its window
             content) rather than being a single page. */}
-        {/* Compass: search + map of everything ISB taught. Descendant routes live in the section. */}
-        <Route path="/compass/*" element={<CompassSection />} />
         <Route path="/learn/*" element={<LearnSection user={user} />} />
 
         <Route element={<RequireAdmin user={user} />}>
+          {/* Compass (search + map of everything ISB taught) is admin-only during the pilot. Remove this
+              wrapper to open it to students; the dataset bucket policy must be widened to match. */}
+          <Route path="/compass/*" element={<CompassSection />} />
           <Route path="/notices" element={<NoticeBoard />} />
           <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
           <Route path="/admin/:tab" element={<AdminPage />} />
