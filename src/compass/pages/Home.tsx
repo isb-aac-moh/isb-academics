@@ -15,6 +15,7 @@ export default function Home({ store, lens }: { store: Store; lens: string }) {
   const topicCount = (id: string) => taught.filter(c => topicOf(c) === id && inLens(c, lens)).length;
   const knownTaught = taught.filter(c => known.has(c.id)).length;
   return <>
+    <p className="note" style={{ marginTop: 14 }}>Pilot preview: a first look at what Compass will do. <Link to="/compass/roadmap" style={{ color: "var(--hero)", fontWeight: 600 }}>See the roadmap →</Link></p>
     <p className="sub" style={{ font: "15px/1.6 var(--serif)", color: "var(--ink2)", maxWidth: 620, margin: "14px 0 0" }}>Look up any idea from your courses, see how it connects to everything else, and jump straight to the class where it was taught.</p>
     <div className="searchbox"><input type="search" autoFocus placeholder="Search an idea, like market sizing or newsvendor" aria-label="Search any idea" value={q} onChange={e => setQ(e.target.value)} /></div>
     {q.length > 1 ? <section>

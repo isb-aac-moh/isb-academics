@@ -7,6 +7,8 @@ import { CoursePage, CoursesPage } from "./pages/CoursePage";
 import { TopicPage, TopicsPage } from "./pages/TopicsPage";
 import { PrepKitPage, PrepPage } from "./pages/PrepPage";
 import MapPage from "./pages/MapPage";
+import ComparePage from "./pages/ComparePage";
+import RoadmapPage from "./pages/RoadmapPage";
 import "./compass.css";
 
 function useLens(): [string, (l: string) => void] {
@@ -16,7 +18,7 @@ function useLens(): [string, (l: string) => void] {
   return [LENSES.some(l => l.id === lens) ? lens : "all", (l) => { try { localStorage.setItem("compass.lens", l); } catch { /* ignore */ } const n = new URLSearchParams(sp); n.set("lens", l); setSp(n, { replace: true }); }];
 }
 
-const TABS = [["", "Search"], ["topics", "Topics"], ["courses", "Courses"], ["prep", "Prep kits"], ["map", "Map"]] as const;
+const TABS = [["", "Search"], ["topics", "Topics"], ["courses", "Courses"], ["prep", "Prep kits"], ["map", "Map"], ["compare", "Across courses"], ["roadmap", "Roadmap"]] as const;
 
 export default function CompassSection() {
   const [store, setStore] = useState<Store | null>(null); const [err, setErr] = useState(false);
@@ -25,7 +27,7 @@ export default function CompassSection() {
   // A new page should open at its top. Only the path triggers this, so picking an idea on the map or
   // switching the view (search params) keeps the reader where they are.
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
-  const showLens = !loc.pathname.startsWith("/compass/prep");
+  const showLens = !/^\/compass\/(prep|roadmap)/.test(loc.pathname);
   return <div className="compass"><div className="wrap">
     <header className="ph"><h1><Link to={`/compass?lens=${lens}`}>ISB <em>Compass</em></Link></h1></header>
     <nav className="nav" aria-label="Compass sections">
@@ -44,6 +46,8 @@ export default function CompassSection() {
       <Route path="prep" element={<PrepPage store={store} />} />
       <Route path="prep/:id" element={<PrepKitPage store={store} lens={lens} />} />
       <Route path="map" element={<MapPage store={store} lens={lens} />} />
+      <Route path="compare" element={<ComparePage store={store} lens={lens} />} />
+      <Route path="roadmap" element={<RoadmapPage store={store} lens={lens} />} />
       <Route path="*" element={<p className="note" style={{ marginTop: 24 }}>Page not found. <Link to="/compass">Back to search</Link></p>} />
     </Routes>}
     <p className="small" style={{ marginTop: 48 }}>Prototype. Built from ISB course material for ISB students. Slides open in Moodle; nothing here is a copy of faculty files.</p>
