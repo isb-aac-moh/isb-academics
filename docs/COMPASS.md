@@ -6,13 +6,14 @@ Status: approved for build. Spec written 30 Sep 2026, re-baselined 15 Oct 2026 (
 
 Owner: Eshan (product decisions, reviews, sign-off). Builder: Claude Code sessions. Testers: a handful of people Eshan recruits himself (names not needed).
 
-Reading order for a new chat: `docs/COMPASS_HANDOFF.md` first (state, next steps, a paste-ready starter prompt), then this file.
+Reading order for a new chat: `docs/COMPASS_HANDOFF.md` first (state, next steps, a paste-ready starter prompt and the map of all Compass docs), then `docs/COMPASS_POC.md` (what is built and live), `docs/COMPASS_PRD.md` (the product plan) and `docs/COMPASS_RESEARCH_PLAN.md`. This file is the earlier engineering spec for the full production build.
 
 ## Changelog
 
 | Date | Change |
 |---|---|
 | 30 Sep 2026 | First full spec after a five-specialist debate (product, data, tech, visual design, UX). |
+| 15 Oct 2026 (late) | A POC was built and shipped for admins only (see `COMPASS_POC.md`). It does not follow sections 6, 8 and 11 of this spec: data is one JSON file in a private bucket, search runs in the browser, and there are no `compass_*` tables yet. |
 | 15 Oct 2026 | Approvals reported in place (D4). Moodle sync added as the preferred content source (section 7.0, D11). Roadmap re-baselined from a 27 Oct public launch (section 14). Added personas, non-functional requirements, open questions, rejected options and glossary (sections 17 to 21). Verified current state against production and `origin/main` (section 2). |
 
 ## Contents

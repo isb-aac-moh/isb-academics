@@ -1,0 +1,5 @@
+# Task: propose "builds on" links for newly found course ideas
+Input ~/Downloads/compass-build/work/links/in_<G>.json has "new" (ideas found in class, with no links yet) and "candidates" (all ideas taught in the same course(s), including the new ones).
+For EACH new idea, choose 0-3 candidates that a student should understand BEFORE it (prerequisites: the new idea uses, applies, or extends them). Only use ids from "candidates"; never the idea itself. Prefer fewer, better links: return an empty list if nothing is a real prerequisite. Do not link two ideas just because they are on the same topic.
+Output ~/Downloads/compass-build/work/links/out_<G>.jsonl, one JSON line per new idea (same order): {"id": "...", "builds_on": [{"to": "<candidate id>", "why": "<=14 words, plain, why it is needed first"}]}
+Write with a python script using json.dumps, validate every id exists in candidates and every new idea has a line. Keep helper scripts in your own scratchpad; write only your out file. No quotes from slides; plain words.
