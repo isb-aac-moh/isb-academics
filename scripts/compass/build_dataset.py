@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build public/data/compass.json (derived data only: no slide text, no files) from tags, passages, seed graph and the Moodle map."""
+"""Build public/compass-dev.json (derived data only: no slide text, no files) from tags, passages, seed graph and the Moodle map."""
 import json, glob, os, re, collections, datetime
 B = os.path.expanduser("~/Downloads/compass-build"); W = f"{B}/work"; MD = f"{B}/moodle"
-OUT = os.path.join(os.path.dirname(__file__), "..", "public", "data", "compass.json")
+OUT = os.path.join(os.path.dirname(__file__), "..", "..", "public", "compass-dev.json")  # gitignored; upload with `supabase --experimental storage cp`
 NAMES = {"STRG": "Strategy", "MKTG": "Marketing Management", "OPMG": "Operations Management", "BANM": "Business Analytics for Marketing", "SWPM": "Software Product Management", "FRNT": "Frontier Technologies"}
 norm = lambda t: re.sub(r"[^a-z0-9]+", " ", t.lower()).strip()
 

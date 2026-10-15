@@ -1,124 +1,122 @@
 # Compass handoff: start here
 
-Written Thu 15 Oct 2026 at the end of the planning chat. Read this, then `docs/COMPASS.md` (the full product requirements, architecture and roadmap). Nothing for Compass has been built yet; everything so far is planning and verification.
+Last updated Thu 15 Oct 2026, after the POC went live for admins. If you are picking this up later, read this file first, then the doc you need from the map below.
 
 ## What Compass is, in three lines
 
-A "where was this taught" index for ISB students. They type an idea ("NPV", "newsvendor"), and see every course, session and slide range that covered it, with a link to open the real deck in the LMS. No chatbot, no AI at runtime, $0 a month extra. AI is used only at build time, in Claude Code sessions on Eshan's Mac, to tag slides and outlines with topics.
+A searchable, connected memory of everything ISB teaches. A student types an idea ("newsvendor", "market sizing"), sees every course and session that taught it, how it connects to other ideas, and opens the class material in Moodle. No chatbot and no AI at runtime; AI is used only while building the dataset. Placement preparation is the first use, not the only one.
+
+## Document map
+
+| File | Read it for |
+|---|---|
+| `docs/COMPASS_HANDOFF.md` (this file) | Where things stand, where everything lives, what to do next, a starter prompt |
+| `docs/COMPASS_POC.md` | What was built: routes, data format, pipeline commands, code map, access control, operations, quality status, backlog, gotchas |
+| `docs/COMPASS_PRD.md` | The stakeholder PRD v2: scope, decisions, guardrails, costs, phases, risks, asks. Repo copy of the private artifact https://claude.ai/artifact/2DVUcVLqxoatKC4h2SHTKc |
+| `docs/COMPASS_RESEARCH_PLAN.md` | How to test the POC with reviewers, data-quality checks with pass marks, usage measurement, timeline, go or stop criteria |
+| `docs/COMPASS.md` | The earlier 740-line engineering spec (schema, RPCs, build pipeline, tests, rollout) for the full production build. **Partly superseded** by the PRD; still useful for the data model and runbook ideas |
+| `docs/AAC_Compass_Blueprint.md` | The first idea bank. Not binding |
 
 ## Where things are
 
 | Thing | Location |
 |---|---|
-| Full PRD, architecture, schema, RPCs, pipeline, tests, roadmap | `docs/COMPASS.md` (742 lines, sections 1 to 21) |
-| This handoff | `docs/COMPASS_HANDOFF.md` |
-| Old blueprint (idea bank only, not binding) | `/Users/eshan/Desktop/claude/ISB/isb-academics/docs/AAC_Compass_Blueprint.md` (main checkout) |
-| Branch and worktree | `claude/aac-compass-blueprint-review-e1ffd5` in `.claude/worktrees/whatsapp-tom5-dashboard-message-edecb8` |
-| Git state | **Both docs are untracked and uncommitted.** The worktree is behind `origin/main` (f002209). If the worktree is cleaned up, the docs are lost; commit them first |
-| Source material | Eshan's OneDrive `ISB/Term1` to `Term4` (770 files, mostly cloud-only PDFs) |
-| Build output (to be created) | `~/compass-build/` outside the repo; never committed |
-| Supabase project | ref `ujnrgvmbahbepdnahtle` (shared with isb-explorer; free plan; no branches) |
+| App code | `src/compass/` in the `isb-academics` repo (merged to `main` by pull request #55, merge commit `f68dd8d`, 15 Oct 2026) |
+| Pipeline scripts and AI prompts | `scripts/compass/` and `scripts/compass/prompts/` |
+| Production database and storage | Supabase project "Pulse of isb", ref `ujnrgvmbahbepdnahtle` (shared with the rest of the app). Private bucket `compass`, one object `compass.json` (about 1.5 MB), uploaded 15 Oct 2026 |
+| Migration | `supabase/migrations/20261015120000_compass_private_bucket.sql`, applied to production with the CLI on 15 Oct |
+| Built dataset (not in git) | `public/compass-dev.json` in a working copy, and the build inputs in `~/Downloads/compass-build/` on Eshan's Mac. **Move that folder to a safe private place; it holds the only copy of the tagging results, explainers and links** |
+| Source course files | Eshan's OneDrive: `~/Library/CloudStorage/OneDrive-IndianSchoolofBusiness/ISB/Term1` to `Term4`, plus the Co'26 "PGP Gyaan Bhandaar" folder (1,316 files, 6.5 GB) which has not been used |
+| Prep graphs | Product Management Knowledge Graph by Professor Chandrashekhar V (saved page in Downloads); Consulting Case Graph in `ISB/Placement Prep/Consulting Case KG/` |
+| Assistant memory | `~/.claude/projects/-Users-eshan-Desktop-claude-ISB-isb-academics/memory/compass-project.md` |
 
-## Status at 15 Oct
+## Status at 15 Oct 2026
 
-| Step | State |
+| Item | State |
 |---|---|
-| Problem, scope, requirements (FR-01 to FR-18), UX, schema, pipeline, roadmap | Written and approved by Eshan |
-| Faculty and AAC approvals | Reported in place by Eshan on 15 Oct; written record link still to be added (`COMPASS.md` section 18, A1 to A3) |
-| Moodle API access | Offered by Eshan on 15 Oct; not yet tested (probe is milestone M-1) |
-| Learn content tables restricted to signed-in users | Done and live in production (migration `20260930150530`, checked 15 Oct) |
-| Database objects for Compass | None. 0 `compass_*` tables; no extensions installed |
-| Code, scripts, migration | None written |
-| Current milestone | **M-1 Moodle probe (Fri 16 Oct)**, then M0 Foundations |
+| POC built and merged to `main` | Done |
+| Migration and dataset in production | Applied and uploaded; signed-out requests to the file get nothing |
+| Admin-only | Route wrapped in `RequireAdmin`; sidebar item hidden for students and in demo; storage read policy is admins only |
+| Verified as a real admin in production | **Not yet.** The build session could not sign in as an admin |
+| Verified a student is redirected | **Not yet** |
+| Content | 6 courses (STRG, MKTG, OPMG, BANM, SWPM, FRNT), 440 ideas taught, 1,515 ideas in the file, 2,927 links (191 AI-suggested), 45 ideas in 2+ courses |
+| Tag accuracy sample | **Not done** |
+| Usage logging | **None.** Add PostHog events before testers start |
+| Reviewer roadmap page | Live at `/compass/roadmap`, not in the tab bar. Delete before production |
+| Approvals and asks to ISB | Open. See the PRD asks table. Written permission to use the PM graph is outstanding |
 
-## Decisions already made (do not reopen without new evidence)
+## First thing to do: confirm production works (10 minutes)
 
-Full table: `COMPASS.md` section 0. The ones that shape everything:
+1. Sign in to the live app as an admin. "Compass" appears in the sidebar with a Preview badge. Open `/compass`: the landing page loads with 440 ideas; search "newsvendor"; open an idea; open the Map and click an idea.
+2. Sign in as a normal student (or ask a friend). There is no Compass in the sidebar and `/compass` sends them to the tracker.
+3. If the data does not load for an admin, check the bucket object exists (`supabase --experimental storage ls ss:///compass --linked`) and that the admin's row in `public.users` has `is_admin = true`.
+4. In the recruiter demo (`/demo`) Compass is hidden on purpose.
 
-1. Own route family `/compass` in the main app, not inside Learn (D1). Sidebar says "Compass"; page subtitle "Where was this taught?"; phone gets a search icon in the top bar, no new bottom tab (D2).
-2. Text only. No slide images, thumbnails or hosted files, ever in v1 (D3).
-3. Pointer mode (course, session, slide range, heading) by default; short quotes (max 200 characters) behind one setting that Eshan flips (D4).
-4. Lists, not graphs (D7). Search is Postgres full-text plus trigram plus an alias list; no embeddings (D9).
-5. "Also taught in" appears only for concepts a human marked reviewed (D8).
-6. Faculty text never goes into git; it loads from Eshan's Mac straight into Supabase (D10).
-7. Moodle sync is the preferred source if the probe passes; OneDrive is the fallback; nothing after step 1 changes (D11).
-8. Search logs are linked to the signed-in user (D6); builder recommends a one-line notice on the page (Q5).
-9. Rejected options and the reasons are in `COMPASS.md` section 20. The five-specialist debate (product, data, tech, visual design, UX) ended with agreement on all of the above.
+## Decisions that hold (do not reopen without new evidence)
 
-## Eshan: what to do next, in order
+The full locked list is in the PRD (D1 to D15). The ones that shaped the POC:
 
-| # | Action | Time | Needed for |
-|---|---|---|---|
-| 1 | Tell the builder the exact dates of the Term 4 end-terms (Q1) | 2 min | Whether R0 goes public Tue 27 Oct or after the exams |
-| 2 | Tell the builder the LMS web address (the address is not secret) and whether Preferences, then User account, then Security keys exists | 5 min | Moodle probe |
-| 3 | After the builder creates `scripts/compass/` and its `.env.example` (first task of the next chat), create `scripts/compass/.env` yourself with two lines: `MOODLE_BASE_URL=<address>` and `MOODLE_TOKEN=<your key>`. **Never paste the key into chat.** The key is the long string next to "Moodle mobile web service" on the Security keys page | 10 min | Moodle probe |
-| 4 | Run the probe yourself in the terminal pane: `python3 scripts/compass/moodle_sync.py --probe`. It prints pass or fail for four checks and never prints the key. Paste only that output into chat | 5 min | Decision D11 |
-| 5 | Paste the link to the faculty and AAC approval message into `COMPASS.md` section 18 (A1) | 5 min | Switching quotes on |
-| 6 | One line to confirm the Moodle approval covers pulling files by API (A3) | 5 min | The bulk pull |
-| 7 | Wed 21 Oct: about one hour reviewing multi-course concepts in a Claude Code session | 1 hr | G1 |
-| 8 | Find your testers for Sat 24 to Mon 26 Oct | n/a | G3 |
+1. One graph with lenses, not separate Product and Consulting graphs. Lenses today: All ideas, Product roles, Consulting cases.
+2. Retrieval, not a chatbot. No AI at runtime. AI only while building the dataset.
+3. Derived data only in the POC: AI-written summaries, no slide text, no transcripts, no hosted files. Slides open in Moodle.
+4. Raw files, extracted text, transcripts and the Moodle session never go into git, logs, analytics or chat.
+5. Admin-only until Eshan says otherwise. Opening to students needs a policy change and a route change together (POC doc, section 6).
+6. Production target is an ISB-owned cloud in an India region with ISB sign-in. The POC runs on the existing Supabase and Vercel setup as a stopgap.
+7. Desktop-first. The map is not designed for phones.
+8. Migrations only through the Supabase CLI. Never in the dashboard.
 
-If the Security keys page is missing or the probe fails on check 1, say so; the builder writes the browser sign-in helper, or you stay on OneDrive. Do not spend more than a day on this.
+Where the POC differs from the old engineering spec (`COMPASS.md`): no `compass_*` database tables (one JSON file in a private bucket instead), search runs in the browser (MiniSearch, not Postgres full text), no pointer or quote settings, no reviewer console yet, no Moodle sync script (a one-off session-cookie fetch was used).
 
-## Builder: what to do next, in order
+## What Eshan does next, in order
 
-Work in this order. Each step has a check; do not start the next until it passes.
+| # | Action | Needed for |
+|---|---|---|
+| 1 | Run the production check above | Knowing it works |
+| 2 | Move `~/Downloads/compass-build/` to a private OneDrive folder (not shared, not in git) | Not losing the dataset's inputs |
+| 3 | Export the MKTG, OPMG, BANM and SWPM transcript Google Docs as `.docx` or text into one local folder and tell the builder the path | Richer tags for four courses |
+| 4 | Decide who gets admin access as testers, and for how long | Reviewer round |
+| 5 | Send the ask list to ISB: cloud confirmation and sign-in app (IT, by 23 Oct and 6 Nov), faculty notice and licence (Dean's office, 30 Oct), rights and privacy (Legal, 30 Oct), role lists (Career Services, 6 Nov), PM graph permission and placement dates (AAC, 23 Oct) | PRD gates |
+| 6 | Run the reviewer sessions in `COMPASS_RESEARCH_PLAN.md` | Go, change or stop decision |
+| 7 | Never paste the Moodle cURL or key into chat. If it is used again, log out of Moodle and delete `curl.txt` and any `.rtf` copy afterwards | Account safety |
 
-1. **Preflight.** Run the `sync_with_base_branch` tool (or merge `origin/main`) so the worktree has the current main. Commit the two docs on this branch (ask Eshan first) so they are not lost. Re-confirm that the files cited in `COMPASS.md` section 2 are unchanged (`git diff HEAD origin/main -- <files>`); update line references if not.
-2. **Create `scripts/compass/`** with `.env.example`, a `.gitignore` rule for `scripts/compass/.env`, and `compass_lib.py` (watermark filter, leak scan, id builders, validators, `--selftest`). Check: `python3 scripts/compass/compass_lib.py --selftest` passes, including a fixture with a watermarked line.
-3. **Write `moodle_sync.py --probe` first** (FR-17, FR-18): read-only function allowlist, token redaction, 1 second between calls. Check: a run with a fake token prints no token anywhere. Eshan runs it with the real key. Record the result in `COMPASS.md` section 18 and confirm D11.
-4. **M0 Foundations:** local Supabase in Docker (`supabase start`, schema-only dump of production `public`, stub admin user, `.env.development.local` pointing the app at it). Write migration `supabase/migrations/<timestamp>_compass_v1.sql` from `COMPASS.md` section 6 using the Supabase CLI. Write `supabase/tests/compass_rls.sql`. Check gate G0.
-5. **M1 and M2 in parallel** as described in `COMPASS.md` section 14. Build the app against demo fixtures first (`src/lib/demoCompassData.ts` and handlers in `src/lib/demoSeed.ts`).
-6. **Dogfood, load to production, launch** per the checklist in section 14.
+## What the builder does next, in order
 
-Every production write goes through a reviewed migration or `load.py --target prod`. Never develop against production.
+1. **Preflight.** Merge `origin/main` into your branch with the `sync_with_base_branch` tool. Read `COMPASS_POC.md`.
+2. **Usage events.** Add PostHog events (list in the research plan, section 6). Check they fire in the app's existing analytics setup. Small pull request, no migration.
+3. **Quality pass.** Run the checks in research plan section 5 (tag accuracy sample first). Fix the worst patterns by re-tagging that slice and rebuilding (POC doc, section 4, steps 5 to 10). Record results.
+4. **Review the new ideas and links.** Merge near-duplicates among the 171 new ideas, drop weak AI links, hand-check the topic rules.
+5. **Frameworks flag.** Tag which ideas are frameworks so the map and tables can filter on it.
+6. **More sources.** Load the four transcript sets and run a vision pass on image-only BANM sessions 7 to 10.
+7. **"My frontier"** and a **report-a-problem** button, if reviewers ask for them.
+8. **Before production:** remove `RoadmapPage.tsx`, its route and the link in `Home.tsx`; decide hosting with ISB IT; follow the PRD for sign-in, viewer, privacy tooling and quality gates.
+
+Every production write goes through a reviewed migration or a CLI upload. Keep a dated copy of each uploaded file so you can roll back.
 
 ## Gotchas learned in this project
 
-- Local dev points at the **production** Supabase project. Use Docker for Compass work.
-- Migrations only through the Supabase CLI, never the dashboard (otherwise migration histories diverge).
-- `src/lib/demoClient.ts` is an in-memory fake used by the homepage demo. Every new table or RPC needs demo data and a handler, or the demo breaks (FR-13).
+- Local dev points at the production Supabase project. For Compass data work use `public/compass-dev.json`, which the loader reads first in dev.
+- `src/lib/demoClient.ts` is an in-memory fake used by the demo. Any new table or RPC needs demo data or the demo breaks. Compass is hidden in demo instead.
 - `users.id` must equal `auth.uid()`; the admin check is `exists (select 1 from public.users u where u.id = auth.uid() and u.is_admin)`.
-- The phone bottom nav is full (5 items). Do not add a sixth. Learn hides the main bottom nav; Compass sits outside Learn.
-- LMS downloads carry a name stamp (file names start `filewithwatermark`). The filter plus the leak scan must pass before any text is stored. Text from decks must never reach git, logs, PostHog or any chat message.
-- `app_settings` is a single row (`id = true`); Compass adds `compass_public` and `compass_quotes_enabled`.
-- Course Resources already puts search state in the URL (`q`, `course`); Compass follows the same rule.
-- Free Supabase plan: 500 MB database. Compass is expected to use 20 to 30 MB.
+- The phone bottom nav is full (5 items). Do not add a sixth.
+- LMS downloads carry a name stamp (file names start `filewithwatermark`). The filter plus the leak scan must pass before any text is stored. Personal patterns come from env `COMPASS_LEAK_PATTERNS`, never the repo.
+- Free Supabase plan: 500 MB database, 1 GB storage. The Compass file is about 1.5 MB.
+- The in-app preview pane is narrow and shows the phone layout. Resize it to see desktop.
 - Writing style for all copy and docs: plain English, no em dashes, no filler words (Eshan's standing rule).
+- Supabase storage commands need `--experimental`.
 
 ## Verified facts (checked 15 Oct)
 
 - 138 courses. "Course Outline" links exist for Term 1: 6 of 7, Term 2: 6 of 7, Term 3: 7 of 9, Term 4: 17 of 17, Term 5: 17 of 17, Block Week 1: 8 of 8, Block Week 2: 12 of 12; none yet for Block Weeks 3 and 4 or Terms 6 and 7.
-- 99 Learn concepts (MADM2 30, BANM2 27, MKTG 23, OPMG 19); `learn_questions` pairs each topic with a session, which is the answer key for the tagging check (FR-03).
-- Transcripts exist for 7 courses (about 57 sessions): FRNT (no S6), ASDM (S1 to S5, S9), MKTG (S1 to S9), OPMG (S1 to S10), BANM (S1 to S10), SWPM (S1 to S7), SUET (S1 to S6). No timestamps anywhere; they align to slide passages by order in release R2. The other 12 courses have none.
-- Slide text layers: good for OPMG, MKTG (Subhranshu), BANM, MADM handouts, SWPM; MGEC decks (S3 confirmed, S1, S2, S4, S5 likely) are images with no text and need reading from page images (R2).
-- Watermark filter that worked on OPMG S2, MKTG S4 and MGEC S8: drop non-horizontal lines, then drop lines that still spell the owner's name or `PGP2027` once stray "I" characters and punctuation are removed.
-- Supabase free plan, 24 MB used at 30 Sep, no branches, no `compass_*` tables.
+- Transcripts exist for 7 courses (about 57 sessions): FRNT (no S6), ASDM (S1 to S5, S9), MKTG (S1 to S9), OPMG (S1 to S10), BANM (S1 to S10), SWPM (S1 to S7), SUET (S1 to S6). No timestamps anywhere. The other 12 courses have none.
+- Moodle sessions found for the POC courses: OPMG 1 to 10, STRG 1 to 10, MKTG 1 to 9, SWPM 1 to 9, FRNT 1 to 5 and 8 to 10 (6 and 7 absent), BANM 1 to 10. Moodle course ids: OPMG 10846, STRG 10578, MKTG 10845, SWPM 10955, FRNT 10581, BANM 10849.
+- Watermark filter that worked: drop non-horizontal lines, drop lines repeated on over half the pages, then fail on any surviving identity pattern.
+- Learn content tables were restricted to signed-in users (migration `20260930150530`, live).
 
 ## Paste-ready starter prompt for the next chat
 
 ```
-Continue the Compass build in isb-academics. Read docs/COMPASS_HANDOFF.md, then docs/COMPASS.md.
-Today is [date]. Term 4 end-terms run [dates]. The LMS address is [address]. The faculty/AAC approval is recorded at [link].
-Start at "Builder: what to do next", step 1. First commit the two docs if they are still uncommitted, then build scripts/compass/ and the Moodle probe so I can run it.
-I will put the Moodle key in scripts/compass/.env myself and will not paste it here.
+Continue Compass in isb-academics. Read docs/COMPASS_HANDOFF.md, then docs/COMPASS_POC.md.
+Today is [date]. Status since 15 Oct: [what changed, for example "production check passed", "testers started", "ISB IT replied"].
+I want to work on: [usage events | quality pass | new ideas and links review | frameworks flag | transcripts | something else].
+Rules: use the Supabase CLI for migrations, never paste or commit the Moodle cURL or key, keep raw course files and the dataset out of git, ask me before committing, pushing or deploying.
 ```
-
-## Update, 15 Oct 2026 (later): PRD v2 written, scope and hosting changed
-
-Read the PRD first: https://claude.ai/artifact/2DVUcVLqxoatKC4h2SHTKc (private artifact; share from its Share menu). It supersedes parts of `docs/COMPASS.md`.
-
-What changed since the sections above:
-
-- **Scope cut by Eshan:** only search, concept page, role kits (Prep kit by role) and the map. No weekly plan, drills or mocks, company brief, story bank, or student tracking.
-- **Purpose-agnostic:** placement is the first lens, not the schema. A "lens" is a saved view stored as data.
-- **Hosting:** target is an ISB-owned Azure subscription, India region (D1; confirm ISB IT runs on Microsoft). Cloudflare R2 and the shared Supabase project are for the pilot only, and the pilot holds derived data only (outlines, concept names, pointers). No files or transcripts load until the ISB tenant is live.
-- **Files:** hosted only as official clean originals through a secure viewer (per-user mark, no downloads, rate limits). We do not strip student watermarks from copies.
-- **AI:** build-time only, in ISB's cloud tenant. Runtime v1 needs one embedding call per search. No LangChain or LangGraph in v1. Jev or an open decision model only if free-text goals appear. In-app agent is a later decision.
-- **Own-AI connector:** read-only MCP server returning Tier 1 content (our concept cards, links, pointers). Never whole files.
-- **Cost:** about ₹5.4 to 7.6 lakh a year core (cloud and AI). People are internal (AAC, faculty).
-- **Dates (re-baselined):** pilot by Tue 10 Nov; full launch by mid-Jan 2027; placement calendar still unknown.
-
-Co'26 folder (`~/Library/CloudStorage/OneDrive-IndianSchoolofBusiness/ISB/Co'26 - PGP Gyaan Bhandaar`): 4 download parts of one tree; part 4 duplicates part 2; 1,316 unique files, about 6.5 GB, 93 course folders, both campuses, all terms. Every file carries another student's name and ISB email as a watermark, so the cleaner must match name patterns, not a fixed list. **Waiting on Eshan's yes to download batch 1** (Mohali Terms 1 to 4 PDF, PowerPoint and Word files: about 370 files, 2.2 GB; disk has about 21 GB free).
-
-Still open: ISB IT cloud confirmation, Moodle service account or key, professor's written OK for the PM graph (author shown as Chandrashekhar V), placement dates, faculty and legal sign-offs listed in the PRD asks table.
