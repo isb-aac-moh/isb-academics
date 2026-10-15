@@ -20,6 +20,7 @@ const TermFourBiddingQA = lazyWithReload(() => import("./pages/TermFourBiddingQA
 const TermDossier = lazyWithReload(() => import("./pages/TermDossier"));
 const NoticeBoard = lazyWithReload(() => import("./pages/NoticeBoard"));
 const PulseCheck = lazyWithReload(() => import("./pages/PulseCheck"));
+const CompassSection = lazyWithReload(() => import("./compass/CompassSection"));
 const LearnSection = lazyWithReload(() => import("./learn/LearnSection"));
 
 export default function App() {
@@ -52,6 +53,8 @@ export default function App() {
 
         {/* Trailing splat: the Learn section renders its own descendant routes (its window
             content) rather than being a single page. */}
+        {/* Compass: search + map of everything ISB taught. Descendant routes live in the section. */}
+        <Route path="/compass/*" element={<CompassSection />} />
         <Route path="/learn/*" element={<LearnSection user={user} />} />
 
         <Route element={<RequireAdmin user={user} />}>
