@@ -14,10 +14,9 @@ export interface Course { code: string; name: string; professor?: string; sessio
 export interface Dataset { meta: { built: string; counts: Record<string, number> }; courses: Course[]; concepts: Record<string, Concept> }
 
 export const LENSES = [
-  { id: "all", name: "Everything", blurb: "All ideas across your courses" },
-  { id: "product", name: "Product", blurb: "What product interviews test, and where ISB taught it" },
-  { id: "consulting", name: "Consulting", blurb: "What case interviews test, and where ISB taught it" },
-  { id: "revision", name: "Revision", blurb: "Revise by course and session" },
+  { id: "all", name: "All ideas", blurb: "Everything taught across your courses" },
+  { id: "product", name: "Product roles", blurb: "What product interviews test, and where ISB taught it" },
+  { id: "consulting", name: "Consulting cases", blurb: "What case interviews test, and where ISB taught it" },
 ] as const;
 
 export const ROLE_LABEL: Record<Role, string> = { teaches: "Taught", applies: "Applied", mentions: "Mentioned" };
@@ -51,7 +50,7 @@ export function loadStore(): Promise<Store> {
   return cache;
 }
 export const coursesOf = (c: Concept) => [...new Set(c.evidence.map(e => e.course))];
-export const inLens = (c: Concept, lens: string) => lens === "all" || lens === "revision" || c.lenses.includes(lens) || c.lenses.includes("general");
+export const inLens = (c: Concept, lens: string) => lens === "all" || c.lenses.includes(lens) || c.lenses.includes("general");
 export function runSearch(s: Store, q: string, lens: string): Concept[] {
   const hits = s.search.search(q).map(h => ({ c: s.data.concepts[h.id as string], score: h.score })).filter(x => x.c && inLens(x.c, lens));
   hits.sort((a, b) => (b.score * (1 + 0.35 * Math.min(coursesOf(b.c).length, 3))) - (a.score * (1 + 0.35 * Math.min(coursesOf(a.c).length, 3))));
