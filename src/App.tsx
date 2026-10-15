@@ -20,6 +20,7 @@ const TermFourBiddingQA = lazyWithReload(() => import("./pages/TermFourBiddingQA
 const TermDossier = lazyWithReload(() => import("./pages/TermDossier"));
 const NoticeBoard = lazyWithReload(() => import("./pages/NoticeBoard"));
 const PulseCheck = lazyWithReload(() => import("./pages/PulseCheck"));
+const CompassSection = lazyWithReload(() => import("./compass/CompassSection"));
 const LearnSection = lazyWithReload(() => import("./learn/LearnSection"));
 
 export default function App() {
@@ -55,6 +56,9 @@ export default function App() {
         <Route path="/learn/*" element={<LearnSection user={user} />} />
 
         <Route element={<RequireAdmin user={user} />}>
+          {/* Compass (search + map of everything ISB taught) is admin-only during the pilot. Remove this
+              wrapper to open it to students; the dataset bucket policy must be widened to match. */}
+          <Route path="/compass/*" element={<CompassSection />} />
           <Route path="/notices" element={<NoticeBoard />} />
           <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
           <Route path="/admin/:tab" element={<AdminPage />} />

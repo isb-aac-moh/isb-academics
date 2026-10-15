@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, PanelLeftClose, PanelLeftOpen, Brain, LayoutGrid } from "lucide-react";
+import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, PanelLeftClose, PanelLeftOpen, Brain, LayoutGrid, Compass as CompassIcon } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { isDemoMode } from "../lib/demoMode";
 import { useNavLinks } from "../hooks/useNavLinks";
@@ -43,6 +43,8 @@ export default function Sidebar({ user, onSignOut }: Props) {
   const primaryNav = (collapsed: boolean, onLight: boolean) => (
     <nav className="space-y-1">
       <NavItem icon={<Brain size={16} />} label="Learn" active={isActive("/learn")} onClick={() => go("/learn")} collapsed={collapsed} onLight={onLight} />
+      {/* Admin-only pilot. Hidden for students and in the recruiter demo (the demo has no Compass data). */}
+      {user.is_admin && !isDemoMode() && <NavItem icon={<CompassIcon size={16} />} label="Compass" active={isActive("/compass")} onClick={() => go("/compass")} preview collapsed={collapsed} onLight={onLight} />}
       <NavItem icon={<GraduationCap size={16} />} label="Credit Tracker" active={isActive("/tracker")} onClick={() => go("/tracker")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<ListChecks size={16} />} label="Bidding Planner" active={isActive("/planner")} onClick={() => go("/planner/background")} collapsed={collapsed} onLight={onLight} />
       <NavItem icon={<Activity size={16} />} label="Bidding Pulse" active={isActive("/pulse-check")} onClick={() => go("/pulse-check")} collapsed={collapsed} onLight={onLight} />
