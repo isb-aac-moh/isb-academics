@@ -1,30 +1,28 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { type Concept, type Store, coursesOf } from "./lib/data";
 import { neighbours } from "./lib/graph";
+import { ideaPath } from "./components";
+import { topicOf } from "./lib/topics";
 
-const W = 760, ROW = 40;
-const trim = (t: string) => t.length > 26 ? t.slice(0, 25) + "…" : t;
+const SHOW = 6;
 
+/** What comes before, what comes after, and what was taught alongside. Plain page layout, so names
+    wrap instead of being cut off and the block fits any width. The Map is where to explore further. */
 export default function ConceptGraph({ store, c, lens }: { store: Store; c: Concept; lens: string }) {
-  const nav = useNavigate(); const n = neighbours(store, c);
+  const n = neighbours(store, c, 40);
   if (!n.up.length && !n.down.length && !n.with.length) return <p className="note">No connections found yet for this idea.</p>;
-  const rows = Math.max(n.up.length, n.down.length, 1);
-  const midY = 30 + rows * ROW / 2, withY = 30 + rows * ROW + 50;
-  const H = n.with.length ? withY + 70 : 30 + rows * ROW + 20;
-  const go = (id: string) => nav(`/compass/c/${encodeURIComponent(id)}?lens=${lens}`);
-  const node = (x: number, y: number, k: Concept, cls: string, onTaught = coursesOf(k).length > 0) =>
-    <g key={k.id + cls} className={`gn ${cls} ${onTaught ? "taught" : ""}`} transform={`translate(${x},${y})`} onClick={() => go(k.id)} tabIndex={0} role="link" aria-label={k.title} onKeyDown={e => e.key === "Enter" && go(k.id)}>
-      <rect x={-92} y={-15} width={184} height={30} rx={15} /><text textAnchor="middle" dy="4">{trim(k.title)}</text><title>{k.title}</title></g>;
-  const curve = (x1: number, y1: number, x2: number, y2: number, dash = false) => <path key={`${x1}${y1}${x2}${y2}`} className={dash ? "ge dash" : "ge"} d={`M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`} />;
-  const upY = (i: number) => 30 + (i + 0.5) * ROW * rows / n.up.length, dnY = (i: number) => 30 + (i + 0.5) * ROW * rows / n.down.length;
-  return <figure className="graph"><svg viewBox={`0 0 ${W} ${H}`} role="group" aria-label={`Connections for ${c.title}`}>
-    <text className="gl" x={110} y={16} textAnchor="middle">Learn first</text><text className="gl" x={W / 2} y={16} textAnchor="middle">This idea</text><text className="gl" x={W - 110} y={16} textAnchor="middle">Leads to</text>
-    {n.up.map((_k, i) => curve(202, upY(i), W / 2 - 92, midY))}{n.down.map((_k, i) => curve(W / 2 + 92, midY, W - 202, dnY(i)))}
-    {n.with.map((_w, i) => curve(W / 2, midY + 15, 70 + i * ((W - 140) / Math.max(n.with.length - 1, 1)), withY - 15, true))}
-    {n.up.map((k, i) => node(110, upY(i), k, "up"))}{n.down.map((k, i) => node(W - 110, dnY(i), k, "down"))}
-    <g className="gn center" transform={`translate(${W / 2},${midY})`}><rect x={-92} y={-17} width={184} height={34} rx={17} /><text textAnchor="middle" dy="4">{trim(c.title)}</text></g>
-    {n.with.length > 0 && <text className="gl" x={W / 2} y={withY - 28} textAnchor="middle">Taught in the same session</text>}
-    {n.with.map((w, i) => node(70 + i * ((W - 140) / Math.max(n.with.length - 1, 1)), withY + 8, w.c, "with"))}
-  </svg>
-  <figcaption>Filled outline = taught at ISB. Click any idea to move there. Dashed lines mean "covered in the same class session", solid lines mean "builds on".</figcaption></figure>;
+  const mapLink = `/compass/map?topic=${topicOf(c)}&node=${encodeURIComponent(c.id)}&lens=${lens}`;
+  const list = (items: Concept[], kind: "u" | "d", empty: string) => items.length === 0 ? <p className="small">{empty}</p> : <>
+    <ul>{items.slice(0, SHOW).map(k => <li key={k.id}><Link className={"cn " + kind + (coursesOf(k).length ? " taught" : "")} to={ideaPath(k.id, lens)}>{k.title}{coursesOf(k).length ? "" : <small> · not covered in class yet</small>}</Link></li>)}</ul>
+    {items.length > SHOW && <Link className="more" to={mapLink}>+{items.length - SHOW} more on the map</Link>}</>;
+  return <figure className="flow">
+    <div className="flowrow">
+      <div><p className="fl">Learn first</p>{list(n.up, "u", "Nothing to learn first. This is a starting point.")}</div>
+      <div className="mid"><span className="arrow" aria-hidden>→</span><div className="me2">{c.title}</div><span className="arrow" aria-hidden>→</span></div>
+      <div><p className="fl">Leads to</p>{list(n.down, "d", "Nothing builds directly on this yet.")}</div>
+    </div>
+    {n.with.length > 0 && <div className="alongside"><p className="fl">Taught in the same session</p>
+      <div className="chips">{n.with.map(w => <Link key={w.c.id} className="chip2" to={ideaPath(w.c.id, lens)}>{w.c.title}</Link>)}</div></div>}
+    <figcaption>Outlined ideas were taught at ISB. <Link to={mapLink} style={{ color: "var(--hero)", fontWeight: 600 }}>Explore this on the map →</Link></figcaption>
+  </figure>;
 }
