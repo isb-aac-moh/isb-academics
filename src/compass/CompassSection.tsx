@@ -22,6 +22,9 @@ export default function CompassSection() {
   const [store, setStore] = useState<Store | null>(null); const [err, setErr] = useState(false);
   const [lens, setLens] = useLens(); const loc = useLocation();
   useEffect(() => { loadStore().then(setStore).catch(() => setErr(true)); }, []);
+  // A new page should open at its top. Only the path triggers this, so picking an idea on the map or
+  // switching the view (search params) keeps the reader where they are.
+  useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
   const showLens = !loc.pathname.startsWith("/compass/prep");
   return <div className="compass"><div className="wrap">
     <header className="ph"><h1><Link to={`/compass?lens=${lens}`}>ISB <em>Compass</em></Link></h1></header>
