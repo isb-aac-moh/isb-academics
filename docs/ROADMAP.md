@@ -101,7 +101,6 @@ Found in a code review for this documentation update on 2026-09-15. None have be
 
 - **"Add a new course" and the name and code fields in Learn admin don't work.** The new-course form writes a code made from the name, which fails unless it matches an existing `courses.code`, and name and code edits are ignored on save.
 - **Admin-added questions have no explanation or hint** (the form lacks those fields), can't be written-answer type, and can't be edited.
-- **Learn content is readable without signing in.** The content tables' read policies have no role restriction, although the migration comment says "everyone signed in". Low risk (it's study material), but it doesn't match the intent.
 - **Switching a course off only hides it in the menus.** A student with the link `/learn/sessions/<code>` or `/learn/practice?course=<code>` can still open it.
 - **The "Sign out" button on Learn's profile page goes back to the Learn home** instead of signing out.
 - **No link to Learn admin on mobile.**
