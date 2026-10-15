@@ -5,7 +5,7 @@ export type Role = "teaches" | "applies" | "mentions";
 export interface Evidence { course: string; session: number | null; kind: string; pages: [number, number]; role: Role; why: string; summary: string; passage: string }
 export interface Concept {
   id: string; title: string; aliases: string[]; lenses: string[]; obj: string; q: string; module: Record<string, string>;
-  freq: number; level: number | null; rel: { to: string; type: string; why?: string }[]; evidence: Evidence[]; isNew?: boolean; definition?: string;
+  freq: number; level: number | null; rel: { to: string; type: string; why?: string; auto?: boolean }[]; evidence: Evidence[]; isNew?: boolean; definition?: string;
   know?: { what: string; use: string; trap: string; ask: string };
 }
 export interface Resource { name: string; type: string; url: string }
