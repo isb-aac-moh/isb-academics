@@ -1,4 +1,5 @@
 import { Fragment, Suspense, memo, type ReactNode } from "react";
+import { PostHogErrorBoundary } from "@posthog/react";
 import { Math } from "./Math";
 import { parseVizProps, VIZ } from "./viz";
 
@@ -312,11 +313,14 @@ export const Markdown = memo(function Markdown({ text, className }: Props) {
       if (Component) {
         // Widgets are lazy (see ./viz). The note around one must not be held back while its chunk
         // loads, so each gets its own boundary and reserves roughly its own height meanwhile —
-        // filling in without shoving the rest of the note down the page.
+        // filling in without shoving the rest of the note down the page. A widget that fails to
+        // load or render leaves an empty slot, not a blank app from the root error boundary.
         blocks.push(
-          <Suspense key={`v-${i}`} fallback={<div style={{ minHeight: 220 }} />}>
-            <Component {...parseVizProps(viz[2])} />
-          </Suspense>,
+          <PostHogErrorBoundary key={`v-${i}`} fallback={<Fragment />}>
+            <Suspense fallback={<div style={{ minHeight: 220 }} />}>
+              <Component {...parseVizProps(viz[2])} />
+            </Suspense>
+          </PostHogErrorBoundary>,
         );
       }
       i++;
