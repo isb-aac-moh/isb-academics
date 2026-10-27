@@ -26,6 +26,10 @@ if (!phToken) {
   posthog.init(phToken, {
     api_host: phHost ?? "https://us.i.posthog.com",
     defaults: "2026-01-30",
+    // Supabase sign-in redirects land on "/#access_token=…&refresh_token=…", and the first
+    // pageview fires before Supabase clears the hash. Routing uses paths only, so drop hashes from
+    // every captured URL (events, person/session props, replay) to keep tokens out of analytics.
+    disable_capture_url_hashes: true,
   });
 }
 
