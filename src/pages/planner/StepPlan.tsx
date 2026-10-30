@@ -9,8 +9,7 @@ import { relevanceTags } from "../../lib/relevance";
 import type { StudentAcademicProfile, Course, GatingCoreCourse, Resource } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
 import { MIN_BID_PER_COURSE } from "../../hooks/useBidPlan";
-import { useFaculty, type CourseFacultyEntry } from "../../hooks/useFaculty";
-import { RatingBadge } from "../../components/FacultySection";
+import { useFaculty } from "../../hooks/useFaculty";
 import { CourseDetailModal } from "../../components/CourseDetailModal";
 
 const TERM_ORDER = BIDDABLE_TERM_ORDER;
@@ -99,7 +98,6 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
           liveBiddingTerms={liveBiddingTerms}
           termCreditLimits={termCreditLimits}
           creditsByTerm={creditsByTerm}
-          faculty={faculty}
           onOpenProfile={openProfile}
           onAdd={onAdd}
           onRemove={onRemove}
@@ -115,7 +113,6 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
         liveBiddingTerms={liveBiddingTerms}
         termCreditLimits={termCreditLimits}
         creditsByTerm={creditsByTerm}
-        faculty={faculty}
         onOpenProfile={openProfile}
         onAdd={onAdd}
         onRemove={onRemove}
@@ -136,9 +133,9 @@ export default function StepPlan({ profile, save, courses, gatingCourses, resour
 }
 
 function GeneralElectivesCard({
-  courses, profile, save, resources, bidEntries, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, faculty, onOpenProfile, onAdd, onRemove,
+  courses, profile, save, resources, bidEntries, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, onOpenProfile, onAdd, onRemove,
 }: {
-  faculty: Map<string, CourseFacultyEntry[]>; onOpenProfile: (code: string) => void;
+  onOpenProfile: (code: string) => void;
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; liveBiddingTerms: string[];
   termCreditLimits: Record<string, { min: number; max: number }>; creditsByTerm: Record<string, number>;
@@ -166,7 +163,6 @@ function GeneralElectivesCard({
         liveBiddingTerms={liveBiddingTerms}
         termCreditLimits={termCreditLimits}
         creditsByTerm={creditsByTerm}
-        faculty={faculty}
         onOpenProfile={onOpenProfile}
         onAdd={onAdd}
         onRemove={onRemove}
@@ -180,9 +176,9 @@ function GeneralElectivesCard({
 }
 
 function AreaCard({
-  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, faculty, onOpenProfile, onAdd, onRemove,
+  area, kind, blocked, profile, save, courses, resources, bidEntries, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, onOpenProfile, onAdd, onRemove,
 }: {
-  area: string; kind: "concentration" | "specialization"; blocked: boolean; faculty: Map<string, CourseFacultyEntry[]>; onOpenProfile: (code: string) => void;
+  area: string; kind: "concentration" | "specialization"; blocked: boolean; onOpenProfile: (code: string) => void;
   profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   courses: Course[]; resources: Resource[]; bidEntries: BidPlanEntry[]; pointsAvailable: number; liveBiddingTerms: string[];
   termCreditLimits: Record<string, { min: number; max: number }>; creditsByTerm: Record<string, number>;
@@ -224,7 +220,6 @@ function AreaCard({
         liveBiddingTerms={liveBiddingTerms}
         termCreditLimits={termCreditLimits}
         creditsByTerm={creditsByTerm}
-        faculty={faculty}
         onOpenProfile={onOpenProfile}
         onAdd={onAdd}
         onRemove={onRemove}
@@ -243,9 +238,9 @@ function AreaCard({
  * flat "N more courses" list.
  */
 function CourseListByTerm({
-  courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, faculty, onOpenProfile, onAdd, onRemove,
+  courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, onOpenProfile, onAdd, onRemove,
 }: {
-  faculty: Map<string, CourseFacultyEntry[]>; onOpenProfile: (code: string) => void;
+  onOpenProfile: (code: string) => void;
   courses: Course[]; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   allCourses: Course[]; resources: Resource[]; entryIdByCourseId: Map<string, string>; pointsAvailable: number; liveBiddingTerms: string[];
   termCreditLimits: Record<string, { min: number; max: number }>; creditsByTerm: Record<string, number>;
@@ -268,7 +263,6 @@ function CourseListByTerm({
         pointsAvailable={pointsAvailable}
         termLimit={termCreditLimits[c.term]}
         creditsInTerm={creditsByTerm[c.term] ?? 0}
-        faculty={faculty.get(c.id) ?? []}
         onOpenProfile={onOpenProfile}
         onAdd={(pts) => onAdd(c.id, c.term, pts)}
         onRemove={entryId ? () => onRemove(entryId) : undefined}
@@ -303,9 +297,9 @@ function CourseListByTerm({
 }
 
 function CourseRow({
-  course, profile, save, allCourses, resources, alreadyAdded, pointsAvailable, termLimit, creditsInTerm, faculty, onOpenProfile, onAdd, onRemove,
+  course, profile, save, allCourses, resources, alreadyAdded, pointsAvailable, termLimit, creditsInTerm, onOpenProfile, onAdd, onRemove,
 }: {
-  faculty: CourseFacultyEntry[]; onOpenProfile: (code: string) => void;
+  onOpenProfile: (code: string) => void;
   course: Course; profile: StudentAcademicProfile; save: (updates: Partial<StudentAcademicProfile>) => void;
   allCourses: Course[]; resources: Resource[]; alreadyAdded: boolean; pointsAvailable: number;
   termLimit?: { min: number; max: number }; creditsInTerm: number;
@@ -340,12 +334,11 @@ function CourseRow({
         <div style={{ minWidth: 0, flex: 1 }}>
           <button
             onClick={() => onOpenProfile(course.code)}
-            title="Open the course profile: professors, ratings, outline"
+            title="Open the course profile: professors, outline"
             className="flex items-center gap-2 flex-wrap"
             style={{ background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
           >
             <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: FONT.sans, color: COLOR.ink, textDecoration: "underline", textDecorationColor: COLOR.border, textUnderlineOffset: 3 }}>{course.name}</span>
-            <RatingBadge entries={faculty} courseCode={course.code} />
             <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 700, color: COLOR.navyHero, fontFamily: FONT.sans }}>
               <Info size={12} /> Profile
             </span>

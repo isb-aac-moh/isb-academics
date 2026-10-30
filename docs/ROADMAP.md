@@ -128,7 +128,7 @@ Found in a code review for this documentation update on 2026-09-15. None have be
 - **SEED1/2/3's professor-to-outline mapping is inferred** from the order the names appeared, not checked inside the PDFs.
 - **Pass/Fail conversion of a Flexi-to-elective course isn't modelled.** Under ISB rules it would stop counting toward the 18 credits.
 - **Grading profile gaps are real, not missing work.** For Term 5, how groups form is stated in only 6 of 17 outlines, cross-section rules in 12, and two outlines (MSTC, NSDL) have no group information at all.
-- **Student feedback covers 6 Term 5 electives**, from one Hyderabad-campus thread. It's anecdotal by design.
+- **Student feedback covers 6 Term 5 electives**, from one Hyderabad-campus thread. It's anecdotal by design, and no student page shows it any more.
 - **Faculty ratings before AY 2025-26 rarely state a campus**, so many rows show "campus not stated".
 - **Course outline links point at ISB SharePoint.** Whether every student account can open them hasn't been checked cohort-wide.
 

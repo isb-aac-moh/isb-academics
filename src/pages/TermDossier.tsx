@@ -1,7 +1,11 @@
 /**
  * The Term Dossier — every elective in a term as its official course outline
  * describes it: how the grade splits, what the exams are, how groups work, how
- * strict attendance is, and how heavy the whole thing feels.
+ * strict attendance is, and what each course counts toward.
+ *
+ * It describes courses; it does not rank them. No workload score, tier or
+ * "heaviest first" sort, and no word-of-mouth feedback: outlines change when
+ * students talk to the professor, and a number would outlive the outline.
  *
  * The route is /dossier/:term rather than /term5 so next term needs no new page:
  * seed course_grading_profiles for that term's courses and its dossier appears.
@@ -13,8 +17,8 @@ import { COLOR, FONT } from "../lib/theme";
 import { useCourses } from "../hooks/useCourses";
 import { useCourseGradingProfiles } from "../hooks/useCourseGradingProfiles";
 import { useFaculty, type CourseFacultyEntry } from "../hooks/useFaculty";
-import { FacultySection, RatingBadge } from "../components/FacultySection";
-import { LOAD_AXES, avg, buildRadar, pressureScore, pressureTier, TIER_COLOR } from "../lib/workloadRadar";
+import { FacultySection } from "../components/FacultySection";
+import { avg } from "../lib/workloadRadar";
 import type { AttendancePolicy, ConcentrationArea, Course, CourseGradingProfile } from "../types";
 
 type Entry = { course: Course; profile: CourseGradingProfile };
@@ -44,15 +48,12 @@ function examSummary(p: CourseGradingProfile): string {
 function tagsFor(p: CourseGradingProfile): string[] {
   const tags: string[] = [];
   if (examCount(p) === 0) tags.push("No sit-down exam");
-  else if (p.grade_exam_pct >= 50) tags.push("Exam-heavy");
   if (p.cross_section === true) tags.push("Cross-section groups");
   if (p.cross_section === false) tags.push("Same section only");
   if (p.peer_eval === true) tags.push("Peer evaluated");
   if (p.attendance === "Not mandatory") tags.push("Attendance optional");
   if (p.attendance === "Participation-linked") tags.push("Attendance is graded");
-  if (p.attendance === "Stricter than ISB policy") tags.push("Strict attendance");
-  if (p.grade_group_pct >= 40) tags.push("Group-heavy");
-  if (p.load_quant >= 4) tags.push("Quant-heavy");
+  if (p.attendance === "Stricter than ISB policy") tags.push("Own attendance rules");
   return tags;
 }
 
@@ -66,18 +67,16 @@ const FILTERS: { value: string; label: string; test: (p: CourseGradingProfile) =
   { value: "peer", label: "Has peer evaluation", test: (p) => p.peer_eval === true },
   { value: "attend-free", label: "Attendance not mandatory", test: (p) => p.attendance === "Not mandatory" },
   { value: "attend-strict", label: "Attendance affects your grade", test: (p) => p.attendance === "Participation-linked" || p.attendance === "Stricter than ISB policy" },
-  { value: "group-light", label: "Light on group work", test: (p) => p.grade_group_pct <= 25 },
-  { value: "chill", label: "Chill workload", test: (p) => pressureTier(pressureScore(p)) === "Chill" },
-  { value: "intense", label: "Intense workload", test: (p) => pressureTier(pressureScore(p)) === "Intense" },
+  { value: "group-light", label: "Group work is 25% or less", test: (p) => p.grade_group_pct <= 25 },
 ];
 
 const SORTS: { value: string; label: string; cmp: (a: Entry, b: Entry) => number }[] = [
-  { value: "pressure-desc", label: "Workload, heavy → light", cmp: (a, b) => pressureScore(b.profile) - pressureScore(a.profile) },
-  { value: "pressure-asc", label: "Workload, light → heavy", cmp: (a, b) => pressureScore(a.profile) - pressureScore(b.profile) },
+  { value: "az", label: "Course name, A–Z", cmp: (a, b) => a.course.name.localeCompare(b.course.name) },
+  { value: "code", label: "Course code", cmp: (a, b) => a.course.code.localeCompare(b.course.code) },
+  { value: "prof", label: "Professor, A–Z", cmp: (a, b) => a.course.professor.localeCompare(b.course.professor) },
   { value: "exam-desc", label: "Exam weight, high → low", cmp: (a, b) => b.profile.grade_exam_pct - a.profile.grade_exam_pct },
   { value: "group-desc", label: "Group weight, high → low", cmp: (a, b) => b.profile.grade_group_pct - a.profile.grade_group_pct },
   { value: "indiv-desc", label: "Individual weight, high → low", cmp: (a, b) => b.profile.grade_individual_pct - a.profile.grade_individual_pct },
-  { value: "az", label: "Course name, A–Z", cmp: (a, b) => a.course.name.localeCompare(b.course.name) },
 ];
 
 export default function TermDossier() {
@@ -90,7 +89,7 @@ export default function TermDossier() {
   const loading = coursesLoading || profilesLoading || facultyLoading;
 
   const [tab, setTab] = useState<Tab>("browse");
-  const [sort, setSort] = useState("pressure-desc");
+  const [sort, setSort] = useState("az");
   const [filter, setFilter] = useState("all");
   const [conc, setConc] = useState("all");
   const [pinned, setPinned] = useState<string[]>([]);
@@ -147,8 +146,8 @@ export default function TermDossier() {
             The {term} Dossier
           </h1>
           <p style={{ fontSize: 13.5, color: COLOR.ink2, marginTop: 8, maxWidth: 620, lineHeight: 1.55 }}>
-            Every {term} elective as its official course outline describes it — grade split, exams, group rules,
-            attendance, and workload. Read this before you spend a point.
+            Every {term} elective as its official course outline describes it: what you learn, what it counts toward,
+            how the grade splits, and the exam, group and attendance rules.
           </p>
         </header>
 
@@ -160,7 +159,6 @@ export default function TermDossier() {
               <HeadlineStat label="Electives on record" value={String(entries.length)} />
               <HeadlineStat label="With a mid or end-term" value={String(entries.filter((e) => examCount(e.profile) > 0).length)} />
               <HeadlineStat label="Avg. group weight" value={`${Math.round(avg(entries.map((e) => e.profile.grade_group_pct)))}%`} />
-              <HeadlineStat label="Avg. workload" value={`${avg(entries.map((e) => pressureScore(e.profile))).toFixed(1)}/10`} />
             </div>
 
             <div className="flex gap-1 mb-5 overflow-x-auto" style={{ borderBottom: `1px solid ${COLOR.border}` }}>
@@ -197,7 +195,6 @@ export default function TermDossier() {
                       <CourseCard
                         key={e.course.id}
                         entry={e}
-                        facultyEntries={facultyByCourse.get(e.course.id) ?? []}
                         pinned={pinned.includes(e.course.id)}
                         pinFull={pinned.length >= MAX_COMPARE}
                         onOpen={() => setOpenId(e.course.id)}
@@ -215,9 +212,9 @@ export default function TermDossier() {
         )}
 
         <p style={{ fontSize: 11.5, color: COLOR.ink3, marginTop: 32, lineHeight: 1.6, maxWidth: 700 }}>
-          Everything here is read off the official ISB course outlines on SharePoint. Workload scores are a judgment
-          call, not an ISB rating, and "not stated" means the outline is silent — not that the rule doesn't exist.
-          Confirm against the live outline on LMS before you register.
+          Everything here is read off the official ISB course outlines on SharePoint. Outlines can be revised, so
+          confirm anything that matters to you with the professor in session 1. "Not stated" means the outline is
+          silent, not that the rule doesn't exist.
         </p>
       </div>
 
@@ -289,12 +286,15 @@ function Select({ label, value, onChange, options }: { label: string; value: str
   );
 }
 
+/** Neutral grey on purpose: red would read as a warning. */
+const EXAM_COLOR = COLOR.ink2;
+
 function GradeBar({ p, height = 18 }: { p: CourseGradingProfile; height?: number }) {
   const segs = [
     { pct: p.grade_participation_pct, color: COLOR.mint, label: "Participation" },
     { pct: p.grade_individual_pct, color: COLOR.navyHero, label: "Individual" },
     { pct: p.grade_group_pct, color: COLOR.amber, label: "Group" },
-    { pct: p.grade_exam_pct, color: COLOR.red, label: "Exam" },
+    { pct: p.grade_exam_pct, color: EXAM_COLOR, label: "Exam" },
   ].filter((s) => s.pct > 0);
 
   return (
@@ -320,19 +320,8 @@ function Tag({ children }: { children: React.ReactNode }) {
   );
 }
 
-function PressurePill({ score }: { score: number }) {
-  const tier = pressureTier(score);
-  const { fg, bg } = TIER_COLOR[tier];
-  return (
-    <span style={{ fontSize: 10.5, fontWeight: 700, color: fg, background: bg, borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap" }}>
-      {tier} · {score.toFixed(1)}
-    </span>
-  );
-}
-
-function CourseCard({ entry, facultyEntries, pinned, pinFull, onOpen, onPin }: { entry: Entry; facultyEntries: CourseFacultyEntry[]; pinned: boolean; pinFull: boolean; onOpen: () => void; onPin: () => void }) {
+function CourseCard({ entry, pinned, pinFull, onOpen, onPin }: { entry: Entry; pinned: boolean; pinFull: boolean; onOpen: () => void; onPin: () => void }) {
   const { course, profile } = entry;
-  const score = pressureScore(profile);
 
   return (
     <div style={{ background: COLOR.surface, border: `1px solid ${pinned ? COLOR.navyHero : COLOR.borderLight}`, borderRadius: 12, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -342,11 +331,10 @@ function CourseCard({ entry, facultyEntries, pinned, pinFull, onOpen, onPin }: {
             <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.navyHero, letterSpacing: "0.06em" }}>{course.code}</p>
             <p style={{ fontSize: 14.5, fontWeight: 700, color: COLOR.ink, lineHeight: 1.3, marginTop: 2, fontFamily: FONT.sans }}>{course.name}</p>
             <p style={{ fontSize: 11.5, color: COLOR.ink3, marginTop: 3 }}>{course.professor}</p>
-            <div style={{ marginTop: 4 }}>
-              <RatingBadge entries={facultyEntries} courseCode={course.code} />
-            </div>
+            {course.concentration_areas.length > 0 && (
+              <p style={{ fontSize: 11.5, color: COLOR.ink2, marginTop: 3 }}>Counts toward {course.concentration_areas.join(", ")}</p>
+            )}
           </div>
-          <PressurePill score={score} />
         </div>
 
         <div style={{ width: "100%" }}>
@@ -390,10 +378,10 @@ function factValue(v: string | boolean | null | undefined, yes: string, no: stri
 // The stored attendance values are short enough to filter on but too terse to
 // read; this is what a student actually needs to know about each one.
 const ATTENDANCE_TEXT: Record<AttendancePolicy, string> = {
-  "Not mandatory": "Not mandatory — the outline says so explicitly",
-  "ISB policy": "Standard ISB policy — one missed session already costs you a letter grade",
-  "Participation-linked": "Standard ISB policy, and showing up feeds your participation marks on top",
-  "Stricter than ISB policy": "Stricter than the ISB default — this course adds penalties of its own",
+  "Not mandatory": "Not mandatory, as the outline states",
+  "ISB policy": "Standard ISB attendance policy; the outline has the penalty scale",
+  "Participation-linked": "Part of the grade: attendance feeds the participation marks",
+  "Stricter than ISB policy": "This course sets its own attendance rules; the outline has the details",
 };
 
 function factsFor(p: CourseGradingProfile): { label: string; value: string }[] {
@@ -407,9 +395,22 @@ function factsFor(p: CourseGradingProfile): { label: string; value: string }[] {
   ];
 }
 
+const SECTION_LABEL: React.CSSProperties = {
+  fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6,
+};
+
+function readDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
 function CourseModal({ entry, facultyEntries, onClose }: { entry: Entry; facultyEntries: CourseFacultyEntry[]; onClose: () => void }) {
   const { course, profile } = entry;
-  const score = pressureScore(profile);
+  const about = profile.brief.find((b) => b.label === "About");
+  const rest = profile.brief.filter((b) => b !== about);
+  const countsToward = [...course.concentration_areas, ...course.industry_specializations];
+  const read = readDate(profile.extracted_at);
 
   return (
     <div
@@ -425,51 +426,52 @@ function CourseModal({ entry, facultyEntries, onClose }: { entry: Entry; faculty
             <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.navyHero, letterSpacing: "0.06em" }}>{course.code}</p>
             <h2 style={{ fontFamily: FONT.serif, fontSize: 22, fontWeight: 700, color: COLOR.ink, lineHeight: 1.2, marginTop: 3 }}>{course.name}</h2>
             <p style={{ fontSize: 12.5, color: COLOR.ink2, marginTop: 4 }}>
-              {course.professor} · {course.concentration_areas.join(", ") || "No concentration area"}
+              {course.professor} · {course.credits} credit{Number(course.credits) === 1 ? "" : "s"}
             </p>
           </div>
           <button onClick={onClose} aria-label="Close" style={{ fontSize: 18, color: COLOR.ink3, background: "none", border: "none", cursor: "pointer", lineHeight: 1, flexShrink: 0 }}>✕</button>
         </div>
 
-        <div className="flex items-center gap-2 mb-4">
-          <PressurePill score={score} />
-          <span style={{ fontSize: 11, color: COLOR.ink3 }}>average of the six workload scores below, on a 10-point scale</span>
-        </div>
+        {about && (
+          <>
+            <p style={SECTION_LABEL}>What you learn</p>
+            <p style={{ fontSize: 13, color: COLOR.ink2, lineHeight: 1.6, marginBottom: 14 }}>{about.text}</p>
+          </>
+        )}
 
-        <FacultySection course={course} entries={facultyEntries} />
+        {countsToward.length > 0 && (
+          <>
+            <p style={SECTION_LABEL}>Counts toward</p>
+            <div className="flex flex-wrap gap-1.5 mb-5">
+              {countsToward.map((c) => <Tag key={c}>{c}</Tag>)}
+            </div>
+          </>
+        )}
 
-        <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>How the grade splits</p>
+        <p style={SECTION_LABEL}>How the grade splits</p>
         <GradeBar p={profile} height={22} />
         <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 mb-5">
           <Legend color={COLOR.mint} label={`Participation ${profile.grade_participation_pct}%`} />
           <Legend color={COLOR.navyHero} label={`Individual ${profile.grade_individual_pct}%`} />
           <Legend color={COLOR.amber} label={`Group ${profile.grade_group_pct}%`} />
-          <Legend color={COLOR.red} label={`Exam ${profile.grade_exam_pct}%`} />
+          <Legend color={EXAM_COLOR} label={`Exam ${profile.grade_exam_pct}%`} />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-5 mb-5">
-          <div style={{ flexShrink: 0 }}>
-            <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Workload profile</p>
-            <div dangerouslySetInnerHTML={{ __html: buildRadar([profile]) }} />
-          </div>
-          <div className="flex-1">
-            <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Rules that bite</p>
-            <dl className="space-y-2">
-              {factsFor(profile).map((f) => (
-                <div key={f.label}>
-                  <dt style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink }}>{f.label}</dt>
-                  <dd style={{ fontSize: 12, color: COLOR.ink2, lineHeight: 1.45 }}>{f.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
+        <p style={SECTION_LABEL}>Good to know before you bid</p>
+        <dl className="space-y-2 mb-5">
+          {factsFor(profile).map((f) => (
+            <div key={f.label}>
+              <dt style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink }}>{f.label}</dt>
+              <dd style={{ fontSize: 12, color: COLOR.ink2, lineHeight: 1.45 }}>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
 
-        {profile.brief.length > 0 && (
+        {rest.length > 0 && (
           <>
-            <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>The full read</p>
+            <p style={SECTION_LABEL}>From the outline</p>
             <ul className="space-y-2 mb-5" style={{ listStyle: "none" }}>
-              {profile.brief.map((b) => (
+              {rest.map((b) => (
                 <li key={b.label} style={{ fontSize: 12.5, color: COLOR.ink2, lineHeight: 1.55 }}>
                   <b style={{ color: COLOR.ink }}>{b.label}</b> — {b.text}
                 </li>
@@ -478,30 +480,12 @@ function CourseModal({ entry, facultyEntries, onClose }: { entry: Entry; faculty
           </>
         )}
 
-        {profile.student_feedback.length > 0 && (
-          <>
-            <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.ink3, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
-              Student feedback
-            </p>
-            <p style={{ fontSize: 11, color: COLOR.ink3, marginBottom: 8, lineHeight: 1.5 }}>
-              Word of mouth from students who've taken it before — not from the official outline, and it can disagree with itself between students.
-            </p>
-            <ul className="space-y-2 mb-5" style={{ listStyle: "none" }}>
-              {profile.student_feedback.map((t, i) => (
-                <li
-                  key={i}
-                  style={{
-                    fontSize: 12.5, color: COLOR.ink2, lineHeight: 1.55, padding: "8px 12px",
-                    background: COLOR.bgSoft, border: `1px solid ${COLOR.borderLight}`, borderRadius: 8,
-                  }}
-                >
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+        <FacultySection course={course} entries={facultyEntries} />
 
+        <p style={{ fontSize: 11, color: COLOR.ink3, lineHeight: 1.5, marginBottom: 10 }}>
+          {read ? `From the official outline, read on ${read}. ` : "From the official outline. "}
+          Professors can revise an outline, so confirm anything that matters to you in session 1.
+        </p>
         {profile.source_url && (
           <a href={profile.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontWeight: 700, color: COLOR.navyHero, textDecoration: "underline" }}>
             Read the official course outline ↗
@@ -536,13 +520,12 @@ function CompareTable({ entries, onUnpin }: { entries: Entry[]; onUnpin: (id: st
   const rows: { label: string; get: (e: Entry) => string }[] = [
     { label: "Professor", get: (e) => e.course.professor },
     { label: "Concentration", get: (e) => e.course.concentration_areas.join(", ") || "—" },
-    { label: "Workload", get: (e) => `${pressureTier(pressureScore(e.profile))} · ${pressureScore(e.profile).toFixed(1)}/10` },
+    { label: "Credits", get: (e) => String(e.course.credits) },
     { label: "Participation", get: (e) => `${e.profile.grade_participation_pct}%` },
     { label: "Individual", get: (e) => `${e.profile.grade_individual_pct}%` },
     { label: "Group", get: (e) => `${e.profile.grade_group_pct}%` },
     { label: "Exam", get: (e) => `${e.profile.grade_exam_pct}%` },
     ...factsFor(entries[0].profile).map((f, i) => ({ label: f.label, get: (e: Entry) => factsFor(e.profile)[i].value })),
-    ...LOAD_AXES.map((ax) => ({ label: ax.label, get: (e: Entry) => `${e.profile[ax.key]}/5` })),
   ];
 
   return (
@@ -590,7 +573,6 @@ function BuildTerm({ entries, pinned, onToggle, pinFull }: { entries: Entry[]; p
   const midterms = profileList.reduce((s, p) => s + p.exam_midterm_count, 0);
   const endterms = profileList.reduce((s, p) => s + p.exam_endterm_count, 0);
   const quizzes = profileList.reduce((s, p) => s + p.exam_quiz_count, 0);
-  const meanPressure = avg(profileList.map(pressureScore));
   const meanGroup = avg(profileList.map((p) => p.grade_group_pct));
 
   return (
@@ -618,7 +600,7 @@ function BuildTerm({ entries, pinned, onToggle, pinFull }: { entries: Entry[]; p
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: COLOR.ink, fontFamily: FONT.sans }}>
                   <b>{e.course.code}</b> · {e.course.name}
                 </span>
-                <PressurePill score={pressureScore(e.profile)} />
+                <span style={{ fontSize: 11, color: COLOR.ink3, textAlign: "right" }}>{e.course.concentration_areas.join(", ")}</span>
               </button>
             );
           })}
@@ -631,24 +613,22 @@ function BuildTerm({ entries, pinned, onToggle, pinFull }: { entries: Entry[]; p
 
           {pinned.length === 0 ? (
             <p style={{ fontSize: 12.5, color: COLOR.ink2, marginTop: 6, lineHeight: 1.55 }}>
-              Pick courses on the left to see the combined load.
+              Pick courses on the left to see what the term adds up to.
             </p>
           ) : (
             <>
               <p style={{ fontSize: 12, color: COLOR.ink3, marginTop: 3, marginBottom: 12 }}>
-                {pinned.length} course{pinned.length > 1 ? "s" : ""} · {meanPressure.toFixed(1)}/10 average workload
+                {pinned.length} course{pinned.length > 1 ? "s" : ""} · {pinned.reduce((s, e) => s + Number(e.course.credits), 0)} credits
               </p>
 
-              <div dangerouslySetInnerHTML={{ __html: buildRadar(profileList) }} />
-
               <div className="grid grid-cols-3 gap-2 mt-4">
-                <MiniStat label="Mid-terms" value={midterms} tint={COLOR.amberTint} color={COLOR.amber} />
-                <MiniStat label="End-terms" value={endterms} tint={COLOR.redTint} color={COLOR.red} />
-                <MiniStat label="Quizzes" value={quizzes} tint={COLOR.navyTint} color={COLOR.navyHero} />
+                <MiniStat label="Mid-terms" value={midterms} />
+                <MiniStat label="End-terms" value={endterms} />
+                <MiniStat label="Quizzes" value={quizzes} />
               </div>
 
               <p style={{ fontSize: 12.5, color: COLOR.ink2, marginTop: 14, lineHeight: 1.55 }}>
-                {verdict(meanPressure, midterms + endterms, meanGroup)}
+                {summary(midterms + endterms, meanGroup)}
               </p>
             </>
           )}
@@ -658,28 +638,24 @@ function BuildTerm({ entries, pinned, onToggle, pinFull }: { entries: Entry[]; p
   );
 }
 
-/** Describes the shape of the selection rather than scoring it — the trade-off is the student's to make. */
-function verdict(meanPressure: number, sitDownExams: number, meanGroup: number): string {
-  const load =
-    meanPressure <= 4 ? "This is a light term on paper."
-      : meanPressure <= 6.5 ? "This is a middling term on paper."
-        : "This is a heavy term on paper.";
+/** Describes the shape of the selection and nothing more: the trade-off is the student's to make. */
+function summary(sitDownExams: number, meanGroup: number): string {
   const exams =
-    sitDownExams === 0 ? " No sit-down exams at all, so the pressure sits in deadlines rather than exam weeks."
-      : sitDownExams <= 2 ? ` ${sitDownExams} sit-down exam${sitDownExams > 1 ? "s" : ""} to schedule around.`
-        : ` ${sitDownExams} sit-down exams — check they don't land in the same week.`;
+    sitDownExams === 0 ? "No sit-down exams, so the deadlines are in assignments and projects."
+      : sitDownExams <= 2 ? `${sitDownExams} sit-down exam${sitDownExams > 1 ? "s" : ""} to schedule around.`
+        : `${sitDownExams} sit-down exams. Check the dates in the outlines so they don't fall in the same week.`;
   const group =
-    meanGroup >= 40 ? " Group work carries most of the grade, so your teams matter more than your own effort."
-      : meanGroup <= 20 ? " Very little rides on group work; this is mostly on you."
+    meanGroup >= 40 ? " Group work carries a large share of the grade, so team formation matters."
+      : meanGroup <= 20 ? " Little of the grade rides on group work."
         : "";
-  return load + exams + group;
+  return exams + group;
 }
 
-function MiniStat({ label, value, tint, color }: { label: string; value: number; tint: string; color: string }) {
+function MiniStat({ label, value }: { label: string; value: number }) {
   return (
-    <div style={{ padding: "8px 10px", borderRadius: 8, background: tint }}>
-      <p style={{ fontSize: 18, fontWeight: 700, color, fontFamily: FONT.sans }}>{value}</p>
-      <p style={{ fontSize: 10, color, opacity: 0.85 }}>{label}</p>
+    <div style={{ padding: "8px 10px", borderRadius: 8, background: COLOR.navyTint }}>
+      <p style={{ fontSize: 18, fontWeight: 700, color: COLOR.navyHero, fontFamily: FONT.sans }}>{value}</p>
+      <p style={{ fontSize: 10, color: COLOR.navyHero, opacity: 0.85 }}>{label}</p>
     </div>
   );
 }

@@ -107,7 +107,7 @@ src/
     theme.ts, options.ts  Design tokens, fixed option lists
     creditProgress.ts     Credit, reserve and budget maths
     termCalendar.ts       Co'27 term dates
-    workloadRadar.ts      Radar SVG + workload score
+    workloadRadar.ts      avg() helper (the radar and workload score are no longer shown)
     relevance.ts          Soft relevance tags
     lazyWithReload.ts     Stale-chunk recovery
     devFixtures.ts        Fake Pulse data for local dev
@@ -183,7 +183,7 @@ Learn keeps its database code in `src/learn/lib/db.ts` instead of hooks, inherit
 
 Settings load once when a page mounts. Nothing subscribes to live updates, so an admin change shows up on the student's next page load.
 
-Business rules live in plain functions in `src/lib/` (credit maths, workload score, relevance tags), separate from the UI, so they can be read and checked on their own.
+Business rules live in plain functions in `src/lib/` (credit maths, relevance tags), separate from the UI, so they can be read and checked on their own.
 
 ## Performance
 

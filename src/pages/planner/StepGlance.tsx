@@ -29,7 +29,7 @@ export default function StepGlance({ courses, bidEntries, gradingProfiles, liveB
     <div className="space-y-6">
       <p style={{ fontFamily: FONT.serif, fontSize: 15, color: COLOR.ink2, lineHeight: 1.6 }}>
         {liveTerms.length > 0
-          ? `How every ${liveTerms.join(" & ")} course is graded, how heavy it runs, and every detail from the outline. The summary at the top covers the courses in your plan.`
+          ? `How every ${liveTerms.join(" & ")} course is graded, and what the outline says about exams, groups and attendance. The summary at the top covers the courses in your plan.`
           : "No bidding round is open right now. This page will show the current term as soon as it opens."}
       </p>
       {liveTerms.map((term) => (
