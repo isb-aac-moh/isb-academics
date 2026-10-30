@@ -239,9 +239,8 @@ function AreaCard({
 
 /**
  * Live-now courses (the current bidding round) always show, open. Everything else
- * is grouped into one toggle per term/block week — rather than a single flat "N more
- * courses" list — with the very next upcoming term pre-opened so it doesn't take an
- * extra click to see what's coming next.
+ * is grouped into one toggle per term/block week, all closed — rather than a single
+ * flat "N more courses" list.
  */
 function CourseListByTerm({
   courses, profile, save, allCourses, resources, entryIdByCourseId, pointsAvailable, liveBiddingTerms, termCreditLimits, creditsByTerm, faculty, onOpenProfile, onAdd, onRemove,
@@ -254,7 +253,6 @@ function CourseListByTerm({
 }) {
   const liveNow = courses.filter((c) => isLiveNow(c.term, liveBiddingTerms));
   const laterTerms = TERM_ORDER.filter((term) => !isLiveNow(term, liveBiddingTerms) && courses.some((c) => c.term === term));
-  const nextTerm = laterTerms[0];
 
   function rowFor(c: Course) {
     const entryId = entryIdByCourseId.get(c.id);
@@ -292,7 +290,7 @@ function CourseListByTerm({
       {laterTerms.map((term) => {
         const termCourses = courses.filter((c) => c.term === term);
         return (
-          <details key={term} open={term === nextTerm} className="mb-2">
+          <details key={term} className="mb-2">
             <summary style={{ fontSize: 12, fontWeight: 600, color: COLOR.ink3, fontFamily: FONT.sans, cursor: "pointer" }}>
               {term} · {termCourses.length} course{termCourses.length > 1 ? "s" : ""}
             </summary>
