@@ -122,7 +122,7 @@ A popup is a dialog shown to students when they open a page.
 
 Only one popup shows at a time. If several match, the most recently updated one wins. "Once" and "Session" are remembered in the student's browser, so a student on a new device sees the popup again.
 
-There's no page option for the Term 5 Dossier (`/dossier`) yet; use "All pages" or ask for it to be added.
+There's no page option for the Term Dossiers (`/dossier`) yet; use "All pages" or ask for it to be added.
 
 ## Learn admin (`/learn/admin`)
 

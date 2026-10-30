@@ -1,6 +1,6 @@
 # Data Model
 
-All tables live in the Supabase project shared with `isb-explorer`. Every schema change is a timestamped file in `supabase/migrations/`, and those files are the source of truth. This doc is a readable summary, current as of `20260912090400_seed_term5_student_feedback.sql` (2026-09-12).
+All tables live in the Supabase project shared with `isb-explorer`. Every schema change is a timestamped file in `supabase/migrations/`, and those files are the source of truth. This doc is a readable summary, current as of `20261030100300_term6_bidding_live.sql` (2026-10-30).
 
 To apply migrations: `supabase db push`, with the CLI linked via `supabase link --project-ref ujnrgvmbahbepdnahtle`. Always use the CLI, never the dashboard's SQL editor, or the migration history drifts. See [ARCHITECTURE.md](ARCHITECTURE.md#database-changes).
 
@@ -411,5 +411,9 @@ Every one has execute revoked from `public` and `anon`. Do the same for any new 
 36. `grading_profile_group_and_attendance` + `seed_term5_group_and_attendance` (2026-09-12) -- the five group, peer-evaluation and attendance columns, filled for Term 5.
 37. `term5_dossier_resource_link` (2026-09-12) -- Term 5 Dossier added to the Platform Directory.
 38. `term5_student_feedback_column` + `seed_term5_student_feedback` (2026-09-12) -- `student_feedback` on grading profiles, seeded for 6 Term 5 electives.
+39. `term6_catalog_and_faculty` (2026-10-30) -- CMGT, DAFN and SIMT disabled (not on ASA's Term 6 lineup), REMA's academic area, seven Course Overview video links, and profiles for five Term 6 faculty who had none (Sandeep Rath, Bret Stasiak, Gopi Krishna Suvanam, Nitin Bakshi, Ankur Garg). Sodhi's ratings link cleared because it pointed at another professor's page.
+40. `seed_term6_course_outline_resources` (2026-10-30) -- outline links for all 21 Term 6 electives, plus the Term 6 Dossier in the Platform Directory.
+41. `seed_term6_grading_profiles` (2026-10-30) -- grading profiles, group rules and attendance for all 21 Term 6 electives, read from the outlines.
+42. `term6_bidding_live` (2026-10-30) -- Term 6 set as the live bidding round (Term 5 off) and a Term 6 bidding popup.
 
 If you're debugging something that references an older shape (e.g. `resources.category`), check this list — it was real, then removed.
