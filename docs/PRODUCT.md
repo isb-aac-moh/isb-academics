@@ -78,7 +78,7 @@ Only shows the terms the admin has marked live. If nothing is live, it says so.
 
 For each live term:
 
-- For courses already in the plan that have a grading profile: a six-axis workload radar (quant, assignments, participation, exam pressure, group work, reading), total mid-terms, end-terms and quizzes, and the split between individual and group grades.
+- For courses already in the plan that have a grading profile: total mid-terms, end-terms and quizzes, and the split between individual and group grades.
 - Every course in the term, planned ones first, each with a grade-split bar and an expandable "Every detail" section from its outline.
 
 ### 5. Bid Budget
@@ -104,13 +104,13 @@ Why it was built despite the risk: in a sealed-bid auction, students have a reas
 
 One page per term that compares every elective using data taken from the official course outlines. It is live for Term 5 at `/dossier/term-5`, and `/term5` redirects there. A new term needs data in the database, not new code.
 
-- **Headline stats:** electives on record, how many have a mid- or end-term, average group weight, average workload.
-- **Browse tab:** sort by workload, exam weight, group weight, individual weight or name. Filter by things students actually ask about: no sit-down exam, cross-section groups allowed, self-selected groups, peer evaluation, attendance not mandatory, light group work, chill or intense workload, plus a concentration filter.
+- **Headline stats:** electives on record, how many have a mid- or end-term, average group weight.
+- **Browse tab:** sorted A to Z by default; also by code, professor, exam weight, group weight or individual weight. Filter by things students actually ask about: no sit-down exam, cross-section groups allowed, self-selected groups, peer evaluation, attendance not mandatory, group work of 25% or less, plus a concentration filter. Each card shows what the course counts toward.
 - **Side by side tab:** up to 4 pinned courses in a comparison table.
-- **Build the term tab:** pick up to 4 courses and see the combined workload radar, exam count and a plain description of the mix.
-- **Course detail:** workload tier, faculty cards with ratings, overview video, grade split, "Rules that bite" (exams, group size, cross-section groups, how groups are formed, peer evaluation, attendance), the full brief, **student feedback** (word of mouth from seniors, clearly labelled, names removed), and the outline link.
+- **Build the term tab:** pick up to 4 courses and see the combined credits, exam count and a plain description of the mix.
+- **Course detail:** what you learn, what it counts toward, grade split, "Good to know before you bid" (exams, group size, cross-section groups, how groups are formed, peer evaluation, attendance), the rest of the brief, faculty cards with ratings and the overview video, a line saying when the outline was read and that professors can revise it, and the outline link.
 
-Workload is shown as a score out of 10 with three tiers: Chill (4 or less), Moderate (up to 6.5), Intense. It is the plain average of the six load scores, unweighted on purpose.
+The Dossier and Your Term describe courses and do not rank them. There is no workload score, tier, chart or "heaviest first" sort, and no student feedback, because outlines change when students talk to professors and a number would outlive the outline (feedback from ASA, 2026-10-30). The six 0-5 load scores and `student_feedback` are still stored and editable in Admin, but no student page reads them. Faculty ratings are not shown on course cards in the Planner; they sit on the professor's card inside the course detail.
 
 **Faculty ratings** come from ASA's FacultyRatings pages. The badge picks one real past offering in this order: this course at Mohali, this course at another stated campus, this course with no campus stated, then the professor's most recent other course (labelled "other course"). Ratings with fewer than 5 responses are marked.
 

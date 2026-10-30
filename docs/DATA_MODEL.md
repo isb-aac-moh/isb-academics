@@ -322,7 +322,7 @@ filters exclude those rows rather than assuming a default.
 Two more columns:
 
 - `student_feedback` -- jsonb array of strings, default `[]` (added in `20260912090300`). Word of mouth
-  from students who took the course, kept apart from `brief` because it can be wrong or contradict
+  from students who took the course (not shown in the app since 2026-10-30), kept apart from `brief` because it can be wrong or contradict
   itself. Empty array means "no feedback yet". Seeded for 6 Term 5 electives from a Hyderabad-campus
   WhatsApp thread, names removed. Shown in the Term Dossier with a disclaimer.
 - `source_url` -- the outline PDF the profile was extracted from, for traceability.

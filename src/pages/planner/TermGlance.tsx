@@ -1,13 +1,14 @@
 /**
  * Once a student has courses in their bid plan for a term, this turns that
  * flat list into a picture of what the term actually looks like — grading
- * composition per course, workload profile, exam tally, and a full brief.
+ * composition per course, exam tally, and a full brief. It describes the term
+ * and does not score it: no workload number, tier or chart.
  * Keyed off course_grading_profiles, which is per-course (not per-term-4-only),
  * so this works unchanged for Term 5 onward as those profiles get added.
  */
 import { useState } from "react";
 import { COLOR, FONT } from "../../lib/theme";
-import { avg, buildRadar } from "../../lib/workloadRadar";
+import { avg } from "../../lib/workloadRadar";
 import type { Course, CourseGradingProfile } from "../../types";
 import type { BidPlanEntry } from "../../hooks/useBidPlan";
 
@@ -54,25 +55,18 @@ export default function TermGlance({ term, entries, courses, profiles }: Props) 
         <p style={{ fontSize: 12.5, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>
           {termCourses.length === 0
             ? `You haven't planned any ${term} courses yet. Here's how every ${term} course is graded.`
-            : `What this term actually looks like, based on the ${termCourses.length} course${termCourses.length > 1 ? "s" : ""} in your plan. Every other ${term} course is listed below to compare.`}
+            : `What this term is made of, based on the ${termCourses.length} course${termCourses.length > 1 ? "s" : ""} in your plan. Every other ${term} course is listed below to compare.`}
           {missing > 0 && ` (${missing} course${missing > 1 ? "s" : ""} without a grading profile yet excluded from the numbers below.)`}
         </p>
       </div>
 
       {profileList.length > 0 && (
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          <div className="flex flex-col items-center" style={{ flexShrink: 0 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
-              Workload profile
-            </p>
-            <div dangerouslySetInnerHTML={{ __html: buildRadar(profileList) }} />
-          </div>
-
           <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3" style={{ alignContent: "flex-start" }}>
-            <Stat label="Mid-terms" value={midterms} tint={COLOR.amberTint} color={COLOR.amber} />
-            <Stat label="End-terms" value={endterms} tint={COLOR.redTint} color={COLOR.red} />
-            <Stat label="Quizzes" value={quizzes} tint={COLOR.navyTint} color={COLOR.navyHero} />
-            <Stat label="Sit-down exams" value={midterms + endterms} tint={COLOR.greenTint} color={COLOR.green} />
+            <Stat label="Mid-terms" value={midterms} />
+            <Stat label="End-terms" value={endterms} />
+            <Stat label="Quizzes" value={quizzes} />
+            <Stat label="Sit-down exams" value={midterms + endterms} />
 
             <div className="col-span-2 sm:col-span-4" style={{ marginTop: 4 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
@@ -104,11 +98,11 @@ export default function TermGlance({ term, entries, courses, profiles }: Props) 
   );
 }
 
-function Stat({ label, value, tint, color }: { label: string; value: number; tint: string; color: string }) {
+function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div style={{ padding: "10px 12px", borderRadius: 9, background: tint }}>
-      <p style={{ fontSize: 20, fontWeight: 700, fontFamily: FONT.sans, color }}>{value}</p>
-      <p style={{ fontSize: 10.5, color, fontFamily: FONT.sans, opacity: 0.85 }}>{label}</p>
+    <div style={{ padding: "10px 12px", borderRadius: 9, background: COLOR.navyTint }}>
+      <p style={{ fontSize: 20, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.navyHero }}>{value}</p>
+      <p style={{ fontSize: 10.5, color: COLOR.navyHero, fontFamily: FONT.sans, opacity: 0.85 }}>{label}</p>
     </div>
   );
 }
@@ -150,14 +144,14 @@ function CourseGlanceRow({ course, profile, inPlan }: { course: Course; profile?
               <Segment pct={profile.grade_group_pct} color={COLOR.amber} label="Group" />
             )}
             {profile.grade_exam_pct > 0 && (
-              <Segment pct={profile.grade_exam_pct} color={COLOR.red} label="Exam" />
+              <Segment pct={profile.grade_exam_pct} color={COLOR.ink2} label="Exam" />
             )}
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
             <Legend color={COLOR.mint} label={`Participation ${profile.grade_participation_pct}%`} />
             <Legend color={COLOR.navyHero} label={`Individual ${profile.grade_individual_pct}%`} />
             <Legend color={COLOR.amber} label={`Group ${profile.grade_group_pct}%`} />
-            <Legend color={COLOR.red} label={`Exam ${profile.grade_exam_pct}%`} />
+            <Legend color={COLOR.ink2} label={`Exam ${profile.grade_exam_pct}%`} />
           </div>
 
           {open && (
@@ -167,6 +161,10 @@ function CourseGlanceRow({ course, profile, inPlan }: { course: Course; profile?
                   <b style={{ color: COLOR.ink }}>{b.label}</b> — {b.text}
                 </li>
               ))}
+              <li style={{ fontSize: 11, fontFamily: FONT.sans, color: COLOR.ink3, lineHeight: 1.5 }}>
+                Read from the official outline{profile.extracted_at && !isNaN(new Date(profile.extracted_at).getTime()) ? ` on ${new Date(profile.extracted_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}` : ""}.
+                Professors can revise an outline, so confirm anything that matters to you in session 1.
+              </li>
               {profile.source_url && (
                 <li>
                   <a href={profile.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: COLOR.navyHero, fontWeight: 700, textDecoration: "underline" }}>

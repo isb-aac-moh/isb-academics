@@ -64,9 +64,9 @@ Each course has a grading profile editor. It powers "Your Term" in the Planner a
 
 - **Grade split:** participation, individual, group and exam percentages. It warns if they don't add up to 100.
 - **Exams:** number of mid-terms, end-terms and quizzes.
-- **Workload scores**, 0 to 5 each: quant, assignments, participation, exam pressure, group work, reading. The app averages these into a score out of 10 (Chill, Moderate, Intense).
+- **Workload scores**, 0 to 5 each: quant, assignments, participation, exam pressure, group work, reading. Kept for the record; no student page shows them since 2026-10-30, so there's no need to fill them in for a new term.
 - **Brief:** labelled bullet points (About, Exams, Groups, Work, Notes) summarising the outline.
-- **Student feedback:** short notes from seniors who took the course. Students see these labelled as word of mouth. Leave names out.
+- **Student feedback:** short notes from seniors who took the course. Not shown to students since 2026-10-30, so there's no need to fill it in.
 - **Group and attendance rules:** group size, whether groups can cross sections, how groups form, peer evaluation, attendance policy.
 - **Source URL:** the outline PDF you took this from.
 

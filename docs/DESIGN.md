@@ -88,7 +88,7 @@ These come from explicit product decisions. Follow them when adding screens.
 - **Say when data is missing.** "Not stated in the outline", "No grading profile yet", "Not enough data yet (3/5)". Never fill a gap with a default.
 - **Informational tags look soft.** Relevance tags are small amber tags, never styled like a recommendation or ranking.
 - **Keep catalogue order.** Lists of courses are not re-sorted by popularity or by cohort data.
-- **Charts should look as uncertain as the data is.** Bidding Pulse uses a coarse 5-bar histogram, not a smooth curve, because 5 to 20 answers don't justify one. Workload uses a plain radar with a simple average.
+- **Charts should look as uncertain as the data is.** Bidding Pulse uses a coarse 5-bar histogram, not a smooth curve, because 5 to 20 answers don't justify one.
 - **Warnings don't block** unless an ISB rule is hard. Spending into the reserve shows red but is allowed; going over a term's credit maximum or the points available does block adding a course.
 - **Confirm the irreversible.** Pulse submissions and removals go through a confirmation dialog.
 - **Open external material in a new tab.** Don't embed SharePoint, Drive or Notion; they block framing and a blank frame gives no clue why.
@@ -103,7 +103,6 @@ These come from explicit product decisions. Follow them when adding screens.
 |---|---|---|
 | Side panel that expands to full screen, state in `?course=CODE&view=full` | Course Resources, Planner | `src/components/CourseDetailModal.tsx` |
 | Faculty card with one labelled rating and an offerings table | Planner, Resources, Dossier | `src/components/FacultySection.tsx` |
-| Six-axis workload radar drawn as SVG | Your Term, Dossier | `src/lib/workloadRadar.ts` |
 | Chip picker saved straight to the profile | Cross-listed concentration choice | `src/components/ConcentrationChoice.tsx` |
 | Admin-driven dialog with page targeting and frequency | Any page | `src/components/PopupManager.tsx` |
 | Step bar with persistent summary tiles | Bidding Planner | `src/pages/BiddingPlanner.tsx` |
