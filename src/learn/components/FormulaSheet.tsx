@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Markdown } from "./Markdown";
+import { useModalA11y } from "../../hooks/useModalA11y";
 
 interface Props {
   /** Markdown formula reference for the session the current question belongs to. */
@@ -16,15 +17,6 @@ interface Props {
 export function FormulaSheet({ sheet, session, title }: Props) {
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
   return (
     <>
       {/* Sits clear of the mobile tab bar (3.25rem + safe area) rather than behind it. */}
@@ -37,12 +29,22 @@ export function FormulaSheet({ sheet, session, title }: Props) {
         <span aria-hidden="true">∑</span> Formula sheet
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-40 flex justify-end" role="dialog" aria-modal="true"
+      {open && <FormulaSheetDialog sheet={sheet} session={session} title={title} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+function FormulaSheetDialog({ sheet, session, title, onClose }: Props & { onClose: () => void }) {
+  const dialogRef = useModalA11y<HTMLDivElement>(onClose);
+  return (
+        <div ref={dialogRef} tabIndex={-1} className="fixed inset-0 z-40 flex justify-end" role="dialog" aria-modal="true"
           aria-label={`Formula sheet for session ${session}`}>
+          {/* Mouse-only target: Escape and the Close button are the keyboard routes, so this
+              stays out of the Tab order rather than being the first stop in the dialog. */}
           <button
             className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]"
-            onClick={() => setOpen(false)}
+            onClick={onClose}
+            tabIndex={-1}
             aria-label="Close formula sheet"
           />
           <div className="relative w-full sm:max-w-md bg-surface border-l border-line h-full overflow-y-auto
@@ -54,7 +56,7 @@ export function FormulaSheet({ sheet, session, title }: Props) {
                 </div>
                 {title && <div className="font-semibold text-sm truncate">{title}</div>}
               </div>
-              <button onClick={() => setOpen(false)} className="btn btn-ghost px-2.5 py-1.5 shrink-0">
+              <button onClick={onClose} className="btn btn-ghost px-2.5 py-1.5 shrink-0">
                 Close
               </button>
             </div>
@@ -63,7 +65,5 @@ export function FormulaSheet({ sheet, session, title }: Props) {
             </div>
           </div>
         </div>
-      )}
-    </>
   );
 }

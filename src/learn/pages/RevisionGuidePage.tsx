@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { getRevisionGuide } from "../lib/revisionGuides";
+import { useModalA11y } from "../../hooks/useModalA11y";
 import { ChevronRightIcon, CompassIcon } from "../components/icons";
 
 /**
@@ -24,6 +25,9 @@ export function RevisionGuidePage() {
   const params = useParams<{ course: string; session?: string }>();
   const guide = getRevisionGuide(params.course);
   const [fullscreen, setFullscreen] = useState(false);
+  // This page swaps its whole layout for the full-screen view, so the button that opened it is
+  // destroyed; the new one it gets back on exit has to take the focus instead.
+  const refocusFullscreenButton = useRef(false);
 
   if (!guide) {
     return (
@@ -75,23 +79,7 @@ export function RevisionGuidePage() {
   }
 
   if (fullscreen) {
-    return createPortal(
-      <div className="fixed inset-0 z-[200] bg-surface flex flex-col">
-        <button
-          onClick={() => setFullscreen(false)}
-          className="fixed top-3 right-3 z-[210] text-xs font-semibold text-white bg-ink/80 backdrop-blur px-3 py-1.5 rounded-full shadow-lg hover:bg-ink"
-        >
-          ✕ Exit full screen
-        </button>
-        <iframe
-          key={active.slug}
-          src={active.file}
-          title={`${active.label} — ${active.title}`}
-          className="flex-1 min-h-0 w-full border-0 block"
-        />
-      </div>,
-      document.body,
-    );
+    return <FullscreenFrame key={active.slug} src={active.file} title={`${active.label} — ${active.title}`} onExit={() => { refocusFullscreenButton.current = true; setFullscreen(false); }} />;
   }
 
   return (
@@ -124,6 +112,7 @@ export function RevisionGuidePage() {
           </>
         )}
         <button
+          ref={(el) => { if (el && refocusFullscreenButton.current) { refocusFullscreenButton.current = false; el.focus(); } }}
           onClick={() => setFullscreen(true)}
           className="shrink-0 ml-auto text-xs font-semibold text-accent hover:underline px-2 py-1.5"
         >
@@ -137,5 +126,29 @@ export function RevisionGuidePage() {
         className="flex-1 min-h-0 w-full border-0 block"
       />
     </div>
+  );
+}
+
+/** Full-screen reading view. Escape exits it, including while the reader has clicked into the
+    guide itself: key presses inside an iframe never reach this page, so for these same-origin
+    guides we listen on the iframe's own document too. */
+function FullscreenFrame({ src, title, onExit }: { src: string; title: string; onExit: () => void }) {
+  const panelRef = useModalA11y<HTMLDivElement>(onExit);
+  return createPortal(
+    <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} className="fixed inset-0 z-[200] bg-surface flex flex-col">
+      <button
+        onClick={onExit}
+        className="fixed top-3 right-3 z-[210] text-xs font-semibold text-white bg-ink/80 backdrop-blur px-3 py-1.5 rounded-full shadow-lg hover:bg-ink"
+      >
+        ✕ Exit full screen
+      </button>
+      <iframe
+        src={src}
+        title={title}
+        onLoad={(e) => e.currentTarget.contentDocument?.addEventListener("keydown", (ev) => { if (ev.key === "Escape") onExit(); })}
+        className="flex-1 min-h-0 w-full border-0 block"
+      />
+    </div>,
+    document.body,
   );
 }
