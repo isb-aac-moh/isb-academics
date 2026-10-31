@@ -3,6 +3,7 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
 import { lazyWithReload } from "../lib/lazyWithReload";
+import { LearnSkeleton } from "../components/Skeleton";
 import { Window } from "./components/Window";
 import { MobileNav } from "./components/MobileNav";
 import { RequireAdmin } from "./components/RequireAdmin";
@@ -64,7 +65,7 @@ export default function LearnSection({ user }: { user: User }) {
   }, [section, posthog]);
 
   if (error) return <LearnMessage title="Practice is unavailable" detail={error} />;
-  if (!profile) return <div className="learn-root" />;
+  if (!profile) return <div className="learn-root min-h-screen"><LearnSkeleton /></div>;
 
   const atHome = section === "";
   const title = atHome ? (homeGuideOpen ? WINDOW_TITLES[""] : null) : WINDOW_TITLES[section];

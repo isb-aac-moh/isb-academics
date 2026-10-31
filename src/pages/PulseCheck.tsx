@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
+import { PageSkeleton } from "../components/Skeleton";
 import { useCourses } from "../hooks/useCourses";
 import { useAppSettings } from "../hooks/useAppSettings";
 import { usePulseCheck, PULSE_CHECK_MIN_RESPONDENTS, PULSE_CHECK_MAX_EDITS } from "../hooks/usePulseCheck";
@@ -33,7 +34,7 @@ export default function PulseCheck() {
   const posthog = usePostHog();
 
   if (coursesLoading || settingsLoading || pulseLoading) {
-    return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
+    return <PageSkeleton variant="dashboard" />;
   }
 
   return (

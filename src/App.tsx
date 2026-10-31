@@ -1,10 +1,12 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { COLOR } from "./lib/theme";
 import { useAuth } from "./hooks/useAuth";
+import { isDemoMode } from "./lib/demoMode";
+import { AUTH_STORAGE_KEY } from "./lib/supabase";
 import { lazyWithReload } from "./lib/lazyWithReload";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import RequireAdmin from "./components/RequireAdmin";
+import { AppShellSkeleton } from "./components/Skeleton";
 
 /* Every route below the shell is code-split. The shell (Layout + Sidebar) and Login stay in the
    entry chunk because one of the two always paints first; everything else is fetched while the
@@ -23,11 +25,36 @@ const PulseCheck = lazyWithReload(() => import("./pages/PulseCheck"));
 const CompassSection = lazyWithReload(() => import("./compass/CompassSection"));
 const LearnSection = lazyWithReload(() => import("./learn/LearnSection"));
 
+/* Fetching a page's code only once it renders put the download after the sign-in check, in series.
+   For someone who looks signed in (a stored session, or the demo), start the download for the
+   page the URL points at right now, in parallel with the check. A signed-out visitor is not asked
+   to fetch app code they are about to be turned away from. */
+const PRELOAD_BY_PATH: [string, { preload: () => Promise<unknown> }][] = [
+  ["/tracker", CreditTracker],
+  ["/planner", BiddingPlanner],
+  ["/pulse-check", PulseCheck],
+  ["/resources", CourseResources],
+  ["/dossier", TermDossier],
+  ["/learn", LearnSection],
+];
+function preloadCurrentPage() {
+  let looksSignedIn = isDemoMode();
+  try {
+    looksSignedIn ||= localStorage.getItem(AUTH_STORAGE_KEY) !== null;
+  } catch {
+    // Storage blocked: nothing to preload from, the normal path still works.
+  }
+  if (!looksSignedIn) return;
+  const path = window.location.pathname === "/" ? "/tracker" : window.location.pathname;
+  PRELOAD_BY_PATH.find(([prefix]) => path.startsWith(prefix))?.[1].preload();
+}
+preloadCurrentPage();
+
 export default function App() {
   const { user, loading, notProvisioned, signOut } = useAuth();
 
   if (loading) {
-    return <div style={{ minHeight: "100vh", background: COLOR.bg }} />;
+    return <AppShellSkeleton />;
   }
 
   if (!user) {

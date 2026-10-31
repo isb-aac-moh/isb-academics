@@ -8,7 +8,7 @@ import { lazy, type ComponentType } from "react";
 // of leaving the user stuck on a page that "doesn't load" until they think to hit refresh.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function lazyWithReload<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
-  return lazy(async () => {
+  const component = lazy(async () => {
     try {
       return await factory();
     } catch (error) {
@@ -21,4 +21,6 @@ export function lazyWithReload<T extends ComponentType<any>>(factory: () => Prom
       throw error;
     }
   });
+  // Lets a caller start the download early; the later render then finds the chunk already there.
+  return Object.assign(component, { preload: factory });
 }

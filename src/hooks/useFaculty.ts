@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { cached, fetchShared } from "../lib/queryCache";
 import type { CourseFaculty, Faculty, FacultyRating } from "../types";
 
 export interface CourseFacultyEntry extends CourseFaculty {
@@ -7,12 +8,10 @@ export interface CourseFacultyEntry extends CourseFaculty {
   ratings: FacultyRating[]; // newest first
 }
 
-export function useFaculty() {
-  const [byCourse, setByCourse] = useState<Map<string, CourseFacultyEntry[]>>(new Map());
-  const [loading, setLoading] = useState(true);
+type ByCourse = Map<string, CourseFacultyEntry[]>;
 
-  const reload = useCallback(async () => {
-    setLoading(true);
+function loadFaculty(force: boolean) {
+  return fetchShared<ByCourse>("faculty", async () => {
     const [f, cf, r] = await Promise.all([
       supabase.from("faculty").select("*"),
       supabase.from("course_faculty").select("*").order("sort_order"),
@@ -21,17 +20,27 @@ export function useFaculty() {
     const faculty = new Map(((f.data as Faculty[]) ?? []).map((x) => [x.id, x]));
     const ratings = new Map<string, FacultyRating[]>();
     ((r.data as FacultyRating[]) ?? []).forEach((x) => ratings.set(x.faculty_id, [...(ratings.get(x.faculty_id) ?? []), x]));
-    const map = new Map<string, CourseFacultyEntry[]>();
+    const map: ByCourse = new Map();
     ((cf.data as CourseFaculty[]) ?? []).forEach((x) => {
       const fac = faculty.get(x.faculty_id);
       if (fac) map.set(x.course_id, [...(map.get(x.course_id) ?? []), { ...x, faculty: fac, ratings: ratings.get(x.faculty_id) ?? [] }]);
     });
-    setByCourse(map);
+    return map;
+  }, force);
+}
+
+export function useFaculty() {
+  const hit = cached<ByCourse>("faculty");
+  const [byCourse, setByCourse] = useState<ByCourse>(hit ?? new Map());
+  const [loading, setLoading] = useState(!hit);
+
+  const reload = useCallback(async (force = true) => {
+    setByCourse(await loadFaculty(force));
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    reload();
+    reload(false);
   }, [reload]);
 
   return { byCourse, loading, reload };

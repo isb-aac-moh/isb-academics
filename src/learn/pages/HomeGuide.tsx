@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TextSkeleton } from "../../components/Skeleton";
 import { useNavigate } from "react-router-dom";
 import type { Attempt, Concept, Course, Question, Student } from "../types";
 import { fetchAttempts, fetchConcepts, fetchCourses, fetchQuestions } from "../lib/db";
@@ -109,7 +110,7 @@ export function HomeGuide({ profile }: Props) {
       <div className="lg:w-80 xl:w-96 shrink-0">
         <h2 className="text-xs uppercase tracking-wide text-ink-soft font-semibold mb-4">Your progress</h2>
         {!data ? (
-          <div className="text-sm text-ink-soft">Loading…</div>
+          <TextSkeleton lines={5} />
         ) : (
           <ProfileSummary profile={profile} {...data} />
         )}

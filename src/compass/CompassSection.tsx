@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TextSkeleton } from "../components/Skeleton";
 import { Link, NavLink, Route, Routes, useLocation, useSearchParams } from "react-router-dom";
 import { LENSES, loadStore, type Store } from "./lib/data";
 import Home from "./pages/Home";
@@ -35,7 +36,7 @@ export default function CompassSection() {
       {showLens && <div className="seg"><span>Show</span><div role="group" aria-label="Show ideas for">{LENSES.map(l => <button key={l.id} className={lens === l.id ? "on" : ""} aria-pressed={lens === l.id} title={l.blurb} onClick={() => setLens(l.id)}>{l.name}</button>)}</div></div>}
     </nav>
     {err && <p className="note" style={{ marginTop: 24 }}>Compass could not load its data. Check your connection and sign in again.</p>}
-    {!store && !err && <p className="small" style={{ marginTop: 24 }}>Loading…</p>}
+    {!store && !err && <div style={{ marginTop: 24 }}><TextSkeleton lines={6} /></div>}
     {store && <Routes>
       <Route index element={<Home store={store} lens={lens} />} />
       <Route path="c/:id" element={<ConceptPage store={store} lens={lens} />} />

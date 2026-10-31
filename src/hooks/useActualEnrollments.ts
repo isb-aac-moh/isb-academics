@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabase";
+import { cached, remember, takeEarly } from "../lib/queryCache";
 
 export interface ActualEnrollment {
   id: string;
@@ -10,19 +11,26 @@ export interface ActualEnrollment {
   grade: string | null;
 }
 
+export const enrollmentsKey = (userId: string) => `enrollments:${userId}`;
+
+export async function fetchEnrollments(userId: string) {
+  const { data } = await supabase
+    .from("actual_enrollments")
+    .select("*")
+    .eq("user_id", userId)
+    .order("term");
+  return data;
+}
+
 /** What a student actually ended up enrolled in — separate from their bid_plan_entries intentions. */
 export function useActualEnrollments(userId: string | undefined) {
-  const [entries, setEntries] = useState<ActualEnrollment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const hit = userId ? cached<ActualEnrollment[]>(enrollmentsKey(userId)) : undefined;
+  const [entries, setEntries] = useState<ActualEnrollment[]>(hit ?? []);
+  const [loading, setLoading] = useState(!hit);
 
   const reload = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
-    setLoading(true);
-    const { data } = await supabase
-      .from("actual_enrollments")
-      .select("*")
-      .eq("user_id", userId)
-      .order("term");
+    const data = await takeEarly(enrollmentsKey(userId), () => fetchEnrollments(userId));
     setEntries((data as ActualEnrollment[]) ?? []);
     setLoading(false);
   }, [userId]);
@@ -30,6 +38,11 @@ export function useActualEnrollments(userId: string | undefined) {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  // Keep the shared copy in step with every change, for the next page that asks.
+  useEffect(() => {
+    if (userId && !loading) remember(enrollmentsKey(userId), entries);
+  }, [userId, loading, entries]);
 
   async function addEntry(entry: { course_id: string | null; term: string; points_paid: number; grade: string | null }) {
     if (!userId) return;

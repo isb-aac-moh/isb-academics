@@ -6,6 +6,7 @@ import BottomNav from "./BottomNav";
 import PopupManager from "./PopupManager";
 import DemoSectionExplainer from "./DemoSectionExplainer";
 import DemoExternalLinkModal from "./DemoExternalLinkModal";
+import { RouteSkeleton } from "./Skeleton";
 import type { User } from "../types";
 
 const ADMIN_PREVIEW_PREFIXES = ["/notices"];
@@ -25,10 +26,10 @@ export default function Layout({ user, onSignOut }: { user: User; onSignOut: () 
       <div style={{ flex: 1, minWidth: 0 }} className={inLearn ? "" : "pb-[calc(3.25rem+env(safe-area-inset-bottom))] md:pb-0"}>
         <DemoSectionExplainer />
         {showPreviewBanner && <PreviewBanner />}
-        {/* Holds the shell steady while a lazily-fetched page chunk arrives. The fallback is a
-            blank block of the page background rather than a spinner: chunks are small and usually
-            land within a frame or two, and a spinner that flashes for 30ms reads as jank. */}
-        <Suspense fallback={<div style={{ minHeight: "100vh", background: COLOR.bg }} />}>
+        {/* Holds the shell steady while a lazily-fetched page chunk arrives. The fallback is the
+            grey outline of the page being fetched, and each page shows the same outline while its
+            data loads, so the two waits read as one. */}
+        <Suspense fallback={<RouteSkeleton pathname={location.pathname} />}>
           <Outlet context={{ user }} />
         </Suspense>
       </div>

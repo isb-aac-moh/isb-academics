@@ -14,6 +14,7 @@ import { useOutletContext } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { GraduationCap, Wallet, Receipt, Award, CheckCircle2, X, ChevronDown } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { PageSkeleton } from "../components/Skeleton";
 import { useCourses } from "../hooks/useCourses";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
 import { useActualEnrollments, type ActualEnrollment } from "../hooks/useActualEnrollments";
@@ -72,7 +73,7 @@ export default function CreditTracker() {
   const posthog = usePostHog();
 
   if (coursesLoading || !profile) {
-    return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
+    return <PageSkeleton variant="dashboard" />;
   }
 
   const creditsSecured = totalElectiveCreditsSecured(profile, courses, entries);

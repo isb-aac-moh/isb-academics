@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LearnSkeleton } from "../../components/Skeleton";
 import type { Attempt, Concept, Question, Student } from "../types";
 import { fetchAttempts, fetchConcepts, fetchQuestions, resetProgress } from "../lib/db";
 import { ProfileSummary } from "../components/ProfileSummary";
@@ -40,7 +41,7 @@ export function ProfilePage({ profile, onSignOut }: Props) {
   }
 
   if (!data) {
-    return <div className="flex items-center justify-center min-h-[60vh] text-ink-soft">Loading…</div>;
+    return <LearnSkeleton />;
   }
 
   return (

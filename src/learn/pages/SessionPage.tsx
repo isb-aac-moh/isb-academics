@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LearnSkeleton } from "../../components/Skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type {
   Attempt,
@@ -385,7 +386,7 @@ export function SessionPage({ profile, onXpChange }: Props) {
   }
 
   if (stage === "loading") {
-    return <div className="flex items-center justify-center min-h-[70vh] text-ink-soft">Loading…</div>;
+    return <LearnSkeleton />;
   }
 
   if (stage === "error") {

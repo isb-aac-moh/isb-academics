@@ -1,4 +1,5 @@
 import { Fragment, Suspense, memo, type ReactNode } from "react";
+import { Bone } from "../../components/Skeleton";
 import { Math } from "./Math";
 import { parseVizProps, VIZ } from "./viz";
 
@@ -314,7 +315,7 @@ export const Markdown = memo(function Markdown({ text, className }: Props) {
         // loads, so each gets its own boundary and reserves roughly its own height meanwhile —
         // filling in without shoving the rest of the note down the page.
         blocks.push(
-          <Suspense key={`v-${i}`} fallback={<div style={{ minHeight: 220 }} />}>
+          <Suspense key={`v-${i}`} fallback={<Bone h={220} r={12} />}>
             <Component {...parseVizProps(viz[2])} />
           </Suspense>,
         );
