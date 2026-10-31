@@ -5,11 +5,12 @@
  * Search is simple text matching for now — title, course name/code, professor.
  * (An NLP/AI-assisted version is a planned follow-up, not built yet.)
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { Search, X, ExternalLink, FileText, Pin, ChevronRight } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { useModalA11y } from "../hooks/useModalA11y";
 import { useResources } from "../hooks/useResources";
 import { useCourses } from "../hooks/useCourses";
 import { useFaculty, type CourseFacultyEntry } from "../hooks/useFaculty";
@@ -156,10 +157,11 @@ export default function CourseResources() {
             value={q}
             onChange={(e) => setParam("q", e.target.value, { replace: true })}
             placeholder="Search courses, professors, outlines, notes…"
+            aria-label="Search courses and resources"
             style={{ width: "100%", padding: "12px 38px 12px 40px", borderRadius: 11, border: `1px solid ${COLOR.border}`, fontSize: 14, fontFamily: FONT.sans, background: COLOR.surface, outline: "none" }}
           />
           {q && (
-            <button onClick={() => setParam("q", null)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}>
+            <button onClick={() => setParam("q", null)} aria-label="Clear search" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}>
               <X size={15} color={COLOR.ink3} />
             </button>
           )}
@@ -178,6 +180,7 @@ export default function CourseResources() {
           <select
             value={typeFilter}
             onChange={(e) => setParam("type", e.target.value)}
+            aria-label="Filter by resource type"
             style={{ marginLeft: 6, padding: "6px 10px", borderRadius: 7, border: `1px solid ${COLOR.border}`, fontSize: 12, fontFamily: FONT.sans, color: COLOR.ink2, background: COLOR.surface }}
           >
             <option value="all">All resource types</option>
@@ -290,16 +293,18 @@ function GeneralResourcesModal({ resources, onClose }: { resources: Resource[]; 
   const populatedTabs = buildPopulatedTabs(resources);
   const [activeTabKey, setActiveTabKey] = useState(populatedTabs[0]?.key);
   const activeTab = populatedTabs.find((t) => t.key === activeTabKey) ?? populatedTabs[0];
+  const panelRef = useModalA11y<HTMLDivElement>(onClose);
+  const titleId = useId();
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60, background: COLOR.bg }}>
+    <div ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} style={{ position: "fixed", inset: 0, zIndex: 60, background: COLOR.bg }}>
       <div className="flex flex-col" style={{ height: "100%" }}>
         <div className="flex items-start justify-between" style={{ padding: "20px 22px", borderBottom: `1px solid ${COLOR.borderLight}`, flexShrink: 0 }}>
           <div style={{ maxWidth: 700, margin: "0 auto", width: "100%" }}>
-            <h2 style={{ fontFamily: FONT.serif, fontSize: 26, fontWeight: 600, color: COLOR.ink }}>General Resources</h2>
+            <h2 id={titleId} style={{ fontFamily: FONT.serif, fontSize: 26, fontWeight: 600, color: COLOR.ink }}>General Resources</h2>
             <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>Not tied to a specific course.</p>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><X size={20} color={COLOR.ink2} /></button>
+          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><X size={20} color={COLOR.ink2} /></button>
         </div>
 
         {populatedTabs.length > 0 && (
@@ -308,6 +313,7 @@ function GeneralResourcesModal({ resources, onClose }: { resources: Resource[]; 
               <button
                 key={tab.key}
                 onClick={() => setActiveTabKey(tab.key)}
+                aria-pressed={activeTab?.key === tab.key}
                 style={{
                   padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer", border: "none",
                   background: activeTab?.key === tab.key ? COLOR.navyHero : COLOR.bgSoft, color: activeTab?.key === tab.key ? "#fff" : COLOR.ink2,
@@ -382,6 +388,7 @@ function FilterChip({ active, onClick, label, muted }: { active: boolean; onClic
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       style={{
         padding: muted ? "5px 12px" : "7px 14px", borderRadius: 8, fontSize: muted ? 11.5 : 12.5, fontWeight: 600, fontFamily: FONT.sans, cursor: "pointer",
         border: `1px solid ${active ? COLOR.navyHero : COLOR.border}`, background: active ? COLOR.navyHero : COLOR.surface, color: active ? "#fff" : COLOR.ink2,

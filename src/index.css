@@ -191,6 +191,11 @@ textarea:focus-visible,
   outline-color: var(--c-accent) !important;
   outline-offset: 2px !important;
 }
+/* tabindex="-1" means "focus me from code, not from Tab" (a dialog panel receiving focus on open).
+   Nothing to operate there, so no ring. */
+[tabindex="-1"]:focus-visible {
+  outline: none !important;
+}
 
 @keyframes dropdown-in {
   from { opacity: 0; transform: translateY(-4px) scale(0.98); }

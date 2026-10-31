@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { usePostHog } from "@posthog/react";
 import { X, ExternalLink, FileText, Maximize2, Minimize2, Pin } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { useModalA11y } from "../hooks/useModalA11y";
 import { buildPopulatedTabs } from "../lib/options";
 import { FacultySection } from "./FacultySection";
 import type { CourseFacultyEntry } from "../hooks/useFaculty";
@@ -17,11 +18,18 @@ export function CourseDetailModal({
 
   const [activeTabKey, setActiveTabKey] = useState(populatedTabs[0]?.key);
   const activeTab = populatedTabs.find((t) => t.key === activeTabKey) ?? populatedTabs[0];
+  const panelRef = useModalA11y<HTMLDivElement>(onClose);
+  const titleId = useId();
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 60 }}>
-      {!fullScreen && <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />}
+      {!fullScreen && <div aria-hidden="true" onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />}
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className="flex flex-col"
         style={fullScreen
           ? { position: "absolute", inset: 0, background: COLOR.bg }
@@ -31,14 +39,14 @@ export function CourseDetailModal({
         <div className="flex items-start justify-between" style={{ padding: "20px 22px", borderBottom: `1px solid ${COLOR.borderLight}`, flexShrink: 0 }}>
           <div style={{ maxWidth: fullScreen ? 700 : undefined, margin: fullScreen ? "0 auto" : undefined, width: fullScreen ? "100%" : undefined }}>
             {course.is_core && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: COLOR.navyHero, color: "#fff", fontFamily: FONT.sans, textTransform: "uppercase" }}>Core</span>}
-            <h2 style={{ fontFamily: FONT.serif, fontSize: fullScreen ? 26 : 19, fontWeight: 600, color: COLOR.ink, marginTop: 6 }}>{course.name}</h2>
+            <h2 id={titleId} style={{ fontFamily: FONT.serif, fontSize: fullScreen ? 26 : 19, fontWeight: 600, color: COLOR.ink, marginTop: 6 }}>{course.name}</h2>
             <p style={{ fontSize: 12, color: COLOR.ink3, fontFamily: FONT.sans, marginTop: 2 }}>{course.code} · {course.professor} · {course.term}</p>
           </div>
           <div className="flex items-center gap-3" style={{ flexShrink: 0 }}>
             <button onClick={onToggleFullScreen} aria-label={fullScreen ? "Exit full screen" : "Open full screen"} style={{ background: "none", border: "none", cursor: "pointer" }}>
               {fullScreen ? <Minimize2 size={18} color={COLOR.ink2} /> : <Maximize2 size={18} color={COLOR.ink2} />}
             </button>
-            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} color={COLOR.ink2} /></button>
+            <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} color={COLOR.ink2} /></button>
           </div>
         </div>
 
@@ -48,6 +56,7 @@ export function CourseDetailModal({
               <button
                 key={tab.key}
                 onClick={() => setActiveTabKey(tab.key)}
+                aria-pressed={activeTab?.key === tab.key}
                 style={{
                   padding: "7px 13px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, fontFamily: FONT.sans, cursor: "pointer", border: "none",
                   background: activeTab?.key === tab.key ? COLOR.navyHero : COLOR.bgSoft, color: activeTab?.key === tab.key ? "#fff" : COLOR.ink2,

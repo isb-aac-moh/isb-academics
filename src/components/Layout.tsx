@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import Sidebar from "./Sidebar";
@@ -10,8 +10,38 @@ import type { User } from "../types";
 
 const ADMIN_PREVIEW_PREFIXES = ["/notices"];
 
+const PAGE_TITLES: [prefix: string, title: string][] = [
+  ["/tracker", "Credit Tracker"],
+  ["/planner", "Bidding Planner"],
+  ["/pulse-check", "Bidding Pulse"],
+  ["/resources", "Course Resources"],
+  ["/term4", "Term 4 Dossier"],
+  ["/notices", "Notice Board"],
+  ["/admin", "Admin"],
+  ["/learn", "Learn"],
+  ["/compass", "Compass"],
+];
+
+/** "/dossier/term-6" -> "Term 6 Dossier"; unknown paths keep the plain app name. */
+function pageTitle(pathname: string): string {
+  const dossier = pathname.match(/^\/dossier\/([^/]+)/);
+  if (dossier) {
+    const term = dossier[1].replace(/-/g, " ");
+    return `${term.charAt(0).toUpperCase()}${term.slice(1)} Dossier · ISB Academics`;
+  }
+  const hit = PAGE_TITLES.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  return hit ? `${hit[1]} · ISB Academics` : "ISB Academics";
+}
+
 export default function Layout({ user, onSignOut }: { user: User; onSignOut: () => void }) {
   const location = useLocation();
+  // The tab title is what browser history, bookmarks and screen readers announce for a page, and
+  // the router swaps pages without a reload, so each route has to set it. Scroll resets for the
+  // same reason: a new page should start at the top, not wherever the last one was left.
+  useEffect(() => {
+    document.title = pageTitle(location.pathname);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   const showPreviewBanner = ADMIN_PREVIEW_PREFIXES.some((p) => location.pathname.startsWith(p));
   // /learn renders its own bottom nav and already reserves space for it; everywhere else needs
   // room at the bottom on mobile so the new app-wide bar doesn't cover the page's last content.
