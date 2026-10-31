@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LearnTiles } from "../../components/Skeleton";
 import { useNavigate } from "react-router-dom";
 import type { Course, Student } from "../types";
 import { fetchCourses } from "../lib/db";
@@ -32,7 +33,7 @@ export function LearnPage({ profile }: Props) {
       <p className="text-ink-soft mb-7">Pick a subject to read its sessions and concepts.</p>
 
       {courses === null ? (
-        <p className="text-sm text-ink-soft">Loading…</p>
+        <LearnTiles />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {courses.map((c) => {

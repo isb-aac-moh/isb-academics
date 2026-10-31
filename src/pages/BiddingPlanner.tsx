@@ -6,6 +6,7 @@
 import { useParams, useNavigate, Navigate, useOutletContext } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
+import { PageSkeleton } from "../components/Skeleton";
 import { useCourses } from "../hooks/useCourses";
 import { useResources } from "../hooks/useResources";
 import { useAcademicProfile } from "../hooks/useAcademicProfile";
@@ -46,7 +47,7 @@ export default function BiddingPlanner() {
   if (step === -1) return <Navigate to="/planner/background" replace />;
 
   if (coursesLoading || settingsLoading || !profile) {
-    return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
+    return <PageSkeleton variant="planner" />;
   }
 
   const creditsSecured = totalElectiveCreditsSecured(profile, courses, entries);

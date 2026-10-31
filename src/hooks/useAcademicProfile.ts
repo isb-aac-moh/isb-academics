@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabase";
+import { cached, remember, takeEarly } from "../lib/queryCache";
 import type { StudentAcademicProfile } from "../types";
 
 const EMPTY: Omit<StudentAcademicProfile, "user_id"> = {
@@ -19,19 +20,26 @@ const EMPTY: Omit<StudentAcademicProfile, "user_id"> = {
   cross_listed_concentration_choices: {},
 };
 
+export const academicProfileKey = (userId: string) => `academic_profile:${userId}`;
+
+export async function fetchAcademicProfile(userId: string) {
+  const { data } = await supabase
+    .from("student_academic_profiles")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data;
+}
+
 export function useAcademicProfile(userId: string | undefined) {
-  const [profile, setProfile] = useState<StudentAcademicProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const hit = userId ? cached<StudentAcademicProfile>(academicProfileKey(userId)) : undefined;
+  const [profile, setProfile] = useState<StudentAcademicProfile | null>(hit ?? null);
+  const [loading, setLoading] = useState(!hit);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
-    setLoading(true);
-    const { data } = await supabase
-      .from("student_academic_profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const data = await takeEarly(academicProfileKey(userId), () => fetchAcademicProfile(userId));
     setProfile((data as StudentAcademicProfile) ?? { user_id: userId, ...EMPTY });
     setLoading(false);
   }, [userId]);
@@ -39,6 +47,11 @@ export function useAcademicProfile(userId: string | undefined) {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  // Keep the shared copy in step with every change, saves included, for the next page that asks.
+  useEffect(() => {
+    if (userId && profile) remember(academicProfileKey(userId), profile);
+  }, [userId, profile]);
 
   async function save(updates: Partial<StudentAcademicProfile>) {
     if (!userId) return;

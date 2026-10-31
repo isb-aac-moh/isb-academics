@@ -14,6 +14,7 @@
 import { useId, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
+import { PageSkeleton } from "../components/Skeleton";
 import { useModalA11y } from "../hooks/useModalA11y";
 import { useCourses } from "../hooks/useCourses";
 import { useCourseGradingProfiles } from "../hooks/useCourseGradingProfiles";
@@ -136,7 +137,7 @@ export default function TermDossier() {
   const open = openId ? entries.find((e) => e.course.id === openId) ?? null : null;
 
   if (loading) {
-    return <div style={{ minHeight: "100vh", background: COLOR.bg }} />;
+    return <PageSkeleton variant="cards" />;
   }
 
   return (

@@ -271,3 +271,35 @@ details.term-group > summary .chevron {
 details.term-group[open] > summary .chevron {
   transform: rotate(180deg);
 }
+
+/* Loading placeholders (components/Skeleton.tsx). A flat grey shape with a soft highlight that
+   sweeps across it. The sweep is a child layer moved with `transform`, so it runs on the GPU
+   without repainting the page; background-position animation would not. Colours are variables
+   so the same shape works on white cards, the Learn palette and the navy sidebar. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--skeleton-base, #ecebe7);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--skeleton-shine, rgba(255, 255, 255, 0.7)), transparent);
+  animation: skeleton-sweep 1.5s ease-in-out infinite;
+}
+.skeleton-dark {
+  --skeleton-base: rgba(255, 255, 255, 0.12);
+  --skeleton-shine: rgba(255, 255, 255, 0.16);
+}
+.learn-root .skeleton {
+  --skeleton-base: var(--c-surface-2);
+}
+@keyframes skeleton-sweep {
+  to { transform: translateX(100%); }
+}
+/* Still shapes for people who ask their system for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after { animation: none; display: none; }
+}

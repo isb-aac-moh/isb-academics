@@ -10,6 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { Search, X, ExternalLink, FileText, Pin, ChevronRight } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { PageSkeleton } from "../components/Skeleton";
 import { useModalA11y } from "../hooks/useModalA11y";
 import { useResources } from "../hooks/useResources";
 import { useCourses } from "../hooks/useCourses";
@@ -121,7 +122,7 @@ export default function CourseResources() {
   const termsPresent = useMemo(() => ALL_TERMS.filter((t) => courses.some((c) => c.term === t)), [courses]);
 
   if (resourcesLoading || coursesLoading) {
-    return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
+    return <PageSkeleton variant="list" />;
   }
 
   return (

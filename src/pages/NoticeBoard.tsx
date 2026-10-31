@@ -4,6 +4,7 @@
  */
 import { Pin } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { PageSkeleton } from "../components/Skeleton";
 import { useNotifications } from "../hooks/useNotifications";
 import type { NotificationTag } from "../types";
 
@@ -18,7 +19,7 @@ export default function NoticeBoard() {
   const { notifications, loading } = useNotifications();
 
   if (loading) {
-    return <div style={{ padding: 40, fontFamily: FONT.sans, color: COLOR.ink2 }}>Loading…</div>;
+    return <PageSkeleton variant="list" />;
   }
 
   return (

@@ -7,6 +7,10 @@ import { buildDemoSeed, demoRpcHandlers } from "./demoSeed";
 // decides which client to export. See demoMode.ts.
 markDemoEntryIfNeeded();
 
+// Where the signed-in session lives in localStorage. Shared with index.html, which reads it to decide
+// whether to draw the app outline before JS arrives.
+export const AUTH_STORAGE_KEY = "pulse-isb-auth"; // same key as isb-explorer — shared Supabase project, one login
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -18,7 +22,7 @@ export const supabase = isDemoMode()
   : createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
-        storageKey: "pulse-isb-auth", // same key as isb-explorer — shared Supabase project, one login
+        storageKey: AUTH_STORAGE_KEY,
         autoRefreshToken: true,
         detectSessionInUrl: true,
       },

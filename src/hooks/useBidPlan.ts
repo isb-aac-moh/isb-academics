@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabase";
+import { cached, remember, takeEarly } from "../lib/queryCache";
 
 export interface BidPlanEntry {
   id: string;
@@ -16,18 +17,25 @@ export const MIN_BID_PER_COURSE = 100;
 export const RESERVE_PER_REMAINING_CREDIT = 100;
 export const TOTAL_ELECTIVE_CREDITS_REQUIRED = 18; // + 1 ELP = 19 total, ELP isn't bid on
 
+export const bidPlanKey = (userId: string) => `bid_plan:${userId}`;
+
+export async function fetchBidPlan(userId: string) {
+  const { data } = await supabase
+    .from("bid_plan_entries")
+    .select("*")
+    .eq("user_id", userId)
+    .order("term");
+  return data;
+}
+
 export function useBidPlan(userId: string | undefined) {
-  const [entries, setEntries] = useState<BidPlanEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const hit = userId ? cached<BidPlanEntry[]>(bidPlanKey(userId)) : undefined;
+  const [entries, setEntries] = useState<BidPlanEntry[]>(hit ?? []);
+  const [loading, setLoading] = useState(!hit);
 
   const reload = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
-    setLoading(true);
-    const { data } = await supabase
-      .from("bid_plan_entries")
-      .select("*")
-      .eq("user_id", userId)
-      .order("term");
+    const data = await takeEarly(bidPlanKey(userId), () => fetchBidPlan(userId));
     setEntries((data as BidPlanEntry[]) ?? []);
     setLoading(false);
   }, [userId]);
@@ -35,6 +43,11 @@ export function useBidPlan(userId: string | undefined) {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  // Keep the shared copy in step with every change, for the next page that asks.
+  useEffect(() => {
+    if (userId && !loading) remember(bidPlanKey(userId), entries);
+  }, [userId, loading, entries]);
 
   async function addEntry(entry: { course_id: string | null; term: string; planned_points: number }) {
     if (!userId) return;

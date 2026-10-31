@@ -45,9 +45,53 @@
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       />
     </noscript>
+
+    <!-- Outline of the app, drawn from the first byte of HTML so a returning student sees the page's
+         shape while the JavaScript downloads, instead of a blank screen. It is plain CSS (nothing here
+         waits on the bundle), matches components/Skeleton.tsx's AppShellSkeleton so React's version
+         takes over without a jump, and only shows when a stored session suggests the app is about to
+         open (a first-time visitor is headed for the login page, where an outline would mislead). -->
+    <style>
+      #boot { display: none; min-height: 100vh; background: #fafafa; flex-direction: column; }
+      html.has-session #boot { display: flex; }
+      #boot .o { background: #ecebe7; border-radius: 8px; }
+      #boot .top { height: 51px; background: #1e2e7a; color: #fff; font: 800 13px/51px system-ui, sans-serif; padding: 0 16px; }
+      #boot .top i, #boot .side i { color: #8fe8d8; font-style: normal; font-weight: 700; }
+      #boot .side { display: none; width: 220px; height: 100vh; position: sticky; top: 0; flex-shrink: 0; box-sizing: border-box; background: #1e2e7a; padding: 24px 12px; color: #fff; font: 800 14px system-ui, sans-serif; }
+      #boot .side i { display: block; font-size: 12px; margin: 1px 0 32px; }
+      #boot .side .o { height: 34px; margin-bottom: 4px; background: rgba(255, 255, 255, 0.12); }
+      #boot .page { flex: 1; min-width: 0; padding: 40px 24px; }
+      #boot .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 920px; margin-top: 24px; }
+      #boot .grid .o { height: 88px; background: #fff; border: 1px solid #f0f0ee; border-radius: 12px; }
+      @media (min-width: 768px) {
+        #boot { flex-direction: row; }
+        #boot .top { display: none; }
+        #boot .side { display: block; }
+        #boot .page { padding: 40px 48px; }
+        #boot .grid { grid-template-columns: repeat(4, 1fr); }
+      }
+    </style>
+    <script>
+      try {
+        if (localStorage.getItem("pulse-isb-auth") || sessionStorage.getItem("isb_demo_mode") || location.pathname === "/demo") {
+          document.documentElement.classList.add("has-session");
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot" aria-hidden="true">
+        <div class="top">ISB <i>Academics</i></div>
+        <div class="side">ISB<i>Academics</i><div class="o"></div><div class="o"></div><div class="o"></div><div class="o"></div><div class="o"></div><div class="o"></div></div>
+        <div class="page">
+          <div class="o" style="width: 200px; height: 28px"></div>
+          <div class="o" style="width: min(100%, 560px); height: 13px; margin-top: 14px"></div>
+          <div class="o" style="width: min(100%, 360px); height: 13px; margin-top: 8px"></div>
+          <div class="grid"><div class="o"></div><div class="o"></div><div class="o"></div><div class="o"></div></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

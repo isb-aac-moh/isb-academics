@@ -3,6 +3,8 @@ import { supabase } from "../lib/supabase";
 import posthog from "posthog-js";
 import { isDemoMode, exitDemoMode } from "../lib/demoMode";
 import { DEMO_USER } from "../lib/demoData";
+import { prefetchForSignedIn } from "../lib/prefetch";
+import { clearCache } from "../lib/queryCache";
 import type { User } from "../types";
 
 // Brief pause after clicking "Login to see demo" before landing on the dashboard — long enough to
@@ -69,6 +71,7 @@ export function useAuth() {
         gateAndLoadProfile(session.user.email, session.user.id);
       } else {
         loadedUid.current = null;
+        clearCache();
         setUser(null);
         setNotProvisioned(false);
         setLoading(false);
@@ -91,6 +94,7 @@ export function useAuth() {
       return;
     }
     loadedUid.current = uid;
+    prefetchForSignedIn(uid);
     loadProfile(uid);
   }
 
@@ -118,6 +122,7 @@ export function useAuth() {
     posthog.reset();
     await supabase.auth.signOut();
     loadedUid.current = null;
+    clearCache();
     setUser(null);
     setNotProvisioned(false);
   }

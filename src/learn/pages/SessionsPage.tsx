@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LearnSkeleton } from "../../components/Skeleton";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Concept, Course, CourseContent, Material, Question, SessionContent, Student } from "../types";
 import {
@@ -77,7 +78,7 @@ export function SessionsPage({ profile }: Props) {
   }
 
   if (!groups || !course) {
-    return <div className="flex items-center justify-center min-h-[60vh] text-ink-soft">Loading…</div>;
+    return <LearnSkeleton />;
   }
 
   const currentGroup = groups.find((g) => g.session === activeSession) ?? null;

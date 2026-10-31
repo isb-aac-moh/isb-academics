@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TextSkeleton } from "../../../components/Skeleton";
 import type { CohortStats, Concept, FlaggedQuestion, TopicStat } from "../../types";
 import { fetchCohortStats, fetchConcepts, fetchFlaggedQuestions, fetchTopicStats, topicKey } from "../../lib/db";
 
@@ -28,7 +29,7 @@ export function AdminMonitoring() {
   }
 
   if (!stats) {
-    return <p className="text-sm text-ink-soft">Loading…</p>;
+    return <TextSkeleton lines={6} />;
   }
 
   const overallAccuracy =
