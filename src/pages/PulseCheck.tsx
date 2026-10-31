@@ -17,6 +17,7 @@ import { useOutletContext } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { COLOR, FONT } from "../lib/theme";
 import { PageSkeleton } from "../components/Skeleton";
+import { ModalCard } from "../components/ModalCard";
 import { useCourses } from "../hooks/useCourses";
 import { useAppSettings } from "../hooks/useAppSettings";
 import { usePulseCheck, PULSE_CHECK_MIN_RESPONDENTS, PULSE_CHECK_MAX_EDITS } from "../hooks/usePulseCheck";
@@ -427,9 +428,7 @@ function RemoveConfirmModal({
   courseName, onCancel, onConfirm,
 }: { courseName: string; onCancel: () => void; onConfirm: () => void }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={onCancel} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
-      <div style={{ position: "relative", background: COLOR.surface, borderRadius: 14, padding: 24, maxWidth: 380, width: "100%" }}>
+    <ModalCard label="Remove this submission?" onClose={onCancel} role="alertdialog">
         <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 8 }}>
           Remove this submission?
         </p>
@@ -450,18 +449,18 @@ function RemoveConfirmModal({
             Remove
           </button>
         </div>
-      </div>
-    </div>
+    </ModalCard>
   );
 }
 
 function ConfirmModal({
   mode, courseName, points, submitting, onCancel, onConfirm,
 }: { mode: "submit" | "edit"; courseName: string; points: number; submitting: boolean; onCancel: () => void; onConfirm: () => void }) {
+  // Backdrop and Escape do nothing while the bid is being saved, so a stray key can't hide the
+  // result of a write that is already in flight.
+  const cancel = submitting ? () => {} : onCancel;
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={onCancel} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
-      <div style={{ position: "relative", background: COLOR.surface, borderRadius: 14, padding: 24, maxWidth: 380, width: "100%" }}>
+    <ModalCard label={mode === "edit" ? "Save this as your final answer?" : "Confirm your bid?"} onClose={cancel} role="alertdialog">
         <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 8 }}>
           {mode === "edit" ? "Save this as your final answer?" : "Confirm your bid?"}
         </p>
@@ -486,7 +485,6 @@ function ConfirmModal({
             {submitting ? "Saving…" : mode === "edit" ? "Confirm edit" : "Confirm"}
           </button>
         </div>
-      </div>
-    </div>
+    </ModalCard>
   );
 }

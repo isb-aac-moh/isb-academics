@@ -13,7 +13,8 @@ interface Props {
 export function Window({ title, onClose, children }: Props) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      // A popup on top of this window (the formula sheet) already used the key to close itself.
+      if (e.key === "Escape" && !e.defaultPrevented) onClose();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

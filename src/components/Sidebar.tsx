@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ListChecks, ShieldCheck, LogOut, Menu, X, BookOpen, Megaphone, ExternalLink, Activity, GraduationCap, PanelLeftClose, PanelLeftOpen, Brain, LayoutGrid, Compass as CompassIcon } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
 import { isDemoMode } from "../lib/demoMode";
+import { useModalA11y } from "../hooks/useModalA11y";
 import { useNavLinks } from "../hooks/useNavLinks";
 import { NAV_LINK_ICONS, type NavLinkIconKey } from "../lib/navLinkIcons";
 import type { User } from "../types";
@@ -35,6 +36,15 @@ export default function Sidebar({ user, onSignOut }: Props) {
   useEffect(() => {
     setCollapsed(inLearn);
   }, [inLearn]);
+
+  // Rotating a tablet or resizing past md hides the drawer with CSS; without this it would stay
+  // "open" invisibly, keeping the page locked and focus trapped behind it.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = () => { if (mq.matches) setMobileOpen(false); };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   // Built as functions of (collapsed, onLight) rather than fixed elements, because the same nav
   // is rendered twice with different needs: the mobile drawer always wants full labels even while
@@ -142,12 +152,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="md:hidden" style={{ position: "fixed", inset: 0, zIndex: 50 }}>
-          <div onClick={() => setMobileOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
-          <div
-            className="flex flex-col justify-between"
-            style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "min(280px, 85vw)", background: COLOR.navyHero, padding: "20px 16px", overflowY: "auto" }}
-          >
+        <DrawerShell onClose={() => setMobileOpen(false)}>
             <div>
               <div className="flex items-center justify-between mb-8">
                 <div>
@@ -166,8 +171,7 @@ export default function Sidebar({ user, onSignOut }: Props) {
               {extraNav(false, false)}
             </div>
             {bottomNav(false, false)}
-          </div>
-        </div>
+        </DrawerShell>
       )}
 
       {/* Desktop sidebar — visible at md and up. Collapsed it goes white with a hairline border:
@@ -242,6 +246,27 @@ function useRailLabel(enabled: boolean) {
   return { pos, bind: { onMouseEnter: open, onMouseLeave: close, onFocus: open, onBlur: close } };
 }
 
+/** The slide-in menu below md. A real dialog: Escape and the backdrop close it, focus stays inside. */
+function DrawerShell({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  const panelRef = useModalA11y<HTMLDivElement>(onClose);
+  return (
+    <div className="md:hidden" style={{ position: "fixed", inset: 0, zIndex: 50 }}>
+      <div aria-hidden="true" onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+        tabIndex={-1}
+        className="flex flex-col justify-between"
+        style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "min(280px, 85vw)", background: COLOR.navyHero, padding: "20px 16px", overflowY: "auto" }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function WithRailLabel({ label, enabled, children }: { label: string; enabled: boolean; children: React.ReactNode }) {
   const { pos, bind } = useRailLabel(enabled);
   return (
@@ -288,6 +313,7 @@ function NavItem({
       <button
         onClick={onClick}
         disabled={disabled}
+        aria-current={active ? "page" : undefined}
         aria-label={collapsed ? hoverLabel : undefined}
         style={{
           width: "100%", display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px" : "9px 10px", borderRadius: 8,

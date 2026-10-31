@@ -2,6 +2,7 @@
     the button is real, it's just pointed at ISB-internal course material behind an @isb.edu login. */
 import { useEffect, useState } from "react";
 import { DEMO_BLOCKED_LINK_EVENT } from "../lib/demoLinkGuard";
+import { ModalCard } from "./ModalCard";
 import { COLOR, FONT } from "../lib/theme";
 
 export default function DemoExternalLinkModal() {
@@ -16,9 +17,7 @@ export default function DemoExternalLinkModal() {
   if (!open) return null;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 80, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={() => setOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
-      <div style={{ position: "relative", background: COLOR.surface, borderRadius: 14, padding: 24, maxWidth: 380, width: "100%" }}>
+    <ModalCard label="This button is real" onClose={() => setOpen(false)} zIndex={80}>
         <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.sans, color: COLOR.ink, marginBottom: 8 }}>
           This button is real — the file is the part that's gated
         </p>
@@ -36,7 +35,6 @@ export default function DemoExternalLinkModal() {
             Got it
           </button>
         </div>
-      </div>
-    </div>
+    </ModalCard>
   );
 }

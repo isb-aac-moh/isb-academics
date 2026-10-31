@@ -11,10 +11,11 @@
  * seed course_grading_profiles for that term's courses and its dossier appears.
  * Term 4 predates this and stays as its own static file at /term4.
  */
-import { useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { COLOR, FONT } from "../lib/theme";
 import { PageSkeleton } from "../components/Skeleton";
+import { useModalA11y } from "../hooks/useModalA11y";
 import { useCourses } from "../hooks/useCourses";
 import { useCourseGradingProfiles } from "../hooks/useCourseGradingProfiles";
 import { useFaculty, type CourseFacultyEntry } from "../hooks/useFaculty";
@@ -256,6 +257,7 @@ function TabButton({ active, onClick, label }: { active: boolean; onClick: () =>
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       style={{
         padding: "9px 16px", fontSize: 13, fontWeight: active ? 700 : 500, fontFamily: FONT.sans,
         color: active ? COLOR.navyHero : COLOR.ink2, background: "none", border: "none", cursor: "pointer",
@@ -299,7 +301,12 @@ function GradeBar({ p, height = 18 }: { p: CourseGradingProfile; height?: number
   ].filter((s) => s.pct > 0);
 
   return (
-    <div className="flex" style={{ height, borderRadius: 5, overflow: "hidden" }}>
+    <div
+      className="flex"
+      role="img"
+      aria-label={`How the grade splits: ${segs.map((s) => `${s.label} ${s.pct}%`).join(", ")}`}
+      style={{ height, borderRadius: 5, overflow: "hidden" }}
+    >
       {segs.map((s) => (
         <div
           key={s.label}
@@ -349,12 +356,17 @@ function CourseCard({ entry, pinned, pinFull, onOpen, onPin }: { entry: Entry; p
       </button>
 
       <div className="flex items-center justify-between gap-2" style={{ marginTop: "auto", paddingTop: 8, borderTop: `1px solid ${COLOR.borderLight}` }}>
-        <button onClick={onOpen} style={{ fontSize: 11.5, fontWeight: 700, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+        {/* Same action as the card above, kept as a visible mouse target. Out of the Tab order and
+            the accessibility tree so keyboard and screen-reader users meet one "open" per card. */}
+        <button onClick={onOpen} tabIndex={-1} aria-hidden="true" style={{ fontSize: 11.5, fontWeight: 700, color: COLOR.navyHero, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
           Full read →
         </button>
         <button
           onClick={onPin}
           disabled={!pinned && pinFull}
+          aria-pressed={pinned}
+          aria-label={`Compare ${course.name}`}
+          title={!pinned && pinFull ? `You can compare up to ${MAX_COMPARE} courses — unpin one first` : undefined}
           style={{
             fontSize: 11.5, fontWeight: 700, background: "none", border: "none", padding: 0,
             color: pinned ? COLOR.amber : !pinned && pinFull ? COLOR.ink3 : COLOR.ink2,
@@ -412,20 +424,29 @@ function CourseModal({ entry, facultyEntries, onClose }: { entry: Entry; faculty
   const rest = profile.brief.filter((b) => b !== about);
   const countsToward = [...course.concentration_areas, ...course.industry_specializations];
   const read = readDate(profile.extracted_at);
+  const panelRef = useModalA11y<HTMLDivElement>(onClose);
+  const titleId = useId();
+  // A drag that starts on the text and ends on the backdrop is a text selection, not a close.
+  const pressedBackdrop = useRef(false);
 
   return (
     <div
-      onClick={onClose}
+      onMouseDown={(e) => { pressedBackdrop.current = e.target === e.currentTarget; }}
+      onClick={(e) => { if (pressedBackdrop.current && e.target === e.currentTarget) onClose(); }}
       style={{ position: "fixed", inset: 0, background: "rgba(17,17,17,.45)", zIndex: 60, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 16px", overflowY: "auto" }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         style={{ background: COLOR.surface, borderRadius: 14, maxWidth: 680, width: "100%", padding: "22px 24px 26px" }}
       >
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
             <p style={{ fontSize: 10.5, fontWeight: 700, color: COLOR.navyHero, letterSpacing: "0.06em" }}>{course.code}</p>
-            <h2 style={{ fontFamily: FONT.serif, fontSize: 22, fontWeight: 700, color: COLOR.ink, lineHeight: 1.2, marginTop: 3 }}>{course.name}</h2>
+            <h2 id={titleId} style={{ fontFamily: FONT.serif, fontSize: 22, fontWeight: 700, color: COLOR.ink, lineHeight: 1.2, marginTop: 3 }}>{course.name}</h2>
             <p style={{ fontSize: 12.5, color: COLOR.ink2, marginTop: 4 }}>
               {course.professor} · {course.credits} credit{Number(course.credits) === 1 ? "" : "s"}
             </p>

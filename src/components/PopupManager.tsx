@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { X } from "lucide-react";
 import { COLOR, FONT } from "../lib/theme";
+import { ModalCard } from "./ModalCard";
 import { useDashboardPopups } from "../hooks/useDashboardPopups";
 import { POPUP_ICONS, type PopupIconKey } from "../lib/popupIcons";
 import type { DashboardPopup } from "../types";
@@ -65,7 +66,7 @@ export default function PopupManager() {
 
   if (!candidate) return null;
 
-  function dismiss(method: "secondary" | "backdrop" | "close") {
+  function dismiss(method: "secondary" | "backdrop" | "close" | "escape") {
     posthog?.capture("popup_dismissed", { slug: candidate!.slug, method });
     markDismissed(candidate!);
     setClosedSlug(candidate!.slug);
@@ -85,9 +86,7 @@ export default function PopupManager() {
   const Icon = candidate.icon ? POPUP_ICONS[candidate.icon as PopupIconKey] : null;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={() => dismiss("backdrop")} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
-      <div style={{ position: "relative", background: COLOR.surface, borderRadius: 14, padding: 24, maxWidth: 380, width: "100%" }}>
+    <ModalCard label={candidate.title} onClose={() => dismiss("escape")} onBackdrop={() => dismiss("backdrop")}>
         <button
           onClick={() => dismiss("close")}
           aria-label="Dismiss"
@@ -127,7 +126,6 @@ export default function PopupManager() {
             {candidate.primary_label}
           </button>
         </div>
-      </div>
-    </div>
+    </ModalCard>
   );
 }

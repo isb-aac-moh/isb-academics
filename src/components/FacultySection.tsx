@@ -8,6 +8,11 @@ import type { Course, FacultyRating } from "../types";
 // flagged wherever it appears rather than hidden.
 const FEW_RESPONSES = 5;
 
+// ASA said workload and rating scores were making students drop courses during
+// bidding, so the per-professor ratings table stays out of the course popups.
+// Flip to true to bring it back.
+const SHOW_ASA_RATINGS = false;
+
 const fmt = (n: number | null) => (n === null ? "–" : n.toFixed(2));
 const campusShort = (c: FacultyRating["campus"]) => (c === "Mohali" ? "MOH" : c === "Hyderabad" ? "HYD" : null);
 const surname = (name: string) => name.trim().split(/\s+/).pop() ?? name;
@@ -117,7 +122,7 @@ function FacultyCard({ entry, courseCode }: { entry: CourseFacultyEntry; courseC
         </div>
       </div>
 
-      {ratings.length > 0 ? (
+      {!SHOW_ASA_RATINGS ? null : ratings.length > 0 ? (
         <div style={{ marginTop: 12 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: COLOR.ink3, fontFamily: FONT.sans, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>
             ASA ratings · {scope}
