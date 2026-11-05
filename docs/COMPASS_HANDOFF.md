@@ -42,7 +42,7 @@ Eshan called the MVP good on 5 Nov. Admins are the only testers for now, so no s
 
 ## Claude connector pilot
 
-Code is written and tested locally, for admins only. See [COMPASS.md section 10](COMPASS.md#10-claude-connector-pilot) for the setup order. Check there whether production setup has been done. Before anyone beyond admins uses it: ASA's written OK, and the database rule that refuses connector tokens must apply automatically to new tables.
+For admins only. On 5 Nov the migration and the function went live, and connector tokens were confirmed refused on tables and storage. Still to do: merge the pull request, turn on the OAuth Server in the dashboard, and test a real Claude sign-in. Steps are in [COMPASS.md section 10](COMPASS.md#10-claude-connector-pilot). Before anyone beyond admins uses it: ASA's written OK, and the database rule that refuses connector tokens must apply automatically to new tables.
 
 ## What comes after the MVP
 
