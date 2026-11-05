@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pilot of source-only idea cards. Writing and sentence checks are done by Claude agents following prompts/card_brief.md; this script prepares their inputs,
 runs the software checks and builds the review page. Everything stays in $COMPASS_BUILD_DIR/phase_a/pilot (outside git). Prints counts and titles only.
-Usage: card_pilot.py prepare | check | clarity | rewrite | report | final | search2 | decline | mvp | export | browser_rule"""
+Usage: card_pilot.py prepare | check | clarity | rewrite | report | final | search2 | decline | mvp | intent | export | browser_rule"""
 import glob, html, json, os, random, re, sqlite3, sys, collections
 from search_baseline import B, DB, DEV, NAMES, REVIEW_PAGE, STOP, tidy
 BASE = os.path.join(os.path.dirname(DB), "pilot"); WAVE = os.environ.get("COMPASS_WAVE", "")  # later batches live in pilot/wave_N
@@ -356,6 +356,17 @@ def mvp_test():
         print(f"{label}: first card {sum(firsts)}/{na} | top 3 {sum(top3s)}/{na} | declines {sum(p[i] < .5 for i in range(len(y)) if not kinds[i])}/{len(y) - na} | shows right {sum(p[i] >= .5 for i in range(len(y)) if firsts[i])}/{sum(firsts)} | shows wrong {sum(p[i] >= .5 for i in range(len(y)) if kinds[i] and not firsts[i])}/{na - sum(firsts)}")
         print("  first card by type:", {t: f"{sum(firsts[i] for i, r in enumerate(rows) if r['intent'] == t)}/{sum(r['intent'] == t for r in rows)}" for t in sorted({r['intent'] for r in rows} - {'none'})})
 
+def intent():
+    """Write inputs for the INTENT agents: only cards that have no questions yet, and only the card text, never its source."""
+    cards = json.load(open(f"{BASE}/cards_final.json")); have = set(); os.makedirs(f"{BASE}/intent", exist_ok=True)
+    for f in glob.glob(f"{BASE}/intent/out_*.jsonl"):
+        have |= {json.loads(l)["id"] for l in open(f) if l.strip()}
+    todo = [dict(id=c["id"], title=c["title"], what=c["what"], use=c["use"], trap=c["trap"]) for c in cards if c["id"] not in have]
+    start = len(glob.glob(f"{BASE}/intent/in_*.json"))
+    for n in range(4):
+        if todo[n::4]: json.dump(todo[n::4], open(f"{BASE}/intent/in_{start + n}.json", "w"), separators=(",", ":"))
+    print(len(todo), "cards need questions")
+
 def export():
     """Write the app's data file holding only checked cards: no unchecked explainers, AI summaries or AI-suggested links. Derived data only, no slide text."""
     data = json.load(open(DEV)); cards = json.load(open(f"{BASE}/cards_final.json")); qs = {}
@@ -398,4 +409,4 @@ def browser_rule():
     for path in (target, f"{BASE}/compass-v2.json"): json.dump(data, open(path, "w"), separators=(",", ":"))
     print("rule written", {k: round(float(v), 2) for k, v in zip(["score", "cover", "course rule"], lr.coef_[0])})
 
-if __name__ == "__main__": {"prepare": prepare, "check": check, "clarity": clarity, "rewrite": rewrite, "report": report, "final": final, "search2": search2, "decline": decline_test, "mvp": mvp_test, "export": export, "browser_rule": browser_rule}[sys.argv[1]]()
+if __name__ == "__main__": {"prepare": prepare, "check": check, "clarity": clarity, "rewrite": rewrite, "report": report, "final": final, "search2": search2, "decline": decline_test, "mvp": mvp_test, "intent": intent, "export": export, "browser_rule": browser_rule}[sys.argv[1]]()

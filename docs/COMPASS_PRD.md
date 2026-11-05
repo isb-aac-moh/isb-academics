@@ -2,7 +2,9 @@
 
 Version 2.0, 15 October 2026. Product owner: Eshan Jain, Academic Affairs Council (AAC). Status: for approval.
 
-This is a repo copy of the stakeholder PRD so it does not depend on a private link. The original is the private artifact https://claude.ai/artifact/2DVUcVLqxoatKC4h2SHTKc. Where `docs/COMPASS.md` (the earlier engineering draft) disagrees with this file, this file wins.
+**Partly superseded, 5 Nov 2026.** The goal and long-term plan still stand, but the first release changed: cards written at build time, keyword search in the browser, no server and no hosted files. See [COMPASS.md](COMPASS.md) and [COMPASS_HANDOFF.md](COMPASS_HANDOFF.md) first.
+
+This is a repo copy of the stakeholder PRD so it does not depend on a private link. The original is the private artifact https://claude.ai/artifact/2DVUcVLqxoatKC4h2SHTKc. 
 
 ## Summary
 
@@ -219,4 +221,4 @@ Roles: AAC builds, reviews and runs; Dean's office sponsors and grants the conte
 
 ## How the POC relates to this PRD
 
-The POC that is live for admins (see `docs/COMPASS_POC.md`) is Phase 0 in spirit but built differently from the plan above: it already includes the map (S1) and a cross-course table, uses AI-written summaries instead of hosted files, runs on the existing Supabase project instead of an ISB tenant, and has none of M1 (Microsoft sign-in), M6 (viewer), M8 (reporting), M9 (privacy tooling) or M10 (quality gates). Its job is to let ISB IT, operations, administration and the AAC judge whether the full build is worth committing to.
+The POC that is live for admins (see `docs/COMPASS.md`) is Phase 0 in spirit but built differently from the plan above: it already includes the map (S1) and a cross-course table, uses AI-written summaries instead of hosted files, runs on the existing Supabase project instead of an ISB tenant, and has none of M1 (Microsoft sign-in), M6 (viewer), M8 (reporting), M9 (privacy tooling) or M10 (quality gates). Its job is to let ISB IT, operations, administration and the AAC judge whether the full build is worth committing to.

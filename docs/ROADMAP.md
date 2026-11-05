@@ -22,6 +22,7 @@ It grew out of one recurring AAC complaint, that students were guessing at elect
 | 2026-09-06 | Measurement | PostHog events, session replay and error tracking. Vercel Analytics and Speed Insights had been added in August. |
 | 2026-09-10 | Mobile and admin control | Installable PWA, mobile bottom nav, admin-managed popups, Term 5 catalogue corrected, Term 4 tools moved into Resources. |
 | 2026-09-11 to 09-12 | Term 5 round | Faculty profiles and campus-tagged ASA ratings, database-driven Term Dossier for Term 5 with group, attendance and student-feedback data, "Your Term" follows the live round, students choose which concentration a cross-listed course counts toward. |
+| 2026-11-05 | Compass MVP | Ask page with 347 checked cards for 6 courses, admins only. No AI at question time. Plan and status in [COMPASS_HANDOFF.md](COMPASS_HANDOFF.md). |
 
 The full list of what each tool does today is in [PRODUCT.md](PRODUCT.md).
 
@@ -36,6 +37,10 @@ Candidates, not a committed order. Eshan sets priorities; this is the list to ch
 - **Launch the Notice Board** when AAC is ready to post ([how](ADMIN_GUIDE.md#notice-board-is-still-in-preview)).
 - **More Learn courses** for later core terms, through the content pipeline.
 - **Refresh faculty ratings** after each term; nothing does this automatically.
+
+**Compass**
+
+- **Finish the MVP for testers, then load more courses.** The list is in [COMPASS_HANDOFF.md](COMPASS_HANDOFF.md).
 
 **Making it reusable for the next batch**
 

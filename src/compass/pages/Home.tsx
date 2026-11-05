@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { usePostHog } from "@posthog/react";
 import { coursesOf, inLens, runSearch, type Store } from "../lib/data";
 import { TOPICS, topicOf } from "../lib/topics";
@@ -11,8 +11,9 @@ import AskAnswer from "./AskAnswer";
 const TRY = ["How much stock should I order?", "What is the Hook model?", "Freemium or free trial?", "How do I test an idea before building it?", "network effects"];
 
 export default function Home({ store, lens }: { store: Store; lens: string }) {
-  const [sp] = useSearchParams(); const nav = useNavigate(); const raw = sp.get("q") || ""; const q = raw.trim(); const [known] = useKnown();
-  const setQ = (v: string) => { const n = new URLSearchParams(); n.set("lens", lens); if (v) n.set("q", v); nav("/compass?" + n.toString(), { replace: !!q }); };
+  // The question lives in browser history, not the address: PostHog records addresses, and only the first 60 characters of a question should be logged.
+  const nav = useNavigate(); const raw = (useLocation().state as { q?: string } | null)?.q ?? ""; const q = raw.trim(); const [known] = useKnown();
+  const setQ = (v: string) => nav(`/compass?lens=${lens}`, { replace: !!raw, state: { q: v } });
   const all = Object.values(store.data.concepts); const taught = all.filter(c => coursesOf(c).length);
   const answer = useMemo(() => (store.ask && q.length > 1 ? ask(store.ask, q) : null), [store.ask, q]);
   const hits = !store.ask && q.length > 1 ? runSearch(store, q, lens) : [];
