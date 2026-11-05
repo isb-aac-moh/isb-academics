@@ -1,0 +1,61 @@
+id,intent,question,expected,mode
+q01,lookup,What is the newsvendor critical ratio?,OPMG:9,any
+q02,lookup,What is Little's Law?,OPMG:1,any
+q03,lookup,What is CAGE distance?,STRG:7|STRG:10,any
+q04,lookup,What is a perceptual map?,BANM:4,any
+q05,lookup,What is economic value to the customer?,MKTG:7,any
+q06,lookup,What is the Hook model?,SWPM:5,any
+q07,lookup,What does Cohen's kappa measure?,BANM:4,any
+q08,lookup,What is the bullwhip effect?,FRNT:7|OPMG:10,any
+q09,lookup,What is the BCG matrix?,STRG:8,any
+q10,lookup,What is the Parfitt-Collins model?,MKTG:9,any
+q11,lookup,What are statistical process control limits?,OPMG:7|OPMG:8,any
+q12,lookup,What is the GAME framework for metrics?,SWPM:6,any
+q13,howto,How much stock should I order when demand is uncertain and leftovers lose their value?,OPMG:9,any
+q14,howto,How do I find which step is slowing down my whole process?,OPMG:3,any
+q15,howto,How many extra customers do I need to make money after cutting my price?,MKTG:3,any
+q16,howto,How do I set a price from what the product is worth to the buyer instead of what it costs me?,MKTG:7|MKTG:8,any
+q17,howto,How can I test a product idea before building anything?,SWPM:3|SWPM:4,any
+q18,howto,How do I talk to customers without leading them to the answer I want?,SWPM:2,any
+q19,howto,How should a company decide whether to enter a foreign country?,STRG:7,any
+q20,howto,How do I check whether an ad campaign actually caused the sales increase?,BANM:9,any
+q21,howto,How do I choose product metrics that people can't game?,SWPM:6,any
+q22,howto,How do I decide whether a company should move into an unrelated business?,STRG:6|STRG:10,any
+q23,howto,How do I cut waiting time at a busy service counter?,OPMG:5|OPMG:6,any
+q24,howto,How do I know how many groups to split my customers into?,BANM:3,any
+q25,situation,A rival with far more money is copying my startup. What can I do?,FRNT|STRG,any
+q26,situation,People sign up for my app but stop coming back after a week. What should I look at?,SWPM:5|SWPM:7,any
+q27,situation,My marketplace has no sellers because it has no buyers and no buyers because it has no sellers.,STRG:9|FRNT:8|FRNT:9,any
+q28,situation,My customers use my app and a competing app at the same time.,STRG:9|STRG:10|FRNT:8|FRNT:9,any
+q29,situation,The quality from my factory keeps changing from batch to batch.,OPMG:7|OPMG:8,any
+q30,situation,My new product is eating into sales of my existing one.,MKTG:3|MKTG:5|FRNT,any
+q31,situation,My retailers are angry that I started selling directly online.,MKTG:7,any
+q32,situation,Our AI assistant confidently gives answers that are wrong.,BANM:5,any
+q33,situation,My model scores well on training data but fails once it is live.,BANM:2,any
+q34,situation,Shops run out of stock while orders to my warehouse swing wildly.,FRNT:7|OPMG:10,any
+q35,compare,Should I offer freemium or a free trial?,SWPM:9|FRNT,any
+q36,compare,What is the difference between a house of brands and a branded house?,MKTG:6,any
+q37,compare,How are market segments different from personas?,SWPM:1,any
+q38,compare,Deliberate versus emergent strategy,STRG:10,any
+q39,compare,How is an AI workflow different from agentic AI?,BANM:5,any
+q40,compare,Cost-plus pricing versus value-based pricing,MKTG:7|MKTG:8,any
+q41,find,What did OPMG session 10 cover?,OPMG:10,any
+q42,find,Which Strategy session was about platforms?,STRG:9,any
+q43,find,Where did Marketing cover advertising?,MKTG:9,any
+q44,find,What was Software Product Management session 4 about?,SWPM:4,any
+q45,find,Which Frontier Technologies class covered blockchain?,FRNT:3,any
+q46,find,Which BANM session covered neural networks?,BANM:3|BANM:4,any
+q47,connect,How do CAC and LTV show up across different courses?,FRNT|MKTG|SWPM,all
+q48,connect,Where do network effects come up in Strategy and Frontier Technologies?,FRNT|STRG,all
+q49,connect,How is positioning taught across marketing and product courses?,MKTG|SWPM,all
+q50,connect,How do supply chain ideas link operations and frontier technology?,FRNT|OPMG,all
+q51,none,How do I calculate WACC?,,none
+q52,none,What is the Black-Scholes formula?,,none
+q53,none,Explain the IS-LM model,,none
+q54,none,How does double-entry bookkeeping work?,,none
+q55,none,What is the Phillips curve?,,none
+q56,none,How do I read a cash flow statement?,,none
+q57,none,What are Tuckman's stages of team development?,,none
+q58,none,What is the capital asset pricing model?,,none
+q59,none,How does GST input tax credit work in India?,,none
+q60,none,What are Hofstede's cultural dimensions?,,none
