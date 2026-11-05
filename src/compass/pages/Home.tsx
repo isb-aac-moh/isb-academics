@@ -11,7 +11,7 @@ import AskAnswer from "./AskAnswer";
 const TRY = ["How much stock should I order?", "What is the Hook model?", "Freemium or free trial?", "How do I test an idea before building it?", "network effects"];
 
 export default function Home({ store, lens }: { store: Store; lens: string }) {
-  const [sp] = useSearchParams(); const nav = useNavigate(); const q = (sp.get("q") || "").trim(); const [known] = useKnown();
+  const [sp] = useSearchParams(); const nav = useNavigate(); const raw = sp.get("q") || ""; const q = raw.trim(); const [known] = useKnown();
   const setQ = (v: string) => { const n = new URLSearchParams(); n.set("lens", lens); if (v) n.set("q", v); nav("/compass?" + n.toString(), { replace: !!q }); };
   const all = Object.values(store.data.concepts); const taught = all.filter(c => coursesOf(c).length);
   const answer = useMemo(() => (store.ask && q.length > 1 ? ask(store.ask, q) : null), [store.ask, q]);
@@ -25,7 +25,7 @@ export default function Home({ store, lens }: { store: Store; lens: string }) {
   return <>
     <p className="note" style={{ marginTop: 14 }}>Pilot preview: a first look at what Compass will do. <Link to="/compass/roadmap" style={{ color: "var(--hero)", fontWeight: 600 }}>See the roadmap →</Link></p>
     <p className="sub" style={{ font: "15px/1.6 var(--serif)", color: "var(--ink2)", maxWidth: 620, margin: "14px 0 0" }}>Ask about anything from your courses, in your own words. Get a clear answer, see how it connects, and jump straight to the class where it was taught.</p>
-    <div className="searchbox"><input type="search" autoFocus placeholder="Ask anything taught at ISB, like how much stock to order" aria-label="Ask anything taught at ISB" value={q} onChange={e => setQ(e.target.value)} /></div>
+    <div className="searchbox"><input type="search" autoFocus placeholder="Ask anything taught at ISB, like how much stock to order" aria-label="Ask anything taught at ISB" value={raw} onChange={e => setQ(e.target.value)} /></div>
     {answer ? <AskAnswer store={store} q={q} answer={answer} lens={lens} /> : q.length > 1 ? <section>
       <SectionLabel>{hits.length ? `${hits.length} ideas for "${q}"` : `Nothing found for "${q}"`}</SectionLabel>
       {!hits.length && <p className="note">Not in the {store.data.courses.length} courses loaded so far. Try a shorter word, or another name for the idea.</p>}
