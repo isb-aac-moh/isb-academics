@@ -143,6 +143,10 @@ A study space for Term 1 to 3 core courses, merged in from a separate "mktg-rep"
 
 Live courses: Marketing Management (MKTG), Operations Management (OPMG), Business Analytics for Marketing and Growth (BANM2), Managerial Accounting (MADM2). Full detail in [LEARN.md](LEARN.md).
 
+## Compass (`/compass`, admins only for now)
+
+Ask about anything from the loaded courses in your own words and get a short card: what the idea is, when to use it, what to watch out for, where it was taught, and a Moodle link. If the material doesn't cover it, the page says so. Cards are written once from class material and checked against it, and no AI writes anything when you ask. It covers 6 of 138 courses so far. Full guide: [COMPASS.md](COMPASS.md).
+
 ## Notice Board (`/notices`)
 
 A feed of AAC announcements, pinned ones first, each tagged Urgent, Important, Info or General. It is fully built but only admins can open it. Students see it greyed out with a "SOON" badge. Launching it is a small code change described in [ADMIN_GUIDE.md](ADMIN_GUIDE.md#notice-board-is-still-in-preview).
@@ -174,5 +178,7 @@ The app is a Progressive Web App. On iOS (Safari, Share, Add to Home Screen) or 
 Admin access is granted by hand in the Supabase dashboard, never from inside the app. See [ADMIN_GUIDE.md](ADMIN_GUIDE.md#granting-admin-access).
 
 ## What we measure
+
+Compass adds `compass_ask` (first 60 characters of the question), `compass_source_click` and `compass_report`.
 
 PostHog records these events: sign-in, planner step changes, bids added and removed, course profile opened, bids reconciled, grades logged, enrollments added and removed, Pulse submissions/edits/removals, resource opened, popup shown/dismissed/clicked, and Learn practice started. Session replay and error tracking are on. The Term Dossier, Notice Board and Course Resources filters don't send events yet.
