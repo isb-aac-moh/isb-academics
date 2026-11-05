@@ -40,6 +40,10 @@ Eshan called the MVP good on 5 Nov. Admins are the only testers for now, so no s
 
 **Before opening to all students:** remove the reviewer roadmap page and the pilot note, build the takedown tool, get written permission for the Product Management graph, and decide hosting with ISB IT.
 
+## Claude connector pilot
+
+For admins only. On 5 Nov the migration and the function went live, and connector tokens were confirmed refused on tables and storage. Still to do: merge the pull request, turn on the OAuth Server in the dashboard, and test a real Claude sign-in. Steps are in [COMPASS.md section 10](COMPASS.md#10-claude-connector-pilot). Before anyone beyond admins uses it: ASA's written OK, and the database rule that refuses connector tokens must apply automatically to new tables.
+
 ## What comes after the MVP
 
 1. Use real questions and tester reports to decide what to fix. Better stemming comes first, and embeddings only if that isn't enough.
