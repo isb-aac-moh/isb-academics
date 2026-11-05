@@ -1,17 +1,18 @@
 import MiniSearch from "minisearch";
 import { supabase } from "../../lib/supabase";
+import { buildAsk, type AskIndex, type Card, type DeclineRule } from "./ask";
 
 export type Role = "teaches" | "applies" | "mentions";
 export interface Evidence { course: string; session: number | null; kind: string; pages: [number, number]; role: Role; why: string; summary: string; passage: string }
 export interface Concept {
   id: string; title: string; aliases: string[]; lenses: string[]; obj: string; q: string; module: Record<string, string>;
   freq: number; level: number | null; rel: { to: string; type: string; why?: string; auto?: boolean }[]; evidence: Evidence[]; isNew?: boolean; definition?: string;
-  know?: { what: string; use: string; trap: string; ask: string };
+  know?: { what: string; use: string; trap: string; ask?: string };
 }
 export interface Resource { name: string; type: string; url: string }
 export interface Session { n: number; title: string; resources: Resource[]; concepts: { id: string; role: Role }[] }
 export interface Course { code: string; name: string; professor?: string; sessions: Session[] }
-export interface Dataset { meta: { built: string; counts: Record<string, number> }; courses: Course[]; concepts: Record<string, Concept> }
+export interface Dataset { meta: { built: string; counts: Record<string, number> }; courses: Course[]; concepts: Record<string, Concept>; cards?: Card[]; declineRule?: DeclineRule }
 
 export const LENSES = [
   { id: "all", name: "All ideas", blurb: "Everything taught across your courses" },
@@ -23,7 +24,7 @@ export const ROLE_LABEL: Record<Role, string> = { teaches: "Taught", applies: "A
 export const KIND_LABEL: Record<string, string> = { slides: "Slides", slides_md: "Slides", transcript: "Class discussion", outline: "Course outline" };
 
 export interface Store {
-  data: Dataset; search: MiniSearch<Concept>; reverse: Record<string, string[]>; byCourse: Record<string, Course>;
+  data: Dataset; search: MiniSearch<Concept>; reverse: Record<string, string[]>; byCourse: Record<string, Course>; ask?: AskIndex;
 }
 // Production reads the private "compass" bucket (signed-in students only). Local dev can drop the
 // file at public/compass-dev.json (gitignored) so the section works without touching Supabase.
@@ -45,7 +46,7 @@ export function loadStore(): Promise<Store> {
     search.addAll(list);
     const reverse: Record<string, string[]> = {};
     for (const c of list) for (const r of c.rel) if (data.concepts[r.to]) (reverse[r.to] ||= []).push(c.id);
-    return { data, search, reverse, byCourse: Object.fromEntries(data.courses.map(c => [c.code, c])) };
+    return { data, search, reverse, byCourse: Object.fromEntries(data.courses.map(c => [c.code, c])), ask: data.cards ? buildAsk(data.cards, data.declineRule) : undefined };
   });
   return cache;
 }

@@ -2,6 +2,19 @@
 
 Last updated Thu 15 Oct 2026, after the POC went live for admins. If you are picking this up later, read this file first, then the doc you need from the map below.
 
+## Update, 5 Nov 2026: the plan changed
+
+Read this first. Parts of the docs below describe the older plan.
+
+- **Goal:** the Academic and Student Affairs Council backed a bigger scope: a gated, ISB-only thinking partner that answers from everything taught here.
+- **Rule on AI:** no AI writes anything when a student asks. Each idea gets a card written once at build time from class material, with every sentence cited and checked. Cards that fail are held back, and people review a sample. This replaces "derived summaries only" and "unchecked explainers".
+- **First release:** an Ask page inside `/compass`, using keyword search in the browser. No server, embeddings or slide text. A server comes back only if real questions need it.
+- **Code:** `src/compass/lib/ask.ts`, `src/compass/pages/AskAnswer.tsx`, `scripts/compass/card_pilot.py`, `scripts/compass/search_baseline.py`, `scripts/compass/prompts/card_brief.md`.
+- **Data:** cards and the app's data file are in `~/Downloads/compass-build/phase_a/pilot/` (`cards_final.json`, `compass-v2.json`), not in git. Until `compass-v2.json` is uploaded to the bucket, production keeps the old search.
+- **Scores on 90 self-written questions:** 347 of 440 cards shown; right first card 35 of 50, right session in top 3 cards 43 of 50, declines 38 of 40. Not yet tested on real student questions.
+- **Stop rule:** accuracy work starts only from real questions or tester reports, never from the self-written test set.
+- **Full plan:** the private product map at https://claude.ai/artifact/4zecPFHu66FJsNwthtebDu
+
 ## What Compass is, in three lines
 
 A searchable, connected memory of everything ISB teaches. A student types an idea ("newsvendor", "market sizing"), sees every course and session that taught it, how it connects to other ideas, and opens the class material in Moodle. No chatbot and no AI at runtime; AI is used only while building the dataset. Placement preparation is the first use, not the only one.

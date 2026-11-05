@@ -20,8 +20,8 @@ export default function ConceptPage({ store, lens }: { store: Store; lens: strin
       <button className={"btn" + (known.has(c.id) ? " on" : "")} onClick={() => toggle(c.id)} aria-pressed={known.has(c.id)}>{known.has(c.id) ? "✓ I know this" : "Mark as known"}</button>
       <Link className="btn" to={`/compass/map?topic=${topic?.id}&node=${encodeURIComponent(c.id)}&lens=${lens}`}>See on the map</Link></div>
     {c.know && <div className="know"><SectionLabel>What to know</SectionLabel>
-      <p>{c.know.what}</p><p><b>When to use it.</b> {c.know.use}</p><p><b>Watch out.</b> {c.know.trap}</p>
-      <details><summary>Test yourself</summary><p>{c.know.ask}</p></details></div>}
+      <p>{c.know.what}</p>{c.know.use && <p><b>When to use it.</b> {c.know.use}</p>}{c.know.trap && <p><b>Watch out.</b> {c.know.trap}</p>}
+      {c.know.ask && <details><summary>Test yourself</summary><p>{c.know.ask}</p></details>}</div>}
     <section style={{ marginTop: 28 }}><SectionLabel>How it connects</SectionLabel><ConceptGraph store={store} c={c} lens={lens} /></section>
     <div className="cols">
       <div>
