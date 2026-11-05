@@ -231,3 +231,34 @@ The clarity check is less reliable than the fact check. It holds back some good 
 - The phone bottom nav is full, so don't add a sixth item.
 - The map isn't designed for phones.
 - Writing style for all copy and docs: plain English and no filler.
+
+## 10. Claude connector pilot
+
+Admins can add Compass to their own Claude as a custom connector. Claude calls one read-only tool, `search_compass`, and writes the reply from what comes back. Their Claude plan pays for the AI. We pay only for the function, and ISB's data stays behind the same login and admin check.
+
+**What's different from the app:** Claude writes the final words, so the "no AI writing at question time" rule can't be enforced here. The tool returns only checked cards and Moodle links, and tells Claude to cite them and to say when nothing matched. Claude can still blend in its own knowledge, so the app remains the strict version. Cards also enter the admin's Claude account, where we don't control retention or training settings. Get ASA's written OK for this before opening it past admins.
+
+**How it fits together:**
+
+| Piece | File | Job |
+|---|---|---|
+| Function | `supabase/functions/compass-mcp/index.ts` | Checks the token and admin flag, applies 100 searches a day, loads the card file, logs |
+| Search | `supabase/functions/compass-mcp/compass.ts` | Runs the same `ask.ts` as the Ask page, so results and declines match. Defines the tool |
+| Approval page | `src/pages/OAuthConsent.tsx` | Approves only Claude's two callback addresses, and only for admins |
+| Database | `supabase/migrations/20261105150000_compass_connector.sql` | Search log (first 60 characters only) and the token block below |
+
+**The token block:** a Supabase connector token carries the user's normal database rights, and its scopes don't limit that. So every public table and all file storage has a restrictive rule refusing any token with a `client_id`. Normal logins have none and aren't affected. **Any table added later needs the same rule**, and this must be automated before students get access. What the rule can't cover: database functions that run with their own rights (admin stats and pulse results), and the user's own auth profile. Only Claude's callbacks can obtain a token, and Claude holds it outside the chat, so this is acceptable for admins. Review it before students.
+
+**Setup, in this order** (the block must be live before sign-in is switched on):
+
+1. `npx supabase@latest db push` for the migration, after checking `supabase db push --dry-run` lists only this one.
+2. `npx supabase@latest functions deploy compass-mcp --no-verify-jwt --use-api`. The flag is needed because the function checks tokens itself and must answer the first signed-out request. Then confirm `https://ujnrgvmbahbepdnahtle.supabase.co/functions/v1/compass-mcp/oauth-protected-resource` reports that same address, not a doubled path.
+3. Merge the pull request so the approval page is live.
+4. In the Supabase dashboard, under Authentication > OAuth Server: turn it on, set the path to `/oauth/consent`, and allow dynamic registration. Confirm Authentication > URL Configuration has the live app as the Site URL.
+5. In Claude: Settings > Connectors > Add custom connector, with `https://ujnrgvmbahbepdnahtle.supabase.co/functions/v1/compass-mcp`.
+
+Don't use `supabase config push` from Supabase's guide. This repo has no `config.toml`, and a partial one could overwrite live auth settings.
+
+**To switch it off:** turn off the OAuth Server in the dashboard, then delete the function. The block can stay.
+
+**Not done, on purpose:** embeddings (start with keywords, since Claude can reword and search again; compare on real questions), a separate open-card tool (search already returns the whole card, and a lookup by ID would make copying easier), and access for non-admins.

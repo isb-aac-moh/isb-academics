@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { isDemoMode } from "./lib/demoMode";
-import { AUTH_STORAGE_KEY } from "./lib/supabase";
+import { AUTH_STORAGE_KEY, CONSENT_RETURN_KEY } from "./lib/supabase";
 import { lazyWithReload } from "./lib/lazyWithReload";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
@@ -23,6 +24,7 @@ const TermDossier = lazyWithReload(() => import("./pages/TermDossier"));
 const NoticeBoard = lazyWithReload(() => import("./pages/NoticeBoard"));
 const PulseCheck = lazyWithReload(() => import("./pages/PulseCheck"));
 const CompassSection = lazyWithReload(() => import("./compass/CompassSection"));
+const OAuthConsent = lazyWithReload(() => import("./pages/OAuthConsent"));
 const LearnSection = lazyWithReload(() => import("./learn/LearnSection"));
 
 /* Fetching a page's code only once it renders put the download after the sign-in check, in series.
@@ -50,6 +52,17 @@ function preloadCurrentPage() {
 }
 preloadCurrentPage();
 
+// Microsoft sign-in always returns to "/", so remember the connector approval page across it.
+function consentReturn(): string | null {
+  try {
+    if (window.location.pathname === "/oauth/consent") localStorage.setItem(CONSENT_RETURN_KEY, window.location.pathname + window.location.search);
+    return localStorage.getItem(CONSENT_RETURN_KEY);
+  } catch {
+    return null;
+  }
+}
+consentReturn();
+
 export default function App() {
   const { user, loading, notProvisioned, signOut } = useAuth();
 
@@ -63,8 +76,9 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/oauth/consent" element={<Suspense fallback={<AppShellSkeleton />}><OAuthConsent user={user} /></Suspense>} />
       <Route element={<Layout user={user} onSignOut={signOut} />}>
-        <Route path="/" element={<Navigate to="/tracker" replace />} />
+        <Route path="/" element={<Navigate to={consentReturn() ?? "/tracker"} replace />} />
         <Route path="/planner" element={<Navigate to="/planner/background" replace />} />
         <Route path="/planner/:step" element={<BiddingPlanner />} />
         <Route path="/tracker" element={<CreditTracker />} />

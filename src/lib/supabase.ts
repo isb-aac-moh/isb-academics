@@ -10,6 +10,7 @@ markDemoEntryIfNeeded();
 // Where the signed-in session lives in localStorage. Shared with index.html, which reads it to decide
 // whether to draw the app outline before JS arrives.
 export const AUTH_STORAGE_KEY = "pulse-isb-auth"; // same key as isb-explorer — shared Supabase project, one login
+export const CONSENT_RETURN_KEY = "compass-connector-consent"; // the approval page to return to after sign-in
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
