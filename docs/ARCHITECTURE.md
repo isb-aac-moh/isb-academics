@@ -126,7 +126,7 @@ context-docs/           ISB source documents the rules are based on
 2. On a session, the email must end in `@isb.edu`. Otherwise the user is signed out immediately. This is the only domain gate.
 3. The matching `users` row is loaded. `is_admin` on that row is the only permission flag in the app. If there is no row, `notProvisioned` is set and Login shows "Account not set up yet".
 4. The user is identified to PostHog.
-5. **Redirect URLs are a Supabase dashboard setting**, not code: Authentication → URL Configuration → Redirect URLs. Both `http://localhost:5174/**` and `https://isb-academics.vercel.app/**` must be listed. If they aren't, Supabase falls back to the project's Site URL, which is isb-explorer's, and login bounces to the wrong app. This happened twice during development. It's also why the dev server port is pinned to 5174 with `strictPort`.
+5. **Redirect URLs are a Supabase dashboard setting**, not code: Authentication → URL Configuration → Redirect URLs. Both `http://localhost:5174/**` and `https://isb-academics.vercel.app/**` must be listed. If they aren't, Supabase falls back to the project's Site URL, so login lands on the wrong address. The Site URL was isb-explorer's until Nov 2026, when it moved to this app. This happened twice during development. It's also why the dev server port is pinned to 5174 with `strictPort`.
 
 While there is no user, `App.tsx` renders `<Login />` for any path without changing the URL. After sign-in the same URL renders the right page, so bookmarked deep links work with no redirect-back logic.
 

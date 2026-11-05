@@ -254,10 +254,12 @@ Admins can add Compass to their own Claude as a custom connector. Claude calls o
 1. `npx supabase@latest db push` for the migration, after checking `supabase db push --dry-run` lists only this one.
 2. `npx supabase@latest functions deploy compass-mcp --no-verify-jwt --use-api`. The flag is needed because the function checks tokens itself and must answer the first signed-out request. Then confirm `https://ujnrgvmbahbepdnahtle.supabase.co/functions/v1/compass-mcp/oauth-protected-resource` reports that same address, not a doubled path.
 3. Merge the pull request so the approval page is live.
-4. In the Supabase dashboard, under Authentication > OAuth Server: turn it on, set the path to `/oauth/consent`, and allow dynamic registration. Confirm Authentication > URL Configuration has the live app as the Site URL.
-5. In Claude: Settings > Connectors > Add custom connector, with `https://ujnrgvmbahbepdnahtle.supabase.co/functions/v1/compass-mcp`.
+4. In the Supabase dashboard, under Authentication > OAuth Server: turn it on, set the path to `/oauth/consent`, and allow dynamic registration. Set Authentication > URL Configuration > Site URL to `https://isb-academics.vercel.app`, because Supabase sends the approval request to the Site URL plus that path.
+5. In Claude: Settings > Connectors > Add custom connector, with `https://ujnrgvmbahbepdnahtle.supabase.co/functions/v1/compass-mcp`. Leave the OAuth client ID and secret blank, so Claude registers itself.
 
 Don't use `supabase config push` from Supabase's guide. This repo has no `config.toml`, and a partial one could overwrite live auth settings.
+
+**Merging doesn't deploy the function.** Vercel only ships the website, so re-run step 2 after any change to `supabase/functions/compass-mcp` or `ask.ts`.
 
 **To switch it off:** turn off the OAuth Server in the dashboard, then delete the function. The block can stay.
 
