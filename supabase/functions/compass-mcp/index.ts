@@ -28,14 +28,14 @@ Deno.serve(pipeline(
     if (error) throw new Error("Could not check access.");
     if (!user?.is_admin) return new Response("The Compass connector is open to admins only for now.", { status: 403 });
 
-    return mcpHandler(async question => {
+    return mcpHandler(async (question, alsoTry) => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { count, error: countError } = await admin.from("compass_connector_log").select("id", { count: "exact", head: true }).eq("user_id", userId).gte("at", since);
       if (countError) throw new Error("Could not check the daily limit.");
       if ((count ?? 0) >= DAILY_SEARCHES) return { found: false, message: `Daily limit of ${DAILY_SEARCHES} Compass searches reached. Try again tomorrow.` };
 
       const { data, index } = await load(admin);
-      const result = searchCards(index, data, question);
+      const result = searchCards(index, data, question, alsoTry);
       // Same limit as the app's analytics: the first 60 characters of a question, never the whole thing.
       const { error: logError } = await admin.from("compass_connector_log").insert({ user_id: userId, question: question.slice(0, 60), cards: result.cards?.length ?? 0 });
       if (logError) throw new Error("Could not record the search.");

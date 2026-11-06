@@ -29,6 +29,8 @@ If the user gave no question, ask one line: "What do you want to look up in ISB 
 
 Otherwise call `search_compass` with their question (2 to 300 characters). Use the words a course would use: "WACC" and "cost of capital" beat "how do firms decide the discount rate".
 
+Also pass `also_try`: 2 or 3 other ways a course might word the same question. A broad question like "how do I build a healthcare product" matches poorly on its own words, so add the course terms behind it, such as "MVP types", "jobs to be done" and "healthcare business model". Each wording is searched separately and the results are merged.
+
 ## Step 3: answer
 
 When the result has `found: true`, write:

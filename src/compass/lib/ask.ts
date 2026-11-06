@@ -14,12 +14,12 @@ const tokens = (t: string) => t.toLowerCase().match(/[a-z0-9]+/g) || [];
 // A light stemmer so "retailers" finds "retailer" and "pricing" finds "price".
 const stem = (w: string) => (w.length > 4 ? w.replace(/(ies)$/, "y").replace(/(ing|ed|es|s|e)$/, "") : w);
 
-export function buildAsk(cards: Card[], rule?: DeclineRule): AskIndex {
+export function buildAsk(cards: Card[], rule?: DeclineRule, courseNames: Record<string, string> = {}): AskIndex {
   const search = new MiniSearch<Card>({
-    fields: ["title", "aliasText", "body", "questionText"], storeFields: ["id"],
-    processTerm: t => { const w = t.toLowerCase(); return STOP.has(w) ? null : stem(w); },
-    extractField: (c, f) => f === "aliasText" ? c.aliases.join(" ") : f === "body" ? `${c.what} ${c.use} ${c.trap}` : f === "questionText" ? c.questions.join(" ") : (c as unknown as Record<string, string>)[f] ?? "",
-    searchOptions: { boost: { title: 6, aliasText: 4, questionText: 2, body: 1 }, combineWith: "OR" },
+    fields: ["title", "aliasText", "body", "questionText", "courseText"], storeFields: ["id"],
+    processTerm: t => { const w = t.toLowerCase(); return STOP.has(w) ? null : w === "healthcare" ? ["health", "care"] : stem(w); },
+    extractField: (c, f) => f === "aliasText" ? c.aliases.join(" ") : f === "body" ? `${c.what} ${c.use} ${c.trap}` : f === "questionText" ? c.questions.join(" ") : f === "courseText" ? c.where.map(([code]) => courseNames[code] ?? "").join(" ") : (c as unknown as Record<string, string>)[f] ?? "",
+    searchOptions: { boost: { title: 6, aliasText: 4, questionText: 2, body: 1, courseText: 1 }, combineWith: "OR" },
   });
   search.addAll(cards);
   return { search, byId: Object.fromEntries(cards.map(c => [c.id, c])), cards, rule };
@@ -35,7 +35,7 @@ export function scopeOf(q: string): [string, number | null] | null {
   return [named[0], n ? Number(n[1]) : null];
 }
 
-export function ask(index: AskIndex, q: string): Answer {
+export function ask(index: AskIndex, q: string, limit = 3): Answer {
   // Exact words first; typo tolerance only when nothing matched, so a near-miss word can't outrank a real match.
   let hits = index.search.search(q);
   if (!hits.length) hits = index.search.search(q, { prefix: t => t.length > 3, fuzzy: t => (t.length > 4 ? 0.2 : 0) });
@@ -48,5 +48,13 @@ export function ask(index: AskIndex, q: string): Answer {
   const features = [Math.log1p(hits[0]?.score ?? 0), cover, scope ? 1 : 0];
   const r = index.rule; let declined = !top;
   if (r && top) declined = features.reduce((sum, x, i) => sum + r.coef[i] * (x - r.mean[i]) / r.sd[i], r.intercept) < 0;
-  return { cards: ranked.slice(0, 3), declined, features };
+  return { cards: ranked.slice(0, limit), declined, features };
+}
+
+/** Several wordings of one question: each is searched alone and the rankings are merged, so a miss on one wording is covered by another. */
+export function askMany(index: AskIndex, queries: string[], limit = 5): Answer {
+  const answers = queries.map(q => ask(index, q, limit)); const score = new Map<string, number>();
+  answers.forEach(a => a.cards.forEach((c, i) => score.set(c.id, (score.get(c.id) ?? 0) + 1 / (10 + i))));
+  const cards = [...score].sort((a, b) => b[1] - a[1]).slice(0, limit).map(([id]) => index.byId[id]);
+  return { cards, declined: answers.every(a => a.declined), features: answers[0].features };
 }

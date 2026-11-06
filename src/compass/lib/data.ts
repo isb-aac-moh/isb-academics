@@ -46,7 +46,7 @@ export function loadStore(): Promise<Store> {
     search.addAll(list);
     const reverse: Record<string, string[]> = {};
     for (const c of list) for (const r of c.rel) if (data.concepts[r.to]) (reverse[r.to] ||= []).push(c.id);
-    return { data, search, reverse, byCourse: Object.fromEntries(data.courses.map(c => [c.code, c])), ask: data.cards ? buildAsk(data.cards, data.declineRule) : undefined };
+    return { data, search, reverse, byCourse: Object.fromEntries(data.courses.map(c => [c.code, c])), ask: data.cards ? buildAsk(data.cards, data.declineRule, Object.fromEntries(data.courses.map(c => [c.code, c.name]))) : undefined };
   });
   return cache;
 }

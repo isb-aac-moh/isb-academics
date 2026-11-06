@@ -243,7 +243,7 @@ Admins can add Compass to their own Claude as a custom connector. Claude calls o
 | Piece | File | Job |
 |---|---|---|
 | Function | `supabase/functions/compass-mcp/index.ts` | Checks the token and admin flag, applies 100 searches a day, loads the card file, logs |
-| Search | `supabase/functions/compass-mcp/compass.ts` | Runs the same `ask.ts` as the Ask page, so results and declines match. Defines the tool |
+| Search | `supabase/functions/compass-mcp/compass.ts` | Runs the same `ask.ts` as the Ask page, so the ranking matches. Where the Ask page declines, the tool returns the nearest cards with `match: "closest"` and Claude filters them, because the decline formula throws away broad questions like "how to build a healthcare product" even when the right course is in the top 3. The tool also takes `also_try` (up to 3 other wordings); each is searched alone and the rankings are merged (`askMany` in `ask.ts`), up to 5 cards. Defines the tool |
 | Approval page | `src/pages/OAuthConsent.tsx` | Approves only Claude's two callback addresses, and only for admins |
 | Database | `supabase/migrations/20261105150000_compass_connector.sql` | Search log (first 60 characters only) and the token block below |
 
