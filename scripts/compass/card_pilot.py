@@ -47,7 +47,8 @@ def prepare():
 def load():
     inputs = {x["id"]: x for f in glob.glob(f"{P}/in_*.json") for x in json.load(open(f))}
     cards = {}
-    for f in sorted(glob.glob(f"{P}/out_*.jsonl")):
+    # Rewrites (out_3) must win over every writer part, including out_4 and later, so load them last.
+    for f in sorted(glob.glob(f"{P}/out_*.jsonl"), key=lambda f: (f.endswith("out_3.jsonl"), f)):
         for line in open(f):
             if line.strip(): r = json.loads(line); cards[r["id"]] = r
     return inputs, cards
