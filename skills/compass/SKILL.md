@@ -38,7 +38,7 @@ When the result has `found: true`, write:
 For each card, in the order returned, skipping any that don't answer the question:
 
 - The idea's title in bold, then what it is, when to use it, and the trap, in plain sentences taken from the card. Don't add facts the card doesn't hold.
-- Taught in: course name, session number, and the Moodle link as "Open session N in Moodle".
+- Taught in: course name, session number, and the Moodle link as "Open session N in Moodle". If a card's `sessions` list is empty, give the course name only. Don't guess a session number or a Moodle link.
 - Links to the idea page (`idea_url`, "See how it connects") and the map (`map_url`, "See where it sits on the map").
 
 Give every link exactly as the result returned it. Never build or guess a Moodle or Compass link. Moodle links need an ISB login, so mention that once at the end if you showed any.
