@@ -4,6 +4,7 @@
   moodle_cards.py ideas           # write moodle/cards/merge_in.json: every tagged idea, for the merge step
   moodle_cards.py prepare N SIZE [PARTS]  # after merging: pick SIZE ideas for batch N, split into PARTS writer inputs
   moodle_cards.py assemble        # every batch's passed sentences, minus people's edits in manual_edits.json -> cards_final.json
+  moodle_cards.py export          # live data file + these courses, their Moodle links and cards with questions -> compass-v3.json
 Then run card_pilot.py with COMPASS_PILOT_DIR=<B>/moodle/cards and COMPASS_WAVE=N.
 """
 import collections, glob, json, os, random, re, sys
@@ -88,5 +89,38 @@ def assemble():
     json.dump(shown, open(f"{C}/cards_final.json", "w")); json.dump(held, open(f"{C}/held_back.json", "w"))
     print(len(shown), "cards |", len(held), "held", dict(collections.Counter(h["why"] for h in held)), "| by course", dict(collections.Counter(w[0] for x in shown for w in {(y[0],) for y in x["where"]})))
 
+LIVE = f"{B}/phase_a/pilot/compass-v2.json"
+FULL = {"SMDM": "Statistical Methods for Business Decision Making", "MGEC": "Managerial Economics", "FCRV": "Foundations of Finance", "FADM": "Financial Accounting in Decision Making"}
+SESSION = re.compile(r"(?:session|class|lecture|\bS)[ _-]*0?(\d{1,2})\b", re.I)
+
+def export():
+    """The live file stays as it is; this adds the new courses with their sessions and Moodle links, and the new cards. No slide text."""
+    data = json.load(open(LIVE)); cards = json.load(open(f"{C}/cards_final.json")); qs = {}
+    for f in glob.glob(f"{C}/intent/out_*.jsonl"):
+        for line in open(f):
+            if line.strip(): r = json.loads(line); qs[r["id"]] = r["questions"]
+    have = {c["code"] for c in data["courses"]}
+    for code, name in FULL.items():
+        if code in have: continue
+        sessions = collections.defaultdict(list)
+        for e in json.load(open(f"{B}/moodle/files/{code}/manifest.json")):
+            n = SESSION.search(f"{e.get('section_title') or ''} {e.get('name') or ''}")
+            if n and e["module"] in ("resource", "filewithwatermark", "folder", "page", "url") and e["status"] == "ok": sessions[int(n.group(1))].append(dict(name=e["name"], type=e["module"], url=e["moodle_url"]))
+        data["courses"].append(dict(code=code, name=name, sessions=[dict(n=k, title=f"Session {k}", resources=v, concepts=[]) for k, v in sorted(sessions.items())]))
+    live_ids = {c["id"] for c in data["cards"]}; new = [dict(id=c["id"], title=c["title"], aliases=c["aliases"], what=c["what"], use=c["use"], trap=c["trap"], where=[list(w) for w in c["where"]], questions=qs.get(c["id"], [])) for c in cards if c["id"] not in live_ids]
+    for c in new:  # Each card needs an idea page for "See how it connects": built from the card and where it was taught, nothing else.
+        data["concepts"].setdefault(c["id"], dict(id=c["id"], title=c["title"], aliases=c["aliases"], lenses=["general"], obj="", q="", module={}, freq=0, level=None, rel=[], isNew=True,
+            evidence=[dict(course=code, session=s, kind="Session material", pages=[0, 0], role="teaches", why="", summary="", passage="") for code, s in c["where"]], know=dict(what=c["what"], use=c["use"], trap=c["trap"])))
+    by_course = {k["code"]: k for k in data["courses"]}
+    for c in new:  # So course pages list the ideas each session taught.
+        for code, n in c["where"]:
+            sess = next((x for x in by_course[code]["sessions"] if x["n"] == n), None) if code in FULL else None
+            if sess is not None and all(x["id"] != c["id"] for x in sess["concepts"]): sess["concepts"].append(dict(id=c["id"], role="teaches"))
+    data["cards"] += new; data["meta"]["counts"]["cards"] = len(data["cards"]); data["meta"]["built"] = __import__("datetime").datetime.now().isoformat(timespec="seconds")
+    out = f"{C}/compass-v3.json"; json.dump(data, open(out, "w"), separators=(",", ":"))
+    dev = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "public", "compass-dev.json"); json.dump(data, open(dev, "w"), separators=(",", ":"))
+    linked = sum(1 for c in new if any(s is not None and any(x["n"] == s for x in next(k for k in data["courses"] if k["code"] == code)["sessions"]) for code, s in c["where"]))
+    print(len(new), "new cards |", sum(not c["questions"] for c in new), "without questions |", linked, "with a session link |", len(data["cards"]), "cards in total |", round(os.path.getsize(out) / 1e6, 2), "MB")
+
 if __name__ == "__main__":
-    {"ideas": ideas, "assemble": assemble}.get(sys.argv[1], lambda: prepare(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]) if len(sys.argv) > 4 else 2))()
+    {"ideas": ideas, "assemble": assemble, "export": export}.get(sys.argv[1], lambda: prepare(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]) if len(sys.argv) > 4 else 2))()

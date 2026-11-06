@@ -8,7 +8,7 @@ export interface AskIndex { search: MiniSearch<Card>; byId: Record<string, Card>
 export interface Answer { cards: Card[]; declined: boolean; features: number[] }
 
 const STOP = new Set("a an the of and or to in on for with by is are was were be do does did how what which where when who why i my we our me you your it its this that at as from about should can could would not no but into than then there their they them have has had if so".split(" "));
-const COURSE_WORDS: Record<string, RegExp> = { OPMG: /\b(opmg|operations)\b/, STRG: /\b(strg|strategy)\b/, MKTG: /\b(mktg|marketing)\b/, BANM: /\b(banm|business analytics)\b/, SWPM: /\b(swpm|software product management)\b/, FRNT: /\b(frnt|frontier)\b/ };
+const COURSE_WORDS: Record<string, RegExp> = { OPMG: /\b(opmg|operations)\b/, STRG: /\b(strg|strategy)\b/, MKTG: /\b(mktg|marketing)\b/, BANM: /\b(banm|business analytics)\b/, SWPM: /\b(swpm|software product management)\b/, FRNT: /\b(frnt|frontier)\b/, FADM: /\b(fadm|financial accounting)\b/, FCRV: /\b(fcrv|foundations of finance)\b/, MGEC: /\b(mgec|managerial economics)\b/, SMDM: /\b(smdm|statistical methods)\b/ };
 const tokens = (t: string) => t.toLowerCase().match(/[a-z0-9]+/g) || [];
 // A light stemmer so "retailers" finds "retailer" and "pricing" finds "price".
 const stem = (w: string) => (w.length > 4 ? w.replace(/(ies)$/, "y").replace(/(ing|ed|es|s|e)$/, "") : w);
