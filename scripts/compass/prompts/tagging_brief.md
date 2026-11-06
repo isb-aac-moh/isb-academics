@@ -23,4 +23,5 @@ Rules:
 - Work in batches of 20 passages. After each batch append the records, one JSON object per line, to
   ~/Downloads/compass-build/work/tags_<GROUP>.jsonl using a Bash heredoc (cat >> file <<'EOF'). Do not rewrite earlier lines.
 - Read the passages with a small Python snippet in batches (do not print the whole file at once).
+- Read the FULL text of every passage: print `p["text"]` whole, never the first N characters. Runs that truncated missed more than half of the new ideas in one course. State in your final report whether every passage was read in full.
 - Finish with a one-line report: passages done, tags, new concepts, admin passages.

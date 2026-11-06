@@ -4,7 +4,7 @@ runs the software checks and builds the review page. Everything stays in $COMPAS
 Usage: card_pilot.py prepare | check | clarity | rewrite | report | final | search2 | decline | mvp | intent | export | browser_rule"""
 import glob, html, json, os, random, re, sqlite3, sys, collections
 from search_baseline import B, DB, DEV, NAMES, REVIEW_PAGE, STOP, tidy
-BASE = os.path.join(os.path.dirname(DB), "pilot"); WAVE = os.environ.get("COMPASS_WAVE", "")  # later batches live in pilot/wave_N
+BASE = os.environ.get("COMPASS_PILOT_DIR") or os.path.join(os.path.dirname(DB), "pilot"); WAVE = os.environ.get("COMPASS_WAVE", "")  # later batches live in pilot/wave_N
 P = os.path.join(BASE, f"wave_{WAVE}") if WAVE else BASE; WAVE_SIZE = 40
 KNOWN = ["Newsvendor critical ratio", "The Hook model", "BCG matrix", "Cheap talk", "CAC, LTV and payback", "Network effects"]
 PER_COURSE = 4; MAX_PASSAGES = 6; WORDS_WHAT = 35; WORDS_OTHER = 30
@@ -58,7 +58,8 @@ def software(s, cite, passages, limit):
     if len(s.split()) > limit: return "too long"
     text = " ".join(passages[i]["text"] for i in cite).lower()
     words = s.split()
-    names = [m.group() for w in words[1:] for m in [re.match(r"[A-Z][a-zA-Z]+", w)] if m]
+    # A capital after ":", ";" or "." starts a clause, not a name, so it needn't appear in the source.
+    names = [m.group() for prev, w in zip(words, words[1:]) if not prev.endswith((":", ";", ".")) for m in [re.match(r"[A-Z][a-zA-Z]+", w)] if m]
     if words and re.match(r"[A-Z]\w*[A-Z]", words[0]): names.append(re.match(r"\w+", words[0]).group())
     for tok in re.findall(r"\d[\d.,]*%?", s) + names:
         if tok.rstrip(".,").lower() not in text: return f"not in source: {tok}"
@@ -77,13 +78,20 @@ def check():
     json.dump(cards, open(f"{P}/cards_checked.json", "w"), indent=0)
     redo = {json.loads(l)["id"] for l in open(f"{P}/out_3.jsonl") if l.strip()} if os.path.exists(f"{P}/out_3.jsonl") else None
     rng = random.Random(27)
-    if redo is None and len(batch) > 8:  # hidden tripwires: a sentence from one card against another card's text must not pass
-        for _ in range(6):
-            x, y = rng.sample(batch, 2)
-            if x["key"].split("|")[0] != y["key"].split("|")[0]: batch.insert(rng.randrange(len(batch)), dict(key=f"z{rng.randrange(10**6)}|{x['key'].split('|')[1]}|0", sentence=x["sentence"], text=y["text"]))
-    if redo is not None: batch = [b for b in batch if b["key"].split("|")[0] in redo]; json.dump(batch, open(f"{P}/check_in_2.json", "w"), indent=0)
+    parts = int(os.environ.get("COMPASS_FACT_PARTS", "2"))
+    trips = []
+    if redo is not None: batch = [b for b in batch if b["key"].split("|")[0] in redo]; json.dump(batch, open(f"{P}/check_in_redo.json", "w"), indent=0)
     else:
-        for n in range(2): json.dump(batch[n::2], open(f"{P}/check_in_{n}.json", "w"), indent=0)
+        for n in range(parts):
+            chunk = batch[n::parts]
+            # Hidden tripwires in every part, so each checker is tested: a sentence from one card against another card's text must not pass.
+            for _ in range(3 if len(batch) > 8 else 0):
+                x, y = rng.sample(batch, 2)
+                if x["key"].split("|")[0] != y["key"].split("|")[0]:
+                    key = f"new:{rng.randrange(16**8):08x}|{x['key'].split('|')[1]}|0"; trips.append(key)  # looks like any other key, so a checker can't spot it
+                    chunk.insert(rng.randrange(len(chunk) + 1), dict(key=key, sentence=x["sentence"], text=y["text"]))
+            json.dump(chunk, open(f"{P}/check_in_{n}.json", "w"), indent=0)
+        json.dump(trips, open(f"{P}/tripwires.json", "w"))
     print(len(cards), "cards |", dict(collections.Counter(c.get("status") for c in cards.values())), "|", kept, "sentences pass software |", dict(fails))
 
 def surviving(cards, verdict, f, cid, c):
