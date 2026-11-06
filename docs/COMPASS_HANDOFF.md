@@ -15,13 +15,15 @@ Last updated 5 Nov 2026. This file says where things stand and what's next. Ever
 
 **The MVP is live for admins.** Pull requests [#64](https://github.com/isb-aac-moh/isb-academics/pull/64) and [#65](https://github.com/isb-aac-moh/isb-academics/pull/65) are merged, and the card file is in the bucket. A real admin sign-in produced 4 `compass_ask` events on 5 Nov, one of them a decline.
 
+**6 Nov, later: 22 courses, 1,163 cards** ([#73](https://github.com/isb-aac-moh/isb-academics/pull/73)). 816 come from Moodle, with 153 held back. Previous file: `compass-backup-2026-11-06b.json`. Nobody has read a sample of the new cards yet.
+
 **6 Nov: 10 courses, 590 cards.** Statistical Methods, Managerial Economics, Foundations of Finance and Financial Accounting were added from Moodle ([#71](https://github.com/isb-aac-moh/isb-academics/pull/71)), with 243 new cards. The live file was replaced on 6 Nov, and the previous one is `compass-backup-2026-11-06.json` in the bucket. Nobody has yet read a sample of the second card batch.
 
 | Phase | Goal | Status |
 |---|---|---|
 | A. Prove it | Find out if this can work on 6 courses | Mostly done. Real student questions outstanding |
 | B. MVP online | Testers use it behind ISB login | Live, with admins as the only testers |
-| C. Full library | All 138 courses, transcripts, course packs | 10 courses. 24 of Eshan's courses are downloaded and extracted (`moodle/`), so the other 14 can follow without another download. Pipeline in [COMPASS.md section 11](COMPASS.md#11-adding-courses-from-moodle) |
+| C. Full library | All 138 courses, transcripts, course packs | 22 courses, which is every downloaded course with usable material. 24 of Eshan's courses are downloaded and extracted (`moodle/`), so the other 14 can follow without another download. Pipeline in [COMPASS.md section 11](COMPASS.md#11-adding-courses-from-moodle) |
 | D. Connections | Checked links across courses | Not started |
 | E. Launch | Limits, watermark, takedown tool, paywall | Report button and usage events only |
 
