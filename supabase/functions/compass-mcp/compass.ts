@@ -9,7 +9,11 @@ export interface Dataset {
   courses: { code: string; name: string; sessions: { n: number; resources: { type: string; url: string }[] }[] }[];
 }
 
-const INSTRUCTIONS = `Compass holds checked idea cards from ISB coursework. Answer from the returned cards, name the course and session behind each point, and include the Moodle links. If found is false, say Compass has no checked card on this. Clearly mark anything you add from your own knowledge as not from ISB coursework.`;
+const COURSEWORK = "From ISB coursework";
+const OWN = "Beyond the course (Claude's own thinking)";
+const INSTRUCTIONS = `Compass holds checked idea cards from ISB coursework. Search it only when the user uses /compass, starts with "Compass:", names Compass, or asks what ISB taught. Don't bring it into other conversations on your own.`;
+const ANSWER_FORMAT = `Start with a section titled "${COURSEWORK}". Use only these cards there, and name the course, session and Moodle link behind each point. If you add anything else, put it in a separate section after it titled "${OWN}". Never mix the two, and skip cards that don't answer the question.`;
+const NO_MATCH_FORMAT = `Say this first, in plain words. You may then offer a general answer, only in a section titled "${OWN}", and must not present it as ISB coursework. If the user's wording may have caused the miss, search once more with course terms first.`;
 // Extra cards must score this share of the top card, or a shared word like "law" pulls in unrelated ideas.
 // 0.4 kept every correct result on the 50 answerable test questions; 0.5 lost one. Claude gets all cards, so noise costs more here than in the app.
 const KEEP_SHARE = 0.4;
@@ -20,13 +24,14 @@ export const buildIndex = (data: Dataset) => buildAsk(data.cards, data.declineRu
 /** Cards and links only: never slide text, whole files, or a way to list everything. */
 export function searchCards(index: AskIndex, data: Dataset, question: string) {
   const answer = ask(index, question);
-  if (answer.declined || !answer.cards.length) return { found: false, message: NO_MATCH };
+  if (answer.declined || !answer.cards.length) return { found: false, message: NO_MATCH, answer_format: NO_MATCH_FORMAT };
   const scores = new Map(index.search.search(question).map(h => [h.id as string, h.score]));
   const top = scores.get(answer.cards[0].id) ?? 0;
   // A question about a named course and session is a list of that session's cards, so scores don't apply.
   const cards = scopeOf(question) ? answer.cards : answer.cards.filter((c, i) => i === 0 || (top > 0 && (scores.get(c.id) ?? 0) >= KEEP_SHARE * top));
   return {
     found: true,
+    answer_format: ANSWER_FORMAT,
     cards: cards.map(c => ({
       title: c.title, what: c.what, use: c.use, trap: c.trap,
       taught_in: [...new Set(c.where.map(([code]) => code))].map(code => {
@@ -49,9 +54,14 @@ export const mcpHandler = (search: (question: string) => Promise<unknown>) => cr
   const server = new McpServer({ name: "compass", version: "0.1.0" }, { instructions: INSTRUCTIONS });
   server.registerTool("search_compass", {
     title: "Search Compass",
-    description: "Search ISB's checked coursework cards for an idea, framework or question. Use the terms a course would use, and search again with other words if nothing matches. Returns up to 3 cards with where each was taught, or found: false.",
+    description: "Search ISB's checked coursework cards for an idea, framework or question. Use only when the user uses /compass, starts with \"Compass:\", names Compass, or asks what ISB taught. Use the terms a course would use. Returns up to 3 cards with where each was taught, or found: false. Follow the answer_format in the result.",
     inputSchema: z.object({ question: z.string().min(2).max(300) }),
     annotations: { readOnlyHint: true },
   }, async ({ question }) => ({ content: [{ type: "text", text: JSON.stringify(await search(question)) }] }));
+  server.registerPrompt("compass", {
+    title: "Ask Compass",
+    description: "Answer from ISB's checked coursework cards",
+    argsSchema: z.object({ question: z.string().describe("What you want to find in ISB coursework") }),
+  }, ({ question }) => ({ messages: [{ role: "user", content: { type: "text", text: `Compass: ${question}` } }] }));
   return server;
 });
