@@ -1,0 +1,49 @@
+id,intent,question,expected,mode
+m01,lookup,what is a z score,SMDM,any
+m02,lookup,normal distribution explained simply,SMDM,any
+m03,lookup,when do we use t distribution instead of z,SMDM,any
+m04,lookup,confidence intervel meaning,SMDM,any
+m05,lookup,what does p value tell you,SMDM,any
+m06,lookup,central limit theorem what is it,SMDM,any
+m07,howto,how do i find the chance of a value above some cutoff when the data is bell shaped,SMDM,any
+m08,howto,how to check if the average of a small group of customers really differs from what the company claims,SMDM,any
+m09,howto,r command to get a range that probably holds the true average from my sample,SMDM,any
+m10,situation,"my sample is only 12 people and i dont know the spread of the whole population, which table do i look up",SMDM,any
+m11,situation,i have sales of two ice cream flavours across stores and want to know if the gap is real or just luck,SMDM,any
+m12,situation,"manager says avg claim settlement is 5 days but my 40 claims average 6.2, how do i show its not chance",SMDM,any
+m13,lookup,production function meaning,MGEC,any
+m14,lookup,marginal cost vs average cost,MGEC,any
+m15,lookup,what is nash equilibrum,MGEC,any
+m16,lookup,cournot oligopoly model,MGEC,any
+m17,lookup,expected utility and risk aversion,MGEC,any
+m18,lookup,mixed strategy equilibrium,MGEC,any
+m19,howto,"how do i draw a game on paper with players, moves and payoffs",MGEC,any
+m20,howto,how to compare a sure 50k with a coin flip for 100k or nothing,MGEC,any
+m21,howto,how to work out how much each firm should make when only two firms sell in a market,MGEC,any
+m22,situation,"two rival airlines both want to cut fares and i cant tell if we should, how do i think about it",MGEC,any
+m23,situation,"my factory cost per unit keeps dropping the more we make, why does that happen",MGEC,any
+m24,situation,"in penalty kicks the keeper learns my pattern if i always go left, what should i do",MGEC,any
+m25,lookup,what is npv,FCRV,any
+m26,lookup,irr vs npv which is better,FCRV,any
+m27,lookup,capm and beta,FCRV,any
+m28,lookup,how is cost of debt calculated,FCRV,any
+m29,lookup,modigliani miller proposition,FCRV,any
+m30,lookup,interest tax shield explained,FCRV,any
+m31,howto,how to decide if a project is worth doing when cash comes in over 5 years,FCRV,any
+m32,howto,how to figure out what return shareholders expect from a risky stock,FCRV,any
+m33,howto,how to get one discount rate that blends debt and equity,FCRV,any
+m34,situation,"my shipping company is thinking of buying a vessel and i have the yearly cash flows, what rate do i discount them at",FCRV,any
+m35,situation,our energy firm has refining and exploration divisions with very different risk and one discount rate for both feels wrong,FCRV,any
+m36,situation,"we want to swap some equity for debt, does firm value go up once taxes are in the picture",FCRV,any
+m37,lookup,what is a balance sheet,FADM,any
+m38,lookup,cash flow statement operating investing financing,FADM,any
+m39,lookup,fifo vs lifo inventory,FADM,any
+m40,lookup,what is goodwill in accounting,FADM,any
+m41,lookup,how does lease accounting work,FADM,any
+m42,lookup,capitalize vs expense a cost,FADM,any
+m43,howto,how to see how much cash a company really made versus its profit,FADM,any
+m44,howto,how to price a bond that pays fixed interest when market rates have moved,FADM,any
+m45,howto,how to show in the books that some customers will never pay their invoices,FADM,any
+m46,situation,"we spent 2 crore on a new machine, do i put it as a cost this year or spread it over years",FADM,any
+m47,situation,"we bought a startup for way more than its assets are worth, where does the extra amount go in the books",FADM,any
+m48,situation,"we bought a 30 percent stake in another company, how do we show it in our accounts",FADM,any

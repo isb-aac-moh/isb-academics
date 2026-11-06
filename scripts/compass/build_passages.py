@@ -2,7 +2,11 @@
 """Group extracted pages into passages and shortlist candidate concepts for each (TF-IDF over concept text)."""
 import json, glob, os, re, collections
 import math
-B = os.path.expanduser("~/Downloads/compass-build"); EX = f"{B}/extract"; W = f"{B}/work"; os.makedirs(W, exist_ok=True)
+B = os.path.expanduser("~/Downloads/compass-build")
+# New Moodle batches: COMPASS_PASSAGE_COURSES="SMDM,MGEC" reads moodle/extract and writes moodle/work, leaving the live build's files alone.
+NEW = [c for c in os.environ.get("COMPASS_PASSAGE_COURSES", "").split(",") if c]
+EX, W = (f"{B}/moodle/extract", f"{B}/moodle/work") if NEW else (f"{B}/extract", f"{B}/work"); os.makedirs(W, exist_ok=True)
+USE = {"slides", "session notes", "unsure document", "moodle page"}
 concepts = json.load(open(f"{B}/seed_concepts.json"))
 docs = [" ".join([c["title"]] * 3 + c["aliases"] * 2 + [c["obj"], c["q"]]) for c in concepts]
 STOP = set("the a an of and for to in on with by vs versus how what is are your you use using as at from or be it this that we they can will not do does into more most".split())
@@ -22,10 +26,12 @@ def sims_for(text):
     return [sum(x * v.get(t, 0) for t, x in q.items()) for v in V]
 GROUPS = {"STRG": ["STRG"], "MKTG": ["MKTG"], "OPMG": ["OPMG"], "BANM_a": ("BANM", range(1, 6)), "BANM_b": ("BANM", range(6, 11)),
           "SWPM": ["SWPM"], "FRNT_a": ("FRNT", range(1, 6)), "FRNT_b": ("FRNT", range(6, 11))}
+if NEW: GROUPS = {c: [c] for c in NEW}
 def passages(course):
     out = []
     for f in sorted(glob.glob(f"{EX}/{course}/*.json")):
         d = json.load(open(f)); m = d["meta"]; buf, words, start = [], 0, None
+        if NEW and m["kind"] not in USE: continue
         def flush(end):
             nonlocal buf, words, start
             if buf and words > 12:

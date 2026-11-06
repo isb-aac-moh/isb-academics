@@ -266,3 +266,22 @@ Don't use `supabase config push` from Supabase's guide. This repo has no `config
 **To switch it off:** turn off the OAuth Server in the dashboard, then delete the function. The block can stay.
 
 **Not done, on purpose:** embeddings (start with keywords, since Claude can reword and search again; compare on real questions), a separate open-card tool (search already returns the whole card, and a lookup by ID would make copying easier), and access for non-admins.
+
+## 11. Adding courses from Moodle
+
+This is how Statistical Methods, Managerial Economics, Foundations of Finance and Financial Accounting were added in Nov 2026, from the 24 courses Eshan took. Eshan reports that ASA and ISB IT both approved bulk downloading from Moodle. Everything here stays in `Compass-build-private/moodle/`, outside git.
+
+| Step | Script | Notes |
+|---|---|---|
+| 1. Download | `moodle_receiver.py <token>` plus `moodle_pull.js`, run inside a Chrome tab signed in to Moodle | No cookie file. The receiver only accepts requests from elearn.isb.edu with the token. The built-in browser pane blocks this, so use Chrome, in its own window. Re-running skips finished files |
+| 2. Extract and sort | `COMPASS_LEAK_PATTERNS="<first name>" python3 moodle_extract.py` | Writes `moodle/extract/sorted.csv`. Sorting is a first pass. Course packs, company reports, cases, assessments and student lists stay out of cards |
+| 3. OCR | `moodle_ocr.py`, same variable | For image-only slides. Strips the watermark before reading |
+| 4. Passages | `COMPASS_PASSAGE_COURSES="SMDM,MGEC" python3 build_passages.py` | Writes to `moodle/work`, apart from the live build |
+| 5. Tag | Agents follow `prompts/tagging_brief.md` | They must read full text: every agent cut corners until told not to |
+| 6. Merge ideas | `moodle_cards.py ideas`, then an agent writes `merge_out.json` | Same idea in different words merges, sub-ideas stay apart |
+| 7. Cards | `moodle_cards.py prepare N SIZE PARTS`, then the card_pilot steps with `COMPASS_PILOT_DIR=<build>/moodle/cards`, `COMPASS_WAVE=N` and `COMPASS_FACT_PARTS` | Don't run `card_pilot.py final` there, because it scores the live search |
+| 8. Assemble | `moodle_cards.py assemble` | Applies people's edits in `manual_edits.json` and writes `cards_final.json` |
+
+**The watermark:** Moodle stamps each file with the student's name, email and PGP batch, with extra letters scattered through to dodge searches. The extract step matches past those letters and fails any file with a trace left. Check the saved text again after any change to it.
+
+**Other students' material:** never collect their cookies or logins. Each student runs the download on their own machine, or ISB provides a service account.

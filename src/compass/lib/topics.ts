@@ -32,7 +32,7 @@ const RULES: [RegExp, string][] = [
   [/Leadership|Organisation|Ethics|Privacy|Stakeholder|^Team|people/, "people"],
   [/Strategy|Moats|Platforms|Market entry|Competitive|Turnaround/, "strategy"],
 ];
-const COURSE_TOPIC: Record<string, string> = { STRG: "strategy", MKTG: "marketing", OPMG: "ops", BANM: "data", SWPM: "product", FRNT: "ai" };
+const COURSE_TOPIC: Record<string, string> = { STRG: "strategy", MKTG: "marketing", OPMG: "ops", BANM: "data", SWPM: "product", FRNT: "ai", FADM: "finance", FCRV: "finance", MGEC: "strategy", SMDM: "data" };
 
 export function topicOf(c: Concept): string {
   for (const m of Object.values(c.module)) for (const [re, t] of RULES) if (re.test(m)) return t;
