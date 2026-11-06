@@ -259,6 +259,8 @@ Admins can add Compass to their own Claude as a custom connector. Claude calls o
 
 Don't use `supabase config push` from Supabase's guide. This repo has no `config.toml`, and a partial one could overwrite live auth settings.
 
+**How people invoke it:** `/compass` if Claude lists the connector's prompt, or typing "Compass:" before a question. The tool's instructions tell Claude to search only then, or when someone names Compass or asks what ISB taught, and to answer in two labelled sections: "From ISB coursework" and "Beyond the course (Claude's own thinking)". These are instructions, not guarantees.
+
 **Merging doesn't deploy the function.** Vercel only ships the website, so re-run step 2 after any change to `supabase/functions/compass-mcp` or `ask.ts`.
 
 **To switch it off:** turn off the OAuth Server in the dashboard, then delete the function. The block can stay.
