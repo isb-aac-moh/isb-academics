@@ -30,15 +30,29 @@ def tagged():
                 if s and t.get("role") in ("teaches", "applies"): x = out.setdefault("seed " + t["concept_id"], dict(key="seed " + t["concept_id"], title=s["title"], definition=(s.get("obj") or s.get("q") or "")[:150], kind="existing", ev=[])); x["ev"].append((r["passage_id"], t["role"]))
     return out
 
+def merged_groups():
+    """The first merge, plus later rounds (merge_out_rN.json). Groups from a round with "existing" set already have a card."""
+    groups = json.load(open(f"{C}/merge_out.json")) if os.path.exists(f"{C}/merge_out.json") else []
+    for f in sorted(glob.glob(f"{C}/merge_out_r*.json")):
+        groups += [dict(g, live_card=g.get("existing")) for g in json.load(open(f))]
+    return groups
+
 def ideas():
     os.makedirs(C, exist_ok=True); items = tagged(); course = lambda pid: pid.split("-")[0]
+    done = merged_groups()
+    if done:  # A later round: only ideas no merge has seen, checked against every card already live or written.
+        seen = {k for g in done for k in g["members"]}
+        new = [dict(key=x["key"], title=x["title"], definition=x["definition"], courses=sorted({course(p) for p, _ in x["ev"]}), passages=len(x["ev"])) for k, x in items.items() if k not in seen]
+        existing = sorted({c["title"] for c in json.load(open(f"{C}/compass-v3.json"))["cards"]} | {g["title"] for g in done})
+        json.dump(dict(ideas=sorted(new, key=lambda r: r["title"].lower()), existing_titles=existing), open(f"{C}/merge_in_next.json", "w"), indent=0)
+        print(len(new), "new ideas |", len(existing), "existing titles"); return
     rows = [dict(key=x["key"], title=x["title"], definition=x["definition"], courses=sorted({course(p) for p, _ in x["ev"]}), passages=len(x["ev"])) for x in items.values()]
     live = sorted(c["title"] for c in json.load(open(f"{B}/phase_a/pilot/cards_final.json")))
     json.dump(dict(ideas=sorted(rows, key=lambda r: r["title"].lower()), live_cards=live), open(f"{C}/merge_in.json", "w"), indent=0)
     print(len(rows), "ideas |", len(live), "live card titles")
 
 def prepare(n, size, parts=2):
-    items = tagged(); merge = json.load(open(f"{C}/merge_out.json")); src = {}
+    items = tagged(); merge = merged_groups(); src = {}
     for f in glob.glob(f"{W}/passages_*.json"):
         for p in json.load(open(f)): src[p["id"]] = p
     done = {x["id"] for f in glob.glob(f"{C}/wave_*/in_*.json") for x in json.load(open(f))}; pool = []
@@ -47,7 +61,7 @@ def prepare(n, size, parts=2):
         ev = [e for k in g["members"] for e in items[k]["ev"]]
         teaches = [p for p, role in ev if role == "teaches"]
         cid = "new:" + re.sub(r"[^a-z0-9]+", "-", g["title"].lower()).strip("-")
-        if cid in done or not teaches: continue
+        if cid in done or len(set(teaches)) < int(os.environ.get("COMPASS_MIN_TEACH", "1")): continue  # raise it to take well-taught ideas first
         order = list(dict.fromkeys(teaches + [p for p, _ in ev]))
         pool.append(dict(id=cid, title=g["title"], aliases=[items[k]["title"] for k in g["members"] if items[k]["title"] != g["title"]][:5], order=order, teaches=len(set(teaches)), courses=sorted({p.split("-")[0] for p in order})))
     # Most-taught ideas first, taken evenly across courses, so the first batches are the ideas with the most material.
@@ -90,7 +104,10 @@ def assemble():
     print(len(shown), "cards |", len(held), "held", dict(collections.Counter(h["why"] for h in held)), "| by course", dict(collections.Counter(w[0] for x in shown for w in {(y[0],) for y in x["where"]})))
 
 LIVE = f"{B}/phase_a/pilot/compass-v2.json"
-FULL = {"SMDM": "Statistical Methods for Business Decision Making", "MGEC": "Managerial Economics", "FCRV": "Foundations of Finance", "FADM": "Financial Accounting in Decision Making"}
+FULL = {"SMDM": "Statistical Methods for Business Decision Making", "MGEC": "Managerial Economics", "FCRV": "Foundations of Finance", "FADM": "Financial Accounting in Decision Making",
+        "LSAT": "Leading Self and Teams", "ASMD": "The Art and Science of Managerial Decision-Making", "HCEN": "Health Care Entrepreneurship", "SUET": "Sustainability and Ethics",
+        "ENTR": "Entrepreneurship", "BSNS": "Business, Society and Non-Market Strategies", "MKTR": "Marketing Research", "ABTE": "A/B Testing and Tech Product Experimentation",
+        "CDMA": "Corporate Development: Mergers & Acquisitions", "WACM": "Written Analysis and Communication", "ELP": "Experiential Learning Programme", "MKTS": "Marketing Strategy"}
 SESSION = re.compile(r"(?:session|class|lecture|\bS)[ _-]*0?(\d{1,2})\b", re.I)
 
 def export():
