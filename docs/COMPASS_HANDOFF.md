@@ -15,11 +15,13 @@ Last updated 5 Nov 2026. This file says where things stand and what's next. Ever
 
 **The MVP is live for admins.** Pull requests [#64](https://github.com/isb-aac-moh/isb-academics/pull/64) and [#65](https://github.com/isb-aac-moh/isb-academics/pull/65) are merged, and the card file is in the bucket. A real admin sign-in produced 4 `compass_ask` events on 5 Nov, one of them a decline.
 
+**6 Nov: 10 courses, 590 cards.** Statistical Methods, Managerial Economics, Foundations of Finance and Financial Accounting were added from Moodle ([#71](https://github.com/isb-aac-moh/isb-academics/pull/71)), with 243 new cards. The live file was replaced on 6 Nov, and the previous one is `compass-backup-2026-11-06.json` in the bucket. Nobody has yet read a sample of the second card batch.
+
 | Phase | Goal | Status |
 |---|---|---|
 | A. Prove it | Find out if this can work on 6 courses | Mostly done. Real student questions outstanding |
 | B. MVP online | Testers use it behind ISB login | Live, with admins as the only testers |
-| C. Full library | All 138 courses, transcripts, course packs | Not started beyond the 6 courses |
+| C. Full library | All 138 courses, transcripts, course packs | 10 courses. 24 of Eshan's courses are downloaded and extracted (`moodle/`), so the other 14 can follow without another download. Pipeline in [COMPASS.md section 11](COMPASS.md#11-adding-courses-from-moodle) |
 | D. Connections | Checked links across courses | Not started |
 | E. Launch | Limits, watermark, takedown tool, paywall | Report button and usage events only |
 
@@ -42,13 +44,20 @@ Eshan called the MVP good on 5 Nov. Admins are the only testers for now, so no s
 
 ## Claude connector pilot
 
-For admins only. On 5 Nov the migration and the function went live, and connector tokens were confirmed refused on tables and storage. Still to do: merge the pull request, turn on the OAuth Server in the dashboard, and test a real Claude sign-in. Steps are in [COMPASS.md section 10](COMPASS.md#10-claude-connector-pilot). Before anyone beyond admins uses it: ASA's written OK, and the database rule that refuses connector tokens must apply automatically to new tables.
+For admins only. On 5 Nov the migration and the function went live, and connector tokens were confirmed refused on tables and storage. A real Claude sign-in worked, along with search, declines, the log and the 100-a-day limit. [#70](https://github.com/isb-aac-moh/isb-academics/pull/70) (ask before searching, labelled answers, `/compass`) is merged and deployed on 6 Nov. Whether Claude lists `/compass` is still to be checked in a new chat. Steps are in [COMPASS.md section 10](COMPASS.md#10-claude-connector-pilot). Before anyone beyond admins uses it: ASA's written OK, and the database rule that refuses connector tokens must apply automatically to new tables.
+
+## Accounts
+
+- **GitHub:** use `isb-aac-moh` for commits, pushes and pull requests. Until 6 Nov the GitHub CLI's active account was a personal one, so pull requests up to #71 show that account as their author. Check with `gh auth status`.
+- **Vercel:** deploys come from the `isb-aac-moh` repository through the ISB AAC team.
+- **Supabase:** the project "Pulse of isb" sits in a personal Supabase organisation, not an ISB AAC one, so migrations, uploads and function deploys run under that account. Moving it needs an ISB AAC Supabase organisation and a project transfer. That's a decision for Eshan, and it should be done before handing over.
 
 ## What comes after the MVP
 
 1. Use real questions and tester reports to decide what to fix. Better stemming comes first, and embeddings only if that isn't enough.
-2. Export the four transcript sets and retry the 77 held-back cards.
-3. Load more courses, which is the biggest gap to the end goal.
+2. Export the four transcript sets and retry the 77 held-back cards. Moodle had no transcripts.
+3. Write cards for the next downloaded courses, Term 1 and 2 first. Relabel the old test questions on WACC, CAPM and double-entry, which are now answerable.
+4. Search misses to fix: "customers who never pay" finds the wrong card, and terms like "Modigliani Miller" need adding as alternative names.
 
 ## Starter prompt for the next chat
 
