@@ -243,9 +243,20 @@ Admins can add Compass to their own Claude as a custom connector. Claude calls o
 | Piece | File | Job |
 |---|---|---|
 | Function | `supabase/functions/compass-mcp/index.ts` | Checks the token and admin flag, applies 100 searches a day, loads the card file, logs |
-| Search | `supabase/functions/compass-mcp/compass.ts` | Runs the same `ask.ts` as the Ask page, so results and declines match. Defines the tool |
+| Search | `supabase/functions/compass-mcp/compass.ts` | Runs the same `ask.ts` as the Ask page, so the ranking matches. Where the Ask page declines, the tool returns the nearest cards with `match: "closest"` and Claude filters them, because the decline formula throws away broad questions like "how to build a healthcare product" even when the right course is in the top 3. The tool also takes `also_try` (up to 3 other wordings); each is searched alone and the rankings are merged (`askMany` in `ask.ts`), up to 5 cards. Defines the tool |
 | Approval page | `src/pages/OAuthConsent.tsx` | Approves only Claude's two callback addresses, and only for admins |
 | Database | `supabase/migrations/20261105150000_compass_connector.sql` | Search log (first 60 characters only) and the token block below |
+
+**The miss log:** each search row also records `outcome` (`good`, `closest` or `none`) and `phrasings` (how many `also_try` rewordings Claude passed). Only the function can read the table, so run this in the Supabase SQL editor or through the CLI once a week, then turn the repeats into aliases, new cards or test questions:
+
+```sql
+select question, outcome, count(*) as times
+from compass_connector_log
+where at > now() - interval '7 days' and outcome in ('closest', 'none')
+group by question, outcome order by times desc;
+```
+
+Questions are cut at 60 characters. The rewordings are not stored. Searches Claude never sent to the connector are invisible here.
 
 **The token block:** a Supabase connector token carries the user's normal database rights, and its scopes don't limit that. So every public table and all file storage has a restrictive rule refusing any token with a `client_id`. Normal logins have none and aren't affected. **Any table added later needs the same rule**, and this must be automated before students get access. What the rule can't cover: database functions that run with their own rights (admin stats and pulse results), and the user's own auth profile. Only Claude's callbacks can obtain a token, and Claude holds it outside the chat, so this is acceptable for admins. Review it before students.
 
