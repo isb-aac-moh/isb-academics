@@ -37,7 +37,10 @@ Deno.serve(pipeline(
       const { data, index } = await load(admin);
       const result = searchCards(index, data, question, alsoTry);
       // Same limit as the app's analytics: the first 60 characters of a question, never the whole thing.
-      const { error: logError } = await admin.from("compass_connector_log").insert({ user_id: userId, question: question.slice(0, 60), cards: result.cards?.length ?? 0 });
+      const { error: logError } = await admin.from("compass_connector_log").insert({
+        user_id: userId, question: question.slice(0, 60), cards: result.cards?.length ?? 0, phrasings: alsoTry.length,
+        outcome: !result.found ? "none" : "match" in result ? "closest" : "good",
+      });
       if (logError) throw new Error("Could not record the search.");
       return result;
     }).fetch(req);
