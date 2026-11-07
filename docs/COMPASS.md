@@ -150,7 +150,7 @@ This works in small batches. Labelling 40 ideas took about 2% of the 5-hour limi
 | 10 | Rewrite unclear cards | `COMPASS_WAVE=N ... rewrite`, then REWRITE, then `check` again, then FACT with N=2 |
 | 11 | Combine | `card_pilot.py final` |
 | 12 | Add likely questions | `card_pilot.py intent`, then agents follow INTENT |
-| 13 | Build the data file | `card_pilot.py export`, then `browser_rule` |
+| 13 | Build the data file | `card_pilot.py export`, then `add_acronym_aliases.py in.json out.json` (adds "NPV" for "net present value" and the reverse, and drops nothing; export would erase them otherwise), then `browser_rule` |
 | 14 | Review and upload | People sample the cards, then replace the live data file as above |
 
 Agents must report counts only and never print course text. Keep the Moodle file (`curl.txt`) out of OneDrive, and log out of Moodle and delete it after fetching.

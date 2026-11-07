@@ -15,6 +15,8 @@ Last updated 5 Nov 2026. This file says where things stand and what's next. Ever
 
 **The MVP is live for admins.** Pull requests [#64](https://github.com/isb-aac-moh/isb-academics/pull/64) and [#65](https://github.com/isb-aac-moh/isb-academics/pull/65) are merged, and the card file is in the bucket. A real admin sign-in produced 4 `compass_ask` events on 5 Nov, one of them a decline.
 
+**7 Nov: search and connector changes** ([#76](https://github.com/isb-aac-moh/isb-academics/pull/76), merged and deployed). Search indexes course names. The connector returns labelled closest matches, accepts `also_try` rewordings, and logs `outcome` and `phrasings` (weekly query in [COMPASS.md section 10](COMPASS.md#10-claude-connector-pilot)). Still to do by hand: re-upload `skills/compass` and reconnect the connector in Claude. Acronym aliases ("Modigliani Miller" for the MM cards, and 93 more) are built by `scripts/compass/add_acronym_aliases.py` and were not yet in the live file when this was written. The decline formula is stale for 22 courses and has not been refit.
+
 **6 Nov, later: 22 courses, 1,163 cards** ([#73](https://github.com/isb-aac-moh/isb-academics/pull/73)). 816 come from Moodle, with 153 held back. Previous file: `compass-backup-2026-11-06b.json`. Nobody has read a sample of the new cards yet.
 
 **6 Nov: 10 courses, 590 cards.** Statistical Methods, Managerial Economics, Foundations of Finance and Financial Accounting were added from Moodle ([#71](https://github.com/isb-aac-moh/isb-academics/pull/71)), with 243 new cards. The live file was replaced on 6 Nov, and the previous one is `compass-backup-2026-11-06.json` in the bucket. Nobody has yet read a sample of the second card batch.
@@ -59,7 +61,7 @@ For admins only. On 5 Nov the migration and the function went live, and connecto
 1. Use real questions and tester reports to decide what to fix. Better stemming comes first, and embeddings only if that isn't enough.
 2. Export the four transcript sets and retry the 77 held-back cards. Moodle had no transcripts.
 3. Write cards for the next downloaded courses, Term 1 and 2 first. Relabel the old test questions on WACC, CAPM and double-entry, which are now answerable.
-4. Search misses to fix: "customers who never pay" finds the wrong card, and terms like "Modigliani Miller" need adding as alternative names.
+4. Search misses to fix: "customers who never pay" still finds willingness-to-pay cards, because the card says "allowance for bad debt". Aliases don't fix wording gaps like this, `also_try` does. "Modigliani Miller" is fixed by the acronym aliases.
 
 ## Starter prompt for the next chat
 
