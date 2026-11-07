@@ -47,3 +47,21 @@ m45,howto,how to show in the books that some customers will never pay their invo
 m46,situation,"we spent 2 crore on a new machine, do i put it as a cost this year or spread it over years",FADM,any
 m47,situation,"we bought a startup for way more than its assets are worth, where does the extra amount go in the books",FADM,any
 m48,situation,"we bought a 30 percent stake in another company, how do we show it in our accounts",FADM,any
+m49,lookup,How do I calculate free cash flow to the firm?,FCRV,any
+m50,lookup,How does accrual accounting differ from cash accounting?,FADM,any
+m51,lookup,What does a p-value of 0.05 mean?,SMDM,any
+m52,lookup,How do I compute earnings per share?,FCRV,any
+m53,lookup,What is the Modigliani-Miller theorem?,FCRV,any
+m54,lookup,What is the difference between a bond's coupon and its yield?,FADM,any
+m55,lookup,How do I build a depreciation schedule?,FADM,any
+m56,lookup,What are the Big Five personality traits?,LSAT,any
+m57,lookup,How do I set up a Kaizen event?,OPMG,any
+m58,lookup,bayesian updating with priors and posteriors,ABTE,any
+m59,lookup,k-means clustering of customers,BANM,any
+m60,lookup,pigouvian tax on pollution externalities,SUET,any
+m61,lookup,breakeven analysis and cost volume profit,MKTG,any
+m62,lookup,market segmentation and targeting,MKTG|BANM,any
+m63,lookup,porter five forces industry analysis,STRG,any
+m64,lookup,lean six sigma process improvement,OPMG,any
+m65,lookup,lean startup and building an mvp,ENTR|SWPM,any
+m66,lookup,corporate social responsibility and business ethics,SUET,any
