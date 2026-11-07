@@ -1,25 +1,16 @@
 id,kind,question,check
-n01,near miss,bayesian updating with priors and posteriors,bayesian prior posterior
 n02,near miss,arima time series forecasting,ARIMA forecasting
-n03,near miss,k-means clustering of customers,k-means clustering
 n04,near miss,how do auctions work and what is the best bidding strategy,auction bidding
-n05,near miss,pigouvian tax on pollution externalities,externality pigouvian tax
 n06,near miss,comparative advantage in international trade,comparative advantage trade
 n07,near miss,black scholes option pricing,Black-Scholes options
 n08,near miss,interest rate swaps for hedging,interest rate swaps
 n09,near miss,ipo underwriting and book building,IPO underwriting
 n10,near miss,activity based costing,activity-based costing
-n11,near miss,breakeven analysis and cost volume profit,breakeven cost-volume-profit
 n12,near miss,transfer pricing between divisions,transfer pricing
 n13,other course,negotiation BATNA and anchoring,negotiation BATNA
 n14,other course,bullwhip effect in supply chain,bullwhip supply chain
-n15,other course,market segmentation and targeting,market segmentation
-n16,other course,porter five forces industry analysis,Porter five forces
-n17,other course,lean six sigma process improvement,lean six sigma
 n18,other course,employee motivation theories like maslow,employee motivation
-n19,other course,lean startup and building an mvp,lean startup MVP
 n20,other course,leadership styles in teams,leadership styles
 n21,other course,critical path method in project management,critical path project
-n22,other course,corporate social responsibility and business ethics,CSR ethics
 n23,other course,seo and digital marketing basics,SEO digital marketing
 n24,other course,brand equity and positioning,brand equity positioning

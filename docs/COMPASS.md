@@ -102,7 +102,7 @@ Run commands from the repo root. Commands that use models or fit the rule need `
 ~/.local/share/compass-venv/bin/python scripts/compass/card_pilot.py browser_rule
 ```
 
-This runs `src/compass/lib/ask.ts` on all 90 test questions, prints the scores and refits the decline formula. It also rewrites `public/compass-dev.json` (gitignored) and `compass-v2.json`, which the app reads in local dev.
+This runs `src/compass/lib/ask.ts` on `questions.csv` (60) and `decline_questions.csv` (21), not the Moodle sets, prints the scores and refits the decline formula. On 7 Nov the formula was also refit on all 162 questions (126 answerable in `questions*.csv`, 36 unanswerable in `decline*.csv`), and again with extra signals such as the gap between the top two scores. Neither beat the live formula, so it was left alone. Keyword scores are the limit. When a question's wording is far from the card, the top score is low whether or not the card is right. It also rewrites `public/compass-dev.json` (gitignored) and `compass-v2.json`, which the app reads in local dev.
 
 ### Replace the live data file
 

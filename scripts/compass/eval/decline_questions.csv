@@ -1,17 +1,9 @@
 id,kind,question,check
-d01,other course,How do I calculate free cash flow to the firm?,free cash flow
 d02,other course,What is the difference between a call option and a put option?,put option
-d03,other course,How does accrual accounting differ from cash accounting?,accrual
 d04,other course,What is the law of comparative advantage?,comparative advantage
-d05,other course,What does a p-value of 0.05 mean?,p-value
 d06,other course,How do I work out my BATNA before a negotiation?,batna
 d07,other course,What is Maslow's hierarchy of needs?,maslow
 d08,other course,What is the difference between monetary and fiscal policy?,fiscal policy
-d09,other course,How do I compute earnings per share?,earnings per share
-d10,other course,What is the Modigliani-Miller theorem?,modigliani
-d11,other course,What is the difference between a bond's coupon and its yield?,coupon
-d12,other course,How do I build a depreciation schedule?,depreciation schedule
-d13,other course,What are the Big Five personality traits?,personality traits
 d14,other course,What is Kotter's eight-step change model?,kotter
 d15,other course,What is a Monte Carlo simulation used for?,monte carlo
 d16,near miss,What is Porter's diamond model of national advantage?,diamond model
@@ -20,7 +12,6 @@ d18,near miss,How does a Dutch auction work?,dutch auction
 d19,near miss,What is the Bass diffusion model?,bass
 d20,near miss,What is the drum-buffer-rope method?,drum
 d21,near miss,What is the Balanced Scorecard?,balanced scorecard
-d22,near miss,How do I set up a Kaizen event?,kaizen
 d23,near miss,What is the Herfindahl index?,herfindahl
 d24,off topic,What time is the end-term exam tomorrow?,exam tomorrow
 d25,off topic,How do I apply for leave from class?,apply for leave
