@@ -106,3 +106,11 @@ table.cmp{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}.c
 .answer .where{margin-top:16px;padding-top:12px;border-top:1px solid var(--line2)}.answer .where .sl{margin-top:0}.answer .where p{font-size:14px}.answer .where a{display:inline-block;margin-left:10px;color:var(--hero);font-weight:600;min-height:28px}.answer a{color:var(--hero)}
 .answer .foot{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-top:14px;font-size:14px;font-weight:600}.answer .link{border:0;background:none;padding:0;min-height:44px;font:inherit;font-weight:500;color:var(--ink2);text-decoration:underline;cursor:pointer}.answer .reasons{display:flex;flex-wrap:wrap;gap:6px}.answer .reasons .btn{min-height:44px}.answer .foot .small{margin:0}
 @media (max-width:560px){.answer{padding:16px}.answer .where a{display:block;margin-left:0}}
+
+/* Claude guide page */
+.how h2{font:500 20px var(--serif);margin:34px 0 10px}.how .lede{color:var(--ink2);font-size:13.5px;margin:0 0 8px}.how code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--soft);border-radius:5px;padding:1px 5px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}.steps .phase{align-items:flex-start}.steps .phase>div:last-child{min-width:0;flex:1}
+.copybox{display:flex;gap:10px;align-items:center;margin:8px 0 0;max-width:640px;background:var(--soft);border:1px solid var(--line2);border-radius:9px;padding:6px 6px 6px 12px}.copybox code{flex:1;min-width:0;background:none;padding:0;font-size:12.5px;line-height:1.45;overflow-wrap:anywhere;color:var(--ink)}.copybox .btn{flex:none;min-height:36px}
+.how details{background:var(--surface);border:1px solid var(--line2);border-radius:12px;padding:10px 16px;margin-bottom:8px}.how summary{cursor:pointer;font-weight:600}.how details p{margin:8px 0 2px;color:var(--ink2);font-size:13px}
+@media(max-width:480px){.copybox{flex-direction:column;align-items:stretch;padding:10px}.copybox .btn{justify-content:center}}
+.how .two{grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr))}
