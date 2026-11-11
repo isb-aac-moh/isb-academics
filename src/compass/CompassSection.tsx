@@ -10,6 +10,7 @@ import { PrepKitPage, PrepPage } from "./pages/PrepPage";
 import MapPage from "./pages/MapPage";
 import ComparePage from "./pages/ComparePage";
 import RoadmapPage from "./pages/RoadmapPage";
+import ClaudePage from "./pages/ClaudePage";
 import "./compass.css";
 
 function useLens(): [string, (l: string) => void] {
@@ -19,7 +20,7 @@ function useLens(): [string, (l: string) => void] {
   return [LENSES.some(l => l.id === lens) ? lens : "all", (l) => { try { localStorage.setItem("compass.lens", l); } catch { /* ignore */ } const n = new URLSearchParams(sp); n.set("lens", l); setSp(n, { replace: true }); }];
 }
 
-const TABS = [["", "Search"], ["topics", "Topics"], ["courses", "Courses"], ["prep", "Prep kits"], ["map", "Map"], ["compare", "Across courses"]] as const;
+const TABS = [["", "Search"], ["topics", "Topics"], ["courses", "Courses"], ["prep", "Prep kits"], ["map", "Map"], ["compare", "Across courses"], ["claude", "Use in Claude"]] as const;
 
 export default function CompassSection() {
   const [store, setStore] = useState<Store | null>(null); const [err, setErr] = useState(false);
@@ -28,7 +29,7 @@ export default function CompassSection() {
   // A new page should open at its top. Only the path triggers this, so picking an idea on the map or
   // switching the view (search params) keeps the reader where they are.
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
-  const showLens = !/^\/compass\/(prep|roadmap)/.test(loc.pathname);
+  const showLens = !/^\/compass\/(prep|roadmap|claude)/.test(loc.pathname);
   return <div className="compass"><div className="wrap">
     <header className="ph"><h1><Link to={`/compass?lens=${lens}`}>ISB <em>Compass</em></Link></h1></header>
     <nav className="nav" aria-label="Compass sections">
@@ -48,6 +49,7 @@ export default function CompassSection() {
       <Route path="prep/:id" element={<PrepKitPage store={store} lens={lens} />} />
       <Route path="map" element={<MapPage store={store} lens={lens} />} />
       <Route path="compare" element={<ComparePage store={store} lens={lens} />} />
+      <Route path="claude" element={<ClaudePage />} />
       {/* Reviewer-only pitch page for the pilot. Not in the tab bar; linked from the landing page. Delete with the note in Home.tsx before production. */}
       <Route path="roadmap" element={<RoadmapPage store={store} lens={lens} />} />
       <Route path="*" element={<p className="note" style={{ marginTop: 24 }}>Page not found. <Link to="/compass">Back to search</Link></p>} />
