@@ -242,8 +242,10 @@ Admins can add Compass to their own Claude as a custom connector. Claude calls o
 
 | Piece | File | Job |
 |---|---|---|
-| Function | `supabase/functions/compass-mcp/index.ts` | Checks the token and admin flag, applies 100 searches a day, loads the card file, logs |
+| Function | `supabase/functions/compass-mcp/index.ts` | Checks the token and admin flag, applies 100 tool calls a day (searches and opens together, so opening sessions one by one can't copy the set), loads the card file, logs |
 | Search | `supabase/functions/compass-mcp/compass.ts` | Runs the same `ask.ts` as the Ask page, so the ranking matches. Where the Ask page declines, the tool returns the nearest cards with `match: "closest"` and Claude filters them, because the decline formula throws away broad questions like "how to build a healthcare product" even when the right course is in the top 3. The tool also takes `also_try` (up to 3 other wordings); each is searched alone and the rankings are merged (`askMany` in `ask.ts`). Returns up to 6 cards plus `lessons`: up to 4 sessions the cards come from, each with its Moodle link and up to 8 other checked ideas taught there (title, one-liner, idea link), each idea listed once. The answer format asks Claude to answer the question from these, citing idea, course and session per point, then list where to study, instead of restating cards. All of it is our own card text, never slide text. Defines the tool |
+| Open idea | same file, `openIdea` | Follow-up tool `open_idea`. Takes a title, alias or idea link and returns the full card, where it was taught, `builds_on` and `leads_to` (the hand-made links in `concepts[id].rel`, with their why; 157 of 1,163 cards have one) and `taught_alongside` (up to 8 cards sharing the most sessions with it). An unknown name returns up to 3 `did_you_mean` titles |
+| Open session | same file, `openSession` | Follow-up tool `open_session`. Takes a course code or name and a session number and returns every card taught there, in the session's order, with use and trap, all the session's Moodle files, and the course's other sessions with their idea counts. A name that fits several courses ("Marketing") returns the options instead of guessing. The largest session (Business Analytics session 2) is 41 cards, about 22 KB |
 | Approval page | `src/pages/OAuthConsent.tsx` | Approves only Claude's two callback addresses, and only for admins |
 | Database | `supabase/migrations/20261105150000_compass_connector.sql` | Search log (first 60 characters only) and the token block below |
 
@@ -256,7 +258,7 @@ where at > now() - interval '7 days' and outcome in ('closest', 'none')
 group by question, outcome order by times desc;
 ```
 
-Questions are cut at 60 characters. The rewordings are not stored. Searches Claude never sent to the connector are invisible here.
+Questions are cut at 60 characters. The rewordings are not stored. Opens go in the same table with the question set to `idea: <name>` or `session: <course> <n>`; a `none` there means Claude asked for a name or session that doesn't exist. Searches Claude never sent to the connector are invisible here.
 
 **The token block:** a Supabase connector token carries the user's normal database rights, and its scopes don't limit that. So every public table and all file storage has a restrictive rule refusing any token with a `client_id`. Normal logins have none and aren't affected. **Any table added later needs the same rule**, and this must be automated before students get access. What the rule can't cover: database functions that run with their own rights (admin stats and pulse results), and the user's own auth profile. Only Claude's callbacks can obtain a token, and Claude holds it outside the chat, so this is acceptable for admins. Review it before students.
 

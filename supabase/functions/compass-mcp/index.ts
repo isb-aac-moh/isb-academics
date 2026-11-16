@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { pipeline } from "npm:@supabase/middleware@1";
 import { withOAuthProtectedResource, withSupabase } from "npm:@supabase/server@1";
 import { type SupabaseClient } from "npm:@supabase/supabase-js@2";
-import { buildIndex, type Dataset, mcpHandler, searchCards } from "./compass.ts";
+import { buildIndex, type Dataset, mcpHandler, openIdea, openSession, searchCards } from "./compass.ts";
 
 const DAILY_SEARCHES = 100;
 const RELOAD_MS = 10 * 60 * 1000; // So a replaced or corrected card file reaches the connector within minutes.
@@ -28,21 +28,28 @@ Deno.serve(pipeline(
     if (error) throw new Error("Could not check access.");
     if (!user?.is_admin) return new Response("The Compass connector is open to admins only for now.", { status: 403 });
 
-    return mcpHandler(async (question, alsoTry) => {
+    // Every tool call counts toward the daily limit, so opening ideas and sessions one by one can't copy the whole set.
+    // Opens are logged with an "idea:" or "session:" prefix so the weekly miss query can tell them from searches.
+    const limited = async <T extends { found: boolean }>(question: string, phrasings: number, run: (c: NonNullable<typeof cache>) => T, cards: (r: T) => number) => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { count, error: countError } = await admin.from("compass_connector_log").select("id", { count: "exact", head: true }).eq("user_id", userId).gte("at", since);
       if (countError) throw new Error("Could not check the daily limit.");
       if ((count ?? 0) >= DAILY_SEARCHES) return { found: false, message: `Daily limit of ${DAILY_SEARCHES} Compass searches reached. Try again tomorrow.` };
 
-      const { data, index } = await load(admin);
-      const result = searchCards(index, data, question, alsoTry);
+      const result = run(await load(admin));
       // Same limit as the app's analytics: the first 60 characters of a question, never the whole thing.
       const { error: logError } = await admin.from("compass_connector_log").insert({
-        user_id: userId, question: question.slice(0, 60), cards: result.cards?.length ?? 0, phrasings: alsoTry.length,
+        user_id: userId, question: question.slice(0, 60), cards: result.found ? cards(result) : 0, phrasings,
         outcome: !result.found ? "none" : "match" in result ? "closest" : "good",
       });
       if (logError) throw new Error("Could not record the search.");
       return result;
+    };
+
+    return mcpHandler({
+      search: (question, alsoTry) => limited(question, alsoTry.length, ({ data, index }) => searchCards(index, data, question, alsoTry), r => "cards" in r ? r.cards.length : 0),
+      openIdea: idea => limited(`idea: ${idea}`, 0, ({ data, index }) => openIdea(index, data, idea), () => 1),
+      openSession: (course, session) => limited(`session: ${course} ${session}`, 0, ({ data }) => openSession(data, course, session), r => "ideas" in r ? r.ideas.length : 0),
     }).fetch(req);
   },
 ));

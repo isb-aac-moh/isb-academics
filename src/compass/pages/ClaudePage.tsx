@@ -67,7 +67,7 @@ export default function ClaudePage() {
         <p>Open a new chat, click + then Connectors, and turn on {CONNECTOR_NAME}. Connectors are off in each new chat until you do this.</p>
       </Step>
       <Step n={6} title="Optional: skip the permission prompt">
-        <p>Under Customize, Connectors, {CONNECTOR_NAME}, set Search Compass to Always allow. Otherwise Claude asks before each search.</p>
+        <p>Under Customize, Connectors, {CONNECTOR_NAME}, set Search Compass, Open a Compass idea and Open an ISB class to Always allow. Otherwise Claude asks before each one.</p>
       </Step>
     </Steps>
 

@@ -19,7 +19,7 @@ If you don't, the connector isn't added yet. Don't try to answer from memory. Gi
 2. Use this address: `https://ujnrgvmbahbepdnahtle.supabase.co/functions/v1/compass-mcp`
 3. Under OAuth client, choose Register automatically. Sign in with the ISB account and approve.
 4. In a chat, click + > Connectors and turn ISB-Acads on.
-5. Optional: under Customize > Connectors > ISB-Acads, set Search Compass to Always allow, so it doesn't ask each time.
+5. Optional: under Customize > Connectors > ISB-Acads, set Search Compass, Open a Compass idea and Open an ISB class to Always allow, so it doesn't ask each time.
 
 If the tool exists but returns "open to admins only", tell the user Compass is limited to admins for now and there is nothing for them to fix.
 
@@ -55,6 +55,15 @@ If the result has no `lessons` (older connector), fall back to one short paragra
 
 Close with one line pointing to the full app: `https://isb-academics.vercel.app/compass` to browse by topic or course.
 
+## Follow-ups
+
+The connector has two more tools. Use them instead of a new search when the user wants to go deeper:
+
+- `open_idea`: one idea in full, with the ideas it builds on, what builds on it and what was taught alongside it. Use it for "tell me more about X" when X came from a Compass answer. Pass the title or `idea_url` exactly as Compass returned it.
+- `open_session`: every idea from one class, with its Moodle links. Use it for "what did session 4 of Health Care Entrepreneurship cover" or "take me through that class". Pass the course name or code and the session number.
+
+Both return their own `answer_format`; follow it the same way. If `open_session` says the course name fits more than one course, ask which one.
+
 ## When nothing matches
 
 When the result has `found: false`, say so first: Compass has no checked card for this, and it covers only some ISB courses, so ISB may still have taught it. Search once more using course terms if the user's wording may have caused the miss. If it still fails, you may give a short general answer under **Beyond the course (Claude's own thinking)**, and never present it as ISB coursework.
@@ -65,4 +74,5 @@ If the result says the daily limit is reached, pass that message on as written.
 
 - Search Compass for questions that aren't about ISB coursework.
 - Quote slide text. The connector only returns cards and links.
-- Paste a card's full text again when the user asks a follow-up. Answer the follow-up, and search again only if it is a new idea.
+- Paste a card's full text again when the user asks a follow-up. Answer the follow-up, open the idea or session if they want more, and search again only if it is a new idea.
+- Open sessions one after another to list a whole course unless the user asks for that. Every call counts toward the daily limit.
