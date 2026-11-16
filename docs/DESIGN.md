@@ -108,6 +108,10 @@ These come from explicit product decisions. Follow them when adding screens.
 | Step bar with persistent summary tiles | Bidding Planner | `src/pages/BiddingPlanner.tsx` |
 | Threshold-gated stat card with mini histogram | Bidding Pulse | `src/pages/PulseCheck.tsx` |
 
+## Outside the app
+
+Announcements, films and posts use the main app's palette and fonts, with real screens as the hero. Tone, words to use and avoid, and the music rule are in [VISION.md](VISION.md#voice-and-look).
+
 ## Icons
 
 `lucide-react` throughout. Admins choose sidebar link icons from a curated set of 18 (`src/lib/navLinkIcons.ts`) and popup icons from a set of 10 (`src/lib/popupIcons.ts`), so admin-created items stay visually consistent.

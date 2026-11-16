@@ -1,6 +1,8 @@
 # ISB Academics
 
-The academic home for ISB PGP students (Co'27, Mohali). It started in July 2026 as a bidding planner. It now covers the whole academic year: tracking credits and grades, planning and sanity-checking elective bids, comparing courses before a bidding round, finding course material, and revising for end-terms.
+The academic home for ISB PGP students (Co'27, Mohali). It started in July 2026 as a bidding planner. It now covers the whole academic year: tracking credits and grades, planning and sanity-checking elective bids, comparing courses before a bidding round, finding course material, revising for end-terms, and (in preview) asking Compass what ISB taught on a real problem.
+
+**Mission:** learn it once, use it for life. See [docs/VISION.md](docs/VISION.md).
 
 **Live:** https://isb-academics.vercel.app
 **Repo:** https://github.com/isb-aac-moh/isb-academics (moved from `jain-eshan/isb-academics`; the old URL redirects)
@@ -17,6 +19,7 @@ The academic home for ISB PGP students (Co'27, Mohali). It started in July 2026 
 | **Term Dossier** | `/dossier/term-5` | Every elective in a term side by side: grade split, exams, group rules, attendance, workload radar, faculty ratings, overview video, student feedback. Filter, compare up to 4, build a sample term. | Everyone |
 | **Course Resources** | `/resources` | Searchable gallery of outlines, slides, PYQPs, notes and links per course, plus a directory of ISB platforms and AAC tools. | Everyone |
 | **Term 4 Dossier / Bidding Q&A** | `/term4`, `/term4-bidding-qa` | Standalone pages from the Term 4 round, kept for reference. Linked from Course Resources. | Everyone |
+| **Compass** | `/compass` | Ask a question in your own words and get short, checked cards on what ISB taught about it, from every loaded course, each linked to the class in Moodle. 22 courses so far. A Claude connector puts the same cards inside Claude. | Admins only (preview) |
 | **Notice Board** | `/notices` | Pinned, tagged announcements from AAC. Built, not yet launched. | Admins only (preview) |
 | **Admin** | `/admin/:tab`, `/learn/admin` | Manage courses, grading profiles, resources, notices, sidebar links, popups, the live bidding round and credit limits. Learn has its own admin for questions and study content. | Admins only |
 
@@ -27,6 +30,8 @@ Detail on each tool: [docs/PRODUCT.md](docs/PRODUCT.md). Learn in depth: [docs/L
 ISB runs elective bidding as a sealed-bid points auction: 4,500 points for the whole programme, a reserve rule of 100 points per credit still needed, term-wise credit limits, and concentrations that close permanently if you fail certain core courses. Before this app, students pieced decisions together from alums, WhatsApp threads and PDFs scattered across Atrium and SharePoint. AAC logged the same complaint every term.
 
 The app puts a student's own goals, history and the live options on one screen so they can decide for themselves. It deliberately never tells anyone what to pick, and it never submits anything to Registro. Over time it absorbed the other things students kept asking AAC for: course material in one place, grading and workload information before bidding, and revision help before end-terms.
+
+The wider problem is that a student's academic life is spread across about ten places, a class moves at one pace for people from very different backgrounds, and what was taught fades after the exam. Learn and Compass take on those last two. The full framing, adoption numbers and the gaps between the pitch and what's built are in [docs/VISION.md](docs/VISION.md).
 
 ## Quick start (local development)
 
@@ -67,7 +72,9 @@ Full picture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | I want to... | Read |
 |---|---|
+| Know why it exists, who it's for, how it should sound and what we can prove | [docs/VISION.md](docs/VISION.md) |
 | Understand every tool and the product rules behind them | [docs/PRODUCT.md](docs/PRODUCT.md) |
+| Work on Compass | [docs/COMPASS_HANDOFF.md](docs/COMPASS_HANDOFF.md), then [docs/COMPASS.md](docs/COMPASS.md) |
 | Understand the Learn section, its learning model and how content gets in | [docs/LEARN.md](docs/LEARN.md) |
 | See the visual design, navigation and UI conventions | [docs/DESIGN.md](docs/DESIGN.md) |
 | Understand how it is built: hosting, auth, routing, data flow, deploys | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
