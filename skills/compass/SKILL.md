@@ -33,21 +33,25 @@ Also pass `also_try`: 2 or 3 other ways a course might word the same question. A
 
 ## Step 3: answer
 
-When the result has `found: true`, write:
+When the result has `found: true`, follow its `answer_format`. In short:
 
 **From ISB coursework**
 
-For each card, in the order returned, skipping any that don't answer the question:
+- Answer the question itself, as steps or a short explanation, built only from the cards and the `also_taught` ideas in `lessons`. Don't list the cards one by one, and skip any that don't help.
+- End each point with its source in brackets: idea title, course, session.
+- Use `lessons` to show what ISB teaches together in one session and the order to work through it. A session's other ideas are often the most useful part of the answer.
+- Don't add facts the cards don't hold.
 
-- The idea's title in bold, then what it is, when to use it, and the trap, in plain sentences taken from the card. Don't add facts the card doesn't hold.
-- Taught in: course name, session number, and the Moodle link as "Open session N in Moodle".
-- Links to the idea page (`idea_url`, "See how it connects") and the map (`map_url`, "See where it sits on the map").
+**Where to study this**
+
+- Each lesson: course, session, and its Moodle link as "Open in Moodle".
+- Each card you used, with its `idea_url` as "See how it connects".
 
 Give every link exactly as the result returned it. Never build or guess a Moodle or Compass link. Moodle links need an ISB login, so mention that once at the end if you showed any.
 
-If you want to add anything that isn't on a card, put it after the card section under **Beyond the course (Claude's own thinking)**. Never mix the two.
+If you want to add anything that isn't on a card, put it after the ISB part under **Beyond the course (Claude's own thinking)**. Never mix the two.
 
-If a card has no `idea_url` or `map_url` (older connector), give one link at the end instead: `https://isb-academics.vercel.app/compass/map`.
+If the result has no `lessons` (older connector), fall back to one short paragraph per card with its course, session and links.
 
 Close with one line pointing to the full app: `https://isb-academics.vercel.app/compass` to browse by topic or course.
 
