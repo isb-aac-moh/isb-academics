@@ -1,6 +1,6 @@
 # Product guide
 
-What each tool does, from a student's point of view, and the rules behind it. For how it is built, see [ARCHITECTURE.md](ARCHITECTURE.md). For the Learn section in depth, see [LEARN.md](LEARN.md).
+What each tool does, from a student's point of view, and the rules behind it. For why the product exists and how it should sound, see [VISION.md](VISION.md). For how it is built, see [ARCHITECTURE.md](ARCHITECTURE.md). For the Learn section in depth, see [LEARN.md](LEARN.md).
 
 ## Who it's for
 
@@ -145,7 +145,7 @@ Live courses: Marketing Management (MKTG), Operations Management (OPMG), Busines
 
 ## Compass (`/compass`, admins only for now)
 
-Ask about anything from the loaded courses in your own words and get a short card: what the idea is, when to use it, what to watch out for, where it was taught, and a Moodle link. If the material doesn't cover it, the page says so. Cards are written once from class material and checked against it, and no AI writes anything when you ask. It covers 6 of 138 courses so far. Full guide: [COMPASS.md](COMPASS.md).
+Ask about anything from the loaded courses in your own words and get a short card: what the idea is, when to use it, what to watch out for, where it was taught, and a Moodle link. If the material doesn't cover it, the page says so. Cards are written once from class material and checked against it, and no AI writes anything when you ask. As of 7 Nov 2026 it covers 22 of 138 courses with 1,163 cards. Admins can also use the same cards inside Claude through a connector. Full guide: [COMPASS.md](COMPASS.md); current status: [COMPASS_HANDOFF.md](COMPASS_HANDOFF.md).
 
 ## Notice Board (`/notices`)
 
@@ -182,3 +182,5 @@ Admin access is granted by hand in the Supabase dashboard, never from inside the
 Compass adds `compass_ask` (first 60 characters of the question), `compass_source_click` and `compass_report`.
 
 PostHog records these events: sign-in, planner step changes, bids added and removed, course profile opened, bids reconciled, grades logged, enrollments added and removed, Pulse submissions/edits/removals, resource opened, popup shown/dismissed/clicked, and Learn practice started. Session replay and error tracking are on. The Term Dossier, Notice Board and Course Resources filters don't send events yet.
+
+Adoption as of mid-November (sign-ups, return rate, peak weeks) is in [VISION.md](VISION.md#proof-so-far), with the caveats on each number.

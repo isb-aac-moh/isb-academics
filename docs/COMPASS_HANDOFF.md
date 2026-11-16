@@ -26,7 +26,7 @@ Last updated 5 Nov 2026. This file says where things stand and what's next. Ever
 | A. Prove it | Find out if this can work on 6 courses | Mostly done. Real student questions outstanding |
 | B. MVP online | Testers use it behind ISB login | Live, with admins as the only testers |
 | C. Full library | All 138 courses, transcripts, course packs | 22 courses, which is every downloaded course with usable material. 24 of Eshan's courses are downloaded and extracted (`moodle/`), so the other 14 can follow without another download. Pipeline in [COMPASS.md section 11](COMPASS.md#11-adding-courses-from-moodle) |
-| D. Connections | Checked links across courses | Not started |
+| D. Connections | Checked links across courses | Not started. The Nov 2026 product films show it as built, so it's now the most visible gap ([VISION.md](VISION.md#what-the-films-show-that-isnt-built-yet)) |
 | E. Launch | Limits, watermark, takedown tool, paywall | Report button and usage events only |
 
 ## What's left for the MVP

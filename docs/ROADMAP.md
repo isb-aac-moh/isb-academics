@@ -1,10 +1,12 @@
 # Roadmap: the plan, what's built, what's next, what's broken
 
-Written to be read honestly. If something below looks half-finished, it is, and it's listed so the next person doesn't have to rediscover it. Current as of 2026-09-15.
+Written to be read honestly. If something below looks half-finished, it is, and it's listed so the next person doesn't have to rediscover it. The plan and history are current as of 2026-11-16; the bug list below dates from 2026-09-15 and hasn't been re-checked since.
 
 ## The plan
 
-**Goal:** one place where an ISB PGP student handles the academic side of the year: planning electives and bids, tracking where they stand, choosing between courses with real information, finding material, and preparing for exams. Run by AAC, built for Co'27, and structured so later batches can reuse it.
+**Mission:** learn it once, use it for life ([VISION.md](VISION.md)).
+
+**Goal:** one place where an ISB PGP student handles the academic side of the year: planning electives and bids, tracking where they stand, choosing between courses with real information, finding material, learning at their own pace, and finding what ISB taught on a problem long after the course ends. Run by AAC, built for Co'27, and structured so later batches can reuse it.
 
 It grew out of one recurring AAC complaint, that students were guessing at electives and concentrations, and then took on the next things students asked for. AAC's original "one-stop platform" idea (course material, professor profiles, a noticeboard, per-course AI help) is the longer arc; the Notion-based resource repo AAC already runs is meant to be absorbed gradually, not replaced overnight.
 
@@ -22,7 +24,9 @@ It grew out of one recurring AAC complaint, that students were guessing at elect
 | 2026-09-06 | Measurement | PostHog events, session replay and error tracking. Vercel Analytics and Speed Insights had been added in August. |
 | 2026-09-10 | Mobile and admin control | Installable PWA, mobile bottom nav, admin-managed popups, Term 5 catalogue corrected, Term 4 tools moved into Resources. |
 | 2026-09-11 to 09-12 | Term 5 round | Faculty profiles and campus-tagged ASA ratings, database-driven Term Dossier for Term 5 with group, attendance and student-feedback data, "Your Term" follows the live round, students choose which concentration a cross-listed course counts toward. |
-| 2026-11-05 | Compass MVP | Ask page with 347 checked cards for 6 courses, admins only. No AI at question time. Plan and status in [COMPASS_HANDOFF.md](COMPASS_HANDOFF.md). |
+| 2026-11-05 | Compass MVP | Ask page with 347 checked cards for 6 courses, admins only. No AI at question time. Claude connector pilot for admins. Plan and status in [COMPASS_HANDOFF.md](COMPASS_HANDOFF.md). |
+| 2026-11-06 to 11-07 | Compass grows | 22 courses and 1,163 cards from Moodle, course-name search, 94 acronym aliases, connector rewordings. |
+| 2026-11-15 | Telling the story | A 2-minute recruiter film and a 41-second LinkedIn cut. The positioning, voice and adoption numbers behind them became [VISION.md](VISION.md). |
 
 The full list of what each tool does today is in [PRODUCT.md](PRODUCT.md).
 
@@ -41,6 +45,17 @@ Candidates, not a committed order. Eshan sets priorities; this is the list to ch
 **Compass**
 
 - **Finish the MVP for testers, then load more courses.** The list is in [COMPASS_HANDOFF.md](COMPASS_HANDOFF.md).
+
+**Close what the film promises**
+
+The recruiter and LinkedIn films show these as done. They aren't yet, and they're the most visible gaps between the pitch and the product. Detail in [VISION.md](VISION.md#what-the-films-show-that-isnt-built-yet).
+
+- **Compass for every student:** Compass-only access (the admin flag opens too much), the takedown tool, and ISB IT's hosting decision.
+- **Connections across courses (Compass Phase D):** checked links between ideas in different courses, so a student sees what to learn first and where it leads.
+- **The Claude connector beyond admins,** once ASA confirms in writing.
+- **Access after graduation.** Sign-in only accepts `@isb.edu`, so "use it for life" needs an alumni route.
+- **Student feedback in the Dossier.** The film says it's there; it was removed after ASA's feedback. Agree it with ASA or drop the line from future cuts.
+- **One name for the tutor.** The films say LearnKit, the app says Learn.
 
 **Making it reusable for the next batch**
 
